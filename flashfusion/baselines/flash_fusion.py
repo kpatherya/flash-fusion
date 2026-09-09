@@ -37,6 +37,7 @@ from typing import Any
 
 import pandas as pd
 from langchain_core.messages import HumanMessage, SystemMessage
+from concurrent.futures import ThreadPoolExecutor, TimeoutError as FutureTimeoutError
 
 from flashfusion.config import FLASH_FUSION_PREDICTIVE_TIMEOUT_S
 from flashfusion.pipeline.executor import ExecutionLayer
@@ -257,19 +258,12 @@ def _run_with_timeout(
     if kwargs is None:
         kwargs = {}
 
-    def _handle_timeout(signum: int, frame: Any) -> None:  # pragma: no cover - defensive
-        raise _FlashFusionTimeoutError(timeout_message)
-
-    previous_handler = signal.getsignal(signal.SIGALRM)
-    signal.signal(signal.SIGALRM, _handle_timeout)
-    signal.setitimer(signal.ITIMER_REAL, timeout_s)
-    try:
-        return fn(*args, **kwargs)
-    except _FlashFusionTimeoutError:
-        raise
-    finally:
-        signal.setitimer(signal.ITIMER_REAL, 0)
-        signal.signal(signal.SIGALRM, previous_handler)
+    with ThreadPoolExecutor(max_workers=1) as executor:
+        future = executor.submit(fn, *args, **kwargs)
+        try:
+            return future.result(timeout=timeout_s)
+        except FutureTimeoutError:
+            raise _FlashFusionTimeoutError(timeout_message)
 
 
 # ---------------------------------------------------------------------------
