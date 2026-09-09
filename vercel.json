@@ -1,7 +1,7 @@
 {
 	"functions": {
 		"api/chat.py": {
-			"includeFiles": "{chat/data/**,flashfusion/eval/cache/cache_registry.json,flashfusion/eval/cache/hybrid_match_config.json}"
+			"includeFiles": "chat/data/**"
 		}
 	}
 }
