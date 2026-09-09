@@ -1,7 +1,11 @@
 {
 	"functions": {
 		"api/chat.py": {
-			"includeFiles": "{chat/data/bus/bus_data.csv,chat/data/ecg/100.csv,chat/data/imu/WISDM_ar_v1.1_raw.txt,flashfusion/eval/cache/cache_registry.json,flashfusion/eval/cache/hybrid_match_config.json}"
+			"includeFiles": [
+				"chat/data/**",
+				"flashfusion/eval/cache/cache_registry.json",
+				"flashfusion/eval/cache/hybrid_match_config.json"
+			]
 		}
 	}
 }

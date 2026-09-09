@@ -63,7 +63,7 @@ from measure import (
     aggregate_cost_by_dataset,
     aggregate_cost_by_query_type,
     aggregate_semantic_stage_latency_overall,
-    display_baseline,
+    display_baseline as _display_baseline,
     expand_baselines,
     split_cache_baseline_rows,
 )
@@ -102,16 +102,28 @@ ERROR_RATE_BASELINES = [
 
 RC: dict[str, Any] = {
     "font.family": "DejaVu Sans",
-    "font.size": 13.5,
-    "axes.labelsize": 13.5,
+    "font.size": 16.0,
+    "font.weight": "bold",
+    "axes.labelsize": 18.0,
     "axes.labelweight": "bold",
-    "xtick.labelsize": 13.0,
-    "ytick.labelsize": 13.0,
-    "legend.fontsize": 12.5,
-    "legend.title_fontsize": 12.5,
+    "axes.titlesize": 18.0,
+    "axes.titleweight": "bold",
+    "xtick.labelsize": 16.0,
+    "ytick.labelsize": 16.0,
+    "legend.fontsize": 15.0,
+    "legend.title_fontsize": 15.0,
     "axes.facecolor": "#ffffff",
     "figure.facecolor": "#ffffff",
 }
+
+
+def display_baseline(code: str) -> str:
+    labels = {
+        "FLASH_FUSION": "Flash-Fusion\n(w/o cache)",
+        CACHE_BASELINE: "Flash-Fusion",
+    }
+    return labels.get(code, _display_baseline(code))
+
 
 SEMANTIC_STAGE_COLORS = {
     "Grounding": "#2f8f57",
@@ -214,7 +226,7 @@ def _set_clean_log_ticks(ax, *, min_value: float | None = None, max_value: float
     ax.xaxis.set_major_formatter(FuncFormatter(_label))
     ax.xaxis.set_minor_locator(NullLocator())
     ax.xaxis.set_minor_formatter(NullFormatter())
-    ax.tick_params(axis="x", which="major", labelsize=11)
+    ax.tick_params(axis="x", which="major", labelsize=16)
 
 
 def _parse_csv_list(raw: str | None) -> list[str] | None:
@@ -306,7 +318,7 @@ def _bars_with_error_labels(
             f"{val:.0f}%",
             ha="center",
             va="bottom",
-            fontsize=9.0,
+            fontsize=12.5,
             fontweight="bold",
         )
 
@@ -347,7 +359,7 @@ def _cost_bars_with_error_labels(
             f"{val:.2f}",
             ha="center",
             va="bottom",
-            fontsize=9.0,
+            fontsize=12.5,
             fontweight="bold",
         )
 
@@ -373,7 +385,7 @@ def plot_cost_across_datasets(
         labels.append(display_baseline(baseline))
         values.append(value)
 
-    fig, ax = plt.subplots(figsize=(7.4, 3.6))
+    fig, ax = plt.subplots(figsize=(9.6, 4.7))
     y = np.arange(len(labels))
     colors = [BASELINE_COLORS.get(baseline, "#999999") for baseline in baselines]
     bars = ax.barh(
@@ -394,7 +406,7 @@ def plot_cost_across_datasets(
             f"{value:.2f}",
             va="center",
             ha="left",
-            fontsize=9.5,
+            fontsize=12.5,
             fontweight="bold",
             color="#222222",
         )
@@ -446,7 +458,7 @@ def plot_cost_across_query_types(
     x = list(range(len(x_labels)))
     width = 0.8 / max(len(baselines), 1)
 
-    fig, ax = plt.subplots(figsize=(7.1, 3.8))
+    fig, ax = plt.subplots(figsize=(9.4, 5.0))
     peak = 0.0
     for i, baseline in enumerate(baselines):
         bdf = summary[summary["baseline"] == baseline]
@@ -462,7 +474,7 @@ def plot_cost_across_query_types(
                 stds.append(float(row["std"].iloc[0]))
 
         xpos = [p - 0.4 + (i + 0.5) * width for p in x]
-        _cost_bars_with_error_labels(ax, xpos, means, stds, width, baseline, label_shift=0.02 * (i % 2))
+        _cost_bars_with_error_labels(ax, xpos, means, stds, width, baseline, label_shift=10.0 * (i % 2))
         peak = max(peak, max((m + s for m, s in zip(means, stds)), default=0.0))
 
     ax.set_xticks(x)
@@ -523,7 +535,7 @@ def plot_latency_and_cost_horizontal(
     fig, (latency_ax, cost_ax) = plt.subplots(
         1,
         2,
-        figsize=(11.2, 4.2),
+        figsize=(14.6, 5.5),
         gridspec_kw={"width_ratios": [1.65, 1.0]},
     )
     positions = np.arange(len(baselines))
@@ -558,7 +570,14 @@ def plot_latency_and_cost_horizontal(
         linewidth=0.8,
     )
     for bar, value in zip(cost_bars, cost_values):
-        cost_ax.text(value, bar.get_y() + bar.get_height() / 2, f"  {value:.1f}", va="center", fontsize=10)
+        cost_ax.text(
+            value,
+            bar.get_y() + bar.get_height() / 2,
+            f"  {value:.1f}",
+            va="center",
+            fontsize=12.5,
+            fontweight="bold",
+        )
 
     labels = [display_baseline(baseline) for baseline in baselines]
     latency_ax.set_yticks(positions, labels)
@@ -597,14 +616,21 @@ def plot_cache_match_comparison(rows_path: Path, out_path: Path) -> None:
         ("false_positive_reuse", "False-positive reuse", "#df2127"),
         ("abstained", "Abstention", "#64748b"),
     ]
-    fig, ax = plt.subplots(figsize=(7.6, 3.8))
+    fig, ax = plt.subplots(figsize=(10.0, 5.0))
     positions = np.arange(len(algorithms))
     height = 0.22
     for index, (column, label, color) in enumerate(metrics):
         values = [100.0 * rows.loc[rows["algorithm"] == algorithm, column].mean() for algorithm in algorithms]
         bars = ax.barh(positions + (index - 1) * height, values, height, label=label, color=color)
         for bar, value in zip(bars, values):
-            ax.text(value + 1.0, bar.get_y() + bar.get_height() / 2, f"{value:.1f}%", va="center", fontsize=9)
+            ax.text(
+                value + 1.0,
+                bar.get_y() + bar.get_height() / 2,
+                f"{value:.1f}%",
+                va="center",
+                fontsize=12.5,
+                fontweight="bold",
+            )
     ax.set_yticks(positions, ["Verified hybrid" if value == "hybrid" else "Fuzzy only" for value in algorithms])
     ax.invert_yaxis()
     ax.set_xlim(0, 108)
@@ -628,7 +654,7 @@ def _plot_cache_outcome_percent(
 ) -> None:
     _apply_plot_style()
 
-    fig, ax = plt.subplots(figsize=(7.1, 3.8))
+    fig, ax = plt.subplots(figsize=(9.4, 5.0))
     x = list(range(len(x_labels)))
     outcomes = ["Hit", "Miss"]
     colors = {"Hit": "#2563eb", "Miss": "#94a3b8"}
@@ -674,7 +700,7 @@ def _plot_cache_outcome_percent(
                 f"{val:.1f}%",
                 ha="center",
                 va="bottom",
-                fontsize=9.0,
+                fontsize=12.5,
                 fontweight="bold",
             )
 
@@ -737,7 +763,7 @@ def plot_accuracy_across_datasets(
     x = list(range(len(x_labels)))
     width = 0.8 / max(len(baselines), 1)
 
-    fig, ax = plt.subplots(figsize=(7.1, 3.8))
+    fig, ax = plt.subplots(figsize=(9.4, 5.0))
     for i, baseline in enumerate(baselines):
         bdf = summary[summary["baseline"] == baseline]
         means: list[float] = []
@@ -752,7 +778,7 @@ def plot_accuracy_across_datasets(
                 stds.append(float(row["std"].iloc[0]))
 
         xpos = [p - 0.4 + (i + 0.5) * width for p in x]
-        _bars_with_error_labels(ax, xpos, means, stds, width, baseline, label_shift=1.2 * (i % 2))
+        _bars_with_error_labels(ax, xpos, means, stds, width, baseline, label_shift=5.0 * (i % 2))
 
     ax.set_xticks(x)
     ax.set_xticklabels([DATASET_LABELS[d] for d in x_labels])
@@ -800,7 +826,7 @@ def plot_accuracy_across_query_types(
     x = list(range(len(x_labels)))
     width = 0.8 / max(len(baselines), 1)
 
-    fig, ax = plt.subplots(figsize=(7.1, 3.8))
+    fig, ax = plt.subplots(figsize=(9.4, 5.0))
     for i, baseline in enumerate(baselines):
         bdf = summary[summary["baseline"] == baseline]
         means: list[float] = []
@@ -815,7 +841,7 @@ def plot_accuracy_across_query_types(
                 stds.append(float(row["std"].iloc[0]))
 
         xpos = [p - 0.4 + (i + 0.5) * width for p in x]
-        _bars_with_error_labels(ax, xpos, means, stds, width, baseline, label_shift=1.0 * (i % 2))
+        _bars_with_error_labels(ax, xpos, means, stds, width, baseline, label_shift=5.0 * (i % 2))
 
     ax.set_xticks(x)
     ax.set_xticklabels(x_labels)
@@ -840,13 +866,13 @@ def plot_accuracy_across_query_types(
     plt.close(fig)
 
 
-def plot_query_error_rate_across_baselines(
+def plot_query_accuracy_across_baselines(
     summary: pd.DataFrame,
     out_path: Path,
     baselines: list[str] | None = None,
     paper_dir: Path | None = None,
 ) -> None:
-    """Plot mean query error rate across datasets for key baselines."""
+    """Plot mean query accuracy across datasets for key baselines."""
     _apply_plot_style()
 
     selected = baselines or ERROR_RATE_BASELINES
@@ -874,20 +900,19 @@ def plot_query_error_rate_across_baselines(
             errors="coerce",
         ).dropna()
         if accuracy_by_dataset.empty:
-            print(f"[WARN] Skipping query error-rate bar for {baseline}: no valid mean accuracy values.")
+            print(f"[WARN] Skipping query accuracy bar for {baseline}: no valid mean accuracy values.")
             continue
 
-        error_by_dataset = 100.0 - accuracy_by_dataset
-        error_mean = float(error_by_dataset.mean())
-        error_std = _sample_std(error_by_dataset.tolist())
+        accuracy_mean = float(accuracy_by_dataset.mean())
+        accuracy_std = _sample_std(accuracy_by_dataset.tolist())
 
         labels.append(label_map.get(baseline, display_baseline(baseline)))
-        means.append(error_mean)
-        stds.append(max(0.0, min(error_std, 100.0)))
+        means.append(accuracy_mean)
+        stds.append(max(0.0, min(accuracy_std, 100.0)))
         colors.append(BASELINE_COLORS.get(baseline, "#5b8def"))
 
     if not labels:
-        raise ValueError("No baseline rows available to plot query error rate.")
+        raise ValueError("No baseline rows available to plot query accuracy.")
 
     x = list(range(len(labels)))
     means_arr = np.asarray(means, dtype=float)
@@ -896,7 +921,7 @@ def plot_query_error_rate_across_baselines(
     lower = np.maximum(0.0, np.minimum(stds_arr, means_arr))
     bounded_yerr = np.vstack([lower, upper])
 
-    fig, ax = plt.subplots(figsize=(8.6, 4.1))
+    fig, ax = plt.subplots(figsize=(11.2, 5.4))
     bars = ax.bar(
         x,
         means,
@@ -916,15 +941,15 @@ def plot_query_error_rate_across_baselines(
             f"{val:.1f}%",
             ha="center",
             va="bottom",
-            fontsize=9.0,
+            fontsize=16.25,
             fontweight="bold",
         )
 
     ax.set_xticks(x)
     ax.set_xticklabels(labels)
     # ax.set_xlabel("Baseline")
-    ax.set_ylabel("Query error rate (%)")
-    ax.set_ylim(0, 60)
+    ax.set_ylabel("Query Accuracy (%)")
+    ax.set_ylim(0, 110)
     ax.yaxis.grid(linestyle="--", alpha=0.35, linewidth=1.0)
     ax.set_axisbelow(True)
     _clean_axes(ax)
@@ -1033,7 +1058,7 @@ def _plot_grounding_loss_vs_model_size_from_summaries(
     lower = np.maximum(0.0, np.minimum(stds_arr, means_arr))
     bounded_yerr = np.vstack([lower, upper])
 
-    fig, ax = plt.subplots(figsize=(8.6, 4.1))
+    fig, ax = plt.subplots(figsize=(11.2, 5.4))
     bars = ax.bar(
         x,
         means,
@@ -1053,7 +1078,7 @@ def _plot_grounding_loss_vs_model_size_from_summaries(
             f"{val:.1f}%",
             ha="center",
             va="bottom",
-            fontsize=9.0,
+            fontsize=16.25,
             fontweight="bold",
         )
 
@@ -1700,7 +1725,7 @@ def main() -> None:
         query_types=selected_query_types,
     )
     plot_latency_and_cost_horizontal(df, fig8, paper_dir=paper_dir)
-    plot_query_error_rate_across_baselines(
+    plot_query_accuracy_across_baselines(
         by_dataset,
         fig10,
         paper_dir=paper_dir,

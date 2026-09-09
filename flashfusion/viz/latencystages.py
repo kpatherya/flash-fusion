@@ -38,7 +38,7 @@ from measure import (
     aggregate_semantic_stage_latency_overall,
     aggregate_semantic_stage_total_latency_by_query_type,
     _semantic_stage_frame,
-    display_baseline,
+    display_baseline as _display_baseline,
     expand_baselines,
     split_cache_baseline_rows,
 )
@@ -66,16 +66,27 @@ CUMULATIVE_LATENCY_FF_CACHE_BASELINES = ["FLASH_FUSION", CACHE_BASELINE]
 
 RC: dict[str, Any] = {
     "font.family": "DejaVu Sans",
-    "font.size": 13.5,
-    "axes.labelsize": 13.5,
+    "font.size": 16.0,
+    "font.weight": "bold",
+    "axes.labelsize": 18.0,
     "axes.labelweight": "bold",
-    "xtick.labelsize": 13.0,
-    "ytick.labelsize": 13.0,
-    "legend.fontsize": 12.0,
-    "legend.title_fontsize": 12.0,
+    "axes.titlesize": 18.0,
+    "axes.titleweight": "bold",
+    "xtick.labelsize": 16.0,
+    "ytick.labelsize": 16.0,
+    "legend.fontsize": 15.0,
+    "legend.title_fontsize": 15.0,
     "axes.facecolor": "#ffffff",
     "figure.facecolor": "#ffffff",
 }
+
+
+def display_baseline(code: str) -> str:
+    labels = {
+        "FLASH_FUSION": "Flash-Fusion\n(w/o cache)",
+        CACHE_BASELINE: "Flash-Fusion",
+    }
+    return labels.get(code, _display_baseline(code))
 
 
 def _apply_rc() -> None:
@@ -730,7 +741,7 @@ def _set_clean_log_ticks(ax, *, min_value: float | None = None, max_value: float
     ax.xaxis.set_major_formatter(FuncFormatter(_label))
     ax.xaxis.set_minor_locator(NullLocator())
     ax.xaxis.set_minor_formatter(NullFormatter())
-    ax.tick_params(axis="x", which="major", labelsize=11)
+    ax.tick_params(axis="x", which="major", labelsize=16)
 
 
 def _metric_mean(summary, query_type: str, metric: str) -> float:
@@ -755,7 +766,7 @@ def plot_flash_fusion_native_latency(summary, out_path: Path, query_types: list[
     y = list(range(len(qtypes)))
     left = [0.0 for _ in qtypes]
 
-    fig, ax = plt.subplots(figsize=(7.1, 3.8))
+    fig, ax = plt.subplots(figsize=(9.4, 5.0))
     for metric, label, color in FF_STAGE_SPECS:
         vals = [_metric_mean(summary, qt, metric) for qt in qtypes]
         ax.barh(
@@ -810,7 +821,7 @@ def plot_semantic_stage_comparison_overall(summary, out_path: Path) -> None:
     y = list(range(len(baselines)))
     left = [0.0 for _ in baselines]
 
-    fig, ax = plt.subplots(figsize=(7.1, 3.8))
+    fig, ax = plt.subplots(figsize=(9.4, 5.0))
     for stage in SEMANTIC_STAGE_ORDER:
         color = SEMANTIC_STAGE_COLORS[stage]
         vals = []
@@ -877,7 +888,7 @@ def plot_semantic_stage_comparison_overall_log(
     y = list(range(len(baselines)))
     left = [0.0 for _ in baselines]
 
-    fig, ax = plt.subplots(figsize=(7.1, 3.8))
+    fig, ax = plt.subplots(figsize=(9.4, 5.0))
     for stage in SEMANTIC_STAGE_ORDER:
         color = SEMANTIC_STAGE_COLORS[stage]
         vals = []
@@ -907,7 +918,7 @@ def plot_semantic_stage_comparison_overall_log(
             f"{total:.2f}s",
             va="center",
             ha="left",
-            fontsize=10,
+            fontsize=12.5,
             fontweight="bold",
             color="#222222",
         )
@@ -959,7 +970,7 @@ def plot_semantic_stage_comparison_overall_two(summary, out_path: Path, baseline
     y = list(range(len(baselines)))
     left = [0.0 for _ in baselines]
 
-    fig, ax = plt.subplots(figsize=(7.1, 3.8))
+    fig, ax = plt.subplots(figsize=(9.4, 5.0))
     for stage in SEMANTIC_STAGE_ORDER:
         color = SEMANTIC_STAGE_COLORS[stage]
         vals = []
@@ -1033,7 +1044,7 @@ def plot_semantic_stage_comparison(
             cursor += 1.0
         cursor += gap
 
-    fig, ax = plt.subplots(figsize=(9.6, 5.8))
+    fig, ax = plt.subplots(figsize=(12.5, 7.5))
     left = [0.0 for _ in rows]
 
     for stage in SEMANTIC_STAGE_ORDER:
@@ -1137,7 +1148,7 @@ def plot_cumulative_latency_comparison(
     y = list(range(len(qtypes)))
     width = 0.22
 
-    fig, ax = plt.subplots(figsize=(8.8, 4.6))
+    fig, ax = plt.subplots(figsize=(11.5, 6.0))
     baseline_bar_values: dict[str, list[float]] = {}
     baseline_bars: dict[str, list] = {}
     for i, baseline in enumerate(baselines):
@@ -1197,7 +1208,7 @@ def plot_cumulative_latency_comparison(
                 f"{value:.2f}",
                 va="center",
                 ha="left",
-                fontsize=9.0,
+                fontsize=12.5,
                 fontweight="bold",
                 color="#222222",
             )
@@ -1234,7 +1245,7 @@ def plot_cumulative_latency_comparison_linear(
     y = list(range(len(qtypes)))
     width = 0.22
 
-    fig, ax = plt.subplots(figsize=(8.8, 4.6))
+    fig, ax = plt.subplots(figsize=(11.5, 6.0))
     for i, baseline in enumerate(baselines):
         vals = []
         stds = []

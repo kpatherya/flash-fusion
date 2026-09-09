@@ -100,6 +100,50 @@ _df_cache: dict[str, pd.DataFrame] = {}
 _path_cache: dict[str, str] = {}
 
 
+def _safe_listdir(path: Path) -> list[str]:
+    try:
+        return sorted(os.listdir(path))
+    except Exception:
+        return []
+
+
+def _path_debug_snapshot(domain: str, ecg_record: str | None = None) -> dict[str, Any]:
+    """Collect lightweight runtime path diagnostics for dataset resolution."""
+    rel = DATASET_REGISTRY.get(domain)
+    chat_candidate = (_CHAT_ROOT / rel) if rel else None
+    local_candidate = LOCAL_DATASET_REGISTRY.get(domain)
+
+    ecg_record_name = ecg_record or DEFAULT_ECG_RECORD
+    local_record_candidate: Path | None = None
+    if domain == "ecg" and local_candidate is not None:
+        local_record_candidate = local_candidate / f"{ecg_record_name}.csv"
+
+    return {
+        "cwd": os.getcwd(),
+        "handler_file": str(Path(__file__).resolve()),
+        "chat_root": str(_CHAT_ROOT),
+        "project_root": str(_PROJECT_ROOT),
+        "domain": domain,
+        "ecg_record": ecg_record_name,
+        "registry_relative": rel,
+        "chat_candidate": str(chat_candidate) if chat_candidate else None,
+        "chat_candidate_exists": bool(chat_candidate and chat_candidate.exists()),
+        "chat_candidate_is_file": bool(chat_candidate and chat_candidate.is_file()),
+        "local_candidate": str(local_candidate) if local_candidate else None,
+        "local_candidate_exists": bool(local_candidate and local_candidate.exists()),
+        "local_candidate_is_file": bool(local_candidate and local_candidate.is_file()),
+        "local_ecg_record_candidate": (
+            str(local_record_candidate) if local_record_candidate else None
+        ),
+        "local_ecg_record_exists": bool(local_record_candidate and local_record_candidate.is_file()),
+        "chat_root_children": _safe_listdir(_CHAT_ROOT),
+        "chat_data_children": _safe_listdir(_CHAT_ROOT / "data"),
+        "chat_data_bus_children": _safe_listdir(_CHAT_ROOT / "data" / "bus"),
+        "chat_data_imu_children": _safe_listdir(_CHAT_ROOT / "data" / "imu"),
+        "chat_data_ecg_children": _safe_listdir(_CHAT_ROOT / "data" / "ecg"),
+    }
+
+
 def _resolve_data_path(domain: str, ecg_record: str | None = None) -> str:
     """Return the absolute path to the data file for *domain*.
 
@@ -127,6 +171,12 @@ def _resolve_data_path(domain: str, ecg_record: str | None = None) -> str:
     if domain == "ecg" and os.path.isdir(abs_path):
         record = ecg_record or DEFAULT_ECG_RECORD
         return export_ecg_record_to_csv(abs_path, record)
+    debug = _path_debug_snapshot(domain, ecg_record)
+    LOGGER.error(
+        "Dataset path resolution failed domain=%s details=%s",
+        domain,
+        json.dumps(debug, ensure_ascii=True),
+    )
     raise FileNotFoundError(f"Dataset not found at: {abs_path}")
 
 
@@ -508,9 +558,18 @@ class handler(BaseHTTPRequestHandler):
             df = _get_dataframe(domain, ecg_record)
             source_path = _get_cached_path(domain, ecg_record)
         except Exception as exc:
-            self._json_response(500, {
+            debug = _path_debug_snapshot(domain, ecg_record)
+            LOGGER.exception(
+                "Dataset load failure domain=%s details=%s",
+                domain,
+                json.dumps(debug, ensure_ascii=True),
+            )
+            payload: dict[str, Any] = {
                 "error": f"Failed to load {domain} dataset: {exc}",
-            })
+            }
+            if os.environ.get("FF_DEBUG_DATA_PATHS", "0") == "1":
+                payload["dataset_debug"] = debug
+            self._json_response(500, payload)
             return
 
         dataset = _dataset_provenance(df, source_path)
