@@ -98,6 +98,7 @@ DOMAIN_ROUTER_MIN_MARGIN = float(os.environ.get("DOMAIN_ROUTER_MIN_MARGIN", "0.0
 # ── Module-level DataFrame cache (survives warm invocations) ─
 _df_cache: dict[str, pd.DataFrame] = {}
 _path_cache: dict[str, str] = {}
+_bundle_probe_logged = False
 
 
 def _safe_listdir(path: Path) -> list[str]:
@@ -142,6 +143,40 @@ def _path_debug_snapshot(domain: str, ecg_record: str | None = None) -> dict[str
         "chat_data_imu_children": _safe_listdir(_CHAT_ROOT / "data" / "imu"),
         "chat_data_ecg_children": _safe_listdir(_CHAT_ROOT / "data" / "ecg"),
     }
+
+
+def _log_bundle_probe_once() -> None:
+    """Emit one-time runtime bundle visibility diagnostics."""
+    global _bundle_probe_logged
+    if _bundle_probe_logged:
+        return
+    _bundle_probe_logged = True
+
+    root = _PROJECT_ROOT
+    chat_data = _CHAT_ROOT / "data"
+    root_ignore = root / ".vercelignore"
+    chat_ignore = _CHAT_ROOT / ".vercelignore"
+    probe = {
+        "cwd": os.getcwd(),
+        "project_root": str(root),
+        "chat_root": str(_CHAT_ROOT),
+        "project_root_children": _safe_listdir(root),
+        "chat_root_children": _safe_listdir(_CHAT_ROOT),
+        "chat_data_exists": chat_data.exists(),
+        "chat_data_is_dir": chat_data.is_dir(),
+        "chat_data_children": _safe_listdir(chat_data),
+        "root_vercelignore_exists": root_ignore.exists(),
+        "chat_vercelignore_exists": chat_ignore.exists(),
+    }
+    try:
+        if root_ignore.exists():
+            probe["root_vercelignore_head"] = root_ignore.read_text(encoding="utf-8").splitlines()[:40]
+        if chat_ignore.exists():
+            probe["chat_vercelignore_head"] = chat_ignore.read_text(encoding="utf-8").splitlines()[:40]
+    except Exception as exc:
+        probe["vercelignore_read_error"] = str(exc)
+
+    LOGGER.warning("Runtime bundle probe: %s", json.dumps(probe, ensure_ascii=True))
 
 
 def _resolve_data_path(domain: str, ecg_record: str | None = None) -> str:
@@ -499,6 +534,7 @@ class handler(BaseHTTPRequestHandler):
         self.end_headers()
 
     def do_POST(self):
+        _log_bundle_probe_once()
         try:
             content_length = int(self.headers.get("Content-Length", 0))
         except (TypeError, ValueError):

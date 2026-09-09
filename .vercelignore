@@ -5,6 +5,8 @@ chat/.venv
 chat/.vercel
 chat/requirements.txt
 data
+!chat/data
+!chat/data/**
 diagram
 docs
 llm_only
