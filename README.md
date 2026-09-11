@@ -9,6 +9,7 @@
 </p>
 
 <p align="center">
+	<a href="https://arxiv.org/abs/2511.11885">Paper</a> ·
 	<a href="https://flash-fusion.vercel.app/">Live chat</a> ·
 	<a href="CONTRIBUTING.md">Contributing</a> ·
 	<a href="CITATION.cff">Citation</a> ·
@@ -19,6 +20,24 @@ Flash-Fusion translates a data question into a constrained typed plan, validates
 that plan against the live schema, and executes deterministic pandas operators.
 Each result carries inspectable routing, plan, validation, cache, and execution
 evidence rather than an opaque code-generation attempt.
+
+## Paper
+
+**Flash-Fusion: Enabling Expressive, Low-Latency Queries on IoT Sensor Streams
+with LLMs.** Kausar Patherya, Ashutosh Dhekne, Francisco Romero.
+[arXiv:2511.11885](https://arxiv.org/abs/2511.11885), November 2025.
+
+The paper describes the end-to-end edge-cloud design: edge-based statistical
+summarization to address data volume, and cloud-based query planning that
+clusters behavioral data and assembles context-rich prompts to address data
+interpretation. Evaluated on a university bus fleet against a baseline that
+feeds raw telemetry to an LLM, the reported system achieves 73.5% data
+reduction, a 95% latency reduction, and a 98% decrease in token usage and cost.
+
+**Status:** preprint, under review. This repository is active research, so the
+code and committed benchmark artifacts continue to evolve and will not always
+match the paper's reported numbers exactly. Cite the paper for results; cite
+the [`CITATION.cff`](CITATION.cff) software entry for the implementation.
 
 ## Project Components
 
@@ -44,7 +63,7 @@ grounded agent implementation remains available as a comparison baseline.
 Requires Python 3.12 or newer.
 
 ```sh
-git clone https://github.com/kpath1999/flash-fusion.git
+git clone https://github.com/kpatherya/flash-fusion.git
 cd flash-fusion
 python3 -m venv .venv
 source .venv/bin/activate

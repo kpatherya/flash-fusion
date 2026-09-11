@@ -15,7 +15,7 @@ Clone the repository and create an isolated Python environment:
 Requires Python 3.12 or newer.
 
 ```sh
-git clone https://github.com/kpath1999/flash-fusion.git
+git clone https://github.com/kpatherya/flash-fusion.git
 cd flash-fusion
 python3 -m venv .venv
 source .venv/bin/activate

@@ -1,12 +1,35 @@
 cff-version: 1.2.0
 title: Flash-Fusion
-message: If you use this software, please cite it using the metadata below.
+message: >-
+  If you use this software, please cite both the software entry below and the
+  preferred-citation paper.
 type: software
 authors:
   - family-names: Patherya
     given-names: Kausar
-repository-code: https://github.com/kpath1999/flash-fusion
-url: https://github.com/kpath1999/flash-fusion
+repository-code: https://github.com/kpatherya/flash-fusion
+url: https://github.com/kpatherya/flash-fusion
 version: 0.1.0
 date-released: 2026-09-10
 license: MIT
+preferred-citation:
+  type: article
+  title: >-
+    Flash-Fusion: Enabling Expressive, Low-Latency Queries on IoT Sensor
+    Streams with LLMs
+  authors:
+    - family-names: Patherya
+      given-names: Kausar
+    - family-names: Dhekne
+      given-names: Ashutosh
+    - family-names: Romero
+      given-names: Francisco
+  year: 2025
+  month: 11
+  journal: arXiv preprint
+  identifiers:
+    - type: other
+      value: arXiv:2511.11885
+      description: arXiv identifier
+  url: https://arxiv.org/abs/2511.11885
+  notes: Preprint, under review.
