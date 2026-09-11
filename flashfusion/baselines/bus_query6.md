@@ -1,6 +1,6 @@
 You are in plan mode. Do not edit files yet.
 
-Repository: kpath1999/flash-fusion/flashfusion
+Repository: kpatherya/flash-fusion/flashfusion
 
 Task: diagnose and propose the smallest implementation plan to make this Flash-Fusion Bus query execute correctly and deterministically through typed operators:
 

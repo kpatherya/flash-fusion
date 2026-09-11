@@ -2,7 +2,7 @@
 
 ## Role and operating rules
 
-You are reviewing the `kpath1999/flash-fusion` repository. **Do not change any file yet.** First scan the repository, verify every checklist item below against the current implementation and benchmark artifacts, and then prepare a minimal, defensive implementation plan.
+You are reviewing the `kpatherya/flash-fusion` repository. **Do not change any file yet.** First scan the repository, verify every checklist item below against the current implementation and benchmark artifacts, and then prepare a minimal, defensive implementation plan.
 
 Treat the following as hypotheses to verify, not established facts. Do not claim a cause unless you can cite the exact file path, symbol, and relevant line range. If the implementation differs from this prompt, explain the discrepancy and adjust the plan to the actual code.
 
