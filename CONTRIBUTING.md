@@ -12,12 +12,16 @@ inspection are especially useful.
 
 Clone the repository and create an isolated Python environment:
 
+Requires Python 3.12 or newer.
+
 ```sh
 git clone https://github.com/kpath1999/flash-fusion.git
 cd flash-fusion
 python3 -m venv .venv
 source .venv/bin/activate
-pip install -r requirements.txt
+pip install -e ./flashfusion
+pip install -r requirements-research.txt
+pytest flashfusion/tests
 ```
 
 To run the chat application locally, install its extra dependencies and start

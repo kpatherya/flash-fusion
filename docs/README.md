@@ -1,8 +1,17 @@
 # Docs
 
-Living notes to align the paper narrative with the code. Suggested files:
-- intent-schema.md: defines the constrained intent set and scoring rules.
-- prompt-catalog.md: documents available prompt templates and required inputs.
-- fallback-behavior.md: decision tree for out-of-scope handling (reject, raw data, RAG).
+Living notes to align benchmark, paper, and product behavior.
 
-Keep these in sync with configs under src/config/.
+Core governance docs:
+- `REPRODUCIBILITY_CHECKLIST.md`: release and claim checklist.
+- `RESULTS_ARTIFACT_POLICY.md`: canonical outputs vs local generated artifacts.
+
+Research and implementation notes:
+- `ecg_sanity_checklist.md`
+- `grounding_wisdm.md`
+- `intent-signature-template-cache-design.md`
+- `latency_reporting_accuracy_plan.md`
+- `tracebenchmarkmismatch.md`
+
+If you add a new benchmark mode or evaluation contract, update both governance
+docs above in the same pull request.

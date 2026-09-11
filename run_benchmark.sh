@@ -44,16 +44,16 @@
 #   DEBUG_BENCHMARK          1=verbose debug output + API connectivity probe
 # =============================================================================
 
-"""
+: <<'NOTE'
 NOTE: commands to run (july 2, 2026) ---
 
-# Run once per baseline — paste into terminal sequentially
+# Run once per baseline; paste into terminal sequentially.
 RUN_TAG=july26_full RUNS=3 BASELINES=FLASH_FUSION    ./run_benchmark.sh
 RUN_TAG=july26_full RUNS=3 BASELINES=HARGPT_PAPER    ./run_benchmark.sh
 RUN_TAG=july26_full RUNS=3 BASELINES=LLMSENSE_PAPER  ./run_benchmark.sh
 RUN_TAG=july26_full RUNS=3 BASELINES=REACT_ONLY      ./run_benchmark.sh
 RUN_TAG=july26_full RUNS=3 BASELINES=AUTOIOT_PAPER   ./run_benchmark.sh
-"""
+NOTE
 
 set -euo pipefail
 

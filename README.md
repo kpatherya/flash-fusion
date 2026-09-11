@@ -10,7 +10,9 @@
 
 <p align="center">
 	<a href="https://flash-fusion.vercel.app/">Live chat</a> ·
-	<a href="CONTRIBUTING.md">Contributing</a>
+	<a href="CONTRIBUTING.md">Contributing</a> ·
+	<a href="CITATION.cff">Citation</a> ·
+	<a href="LICENSE">License</a>
 </p>
 
 Flash-Fusion translates a data question into a constrained typed plan, validates
@@ -39,7 +41,7 @@ grounded agent implementation remains available as a comparison baseline.
 
 ## Quick Start
 
-Requires Python 3.11 or newer.
+Requires Python 3.12 or newer.
 
 ```sh
 git clone https://github.com/kpath1999/flash-fusion.git
@@ -100,6 +102,9 @@ over WISDM, MIT ECG, and bus datasets. Results are written below
 Run `./run_benchmark.sh --help` for dataset, query, latency, model, and output
 configuration.
 
+See [docs/RESULTS_ARTIFACT_POLICY.md](docs/RESULTS_ARTIFACT_POLICY.md) for
+which benchmark artifacts are canonical and which are local-only outputs.
+
 ## Deployment Footprint
 
 Vercel uses the root `pyproject.toml` to install the production-only dependency
@@ -132,3 +137,6 @@ include tests for behavior changes, especially when execution semantics change.
 Read [CONTRIBUTING.md](CONTRIBUTING.md) for the contribution flow and project
 conventions. Issue reports should include the query, dataset, execution mode,
 expected result, actual result, and a redacted audit trace.
+
+Use [docs/REPRODUCIBILITY_CHECKLIST.md](docs/REPRODUCIBILITY_CHECKLIST.md)
+before publishing result claims or tagging a release.

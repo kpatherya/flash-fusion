@@ -37,6 +37,12 @@ flashfusion/miniexp/results_new/
 flashfusion/eval/ground_truth/by_fraction/
 flashfusion/performance/data/
 flashfusion/performance/results/
+flashfusion/results/runs/
+flashfusion/results/**/run_*/
+flashfusion/results/**/raw_results.jsonl
+flashfusion/results/**/benchmark.log
+flashfusion/results/**/visualize.log
+flashfusion/results/**/stage_*.log
 
 # ── Logs ─────────────────────────────────────────────────────────────────────
 logs/
