@@ -93,7 +93,7 @@ FULL_BASELINES = [
     "LLMSENSE_PAPER",
 ]
 ERROR_RATE_BASELINES = [
-    "FLASH_FUSION",
+    CACHE_BASELINE,
     "REACT_ONLY",
     "AUTOIOT_PAPER",
     "HARGPT_PAPER",
@@ -877,7 +877,7 @@ def plot_query_accuracy_across_baselines(
 
     selected = baselines or ERROR_RATE_BASELINES
     label_map = {
-        "FLASH_FUSION": "Flash-Fusion",
+        CACHE_BASELINE: "Flash-Fusion",
         "REACT_ONLY": "ReAct",
         "AUTOIOT_PAPER": "AutoIOT",
         "HARGPT_PAPER": "HARGPT",
@@ -1695,7 +1695,7 @@ def main() -> None:
     fig7 = output_dir / "cache_hit_miss_percent_across_query_types.png"
     fig8 = output_dir / "latency_cost_horizontal_three.png"
     fig9 = output_dir / "hybrid_cache_vs_fuzzy_match_quality.png"
-    fig10 = output_dir / "query_error_rate_across_baselines.png"
+    fig10 = output_dir / "query_accuracy_across_baselines.png"
 
     plot_accuracy_across_datasets(
         by_dataset,

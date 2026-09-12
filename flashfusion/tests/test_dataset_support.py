@@ -8,12 +8,13 @@ from flashfusion.eval.queries import (
     DATASET_WISDM,
     get_queries,
 )
+from flashfusion.eval import queries_v2, queries_v3
 from flashfusion.pipeline.loader import load_bus_data, load_dataset_by_name, load_mit_arrythmia
 
 
 def test_mit_query_bank_has_expected_split() -> None:
     queries = get_queries(DATASET_MIT_ECG)
-    assert len(queries) == 16
+    assert len(queries) == 20
 
     complexity_counts: dict[str, int] = {}
     for q in queries:
@@ -55,12 +56,12 @@ def test_load_dataset_by_name_dispatches_mit(tmp_path: Path) -> None:
     assert list(df.columns) == ["sample_idx", "time_s", "MLII", "V1", "record_id", "annotation"]
 
     # WISDM path still available; this call should simply return a list for the known dataset id.
-    assert len(get_queries(DATASET_WISDM)) == 16
+    assert len(get_queries(DATASET_WISDM)) == 20
 
 
 def test_bus_query_bank_has_expected_split() -> None:
     queries = get_queries(DATASET_BUS)
-    assert len(queries) == 16
+    assert len(queries) == 20
 
     complexity_counts: dict[str, int] = {}
     for q in queries:
@@ -71,6 +72,23 @@ def test_bus_query_bank_has_expected_split() -> None:
     assert complexity_counts.get("intermediate", 0) == 4
     assert complexity_counts.get("out_of_scope", 0) == 4
     assert complexity_counts.get("predictive", 0) == 4
+    assert complexity_counts.get("extra_hard", 0) == 4
+
+
+def test_extra_hard_query_versions_preserve_metadata_and_reword_text() -> None:
+    for dataset in (DATASET_WISDM, DATASET_MIT_ECG, DATASET_BUS):
+        base_by_id = {q["id"]: q for q in get_queries(dataset)}
+        v2_by_id = {q["id"]: q for q in queries_v2.get_queries(dataset)}
+        v3_by_id = {q["id"]: q for q in queries_v3.get_queries(dataset)}
+
+        for query_id in range(17, 21):
+            base = base_by_id[query_id]
+            v2 = v2_by_id[query_id]
+            v3 = v3_by_id[query_id]
+            assert base["complexity"] == v2["complexity"] == v3["complexity"] == "extra_hard"
+            assert base["operation"] == v2["operation"] == v3["operation"]
+            assert base["text"] != v2["text"]
+            assert base["text"] != v3["text"]
 
 
 def test_load_bus_data_parses_rows(tmp_path: Path) -> None:

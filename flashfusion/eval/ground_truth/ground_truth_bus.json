@@ -94,5 +94,1517 @@
     "query_text": "Sort all bus rows by timestamp in ascending order. Use the first 80% of rows for training and the final 20% as the chronological holdout. Train a hist gradient boosting model using the training rows. Predict the label in the behavior column for the first row in the holdout set.",
     "reference_answer": "Hist gradient boosting predicts behavior 'moderate' for the first holdout row.",
     "expected_rejection": false
+  },
+  {
+    "query_id": 17,
+    "query_text": "Split timestamps into 1-minute bins. For each bin, compute mean instability_score and mean accel_variance. Rank bins by mean instability_score descending, keep the top 10% of bins, then within that top decile compute the correlation between mean accel_variance and mean instability_score.",
+    "reference_answer": "The top-decile 1-minute-bin Pearson correlation between mean accel_variance and mean instability_score is 1.0000.",
+    "expected_rejection": false,
+    "ground_truth_method": "extra_hard_composition_v1",
+    "stage_trace": [
+      {
+        "stage": "stage_1_DeriveBin_1_minute",
+        "value": {
+          "bin_count": 79
+        }
+      },
+      {
+        "stage": "stage_2_GroupAggregate_dual_means",
+        "value": [
+          {
+            "minute": "2025-06-06T16:01:00",
+            "mean_instability_score": 5.869,
+            "mean_accel_variance": 5.869
+          },
+          {
+            "minute": "2025-06-06T16:02:00",
+            "mean_instability_score": 5.869,
+            "mean_accel_variance": 5.869
+          },
+          {
+            "minute": "2025-06-06T16:04:00",
+            "mean_instability_score": 0.594,
+            "mean_accel_variance": 0.594
+          },
+          {
+            "minute": "2025-06-06T16:05:00",
+            "mean_instability_score": 0.594,
+            "mean_accel_variance": 0.594
+          },
+          {
+            "minute": "2025-06-06T11:13:00",
+            "mean_instability_score": 0.574,
+            "mean_accel_variance": 0.574
+          },
+          {
+            "minute": "2025-06-06T11:14:00",
+            "mean_instability_score": 0.574,
+            "mean_accel_variance": 0.574
+          },
+          {
+            "minute": "2025-06-06T11:15:00",
+            "mean_instability_score": 0.5186499999999999,
+            "mean_accel_variance": 0.5186499999999999
+          },
+          {
+            "minute": "2025-06-06T16:06:00",
+            "mean_instability_score": 0.4225,
+            "mean_accel_variance": 0.4225
+          },
+          {
+            "minute": "2025-06-06T16:10:00",
+            "mean_instability_score": 0.369,
+            "mean_accel_variance": 0.369
+          },
+          {
+            "minute": "2025-06-06T16:11:00",
+            "mean_instability_score": 0.369,
+            "mean_accel_variance": 0.369
+          },
+          {
+            "minute": "2025-06-06T11:46:00",
+            "mean_instability_score": 0.336,
+            "mean_accel_variance": 0.336
+          },
+          {
+            "minute": "2025-06-06T11:47:00",
+            "mean_instability_score": 0.336,
+            "mean_accel_variance": 0.336
+          },
+          {
+            "minute": "2025-06-06T16:12:00",
+            "mean_instability_score": 0.29969999999999997,
+            "mean_accel_variance": 0.29969999999999997
+          },
+          {
+            "minute": "2025-06-06T16:21:00",
+            "mean_instability_score": 0.255,
+            "mean_accel_variance": 0.255
+          },
+          {
+            "minute": "2025-06-06T16:22:00",
+            "mean_instability_score": 0.255,
+            "mean_accel_variance": 0.255
+          },
+          {
+            "minute": "2025-06-06T16:23:00",
+            "mean_instability_score": 0.255,
+            "mean_accel_variance": 0.255
+          },
+          {
+            "minute": "2025-06-06T16:28:00",
+            "mean_instability_score": 0.253,
+            "mean_accel_variance": 0.253
+          },
+          {
+            "minute": "2025-06-06T16:29:00",
+            "mean_instability_score": 0.253,
+            "mean_accel_variance": 0.253
+          },
+          {
+            "minute": "2025-06-06T16:24:00",
+            "mean_instability_score": 0.22247368421052632,
+            "mean_accel_variance": 0.22247368421052632
+          },
+          {
+            "minute": "2025-06-06T11:08:00",
+            "mean_instability_score": 0.21,
+            "mean_accel_variance": 0.21
+          },
+          {
+            "minute": "2025-06-06T11:24:00",
+            "mean_instability_score": 0.209,
+            "mean_accel_variance": 0.209
+          },
+          {
+            "minute": "2025-06-06T11:20:00",
+            "mean_instability_score": 0.208,
+            "mean_accel_variance": 0.208
+          },
+          {
+            "minute": "2025-06-06T11:21:00",
+            "mean_instability_score": 0.208,
+            "mean_accel_variance": 0.208
+          },
+          {
+            "minute": "2025-06-06T11:16:00",
+            "mean_instability_score": 0.205,
+            "mean_accel_variance": 0.205
+          },
+          {
+            "minute": "2025-06-06T16:09:00",
+            "mean_instability_score": 0.19675,
+            "mean_accel_variance": 0.19675
+          },
+          {
+            "minute": "2025-06-06T11:09:00",
+            "mean_instability_score": 0.19395,
+            "mean_accel_variance": 0.19395
+          },
+          {
+            "minute": "2025-06-06T11:45:00",
+            "mean_instability_score": 0.18214999999999998,
+            "mean_accel_variance": 0.18214999999999998
+          },
+          {
+            "minute": "2025-06-06T11:34:00",
+            "mean_instability_score": 0.179,
+            "mean_accel_variance": 0.179
+          },
+          {
+            "minute": "2025-06-06T11:35:00",
+            "mean_instability_score": 0.179,
+            "mean_accel_variance": 0.179
+          },
+          {
+            "minute": "2025-06-06T16:30:00",
+            "mean_instability_score": 0.1740909090909091,
+            "mean_accel_variance": 0.1740909090909091
+          },
+          {
+            "minute": "2025-06-06T11:12:00",
+            "mean_instability_score": 0.17365,
+            "mean_accel_variance": 0.17365
+          },
+          {
+            "minute": "2025-06-06T11:36:00",
+            "mean_instability_score": 0.17195,
+            "mean_accel_variance": 0.17195
+          },
+          {
+            "minute": "2025-06-06T16:13:00",
+            "mean_instability_score": 0.171,
+            "mean_accel_variance": 0.171
+          },
+          {
+            "minute": "2025-06-06T16:14:00",
+            "mean_instability_score": 0.171,
+            "mean_accel_variance": 0.171
+          },
+          {
+            "minute": "2025-06-06T11:58:00",
+            "mean_instability_score": 0.167,
+            "mean_accel_variance": 0.167
+          },
+          {
+            "minute": "2025-06-06T11:59:00",
+            "mean_instability_score": 0.167,
+            "mean_accel_variance": 0.167
+          },
+          {
+            "minute": "2025-06-06T12:00:00",
+            "mean_instability_score": 0.167,
+            "mean_accel_variance": 0.167
+          },
+          {
+            "minute": "2025-06-06T16:19:00",
+            "mean_instability_score": 0.166,
+            "mean_accel_variance": 0.166
+          },
+          {
+            "minute": "2025-06-06T16:20:00",
+            "mean_instability_score": 0.166,
+            "mean_accel_variance": 0.166
+          },
+          {
+            "minute": "2025-06-06T16:15:00",
+            "mean_instability_score": 0.1575,
+            "mean_accel_variance": 0.1575
+          },
+          {
+            "minute": "2025-06-06T11:43:00",
+            "mean_instability_score": 0.155,
+            "mean_accel_variance": 0.155
+          },
+          {
+            "minute": "2025-06-06T11:44:00",
+            "mean_instability_score": 0.155,
+            "mean_accel_variance": 0.155
+          },
+          {
+            "minute": "2025-06-06T16:18:00",
+            "mean_instability_score": 0.1517,
+            "mean_accel_variance": 0.1517
+          },
+          {
+            "minute": "2025-06-06T14:50:00",
+            "mean_instability_score": 0.151,
+            "mean_accel_variance": 0.151
+          },
+          {
+            "minute": "2025-06-06T14:51:00",
+            "mean_instability_score": 0.151,
+            "mean_accel_variance": 0.151
+          },
+          {
+            "minute": "2025-06-06T16:16:00",
+            "mean_instability_score": 0.144,
+            "mean_accel_variance": 0.144
+          },
+          {
+            "minute": "2025-06-06T16:17:00",
+            "mean_instability_score": 0.144,
+            "mean_accel_variance": 0.144
+          },
+          {
+            "minute": "2025-06-06T11:37:00",
+            "mean_instability_score": 0.132,
+            "mean_accel_variance": 0.132
+          },
+          {
+            "minute": "2025-06-06T11:38:00",
+            "mean_instability_score": 0.132,
+            "mean_accel_variance": 0.132
+          },
+          {
+            "minute": "2025-06-06T16:31:00",
+            "mean_instability_score": 0.129,
+            "mean_accel_variance": 0.129
+          },
+          {
+            "minute": "2025-06-06T16:32:00",
+            "mean_instability_score": 0.129,
+            "mean_accel_variance": 0.129
+          },
+          {
+            "minute": "2025-06-06T16:33:00",
+            "mean_instability_score": 0.1283,
+            "mean_accel_variance": 0.1283
+          },
+          {
+            "minute": "2025-06-06T16:34:00",
+            "mean_instability_score": 0.127,
+            "mean_accel_variance": 0.127
+          },
+          {
+            "minute": "2025-06-06T16:35:00",
+            "mean_instability_score": 0.127,
+            "mean_accel_variance": 0.127
+          },
+          {
+            "minute": "2025-06-06T16:36:00",
+            "mean_instability_score": 0.127,
+            "mean_accel_variance": 0.127
+          },
+          {
+            "minute": "2025-06-06T11:39:00",
+            "mean_instability_score": 0.1233,
+            "mean_accel_variance": 0.1233
+          },
+          {
+            "minute": "2025-06-06T16:07:00",
+            "mean_instability_score": 0.104,
+            "mean_accel_variance": 0.104
+          },
+          {
+            "minute": "2025-06-06T16:08:00",
+            "mean_instability_score": 0.104,
+            "mean_accel_variance": 0.104
+          },
+          {
+            "minute": "2025-06-06T11:10:00",
+            "mean_instability_score": 0.10300000000000001,
+            "mean_accel_variance": 0.10300000000000001
+          },
+          {
+            "minute": "2025-06-06T11:11:00",
+            "mean_instability_score": 0.10300000000000001,
+            "mean_accel_variance": 0.10300000000000001
+          },
+          {
+            "minute": "2025-06-06T11:57:00",
+            "mean_instability_score": 0.099,
+            "mean_accel_variance": 0.099
+          },
+          {
+            "minute": "2025-06-06T15:14:00",
+            "mean_instability_score": 0.09400000000000001,
+            "mean_accel_variance": 0.09400000000000001
+          },
+          {
+            "minute": "2025-06-06T15:15:00",
+            "mean_instability_score": 0.094,
+            "mean_accel_variance": 0.094
+          },
+          {
+            "minute": "2025-06-06T11:48:00",
+            "mean_instability_score": 0.08900000000000001,
+            "mean_accel_variance": 0.08900000000000001
+          },
+          {
+            "minute": "2025-06-06T11:49:00",
+            "mean_instability_score": 0.089,
+            "mean_accel_variance": 0.089
+          },
+          {
+            "minute": "2025-06-06T11:50:00",
+            "mean_instability_score": 0.089,
+            "mean_accel_variance": 0.089
+          },
+          {
+            "minute": "2025-06-06T11:51:00",
+            "mean_instability_score": 0.089,
+            "mean_accel_variance": 0.089
+          },
+          {
+            "minute": "2025-06-06T11:56:00",
+            "mean_instability_score": 0.08700000000000001,
+            "mean_accel_variance": 0.08700000000000001
+          },
+          {
+            "minute": "2025-06-06T11:55:00",
+            "mean_instability_score": 0.087,
+            "mean_accel_variance": 0.087
+          },
+          {
+            "minute": "2025-06-06T11:42:00",
+            "mean_instability_score": 0.08614999999999999,
+            "mean_accel_variance": 0.08614999999999999
+          },
+          {
+            "minute": "2025-06-06T11:54:00",
+            "mean_instability_score": 0.08530000000000001,
+            "mean_accel_variance": 0.08530000000000001
+          },
+          {
+            "minute": "2025-06-06T11:53:00",
+            "mean_instability_score": 0.085,
+            "mean_accel_variance": 0.085
+          },
+          {
+            "minute": "2025-06-06T15:05:00",
+            "mean_instability_score": 0.082,
+            "mean_accel_variance": 0.082
+          },
+          {
+            "minute": "2025-06-06T15:06:00",
+            "mean_instability_score": 0.082,
+            "mean_accel_variance": 0.082
+          },
+          {
+            "minute": "2025-06-06T15:04:00",
+            "mean_instability_score": 0.07583333333333334,
+            "mean_accel_variance": 0.07583333333333334
+          },
+          {
+            "minute": "2025-06-06T11:40:00",
+            "mean_instability_score": 0.074,
+            "mean_accel_variance": 0.074
+          },
+          {
+            "minute": "2025-06-06T11:41:00",
+            "mean_instability_score": 0.074,
+            "mean_accel_variance": 0.074
+          },
+          {
+            "minute": "2025-06-06T11:33:00",
+            "mean_instability_score": 0.05566666666666667,
+            "mean_accel_variance": 0.05566666666666667
+          },
+          {
+            "minute": "2025-06-06T15:07:00",
+            "mean_instability_score": 0.047636363636363636,
+            "mean_accel_variance": 0.047636363636363636
+          }
+        ]
+      },
+      {
+        "stage": "stage_3_RankRows_and_Select_top_decile",
+        "value": [
+          {
+            "minute": "2025-06-06T16:01:00",
+            "mean_instability_score": 5.869,
+            "mean_accel_variance": 5.869
+          },
+          {
+            "minute": "2025-06-06T16:02:00",
+            "mean_instability_score": 5.869,
+            "mean_accel_variance": 5.869
+          },
+          {
+            "minute": "2025-06-06T16:04:00",
+            "mean_instability_score": 0.594,
+            "mean_accel_variance": 0.594
+          },
+          {
+            "minute": "2025-06-06T16:05:00",
+            "mean_instability_score": 0.594,
+            "mean_accel_variance": 0.594
+          },
+          {
+            "minute": "2025-06-06T11:13:00",
+            "mean_instability_score": 0.574,
+            "mean_accel_variance": 0.574
+          },
+          {
+            "minute": "2025-06-06T11:14:00",
+            "mean_instability_score": 0.574,
+            "mean_accel_variance": 0.574
+          },
+          {
+            "minute": "2025-06-06T11:15:00",
+            "mean_instability_score": 0.5186499999999999,
+            "mean_accel_variance": 0.5186499999999999
+          },
+          {
+            "minute": "2025-06-06T16:06:00",
+            "mean_instability_score": 0.4225,
+            "mean_accel_variance": 0.4225
+          }
+        ]
+      },
+      {
+        "stage": "stage_4_CorrelateColumns",
+        "value": 1.0
+      }
+    ]
+  },
+  {
+    "query_id": 18,
+    "query_text": "Compute peak acceleration magnitude per row using the 99th-percentile x, y, and z columns. Split rows into a northern half (latitude above median) and a southern half (latitude at or below median). Within each half, compute the mean peak magnitude and the count of rows where accel_variance exceeds 0.20. Compare the two halves on both metrics and report which half is rougher by both criteria, or state disagreement.",
+    "reference_answer": "The two criteria yield north. Mean peak-magnitude winner is north; accel_variance > 0.20 count winner is north.",
+    "expected_rejection": false,
+    "ground_truth_method": "extra_hard_composition_v1",
+    "stage_trace": [
+      {
+        "stage": "stage_1_DeriveVectorMagnitude_peak",
+        "value": {
+          "column": "peak_magnitude",
+          "rows": 1219
+        }
+      },
+      {
+        "stage": "stage_2_SplitByThreshold_latitude_median",
+        "value": {
+          "median": 33.776676,
+          "north_rows": 609,
+          "south_rows": 610
+        }
+      },
+      {
+        "stage": "stage_3_AggregatePartitions_dual_metrics",
+        "value": [
+          {
+            "half": "north",
+            "mean_peak_magnitude": 11.722590691852952,
+            "variance_gt_0_20_count": 190
+          },
+          {
+            "half": "south",
+            "mean_peak_magnitude": 11.194853285218633,
+            "variance_gt_0_20_count": 162
+          }
+        ]
+      },
+      {
+        "stage": "stage_4_ComparePartitions",
+        "value": {
+          "magnitude_higher": "north",
+          "count_higher": "north",
+          "verdict": "north"
+        }
+      }
+    ]
+  },
+  {
+    "query_id": 19,
+    "query_text": "For each 5-minute time bin, compute the range (accel_stats_z_p99 minus accel_stats_z_p1) and the mean extreme_event_magnitude. Rank bins by range descending, keep the top 3 bins, then compute the behavior-label distribution across just those bins, and report the most frequent behavior label among them.",
+    "reference_answer": "The most frequent behavior label across the top three 5-minute range bins is aggressive.",
+    "expected_rejection": false,
+    "ground_truth_method": "extra_hard_composition_v1",
+    "stage_trace": [
+      {
+        "stage": "stage_1_DeriveBin_5_minutes_and_vertical_range",
+        "value": {
+          "bin_count": 24
+        }
+      },
+      {
+        "stage": "stage_2_GroupAggregate_bin_metrics",
+        "value": [
+          {
+            "bin_5min": "2025-06-06T11:05:00",
+            "mean_vertical_range": 6.72096551724138,
+            "mean_extreme_event_magnitude": 14.25139322750012
+          },
+          {
+            "bin_5min": "2025-06-06T11:10:00",
+            "mean_vertical_range": 2.1483500000000006,
+            "mean_extreme_event_magnitude": 11.853487856332498
+          },
+          {
+            "bin_5min": "2025-06-06T11:15:00",
+            "mean_vertical_range": 3.1415000000000006,
+            "mean_extreme_event_magnitude": 12.312866646018737
+          },
+          {
+            "bin_5min": "2025-06-06T11:20:00",
+            "mean_vertical_range": 3.1840000000000006,
+            "mean_extreme_event_magnitude": 11.958928770782553
+          },
+          {
+            "bin_5min": "2025-06-06T11:30:00",
+            "mean_vertical_range": 1.6307499999999997,
+            "mean_extreme_event_magnitude": 10.452724146816395
+          },
+          {
+            "bin_5min": "2025-06-06T11:35:00",
+            "mean_vertical_range": 2.1484300000000003,
+            "mean_extreme_event_magnitude": 11.141954254540234
+          },
+          {
+            "bin_5min": "2025-06-06T11:40:00",
+            "mean_vertical_range": 2.0757978723404267,
+            "mean_extreme_event_magnitude": 11.088188621020477
+          },
+          {
+            "bin_5min": "2025-06-06T11:45:00",
+            "mean_vertical_range": 3.0836111111111113,
+            "mean_extreme_event_magnitude": 11.65439907282934
+          },
+          {
+            "bin_5min": "2025-06-06T11:50:00",
+            "mean_vertical_range": 1.7522816901408445,
+            "mean_extreme_event_magnitude": 10.590989008734182
+          },
+          {
+            "bin_5min": "2025-06-06T11:55:00",
+            "mean_vertical_range": 2.323622950819672,
+            "mean_extreme_event_magnitude": 10.91355308972818
+          },
+          {
+            "bin_5min": "2025-06-06T12:00:00",
+            "mean_vertical_range": 2.6050000000000004,
+            "mean_extreme_event_magnitude": 10.858934201845042
+          },
+          {
+            "bin_5min": "2025-06-06T14:50:00",
+            "mean_vertical_range": 4.1370000000000005,
+            "mean_extreme_event_magnitude": 11.195897507569455
+          },
+          {
+            "bin_5min": "2025-06-06T15:00:00",
+            "mean_vertical_range": 3.7283333333333335,
+            "mean_extreme_event_magnitude": 11.61018010061402
+          },
+          {
+            "bin_5min": "2025-06-06T15:05:00",
+            "mean_vertical_range": 3.1995294117647055,
+            "mean_extreme_event_magnitude": 11.307714436830722
+          },
+          {
+            "bin_5min": "2025-06-06T15:10:00",
+            "mean_vertical_range": 1.992,
+            "mean_extreme_event_magnitude": 10.769560529566654
+          },
+          {
+            "bin_5min": "2025-06-06T15:15:00",
+            "mean_vertical_range": 1.9920000000000002,
+            "mean_extreme_event_magnitude": 10.769560529566654
+          },
+          {
+            "bin_5min": "2025-06-06T16:00:00",
+            "mean_vertical_range": 8.781896551724138,
+            "mean_extreme_event_magnitude": 15.925532654256838
+          },
+          {
+            "bin_5min": "2025-06-06T16:05:00",
+            "mean_vertical_range": 3.612329411764706,
+            "mean_extreme_event_magnitude": 11.570120243209004
+          },
+          {
+            "bin_5min": "2025-06-06T16:10:00",
+            "mean_vertical_range": 3.671424242424243,
+            "mean_extreme_event_magnitude": 10.864787476953891
+          },
+          {
+            "bin_5min": "2025-06-06T16:15:00",
+            "mean_vertical_range": 2.345851063829787,
+            "mean_extreme_event_magnitude": 10.952486063678434
+          },
+          {
+            "bin_5min": "2025-06-06T16:20:00",
+            "mean_vertical_range": 2.816238095238096,
+            "mean_extreme_event_magnitude": 11.621107383426606
+          },
+          {
+            "bin_5min": "2025-06-06T16:25:00",
+            "mean_vertical_range": 2.9110000000000005,
+            "mean_extreme_event_magnitude": 11.669360265241622
+          },
+          {
+            "bin_5min": "2025-06-06T16:30:00",
+            "mean_vertical_range": 2.373081395348838,
+            "mean_extreme_event_magnitude": 11.31783848171495
+          },
+          {
+            "bin_5min": "2025-06-06T16:35:00",
+            "mean_vertical_range": 2.758000000000001,
+            "mean_extreme_event_magnitude": 11.663130454556358
+          }
+        ]
+      },
+      {
+        "stage": "stage_3_RankRows_Select_top_3_bins",
+        "value": [
+          {
+            "bin_5min": "2025-06-06T16:00:00",
+            "mean_vertical_range": 8.781896551724138
+          },
+          {
+            "bin_5min": "2025-06-06T11:05:00",
+            "mean_vertical_range": 6.72096551724138
+          },
+          {
+            "bin_5min": "2025-06-06T14:50:00",
+            "mean_vertical_range": 4.1370000000000005
+          }
+        ]
+      },
+      {
+        "stage": "stage_4_GroupAggregate_behavior_distribution",
+        "value": [
+          {
+            "behavior": "aggressive",
+            "count": 39
+          },
+          {
+            "behavior": "very_aggressive",
+            "count": 16
+          },
+          {
+            "behavior": "moderate",
+            "count": 5
+          },
+          {
+            "behavior": "calm",
+            "count": 3
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "query_id": 20,
+    "query_text": "Compute per-minute mean accel_mean and mean accel_variance. Split minutes into quartiles by mean accel_variance. Within the top quartile (roughest) and bottom quartile (smoothest), compute the average instability_score. Compare the two quartile averages and report the ratio of roughest to smoothest instability_score, rounded to two decimals.",
+    "reference_answer": "The roughest-to-smoothest quartile mean instability_score ratio is 11.05.",
+    "expected_rejection": false,
+    "ground_truth_method": "extra_hard_composition_v1",
+    "stage_trace": [
+      {
+        "stage": "stage_1_DeriveBin_1_minute",
+        "value": {
+          "bin_count": 79
+        }
+      },
+      {
+        "stage": "stage_2_GroupAggregate_minute_means",
+        "value": [
+          {
+            "minute": "2025-06-06T11:08:00",
+            "mean_accel_mean": 9.269,
+            "mean_accel_variance": 0.21,
+            "mean_instability_score": 0.21
+          },
+          {
+            "minute": "2025-06-06T11:09:00",
+            "mean_accel_mean": 9.266,
+            "mean_accel_variance": 0.19395,
+            "mean_instability_score": 0.19395
+          },
+          {
+            "minute": "2025-06-06T11:10:00",
+            "mean_accel_mean": 9.249,
+            "mean_accel_variance": 0.10300000000000001,
+            "mean_instability_score": 0.10300000000000001
+          },
+          {
+            "minute": "2025-06-06T11:11:00",
+            "mean_accel_mean": 9.249,
+            "mean_accel_variance": 0.10300000000000001,
+            "mean_instability_score": 0.10300000000000001
+          },
+          {
+            "minute": "2025-06-06T11:12:00",
+            "mean_accel_mean": 9.26565,
+            "mean_accel_variance": 0.17365,
+            "mean_instability_score": 0.17365
+          },
+          {
+            "minute": "2025-06-06T11:13:00",
+            "mean_accel_mean": 9.36,
+            "mean_accel_variance": 0.574,
+            "mean_instability_score": 0.574
+          },
+          {
+            "minute": "2025-06-06T11:14:00",
+            "mean_accel_mean": 9.36,
+            "mean_accel_variance": 0.574,
+            "mean_instability_score": 0.574
+          },
+          {
+            "minute": "2025-06-06T11:15:00",
+            "mean_accel_mean": 9.340799999999998,
+            "mean_accel_variance": 0.5186499999999999,
+            "mean_instability_score": 0.5186499999999999
+          },
+          {
+            "minute": "2025-06-06T11:16:00",
+            "mean_accel_mean": 9.232,
+            "mean_accel_variance": 0.205,
+            "mean_instability_score": 0.205
+          },
+          {
+            "minute": "2025-06-06T11:20:00",
+            "mean_accel_mean": 9.310999999999998,
+            "mean_accel_variance": 0.208,
+            "mean_instability_score": 0.208
+          },
+          {
+            "minute": "2025-06-06T11:21:00",
+            "mean_accel_mean": 9.311,
+            "mean_accel_variance": 0.208,
+            "mean_instability_score": 0.208
+          },
+          {
+            "minute": "2025-06-06T11:24:00",
+            "mean_accel_mean": 9.314,
+            "mean_accel_variance": 0.209,
+            "mean_instability_score": 0.209
+          },
+          {
+            "minute": "2025-06-06T11:33:00",
+            "mean_accel_mean": 9.247499999999999,
+            "mean_accel_variance": 0.05566666666666667,
+            "mean_instability_score": 0.05566666666666667
+          },
+          {
+            "minute": "2025-06-06T11:34:00",
+            "mean_accel_mean": 9.26,
+            "mean_accel_variance": 0.179,
+            "mean_instability_score": 0.179
+          },
+          {
+            "minute": "2025-06-06T11:35:00",
+            "mean_accel_mean": 9.26,
+            "mean_accel_variance": 0.179,
+            "mean_instability_score": 0.179
+          },
+          {
+            "minute": "2025-06-06T11:36:00",
+            "mean_accel_mean": 9.2669,
+            "mean_accel_variance": 0.17195,
+            "mean_instability_score": 0.17195
+          },
+          {
+            "minute": "2025-06-06T11:37:00",
+            "mean_accel_mean": 9.306,
+            "mean_accel_variance": 0.132,
+            "mean_instability_score": 0.132
+          },
+          {
+            "minute": "2025-06-06T11:38:00",
+            "mean_accel_mean": 9.306,
+            "mean_accel_variance": 0.132,
+            "mean_instability_score": 0.132
+          },
+          {
+            "minute": "2025-06-06T11:39:00",
+            "mean_accel_mean": 9.2961,
+            "mean_accel_variance": 0.1233,
+            "mean_instability_score": 0.1233
+          },
+          {
+            "minute": "2025-06-06T11:40:00",
+            "mean_accel_mean": 9.24,
+            "mean_accel_variance": 0.074,
+            "mean_instability_score": 0.074
+          },
+          {
+            "minute": "2025-06-06T11:41:00",
+            "mean_accel_mean": 9.24,
+            "mean_accel_variance": 0.074,
+            "mean_instability_score": 0.074
+          },
+          {
+            "minute": "2025-06-06T11:42:00",
+            "mean_accel_mean": 9.24375,
+            "mean_accel_variance": 0.08614999999999999,
+            "mean_instability_score": 0.08614999999999999
+          },
+          {
+            "minute": "2025-06-06T11:43:00",
+            "mean_accel_mean": 9.265,
+            "mean_accel_variance": 0.155,
+            "mean_instability_score": 0.155
+          },
+          {
+            "minute": "2025-06-06T11:44:00",
+            "mean_accel_mean": 9.265,
+            "mean_accel_variance": 0.155,
+            "mean_instability_score": 0.155
+          },
+          {
+            "minute": "2025-06-06T11:45:00",
+            "mean_accel_mean": 9.27385,
+            "mean_accel_variance": 0.18214999999999998,
+            "mean_instability_score": 0.18214999999999998
+          },
+          {
+            "minute": "2025-06-06T11:46:00",
+            "mean_accel_mean": 9.324,
+            "mean_accel_variance": 0.336,
+            "mean_instability_score": 0.336
+          },
+          {
+            "minute": "2025-06-06T11:47:00",
+            "mean_accel_mean": 9.324,
+            "mean_accel_variance": 0.336,
+            "mean_instability_score": 0.336
+          },
+          {
+            "minute": "2025-06-06T11:48:00",
+            "mean_accel_mean": 9.253,
+            "mean_accel_variance": 0.08900000000000001,
+            "mean_instability_score": 0.08900000000000001
+          },
+          {
+            "minute": "2025-06-06T11:49:00",
+            "mean_accel_mean": 9.253,
+            "mean_accel_variance": 0.089,
+            "mean_instability_score": 0.089
+          },
+          {
+            "minute": "2025-06-06T11:50:00",
+            "mean_accel_mean": 9.253,
+            "mean_accel_variance": 0.089,
+            "mean_instability_score": 0.089
+          },
+          {
+            "minute": "2025-06-06T11:51:00",
+            "mean_accel_mean": 9.253,
+            "mean_accel_variance": 0.089,
+            "mean_instability_score": 0.089
+          },
+          {
+            "minute": "2025-06-06T11:53:00",
+            "mean_accel_mean": 9.297,
+            "mean_accel_variance": 0.085,
+            "mean_instability_score": 0.085
+          },
+          {
+            "minute": "2025-06-06T11:54:00",
+            "mean_accel_mean": 9.29085,
+            "mean_accel_variance": 0.08530000000000001,
+            "mean_instability_score": 0.08530000000000001
+          },
+          {
+            "minute": "2025-06-06T11:55:00",
+            "mean_accel_mean": 9.256,
+            "mean_accel_variance": 0.087,
+            "mean_instability_score": 0.087
+          },
+          {
+            "minute": "2025-06-06T11:56:00",
+            "mean_accel_mean": 9.256,
+            "mean_accel_variance": 0.08700000000000001,
+            "mean_instability_score": 0.08700000000000001
+          },
+          {
+            "minute": "2025-06-06T11:57:00",
+            "mean_accel_mean": 9.2638,
+            "mean_accel_variance": 0.099,
+            "mean_instability_score": 0.099
+          },
+          {
+            "minute": "2025-06-06T11:58:00",
+            "mean_accel_mean": 9.308,
+            "mean_accel_variance": 0.167,
+            "mean_instability_score": 0.167
+          },
+          {
+            "minute": "2025-06-06T11:59:00",
+            "mean_accel_mean": 9.308,
+            "mean_accel_variance": 0.167,
+            "mean_instability_score": 0.167
+          },
+          {
+            "minute": "2025-06-06T12:00:00",
+            "mean_accel_mean": 9.308,
+            "mean_accel_variance": 0.167,
+            "mean_instability_score": 0.167
+          },
+          {
+            "minute": "2025-06-06T14:50:00",
+            "mean_accel_mean": 9.195,
+            "mean_accel_variance": 0.151,
+            "mean_instability_score": 0.151
+          },
+          {
+            "minute": "2025-06-06T14:51:00",
+            "mean_accel_mean": 9.195,
+            "mean_accel_variance": 0.151,
+            "mean_instability_score": 0.151
+          },
+          {
+            "minute": "2025-06-06T15:04:00",
+            "mean_accel_mean": 9.231333333333332,
+            "mean_accel_variance": 0.07583333333333334,
+            "mean_instability_score": 0.07583333333333334
+          },
+          {
+            "minute": "2025-06-06T15:05:00",
+            "mean_accel_mean": 9.221,
+            "mean_accel_variance": 0.082,
+            "mean_instability_score": 0.082
+          },
+          {
+            "minute": "2025-06-06T15:06:00",
+            "mean_accel_mean": 9.221,
+            "mean_accel_variance": 0.082,
+            "mean_instability_score": 0.082
+          },
+          {
+            "minute": "2025-06-06T15:07:00",
+            "mean_accel_mean": 9.236818181818181,
+            "mean_accel_variance": 0.047636363636363636,
+            "mean_instability_score": 0.047636363636363636
+          },
+          {
+            "minute": "2025-06-06T15:14:00",
+            "mean_accel_mean": 9.288,
+            "mean_accel_variance": 0.09400000000000001,
+            "mean_instability_score": 0.09400000000000001
+          },
+          {
+            "minute": "2025-06-06T15:15:00",
+            "mean_accel_mean": 9.288,
+            "mean_accel_variance": 0.094,
+            "mean_instability_score": 0.094
+          },
+          {
+            "minute": "2025-06-06T16:01:00",
+            "mean_accel_mean": 9.332,
+            "mean_accel_variance": 5.869,
+            "mean_instability_score": 5.869
+          },
+          {
+            "minute": "2025-06-06T16:02:00",
+            "mean_accel_mean": 9.332,
+            "mean_accel_variance": 5.869,
+            "mean_instability_score": 5.869
+          },
+          {
+            "minute": "2025-06-06T16:04:00",
+            "mean_accel_mean": 9.202,
+            "mean_accel_variance": 0.594,
+            "mean_instability_score": 0.594
+          },
+          {
+            "minute": "2025-06-06T16:05:00",
+            "mean_accel_mean": 9.202,
+            "mean_accel_variance": 0.594,
+            "mean_instability_score": 0.594
+          },
+          {
+            "minute": "2025-06-06T16:06:00",
+            "mean_accel_mean": 9.20655,
+            "mean_accel_variance": 0.4225,
+            "mean_instability_score": 0.4225
+          },
+          {
+            "minute": "2025-06-06T16:07:00",
+            "mean_accel_mean": 9.215,
+            "mean_accel_variance": 0.104,
+            "mean_instability_score": 0.104
+          },
+          {
+            "minute": "2025-06-06T16:08:00",
+            "mean_accel_mean": 9.215,
+            "mean_accel_variance": 0.104,
+            "mean_instability_score": 0.104
+          },
+          {
+            "minute": "2025-06-06T16:09:00",
+            "mean_accel_mean": 9.21815,
+            "mean_accel_variance": 0.19675,
+            "mean_instability_score": 0.19675
+          },
+          {
+            "minute": "2025-06-06T16:10:00",
+            "mean_accel_mean": 9.224,
+            "mean_accel_variance": 0.369,
+            "mean_instability_score": 0.369
+          },
+          {
+            "minute": "2025-06-06T16:11:00",
+            "mean_accel_mean": 9.224,
+            "mean_accel_variance": 0.369,
+            "mean_instability_score": 0.369
+          },
+          {
+            "minute": "2025-06-06T16:12:00",
+            "mean_accel_mean": 9.249550000000001,
+            "mean_accel_variance": 0.29969999999999997,
+            "mean_instability_score": 0.29969999999999997
+          },
+          {
+            "minute": "2025-06-06T16:13:00",
+            "mean_accel_mean": 9.297,
+            "mean_accel_variance": 0.171,
+            "mean_instability_score": 0.171
+          },
+          {
+            "minute": "2025-06-06T16:14:00",
+            "mean_accel_mean": 9.297,
+            "mean_accel_variance": 0.171,
+            "mean_instability_score": 0.171
+          },
+          {
+            "minute": "2025-06-06T16:15:00",
+            "mean_accel_mean": 9.3285,
+            "mean_accel_variance": 0.1575,
+            "mean_instability_score": 0.1575
+          },
+          {
+            "minute": "2025-06-06T16:16:00",
+            "mean_accel_mean": 9.36,
+            "mean_accel_variance": 0.144,
+            "mean_instability_score": 0.144
+          },
+          {
+            "minute": "2025-06-06T16:17:00",
+            "mean_accel_mean": 9.36,
+            "mean_accel_variance": 0.144,
+            "mean_instability_score": 0.144
+          },
+          {
+            "minute": "2025-06-06T16:18:00",
+            "mean_accel_mean": 9.3446,
+            "mean_accel_variance": 0.1517,
+            "mean_instability_score": 0.1517
+          },
+          {
+            "minute": "2025-06-06T16:19:00",
+            "mean_accel_mean": 9.316,
+            "mean_accel_variance": 0.166,
+            "mean_instability_score": 0.166
+          },
+          {
+            "minute": "2025-06-06T16:20:00",
+            "mean_accel_mean": 9.316,
+            "mean_accel_variance": 0.166,
+            "mean_instability_score": 0.166
+          },
+          {
+            "minute": "2025-06-06T16:21:00",
+            "mean_accel_mean": 9.319,
+            "mean_accel_variance": 0.255,
+            "mean_instability_score": 0.255
+          },
+          {
+            "minute": "2025-06-06T16:22:00",
+            "mean_accel_mean": 9.319,
+            "mean_accel_variance": 0.255,
+            "mean_instability_score": 0.255
+          },
+          {
+            "minute": "2025-06-06T16:23:00",
+            "mean_accel_mean": 9.319,
+            "mean_accel_variance": 0.255,
+            "mean_instability_score": 0.255
+          },
+          {
+            "minute": "2025-06-06T16:24:00",
+            "mean_accel_mean": 9.336052631578948,
+            "mean_accel_variance": 0.22247368421052632,
+            "mean_instability_score": 0.22247368421052632
+          },
+          {
+            "minute": "2025-06-06T16:28:00",
+            "mean_accel_mean": 9.38,
+            "mean_accel_variance": 0.253,
+            "mean_instability_score": 0.253
+          },
+          {
+            "minute": "2025-06-06T16:29:00",
+            "mean_accel_mean": 9.38,
+            "mean_accel_variance": 0.253,
+            "mean_instability_score": 0.253
+          },
+          {
+            "minute": "2025-06-06T16:30:00",
+            "mean_accel_mean": 9.34309090909091,
+            "mean_accel_variance": 0.1740909090909091,
+            "mean_instability_score": 0.1740909090909091
+          },
+          {
+            "minute": "2025-06-06T16:31:00",
+            "mean_accel_mean": 9.322,
+            "mean_accel_variance": 0.129,
+            "mean_instability_score": 0.129
+          },
+          {
+            "minute": "2025-06-06T16:32:00",
+            "mean_accel_mean": 9.322,
+            "mean_accel_variance": 0.129,
+            "mean_instability_score": 0.129
+          },
+          {
+            "minute": "2025-06-06T16:33:00",
+            "mean_accel_mean": 9.329699999999999,
+            "mean_accel_variance": 0.1283,
+            "mean_instability_score": 0.1283
+          },
+          {
+            "minute": "2025-06-06T16:34:00",
+            "mean_accel_mean": 9.344,
+            "mean_accel_variance": 0.127,
+            "mean_instability_score": 0.127
+          },
+          {
+            "minute": "2025-06-06T16:35:00",
+            "mean_accel_mean": 9.344,
+            "mean_accel_variance": 0.127,
+            "mean_instability_score": 0.127
+          },
+          {
+            "minute": "2025-06-06T16:36:00",
+            "mean_accel_mean": 9.344,
+            "mean_accel_variance": 0.127,
+            "mean_instability_score": 0.127
+          }
+        ]
+      },
+      {
+        "stage": "stage_3_QuartileSplit_mean_accel_variance",
+        "value": [
+          {
+            "minute": "2025-06-06T11:08:00",
+            "variance_quartile": "Q4"
+          },
+          {
+            "minute": "2025-06-06T11:09:00",
+            "variance_quartile": "Q3"
+          },
+          {
+            "minute": "2025-06-06T11:10:00",
+            "variance_quartile": "Q1"
+          },
+          {
+            "minute": "2025-06-06T11:11:00",
+            "variance_quartile": "Q2"
+          },
+          {
+            "minute": "2025-06-06T11:12:00",
+            "variance_quartile": "Q3"
+          },
+          {
+            "minute": "2025-06-06T11:13:00",
+            "variance_quartile": "Q4"
+          },
+          {
+            "minute": "2025-06-06T11:14:00",
+            "variance_quartile": "Q4"
+          },
+          {
+            "minute": "2025-06-06T11:15:00",
+            "variance_quartile": "Q4"
+          },
+          {
+            "minute": "2025-06-06T11:16:00",
+            "variance_quartile": "Q3"
+          },
+          {
+            "minute": "2025-06-06T11:20:00",
+            "variance_quartile": "Q3"
+          },
+          {
+            "minute": "2025-06-06T11:21:00",
+            "variance_quartile": "Q3"
+          },
+          {
+            "minute": "2025-06-06T11:24:00",
+            "variance_quartile": "Q3"
+          },
+          {
+            "minute": "2025-06-06T11:33:00",
+            "variance_quartile": "Q1"
+          },
+          {
+            "minute": "2025-06-06T11:34:00",
+            "variance_quartile": "Q3"
+          },
+          {
+            "minute": "2025-06-06T11:35:00",
+            "variance_quartile": "Q3"
+          },
+          {
+            "minute": "2025-06-06T11:36:00",
+            "variance_quartile": "Q3"
+          },
+          {
+            "minute": "2025-06-06T11:37:00",
+            "variance_quartile": "Q2"
+          },
+          {
+            "minute": "2025-06-06T11:38:00",
+            "variance_quartile": "Q2"
+          },
+          {
+            "minute": "2025-06-06T11:39:00",
+            "variance_quartile": "Q2"
+          },
+          {
+            "minute": "2025-06-06T11:40:00",
+            "variance_quartile": "Q1"
+          },
+          {
+            "minute": "2025-06-06T11:41:00",
+            "variance_quartile": "Q1"
+          },
+          {
+            "minute": "2025-06-06T11:42:00",
+            "variance_quartile": "Q1"
+          },
+          {
+            "minute": "2025-06-06T11:43:00",
+            "variance_quartile": "Q2"
+          },
+          {
+            "minute": "2025-06-06T11:44:00",
+            "variance_quartile": "Q2"
+          },
+          {
+            "minute": "2025-06-06T11:45:00",
+            "variance_quartile": "Q3"
+          },
+          {
+            "minute": "2025-06-06T11:46:00",
+            "variance_quartile": "Q4"
+          },
+          {
+            "minute": "2025-06-06T11:47:00",
+            "variance_quartile": "Q4"
+          },
+          {
+            "minute": "2025-06-06T11:48:00",
+            "variance_quartile": "Q1"
+          },
+          {
+            "minute": "2025-06-06T11:49:00",
+            "variance_quartile": "Q1"
+          },
+          {
+            "minute": "2025-06-06T11:50:00",
+            "variance_quartile": "Q1"
+          },
+          {
+            "minute": "2025-06-06T11:51:00",
+            "variance_quartile": "Q1"
+          },
+          {
+            "minute": "2025-06-06T11:53:00",
+            "variance_quartile": "Q1"
+          },
+          {
+            "minute": "2025-06-06T11:54:00",
+            "variance_quartile": "Q1"
+          },
+          {
+            "minute": "2025-06-06T11:55:00",
+            "variance_quartile": "Q1"
+          },
+          {
+            "minute": "2025-06-06T11:56:00",
+            "variance_quartile": "Q1"
+          },
+          {
+            "minute": "2025-06-06T11:57:00",
+            "variance_quartile": "Q1"
+          },
+          {
+            "minute": "2025-06-06T11:58:00",
+            "variance_quartile": "Q3"
+          },
+          {
+            "minute": "2025-06-06T11:59:00",
+            "variance_quartile": "Q3"
+          },
+          {
+            "minute": "2025-06-06T12:00:00",
+            "variance_quartile": "Q3"
+          },
+          {
+            "minute": "2025-06-06T14:50:00",
+            "variance_quartile": "Q2"
+          },
+          {
+            "minute": "2025-06-06T14:51:00",
+            "variance_quartile": "Q2"
+          },
+          {
+            "minute": "2025-06-06T15:04:00",
+            "variance_quartile": "Q1"
+          },
+          {
+            "minute": "2025-06-06T15:05:00",
+            "variance_quartile": "Q1"
+          },
+          {
+            "minute": "2025-06-06T15:06:00",
+            "variance_quartile": "Q1"
+          },
+          {
+            "minute": "2025-06-06T15:07:00",
+            "variance_quartile": "Q1"
+          },
+          {
+            "minute": "2025-06-06T15:14:00",
+            "variance_quartile": "Q1"
+          },
+          {
+            "minute": "2025-06-06T15:15:00",
+            "variance_quartile": "Q1"
+          },
+          {
+            "minute": "2025-06-06T16:01:00",
+            "variance_quartile": "Q4"
+          },
+          {
+            "minute": "2025-06-06T16:02:00",
+            "variance_quartile": "Q4"
+          },
+          {
+            "minute": "2025-06-06T16:04:00",
+            "variance_quartile": "Q4"
+          },
+          {
+            "minute": "2025-06-06T16:05:00",
+            "variance_quartile": "Q4"
+          },
+          {
+            "minute": "2025-06-06T16:06:00",
+            "variance_quartile": "Q4"
+          },
+          {
+            "minute": "2025-06-06T16:07:00",
+            "variance_quartile": "Q2"
+          },
+          {
+            "minute": "2025-06-06T16:08:00",
+            "variance_quartile": "Q2"
+          },
+          {
+            "minute": "2025-06-06T16:09:00",
+            "variance_quartile": "Q3"
+          },
+          {
+            "minute": "2025-06-06T16:10:00",
+            "variance_quartile": "Q4"
+          },
+          {
+            "minute": "2025-06-06T16:11:00",
+            "variance_quartile": "Q4"
+          },
+          {
+            "minute": "2025-06-06T16:12:00",
+            "variance_quartile": "Q4"
+          },
+          {
+            "minute": "2025-06-06T16:13:00",
+            "variance_quartile": "Q3"
+          },
+          {
+            "minute": "2025-06-06T16:14:00",
+            "variance_quartile": "Q3"
+          },
+          {
+            "minute": "2025-06-06T16:15:00",
+            "variance_quartile": "Q2"
+          },
+          {
+            "minute": "2025-06-06T16:16:00",
+            "variance_quartile": "Q2"
+          },
+          {
+            "minute": "2025-06-06T16:17:00",
+            "variance_quartile": "Q2"
+          },
+          {
+            "minute": "2025-06-06T16:18:00",
+            "variance_quartile": "Q2"
+          },
+          {
+            "minute": "2025-06-06T16:19:00",
+            "variance_quartile": "Q3"
+          },
+          {
+            "minute": "2025-06-06T16:20:00",
+            "variance_quartile": "Q3"
+          },
+          {
+            "minute": "2025-06-06T16:21:00",
+            "variance_quartile": "Q4"
+          },
+          {
+            "minute": "2025-06-06T16:22:00",
+            "variance_quartile": "Q4"
+          },
+          {
+            "minute": "2025-06-06T16:23:00",
+            "variance_quartile": "Q4"
+          },
+          {
+            "minute": "2025-06-06T16:24:00",
+            "variance_quartile": "Q4"
+          },
+          {
+            "minute": "2025-06-06T16:28:00",
+            "variance_quartile": "Q4"
+          },
+          {
+            "minute": "2025-06-06T16:29:00",
+            "variance_quartile": "Q4"
+          },
+          {
+            "minute": "2025-06-06T16:30:00",
+            "variance_quartile": "Q3"
+          },
+          {
+            "minute": "2025-06-06T16:31:00",
+            "variance_quartile": "Q2"
+          },
+          {
+            "minute": "2025-06-06T16:32:00",
+            "variance_quartile": "Q2"
+          },
+          {
+            "minute": "2025-06-06T16:33:00",
+            "variance_quartile": "Q2"
+          },
+          {
+            "minute": "2025-06-06T16:34:00",
+            "variance_quartile": "Q2"
+          },
+          {
+            "minute": "2025-06-06T16:35:00",
+            "variance_quartile": "Q2"
+          },
+          {
+            "minute": "2025-06-06T16:36:00",
+            "variance_quartile": "Q2"
+          }
+        ]
+      },
+      {
+        "stage": "stage_4_Aggregate_and_Compare_quartiles",
+        "value": {
+          "roughest_mean_instability_score": 0.9214161842105263,
+          "smoothest_mean_instability_score": 0.0833793181818182,
+          "ratio": 11.05089612511909
+        }
+      }
+    ]
   }
 ]

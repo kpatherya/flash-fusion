@@ -19,12 +19,13 @@ import pandas as pd
 from flashfusion.eval.queries import DATASET_WISDM, SUPPORTED_DATASETS, get_queries
 
 
-QUERY_TYPE_ORDER = ["Predictive", "Direct", "Reasoning", "Out-of-Scope"]
+QUERY_TYPE_ORDER = ["Predictive", "Direct", "Reasoning", "Out-of-Scope", "Extra-Hard"]
 QUERY_TYPE_LABELS = {
     "predictive": "Predictive",
     "direct": "Direct",
     "intermediate": "Reasoning",
     "out_of_scope": "Out-of-Scope",
+    "extra_hard": "Extra-Hard",
 }
 
 BASELINE_ORDER = ["FLASH_FUSION", "REACT_ONLY"]

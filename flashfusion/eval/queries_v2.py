@@ -39,11 +39,30 @@ def _reword_v2(text: str) -> str:
     return out
 
 
+def _reword_extra_hard_v2(text: str) -> str:
+    """Paraphrase only the compositional ablation prompts without changing constraints."""
+    out = text.strip()
+    replacements: tuple[tuple[str, str], ...] = (
+        (r"\bFor each\b", "For every"),
+        (r"\bCompute\b", "Calculate"),
+        (r"\bFilter\b", "Restrict"),
+        (r"\bSplit\b", "Partition"),
+    )
+    for pattern, repl in replacements:
+        out = re.sub(pattern, repl, out, flags=re.IGNORECASE)
+    return out
+
+
 def _rewrite(queries: list[dict]) -> list[dict]:
     rewritten: list[dict] = []
     for q in queries:
         nq = copy.deepcopy(q)
-        nq["text"] = _reword_v2(str(q["text"]))
+        source = str(q["text"])
+        nq["text"] = (
+            _reword_extra_hard_v2(source)
+            if int(q["id"]) >= 17
+            else _reword_v2(source)
+        )
         rewritten.append(nq)
     return rewritten
 

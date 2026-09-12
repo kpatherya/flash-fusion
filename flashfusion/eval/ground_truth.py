@@ -4,9 +4,10 @@ eval/ground_truth.py — Ground-truth schema and loader for benchmark scoring.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 import json
 from pathlib import Path
+from typing import Any
 
 
 @dataclass(frozen=True)
@@ -17,6 +18,8 @@ class GroundTruthEntry:
     query_text: str
     reference_answer: str
     expected_rejection: bool = False
+    ground_truth_method: str = ""
+    stage_trace: list[dict[str, Any]] = field(default_factory=list)
 
 
 def load_ground_truth(path: str) -> dict[int, GroundTruthEntry]:
@@ -56,6 +59,8 @@ def load_ground_truth(path: str) -> dict[int, GroundTruthEntry]:
             query_text=str(item["query_text"]),
             reference_answer=str(item["reference_answer"]),
             expected_rejection=bool(item.get("expected_rejection", False)),
+            ground_truth_method=str(item.get("ground_truth_method", "")),
+            stage_trace=list(item.get("stage_trace", [])),
         )
 
     if not out:

@@ -31,9 +31,13 @@ QUERY_TYPE_BY_ID = {
     14: "Predictive",
     15: "Predictive",
     16: "Predictive",
+    17: "Extra-Hard",
+    18: "Extra-Hard",
+    19: "Extra-Hard",
+    20: "Extra-Hard",
 }
 
-QUERY_TYPE_ORDER = ["Direct", "Reasoning", "Predictive", "Out-of-Scope"]
+QUERY_TYPE_ORDER = ["Direct", "Reasoning", "Predictive", "Out-of-Scope", "Extra-Hard"]
 DATASET_ORDER = ["bus", "wisdm", "ecg"]
 SEMANTIC_STAGE_ORDER = ["Grounding", "Validation", "Planning", "Execution"]
 CACHE_BASELINE = "FLASH_FUSION_CACHE"
