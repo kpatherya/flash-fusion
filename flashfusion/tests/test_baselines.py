@@ -579,6 +579,106 @@ def test_typed_plan_rank_on_empty_frame_reports_error_not_crash() -> None:
     assert "no rows" in (execution.error or "")
 
 
+def test_parallel_aggregate_preserves_common_prefix_filter() -> None:
+    from flashfusion.pipeline.operators import execute_plan
+
+    df = pd.DataFrame(
+        {
+            "record_id": [101, 101, 102, 102],
+            "label": ["annotated", "plain", "annotated", "plain"],
+        }
+    )
+    plan = _plan(
+        {"op": "FILTER_COMPARE", "column": "record_id", "comparator": "eq", "value": 101},
+        {
+            "op": "PARALLEL_AGGREGATE",
+            "branches": [
+                {
+                    "filter_column": "label",
+                    "filter_values": ["annotated"],
+                    "group_by": ["record_id"],
+                    "aggregate": "count",
+                    "column": None,
+                    "result_column": "annotated_count",
+                },
+                {
+                    "filter_column": None,
+                    "filter_values": None,
+                    "group_by": ["record_id"],
+                    "aggregate": "count",
+                    "column": None,
+                    "result_column": "total_count",
+                },
+            ],
+        },
+        {
+            "op": "RANK_ROWS",
+            "column": "total_count",
+            "direction": "max",
+            "return_columns": ["record_id", "annotated_count", "total_count"],
+        },
+    )
+
+    execution = execute_plan(df, plan)
+
+    assert execution.ok is True
+    assert execution.value == {"record_id": 101, "annotated_count": 1, "total_count": 2}
+    assert ".groupby(['record_id']).size()" in execution.code
+
+
+def test_parallel_aggregate_does_not_zero_fill_missing_means() -> None:
+    from flashfusion.pipeline.operators import execute_plan
+
+    df = pd.DataFrame(
+        {
+            "subject_id": [1, 1, 2, 2, 3],
+            "activity": ["dynamic", "resting", "dynamic", "resting", "dynamic"],
+            "magnitude": [12.0, 10.0, 15.0, 10.0, 100.0],
+        }
+    )
+    plan = _plan(
+        {
+            "op": "PARALLEL_AGGREGATE",
+            "branches": [
+                {
+                    "filter_column": "activity",
+                    "filter_values": ["dynamic"],
+                    "group_by": ["subject_id"],
+                    "aggregate": "mean",
+                    "column": "magnitude",
+                    "result_column": "dynamic_mean",
+                },
+                {
+                    "filter_column": "activity",
+                    "filter_values": ["resting"],
+                    "group_by": ["subject_id"],
+                    "aggregate": "mean",
+                    "column": "magnitude",
+                    "result_column": "resting_mean",
+                },
+            ],
+        },
+        {
+            "op": "DERIVE_BINARY",
+            "left": "dynamic_mean",
+            "right": "resting_mean",
+            "operation": "subtract",
+            "result": "delta",
+        },
+        {
+            "op": "RANK_ROWS",
+            "column": "delta",
+            "direction": "max",
+            "return_columns": ["subject_id", "delta"],
+        },
+    )
+
+    execution = execute_plan(df, plan)
+
+    assert execution.ok is True
+    assert execution.value == {"subject_id": 2, "delta": 5.0}
+
+
 def test_build_react_query_includes_grounding_and_ambiguous_concepts() -> None:
     from flashfusion.baselines.flash_fusion import build_react_query
 

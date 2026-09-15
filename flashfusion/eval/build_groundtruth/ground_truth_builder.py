@@ -50,6 +50,10 @@ from flashfusion.eval.build_groundtruth.simple_pred import MODEL_ORDER, run_pred
 from flashfusion.pipeline.loader import load_dataset_by_name
 
 RANDOM_SEED = 42
+MIT_ECG_ANNOTATION_CODES = [
+    "!", '"', "+", "/", "A", "E", "F", "J", "L", "N", "Q", "R", "S",
+    "V", "[", "]", "a", "e", "f", "j", "x", "|", "~",
+]
 
 FIXED_PREDICTIVE_LABELS: dict[str, dict[str, str]] = {
     DATASET_BUS: {
@@ -297,6 +301,65 @@ def build_ground_truth_wisdm(df: pd.DataFrame) -> list[dict]:
 
     q8_diff = abs(q8_up_mean - q8_down_mean)
 
+    q17_dynamic = df.loc[dynamic_mask].groupby("subject_id")["magnitude"].mean()
+    q17_resting = df.loc[resting_mask].groupby("subject_id")["magnitude"].mean()
+    q17 = pd.concat(
+        [
+            q17_dynamic.rename("dynamic_mean_magnitude"),
+            q17_resting.rename("resting_mean_magnitude"),
+        ],
+        axis=1,
+    ).dropna()
+    q17["dynamic_minus_resting"] = (
+        q17["dynamic_mean_magnitude"] - q17["resting_mean_magnitude"]
+    )
+    q17_top = q17.loc[q17["dynamic_minus_resting"].idxmax()]
+
+    q18_jogging = df.loc[df["activity_lower"] == "jogging"].groupby("subject_id")["x"].var()
+    q18_walking = df.loc[df["activity_lower"] == "walking"].groupby("subject_id")["x"].var()
+    q18 = pd.concat(
+        [
+            q18_jogging.rename("jogging_x_variance"),
+            q18_walking.rename("walking_x_variance"),
+        ],
+        axis=1,
+    ).dropna()
+    q18["jogging_minus_walking_variance"] = (
+        q18["jogging_x_variance"] - q18["walking_x_variance"]
+    )
+    q18_top = q18.loc[q18["jogging_minus_walking_variance"] > 0].loc[
+        lambda values: values["jogging_minus_walking_variance"].idxmax()
+    ]
+
+    q19_jogging = df.loc[df["activity_lower"] == "jogging"].groupby("subject_id")["magnitude"].mean()
+    q19_walking = df.loc[df["activity_lower"] == "walking"].groupby("subject_id")["magnitude"].mean()
+    q19 = pd.concat(
+        [
+            q19_jogging.rename("jogging_mean_magnitude"),
+            q19_walking.rename("walking_mean_magnitude"),
+        ],
+        axis=1,
+    ).dropna()
+    q19_correlation = float(
+        q19["jogging_mean_magnitude"].corr(q19["walking_mean_magnitude"])
+    )
+
+    q20_locomotion = df_sorted.loc[locomotion_mask].groupby("subject_id")["dt_s"].sum()
+    q20_resting = df_sorted.loc[stationary_mask].groupby("subject_id")["dt_s"].sum()
+    q20 = pd.concat(
+        [
+            q20_locomotion.rename("locomotion_duration_s"),
+            q20_resting.rename("resting_duration_s"),
+        ],
+        axis=1,
+    ).fillna(0.0)
+    q20["locomotion_minus_resting_s"] = (
+        q20["locomotion_duration_s"] - q20["resting_duration_s"]
+    )
+    q20_top = q20.loc[q20["locomotion_minus_resting_s"] > 0].loc[
+        lambda values: values["locomotion_minus_resting_s"].idxmax()
+    ]
+
     fixed_predictions = FIXED_PREDICTIVE_LABELS[DATASET_WISDM]
 
     entries = [
@@ -423,6 +486,44 @@ def build_ground_truth_wisdm(df: pd.DataFrame) -> list[dict]:
             ),
             "expected_rejection": False,
         },
+        {
+            "query_id": 17,
+            "query_text": qmap[17],
+            "reference_answer": (
+                f"subject_id {int(q17_top.name)} has the largest dynamic-minus-resting "
+                f"mean magnitude: {float(q17_top['dynamic_minus_resting']):.12f}."
+            ),
+            "expected_rejection": False,
+        },
+        {
+            "query_id": 18,
+            "query_text": qmap[18],
+            "reference_answer": (
+                f"subject_id {int(q18_top.name)} has the largest positive "
+                f"Jogging-minus-Walking x-variance difference: "
+                f"{float(q18_top['jogging_minus_walking_variance']):.12f}."
+            ),
+            "expected_rejection": False,
+        },
+        {
+            "query_id": 19,
+            "query_text": qmap[19],
+            "reference_answer": (
+                "The Pearson correlation between per-subject Jogging and Walking "
+                f"mean magnitudes is {q19_correlation:.12f}."
+            ),
+            "expected_rejection": False,
+        },
+        {
+            "query_id": 20,
+            "query_text": qmap[20],
+            "reference_answer": (
+                f"subject_id {int(q20_top.name)} has the largest positive "
+                f"locomotion-minus-resting duration: "
+                f"{float(q20_top['locomotion_minus_resting_s']):.12f} seconds."
+            ),
+            "expected_rejection": False,
+        },
     ]
     return _validate_entries(entries, qmap, DATASET_WISDM)
 
@@ -497,7 +598,7 @@ def _ecg_tumbling_raw(
 
 
 def build_ground_truth_mit_ecg(df: pd.DataFrame) -> list[dict]:
-    """Build deterministic MIT ECG ground-truth entries for 16 queries."""
+    """Build deterministic MIT ECG ground-truth entries for all benchmark queries."""
     df = df.copy()
     df["annotation"] = df["annotation"].astype(str).fillna("")
     df["is_annotated"] = df["annotation"].str.strip() != ""
@@ -536,6 +637,41 @@ def build_ground_truth_mit_ecg(df: pd.DataFrame) -> list[dict]:
 
     mlii_106 = df.loc[df["record_id"] == 106, "MLII"]
     q8_rms_106 = float(np.sqrt((mlii_106**2).mean()))
+
+    q17_work = df.loc[df["annotation"].str.strip().isin(MIT_ECG_ANNOTATION_CODES)].copy()
+    q17_work["bin_10s"] = (q17_work["time_s"] // 10) * 10
+    q17 = (
+        q17_work.groupby(["record_id", "bin_10s"])["MLII"]
+        .apply(lambda values: float(np.sqrt(np.mean(values**2))))
+        .rename("rms_MLII")
+    )
+    q17_top_key = q17.idxmax()
+    q17_top_rms = float(q17.loc[q17_top_key])
+
+    q18 = df.groupby("record_id")["MLII"].agg(["max", "min"])
+    q18["mlii_range"] = (q18["max"] - q18["min"]).abs()
+    q18_top = q18.loc[q18["mlii_range"].idxmax()]
+
+    q19_work = df.copy()
+    q19_work["window_index"] = (q19_work["time_s"] // 10) * 10
+    q19_rows = q19_work.groupby(["record_id", "window_index"]).size().rename("rows_per_window")
+    q19_annotated = (
+        q19_work.loc[q19_work["annotation"].str.strip().isin(MIT_ECG_ANNOTATION_CODES)]
+        .groupby(["record_id", "window_index"])
+        .size()
+        .rename("annotated_count_per_window")
+    )
+    q19 = pd.concat([q19_rows, q19_annotated], axis=1).fillna(0.0).reset_index()
+    q19 = q19.loc[q19["record_id"] == 101].copy()
+    q19["annotated_rate"] = q19["annotated_count_per_window"] / q19["rows_per_window"]
+    q19_correlation = float(q19["window_index"].corr(q19["annotated_rate"]))
+
+    q20 = df.groupby("record_id").agg(
+        mlii_variance=("MLII", "var"),
+        v1_variance=("V1", "var"),
+    )
+    q20["combined_variance"] = q20["mlii_variance"] + q20["v1_variance"]
+    q20_top = q20.loc[q20["combined_variance"].idxmax()]
 
     fixed_predictions = FIXED_PREDICTIVE_LABELS[DATASET_MIT_ECG]
 
@@ -653,12 +789,48 @@ def build_ground_truth_mit_ecg(df: pd.DataFrame) -> list[dict]:
             ),
             "expected_rejection": False,
         },
+        {
+            "query_id": 17,
+            "query_text": qmap[17],
+            "reference_answer": (
+                f"The greatest MLII RMS is {q17_top_rms:.12f} for record_id "
+                f"{int(q17_top_key[0])} in the {float(q17_top_key[1]):.1f}-second bin."
+            ),
+            "expected_rejection": False,
+        },
+        {
+            "query_id": 18,
+            "query_text": qmap[18],
+            "reference_answer": (
+                f"record_id {int(q18_top.name)} has the largest MLII span: "
+                f"{float(q18_top['mlii_range']):.12f}."
+            ),
+            "expected_rejection": False,
+        },
+        {
+            "query_id": 19,
+            "query_text": qmap[19],
+            "reference_answer": (
+                "The Pearson correlation between 10-second bin index and annotated-row "
+                f"rate for record_id 101 is {q19_correlation:.12f}."
+            ),
+            "expected_rejection": False,
+        },
+        {
+            "query_id": 20,
+            "query_text": qmap[20],
+            "reference_answer": (
+                f"record_id {int(q20_top.name)} has the largest total lead variability: "
+                f"{float(q20_top['combined_variance']):.12f}."
+            ),
+            "expected_rejection": False,
+        },
     ]
     return _validate_entries(entries, qmap, DATASET_MIT_ECG)
 
 
 def build_ground_truth_bus(df: pd.DataFrame) -> list[dict]:
-    """Build deterministic bus ground-truth entries for 16 queries."""
+    """Build deterministic bus ground-truth entries for all benchmark queries."""
     df = df.copy()
     df["timestamp"] = pd.to_datetime(df["timestamp"], errors="coerce")
     df = df.dropna().reset_index(drop=True)
@@ -699,6 +871,32 @@ def build_ground_truth_bus(df: pd.DataFrame) -> list[dict]:
     )
     q8_bin = instability_by_minute.idxmax()
     q8_mean = float(instability_by_minute.max())
+
+    q17 = (
+        df.loc[df["behavior"] == "aggressive"]
+        .groupby(pd.Grouper(key="timestamp", freq="5min"))["instability_score"]
+        .mean()
+    )
+    q17_top_timestamp = q17.idxmax()
+    q17_top_score = float(q17.loc[q17_top_timestamp])
+
+    q18_north = float(df.loc[df["latitude"] > lat_median, "peak_magnitude"].mean())
+    q18_south = float(df.loc[df["latitude"] <= lat_median, "peak_magnitude"].mean())
+    q18_difference = abs(q18_north - q18_south)
+
+    q19_aggressive = float(
+        df.loc[df["behavior"] == "aggressive", "vertical_shock"].mean()
+    )
+    q19_calm = float(df.loc[df["behavior"] == "calm", "vertical_shock"].mean())
+    q19_difference = q19_aggressive - q19_calm
+
+    q20 = (
+        df.loc[df["behavior"] == "aggressive"]
+        .groupby(pd.Grouper(key="timestamp", freq="5min"))["vertical_shock"]
+        .mean()
+    )
+    q20_top_timestamp = q20.idxmax()
+    q20_top_shock = float(q20.loc[q20_top_timestamp])
 
     fixed_predictions = FIXED_PREDICTIVE_LABELS[DATASET_BUS]
 
@@ -825,6 +1023,46 @@ def build_ground_truth_bus(df: pd.DataFrame) -> list[dict]:
             "reference_answer": (
                 "Hist gradient boosting predicts behavior "
                 f"'{fixed_predictions['hgb']}' for the first holdout row."
+            ),
+            "expected_rejection": False,
+        },
+        {
+            "query_id": 17,
+            "query_text": qmap[17],
+            "reference_answer": (
+                f"The aggressive-behavior 5-minute window beginning "
+                f"{q17_top_timestamp.strftime('%Y-%m-%d %H:%M:%S')} has the highest "
+                f"mean instability_score: {q17_top_score:.12f}."
+            ),
+            "expected_rejection": False,
+        },
+        {
+            "query_id": 18,
+            "query_text": qmap[18],
+            "reference_answer": (
+                f"Northern mean peak magnitude is {q18_north:.12f}; southern mean "
+                f"peak magnitude is {q18_south:.12f}; their absolute difference is "
+                f"{q18_difference:.12f}."
+            ),
+            "expected_rejection": False,
+        },
+        {
+            "query_id": 19,
+            "query_text": qmap[19],
+            "reference_answer": (
+                f"Aggressive mean vertical shock range is {q19_aggressive:.12f}; calm "
+                f"mean is {q19_calm:.12f}; aggressive-minus-calm is "
+                f"{q19_difference:.12f}."
+            ),
+            "expected_rejection": False,
+        },
+        {
+            "query_id": 20,
+            "query_text": qmap[20],
+            "reference_answer": (
+                f"The aggressive-behavior 5-minute window beginning "
+                f"{q20_top_timestamp.strftime('%Y-%m-%d %H:%M:%S')} has the highest "
+                f"mean vertical shock range: {q20_top_shock:.12f}."
             ),
             "expected_rejection": False,
         },

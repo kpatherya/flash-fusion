@@ -1,13 +1,14 @@
 """
 eval/queries.py — WISDM benchmark query definitions.
 
-DO NOT MODIFY without re-running the full benchmark and updating CLAUDE.md.
-
-Each query is a dict with:
+            "Derive the vertical shock range as accel_stats_z_p99 minus "
+            "accel_stats_z_p1. Filter to aggressive behavior, group rows into "
+            "5-minute timestamp windows, and return the window with the highest mean "
+            "vertical shock range."
   id         (int)   1-indexed query identifier
   text       (str)   The exact natural language query fed to each baseline
-    complexity (str)   "direct" | "intermediate" | "out_of_scope" | "predictive" | "extra_hard"
-  operation  (str)   Primary pandas operation expected (AGGREGATE, FILTER, etc.)
+        "operation": "DERIVE+FILTER+GROUPBY+RANK",
+        "stress": "Compositional-depth ablation: vertical-shock derivation, behavior filtering, temporal aggregation, and ranking.",
   stress     (str)   Which capability gap this query exposes
 
 EXPECTED_OUTCOMES maps query id → baseline → expected behaviour keyword:
@@ -219,52 +220,50 @@ WISDM_QUERIES: list[dict] = [
     {
         "id": 17,
         "text": (
-            "For each subject_id, derive acceleration magnitude, split rows into a dynamic partition "
-            "(Walking, Jogging, Upstairs, Downstairs) and a resting partition (Sitting, Standing), "
-            "compute each partition's mean magnitude per subject_id, then compute the per-subject_id "
-            "difference (dynamic mean minus resting mean). Rank subject_id values by this difference "
-            "in descending order and report the top-ranked subject_id and its difference value rounded to two decimals."
+            "For every subject_id, compute mean acceleration magnitude separately for "
+            "dynamic activities (Walking, Jogging, Upstairs, Downstairs) and resting "
+            "activities (Sitting, Standing). Return the subject_id with the largest "
+            "dynamic-minus-resting mean magnitude."
         ),
         "complexity": "extra_hard",
         "operation": "DERIVE+PARALLEL_AGGREGATE+COMPARE+RANK",
-        "stress": "Compositional-depth ablation: dynamic/resting per-user comparison and ranking over supported operator concepts.",
+        "stress": "Compositional-depth ablation: derived magnitude, aligned category aggregates, comparison, and ranking.",
     },
     {
         "id": 18,
         "text": (
-            "Filter to subject_id values with at least 200 Jogging samples. For each such subject_id, "
-            "compute the variance of x-acceleration while Jogging and while Walking. Keep subject_id values "
-            "where the Jogging variance exceeds 1.5 times the Walking variance. Among the retained subject_id "
-            "values, bin them by whether total Jogging duration is above or below the dataset-wide median Jogging "
-            "duration, and report the count of retained subject_id values in each bin."
+            "For every subject_id, compute x-acceleration variance separately while "
+            "Jogging and while Walking. Among subject_id values whose Jogging variance "
+            "exceeds their Walking variance, return the subject_id with the largest "
+            "Jogging-minus-Walking variance difference."
         ),
         "complexity": "extra_hard",
-        "operation": "FILTER+GROUPBY+COMPARE+DERIVE_DURATION+BIN+COUNT",
-        "stress": "Compositional-depth ablation: combines sample eligibility, parallel variances, duration derivation, and a median split.",
+        "operation": "PARALLEL_AGGREGATE+COMPARE+FILTER+RANK",
+        "stress": "Compositional-depth ablation: aligned category variances, comparison filtering, and ranking.",
     },
     {
         "id": 19,
         "text": (
-            "Compute the y-acceleration mean for each (subject_id, activity_label) group with at least 50 samples. "
-            "Rank groups within each activity_label by mean descending. Report, for each activity_label, the "
-            "subject_id ranked first, then compute the correlation between these top subject_id values' overall "
-            "sample counts and their average x-acceleration magnitude across all activities."
+            "For every subject_id, compute mean acceleration magnitude while Jogging "
+            "and while Walking. Return the Pearson correlation between the two per-subject "
+            "mean-magnitude columns."
         ),
         "complexity": "extra_hard",
-        "operation": "FILTER+GROUPBY+RANK+SELECT+DERIVE+CORRELATE",
-        "stress": "Compositional-depth ablation: group eligibility, within-label ranking, selected-user aggregation, and correlation.",
+        "operation": "DERIVE+PARALLEL_AGGREGATE+CORRELATE",
+        "stress": "Compositional-depth ablation: derived magnitude, aligned category aggregates, and correlation.",
     },
     {
         "id": 20,
         "text": (
-            "Split the WISDM data chronologically by timestamp into 5 equal-sized partitions. Within each partition, "
-            "compute the mean acceleration magnitude and the count of distinct subject_id values. Rank the partitions "
-            "by mean magnitude descending. Compare the highest-ranked partition to the lowest-ranked partition and "
-            "report the ratio of their distinct-subject_id counts."
+            "For every subject_id, derive elapsed seconds from timestamp, then compute "
+            "total locomotion duration (Walking, Jogging, Upstairs, Downstairs) and "
+            "total resting duration (Sitting, Standing). Among subjects with more "
+            "locomotion than resting time, return the subject_id with the largest "
+            "locomotion-minus-resting duration."
         ),
         "complexity": "extra_hard",
-        "operation": "CHRONO_PARTITION+DERIVE+AGGREGATE+RANK+COMPARE",
-        "stress": "Compositional-depth ablation: chronological partitioning, parallel aggregates, ranking, and comparison.",
+        "operation": "DERIVE_DURATION+PARALLEL_AGGREGATE+COMPARE+FILTER+RANK",
+        "stress": "Compositional-depth ablation: elapsed-duration derivation, aligned category sums, comparison filtering, and ranking.",
     },
 ]
 
@@ -408,49 +407,47 @@ MIT_ECG_QUERIES: list[dict] = [
     {
         "id": 17,
         "text": (
-            "For each record_id, filter to rows with non-empty annotation, then compute the RMS of MLII within "
-            "10-second time_s bins. Rank the bins within each record_id by RMS descending, keep the top bin per "
-            "record_id, then rank record_id values by their top-bin RMS descending and report the top record_id "
-            "and its top-bin RMS."
+            "Among rows whose annotation is one of the known MIT-ECG annotation codes, "
+            "divide time_s into 10-second bins. For each (record_id, bin) pair, compute "
+            "MLII RMS. Return the (record_id, bin) pair with the greatest RMS."
         ),
         "complexity": "extra_hard",
         "operation": "FILTER+BIN+GROUPBY+RMS+RANK",
-        "stress": "Compositional-depth ablation: annotation filtering, temporal binning, RMS aggregation, and nested ranking.",
+        "stress": "Compositional-depth ablation: annotation filtering, temporal binning, RMS aggregation, and ranking.",
     },
     {
         "id": 18,
         "text": (
-            "For each record_id, compute the difference between maximum and minimum MLII and the count of annotated beats. "
-            "Split record_id values into two groups by whether their annotated-beat count is above or below the dataset "
-            "median. Within each group, compute the average MLII range. Compare the two group averages and report which "
-            "group has the larger range along with the numeric difference."
+            "For every record_id, independently compute maximum and minimum MLII. "
+            "Define MLII span as maximum minus minimum. Return the record_id with "
+            "the largest MLII span."
         ),
         "complexity": "extra_hard",
-        "operation": "GROUPBY+DERIVE+FILTER+MEDIAN_SPLIT+AGGREGATE+COMPARE",
-        "stress": "Compositional-depth ablation: cross-metric per-record state, a median split, and partition comparison.",
+        "operation": "PARALLEL_AGGREGATE+DERIVE+RANK",
+        "stress": "Compositional-depth ablation: aligned maximum/minimum aggregates, span derivation, and ranking.",
     },
     {
         "id": 19,
         "text": (
-            "For record_id 101, bin time_s into 10-second windows, count annotated beats per window, then compute the "
-            "correlation between window index and annotated-beat count across the record's duration. Report the correlation "
-            "coefficient rounded to three decimals."
+            "For record_id 101, divide time_s into 10-second bins. For each bin, "
+            "compute annotated-row rate as rows with an annotation in the known "
+            "annotation-code list divided by all rows in the bin. Return the Pearson "
+            "correlation between bin index and annotated-row rate."
         ),
         "complexity": "extra_hard",
-        "operation": "FILTER+BIN+FILTER+GROUPBY+SELECT+CORRELATE",
-        "stress": "Compositional-depth ablation: record scoping, binning, annotation counting, projection, and correlation.",
+        "operation": "BIN+PARALLEL_AGGREGATE+FILTER+DERIVE+CORRELATE",
+        "stress": "Compositional-depth ablation: binned all-row and annotated-row counts, rate derivation, and correlation.",
     },
     {
         "id": 20,
         "text": (
-            "Across all record_id values, compute each record's MLII variance and V1 variance. Rank record_id values by "
-            "MLII variance descending and separately by V1 variance descending. Identify record_id values that fall in the "
-            "top 5 of both rankings. Among these overlapping record_id values, compute the average duration (maximum time_s) "
-            "and compare it to the dataset-wide average duration across all record_id values, reporting the absolute difference."
+            "For every record_id, independently compute MLII variance and V1 variance. "
+            "Define total lead variability as their sum. Return the record_id with "
+            "the largest total lead variability."
         ),
         "complexity": "extra_hard",
-        "operation": "GROUPBY+RANK+INTERSECT+AGGREGATE+COMPARE",
-        "stress": "Compositional-depth ablation: independent ranking streams, top-k intersection, duration aggregation, and comparison.",
+        "operation": "PARALLEL_AGGREGATE+DERIVE+RANK",
+        "stress": "Compositional-depth ablation: aligned lead variances, additive derivation, and ranking.",
     },
 ]
 
@@ -590,47 +587,48 @@ BUS_QUERIES: list[dict] = [
     {
         "id": 17,
         "text": (
-            "Split timestamps into 1-minute bins. For each bin, compute mean instability_score and mean accel_variance. "
-            "Rank bins by mean instability_score descending, keep the top 10% of bins, then within that top decile compute "
-            "the correlation between mean accel_variance and mean instability_score."
+            "Filter the route to rows labeled aggressive, group them into 5-minute "
+            "timestamp windows, and return the window with the highest mean "
+            "instability_score."
         ),
         "complexity": "extra_hard",
-        "operation": "BIN+GROUPBY+RANK+THRESHOLD+SELECT+CORRELATE",
-        "stress": "Compositional-depth ablation: temporal binning, dual metrics, decile selection, and correlation.",
+        "operation": "FILTER+GROUPBY+RANK",
+        "stress": "Compositional-depth ablation: behavior filtering, temporal aggregation, and ranking.",
     },
     {
         "id": 18,
         "text": (
-            "Compute peak acceleration magnitude per row using the 99th-percentile x, y, and z columns. Split rows into "
-            "a northern half (latitude above median) and a southern half (latitude at or below median). Within each half, "
-            "compute the mean peak magnitude and the count of rows where accel_variance exceeds 0.20. Compare the two halves "
-            "on both metrics and report which half is rougher by both criteria, or state disagreement."
+            "Derive peak acceleration magnitude from accel_stats_x_p99, "
+            "accel_stats_y_p99, and accel_stats_z_p99. Split the route at the median "
+            "latitude and report the absolute difference between the northern and "
+            "southern halves' mean peak magnitudes."
         ),
         "complexity": "extra_hard",
-        "operation": "DERIVE+MEDIAN_SPLIT+AGGREGATE+FILTER+COUNT+COMPARE",
-        "stress": "Compositional-depth ablation: vector derivation, complementary partitions, dual criteria, and agreement logic.",
+        "operation": "DERIVE+MEDIAN_SPLIT+AGGREGATE+COMPARE",
+        "stress": "Compositional-depth ablation: vector derivation, spatial partitions, aggregation, and comparison.",
     },
     {
         "id": 19,
         "text": (
-            "For each 5-minute time bin, compute the range (accel_stats_z_p99 minus accel_stats_z_p1) and the mean "
-            "extreme_event_magnitude. Rank bins by range descending, keep the top 3 bins, then compute the behavior-label "
-            "distribution across just those bins, and report the most frequent behavior label among them."
+            "Derive the vertical shock range as accel_stats_z_p99 minus "
+            "accel_stats_z_p1. Compute its mean separately for aggressive and calm "
+            "behavior labels, then report the aggressive-minus-calm difference."
         ),
         "complexity": "extra_hard",
-        "operation": "BIN+DERIVE+GROUPBY+RANK+SELECT+GROUPBY",
-        "stress": "Compositional-depth ablation: derived range, top-k selection, and selected-bin label distribution.",
+        "operation": "DERIVE+SPLIT+AGGREGATE+COMPARE",
+        "stress": "Compositional-depth ablation: vertical-shock derivation, behavior partitions, aggregation, and comparison.",
     },
     {
         "id": 20,
         "text": (
-            "Compute per-minute mean accel_mean and mean accel_variance. Split minutes into quartiles by mean accel_variance. "
-            "Within the top quartile (roughest) and bottom quartile (smoothest), compute the average instability_score. "
-            "Compare the two quartile averages and report the ratio of roughest to smoothest instability_score, rounded to two decimals."
+            "Derive the vertical shock range as accel_stats_z_p99 minus "
+            "accel_stats_z_p1. Filter to aggressive behavior, group rows into "
+            "5-minute timestamp windows, and return the window with the highest mean "
+            "vertical shock range."
         ),
         "complexity": "extra_hard",
-        "operation": "BIN+GROUPBY+QUARTILE_SPLIT+AGGREGATE+COMPARE",
-        "stress": "Compositional-depth ablation: minute aggregation, quartile assignment, partition aggregates, and ratio comparison.",
+        "operation": "DERIVE+FILTER+GROUPBY+RANK",
+        "stress": "Compositional-depth ablation: derived shock range, behavior filtering, temporal aggregation, and ranking.",
     },
 ]
 

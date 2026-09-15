@@ -231,23 +231,26 @@ rather than scoring the entire query pass/fail with no diagnostic value.
 
 ### Implemented Ground-Truth Generator
 
-`flashfusion/eval/build_groundtruth/generate_extra_hard_ground_truth.py`
-computes IDs 17--20 directly with pandas and merges them into the existing
-dataset ground-truth JSON without rewriting IDs 1--16. It records a
-`ground_truth_method` plus a serializable `stage_trace` for each generated row.
-Run it once per dataset before tracing or benchmarking:
+`flashfusion/eval/build_groundtruth/ground_truth_builder.py` computes the
+canonical references for all IDs 1--20. The extra-hard staging harnesses under
+`flashfusion/eval/build_groundtruth/trace/` validate the typed plans against
+independent pandas calculations before query promotion. Regenerate the complete
+canonical ground-truth JSON once per dataset before benchmarking:
 
 ```sh
-python -m flashfusion.eval.build_groundtruth.generate_extra_hard_ground_truth \
+python -m flashfusion.eval.build_groundtruth.ground_truth_builder \
    --dataset wisdm \
+   --data data/AutoIOT_dataset/IMU/WISDM_ar_v1.1_raw.txt \
    --output flashfusion/eval/ground_truth/ground_truth_wisdm.json
 
-python -m flashfusion.eval.build_groundtruth.generate_extra_hard_ground_truth \
+python -m flashfusion.eval.build_groundtruth.ground_truth_builder \
    --dataset mit_ecg \
+   --data data/AutoIOT_dataset/ECG.0/MIT_arrythmia_v1.txt \
    --output flashfusion/eval/ground_truth/ground_truth_mit_ecg.json
 
-python -m flashfusion.eval.build_groundtruth.generate_extra_hard_ground_truth \
+python -m flashfusion.eval.build_groundtruth.ground_truth_builder \
    --dataset bus \
+   --data data/bus/bus_data_enriched_behavior.csv \
    --output flashfusion/eval/ground_truth/ground_truth_bus.json
 ```
 

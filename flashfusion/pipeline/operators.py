@@ -81,9 +81,9 @@ __all__ = [
 PLAN_VERSION = "1"
 
 #: Bumped whenever OPERATOR_VOCABULARY_SPEC or the planner contract text changes.
-#: "3" — the planner prefix is now assembled from a routed (possibly narrowed)
-#: vocabulary spec rather than always from the full one.
-OPERATOR_VOCABULARY_VERSION = "3"
+#: "4" — PARALLEL_AGGREGATE branches now preserve common prefix filters and
+#: only zero-fill missing additive aggregates (count and sum).
+OPERATOR_VOCABULARY_VERSION = "4"
 
 # ---------------------------------------------------------------------------
 # Scalar vocabularies
@@ -400,9 +400,9 @@ class ParallelAggregate(_Operator):
 
     Design rationale:
     - Solves the "compare resting vs. dynamic duration per user" pattern
-    - Each branch filters the ORIGINAL dataframe independently
+    - Each branch filters the working frame at operator entry independently
     - All branches must group by the SAME keys (enforced in validation)
-    - Results are outer-merged on group keys, filling missing with 0
+    - Results are outer-merged on group keys; only missing counts/sums become 0
     - Working frame becomes the merged result with columns: [group_keys, result1, result2, ...]
 
     Example ("which entity spent more time in category group A than group B",
@@ -1639,25 +1639,25 @@ def _execute_step(step: TypedOperator, state: _State) -> tuple[Any, str]:
             group_keys = step.shared_group_keys
             state.use(*group_keys)
 
-            # Execute each branch independently on the ORIGINAL dataframe
+            # Fork every branch from the same frame at operator entry. This keeps
+            # branch filters independent while preserving shared prefix filters.
+            branch_base = state.working.copy()
             branch_results: list[pd.DataFrame] = []
             code_lines = ["# PARALLEL_AGGREGATE branches:"]
 
             for i, branch in enumerate(step.branches):
-                # Start with original frame
-                branch_df = state.original.copy()
+                branch_df = branch_base.copy()
+                df_expr = "df"
 
                 # Apply filter if specified
                 if branch.filter_column is not None and branch.filter_values is not None:
                     state.use(branch.filter_column)
                     values = [
-                        _coerce_value(state.original[branch.filter_column], v)
+                        _coerce_value(branch_base[branch.filter_column], v)
                         for v in branch.filter_values
                     ]
                     branch_df = branch_df[branch_df[branch.filter_column].isin(values)]
-                    code_lines.append(
-                        f"# Branch {i}: filter {branch.filter_column!r} in {values!r}"
-                    )
+                    df_expr = f"df[df[{branch.filter_column!r}].isin({values!r})]"
 
                 # Group and aggregate
                 if branch.column is not None:
@@ -1683,19 +1683,25 @@ def _execute_step(step: TypedOperator, state: _State) -> tuple[Any, str]:
                 result_df = aggregated.reset_index(name=branch.result_column)
                 branch_results.append(result_df)
 
-                agg_method = "size()" if branch.column is None else f"[{branch.column!r}].{branch.aggregate}()"
+                agg_method = ".size()" if branch.column is None else f"[{branch.column!r}].{branch.aggregate}()"
                 code_lines.append(
-                    f"branch_{i} = df.groupby({group_keys!r}){agg_method}"
+                    f"branch_{i} = {df_expr}.groupby({group_keys!r}){agg_method}"
                 )
 
-            # Merge all branch results on group keys (outer join, fill NaN with 0)
+            # Preserve undefined statistics (mean, variance, extrema, etc.) as
+            # missing. Only additive empty-group results have a natural zero.
             merged = branch_results[0]
             for i, branch_df in enumerate(branch_results[1:], start=1):
                 merged = merged.merge(branch_df, on=group_keys, how="outer")
 
-            # Fill NaN with 0 for all result columns
-            result_columns = [b.result_column for b in step.branches]
-            merged[result_columns] = merged[result_columns].fillna(0)
+            result_columns = [branch.result_column for branch in step.branches]
+            zero_fill_columns = [
+                branch.result_column
+                for branch in step.branches
+                if branch.aggregate in {"count", "sum"}
+            ]
+            if zero_fill_columns:
+                merged[zero_fill_columns] = merged[zero_fill_columns].fillna(0)
 
             # Update working frame
             state.working = merged
@@ -1707,8 +1713,13 @@ def _execute_step(step: TypedOperator, state: _State) -> tuple[Any, str]:
             state.observations.append(observation)
 
             code_lines.append(
-                f"merged = branch_0.merge(branch_1, on={group_keys!r}, how='outer').fillna(0)"
+                f"merged = branch_0.merge(branch_1, on={group_keys!r}, how='outer')"
             )
+            if zero_fill_columns:
+                code_lines.append(
+                    f"merged[{zero_fill_columns!r}] = "
+                    f"merged[{zero_fill_columns!r}].fillna(0)"
+                )
 
             return (observation, "\n".join(code_lines))
 
@@ -2183,7 +2194,7 @@ EXECUTION MODEL:
 - GROUP_AGGREGATE produces an internal grouped result for RANK_GROUPS or AGGREGATE_GROUPS.
   It does NOT create DataFrame columns and does NOT accept result_column.
 - PARALLEL_AGGREGATE is the ONLY operator that creates multiple independent branches from
-  the ORIGINAL dataframe and produces a merged working frame with new columns.
+    the working frame at operator entry and produces a merged working frame with new columns.
 - After GROUP_AGGREGATE, only RANK_GROUPS or AGGREGATE_GROUPS can consume the result.
 - After PARALLEL_AGGREGATE, the working frame contains group keys + result_columns.
 - COMPARE_VALUES reduces exactly two preceding AGGREGATE_COLUMN/AGGREGATE_GROUPS scalars into one
@@ -2320,8 +2331,12 @@ PARALLEL_AGGREGATE  {"op":"PARALLEL_AGGREGATE","branches":[{"filter_column":str|
                     (subject_id, user_id, etc.) that appears in every branch's group_by field.
                     DO NOT USE when comparing two halves of the entire dataset with no per-entity grouping — use
                     SPLIT_BY_THRESHOLD + AGGREGATE_PARTITIONS + COMPARE_PARTITIONS for that pattern instead.
-                    EXECUTION: Every branch starts from ORIGINAL dataframe, filters its own rows, groups by the
-                    SAME keys, aggregates, then all branch outputs are outer-merged into the working frame.
+                    EXECUTION: Every branch starts from the SAME working frame at operator entry, filters its
+                    own rows, groups by the SAME keys, aggregates, then all branch outputs are outer-merged.
+                    Therefore a common FILTER_* before PARALLEL_AGGREGATE constrains every branch. Missing
+                    count/sum results are filled with 0; missing mean/median/std/var/min/max/rms results remain
+                    null because an unobserved measurement is not a measured zero. Arithmetic and correlation
+                    then follow pandas missing-value semantics.
                     OUTPUT: A working frame with columns [group_by keys, result_column_1, result_column_2, ...].
                     NEXT STEPS depend on what the question asks for:
                     - "which entity/subject/user is highest/lowest" → RANK_ROWS(column=a result_column).
