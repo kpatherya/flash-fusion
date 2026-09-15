@@ -2,7 +2,7 @@
   "version": 1,
   "dataset": "wisdm",
   "query_version": "v1",
-  "count": 12,
+  "count": 29,
   "entries": {
     "wisdm:15:v1": {
       "template_id": "wisdm:15:v1",
@@ -115,14 +115,13 @@
       "query_text": "Calculate the absolute difference between the mean z-axis acceleration of activity labels Upstairs and Downstairs.",
       "query_version": "v1",
       "operator_skeleton": [
-        "FILTER_NOT_EMPTY",
         "SPLIT_BY_VALUES",
         "SPLIT_BY_VALUES",
         "AGGREGATE_PARTITIONS",
         "COMPARE_PARTITIONS"
       ],
       "operator_contract_hash": "78a4cd22b7dbe6673097919cfed0b476be06682bdfc09df50fed9b6a234f751b",
-      "schema_fingerprint": null,
+      "schema_fingerprint": "b927f02262d7702e",
       "semantic_signature": {
         "admissibility": "in_scope",
         "confidence": 0.85,
@@ -151,7 +150,6 @@
         "operator_skeleton_hint": null,
         "output_shape": "scalar",
         "operator_skeleton": [
-          "FILTER_NOT_EMPTY",
           "SPLIT_BY_VALUES",
           "SPLIT_BY_VALUES",
           "AGGREGATE_PARTITIONS",
@@ -427,7 +425,7 @@
         "RANK_GROUPS"
       ],
       "operator_contract_hash": "78a4cd22b7dbe6673097919cfed0b476be06682bdfc09df50fed9b6a234f751b",
-      "schema_fingerprint": null,
+      "schema_fingerprint": "b927f02262d7702e",
       "semantic_signature": {
         "admissibility": "in_scope",
         "confidence": 0.85,
@@ -472,7 +470,7 @@
         "AGGREGATE_COLUMN"
       ],
       "operator_contract_hash": "78a4cd22b7dbe6673097919cfed0b476be06682bdfc09df50fed9b6a234f751b",
-      "schema_fingerprint": null,
+      "schema_fingerprint": "b927f02262d7702e",
       "semantic_signature": {
         "admissibility": "in_scope",
         "confidence": 0.85,
@@ -522,7 +520,7 @@
         "AGGREGATE_COLUMN"
       ],
       "operator_contract_hash": "78a4cd22b7dbe6673097919cfed0b476be06682bdfc09df50fed9b6a234f751b",
-      "schema_fingerprint": null,
+      "schema_fingerprint": "b927f02262d7702e",
       "semantic_signature": {
         "admissibility": "in_scope",
         "confidence": 0.85,
@@ -610,6 +608,871 @@
           "SPLIT_BY_VALUES",
           "AGGREGATE_PARTITIONS",
           "COMPARE_PARTITIONS"
+        ]
+      },
+      "source": "offline_semantic_registry_build"
+    },
+    "wisdm:52:v1": {
+      "template_id": "wisdm:52:v1",
+      "dataset": "wisdm",
+      "status": "reusable",
+      "query_id": "",
+      "query_text": "Compare the overall acceleration magnitude between dynamic (walking,jogging,upstairs,downstairs) and resting (sitting,standing) states.",
+      "query_version": "v1",
+      "operator_skeleton": [
+        "FILTER_NOT_EMPTY",
+        "DERIVE_VECTOR_MAGNITUDE",
+        "SPLIT_BY_VALUES",
+        "SPLIT_BY_VALUES",
+        "AGGREGATE_PARTITIONS",
+        "COMPARE_PARTITIONS"
+      ],
+      "operator_contract_hash": null,
+      "schema_fingerprint": "7ad69ccf7f729a4d",
+      "semantic_signature": {
+        "admissibility": "unknown",
+        "confidence": 0.4,
+        "aggregate": null,
+        "fields": [],
+        "predicate_ops": {},
+        "filter_values": {},
+        "intent_flags": {
+          "rank": false,
+          "group_by": false,
+          "difference": false,
+          "derived_magnitude": true,
+          "time_bin": false,
+          "correlation": false,
+          "last_event": false,
+          "predictive": false
+        },
+        "predictive": {
+          "model": null,
+          "target_column": null,
+          "train_fraction": null,
+          "holdout_row": null
+        },
+        "operator_skeleton_hint": null,
+        "output_shape": "unknown",
+        "operator_skeleton": [
+          "FILTER_NOT_EMPTY",
+          "DERIVE_VECTOR_MAGNITUDE",
+          "SPLIT_BY_VALUES",
+          "SPLIT_BY_VALUES",
+          "AGGREGATE_PARTITIONS",
+          "COMPARE_PARTITIONS"
+        ]
+      },
+      "source": "offline_semantic_registry_build"
+    },
+    "wisdm:53:v1": {
+      "template_id": "wisdm:53:v1",
+      "dataset": "wisdm",
+      "status": "reusable",
+      "query_id": "",
+      "query_text": "Order all WISDM rows by timestamp in ascending order, using subject_id as the tie-breaker. Use the first 80% of rows for training and the final 20% as the chronological holdout. Train a random forest model using the features x, y and z. Estimate the activity label for the first row in the holdout set.",
+      "query_version": "v1",
+      "operator_skeleton": [
+        "PREDICTIVE_PIPELINE"
+      ],
+      "operator_contract_hash": null,
+      "schema_fingerprint": "7ad69ccf7f729a4d",
+      "semantic_signature": {
+        "admissibility": "in_scope",
+        "confidence": 0.85,
+        "aggregate": null,
+        "fields": [
+          "subject_id",
+          "timestamp",
+          "x",
+          "y",
+          "z"
+        ],
+        "predicate_ops": {},
+        "filter_values": {},
+        "intent_flags": {
+          "rank": false,
+          "group_by": true,
+          "difference": false,
+          "derived_magnitude": false,
+          "time_bin": false,
+          "correlation": false,
+          "last_event": false,
+          "predictive": true
+        },
+        "predictive": {
+          "model": "random_forest",
+          "target_column": "activity_label",
+          "train_fraction": 0.8,
+          "holdout_row": "first"
+        },
+        "operator_skeleton_hint": [
+          "PREDICTIVE_PIPELINE"
+        ],
+        "output_shape": "predictive",
+        "operator_skeleton": [
+          "PREDICTIVE_PIPELINE"
+        ]
+      },
+      "source": "offline_semantic_registry_build"
+    },
+    "wisdm:54:v1": {
+      "template_id": "wisdm:54:v1",
+      "dataset": "wisdm",
+      "status": "reusable",
+      "query_id": "",
+      "query_text": "Identify the user whose total recorded duration of resting states (sitting,standing) exceeds their duration of dynamic movements (walking,jogging,upstairs,downstairs) by the largest margin.",
+      "query_version": "v1",
+      "operator_skeleton": [
+        "FILTER_NOT_EMPTY",
+        "DERIVE_DURATION_SECONDS",
+        "PARALLEL_AGGREGATE",
+        "DERIVE_BINARY",
+        "FILTER_COMPARE",
+        "RANK_ROWS"
+      ],
+      "operator_contract_hash": null,
+      "schema_fingerprint": "b927f02262d7702e",
+      "semantic_signature": {
+        "admissibility": "in_scope",
+        "confidence": 0.85,
+        "aggregate": "max",
+        "fields": [],
+        "predicate_ops": {},
+        "filter_values": {},
+        "intent_flags": {
+          "rank": true,
+          "group_by": true,
+          "difference": true,
+          "derived_magnitude": false,
+          "time_bin": false,
+          "correlation": false,
+          "last_event": false,
+          "predictive": false
+        },
+        "predictive": {
+          "model": null,
+          "target_column": null,
+          "train_fraction": null,
+          "holdout_row": null
+        },
+        "operator_skeleton_hint": null,
+        "output_shape": "scalar",
+        "operator_skeleton": [
+          "FILTER_NOT_EMPTY",
+          "DERIVE_DURATION_SECONDS",
+          "PARALLEL_AGGREGATE",
+          "DERIVE_BINARY",
+          "FILTER_COMPARE",
+          "RANK_ROWS"
+        ]
+      },
+      "source": "offline_semantic_registry_build"
+    },
+    "wisdm:55:v1": {
+      "template_id": "wisdm:55:v1",
+      "dataset": "wisdm",
+      "status": "reusable",
+      "query_id": "",
+      "query_text": "Arrange all WISDM rows by timestamp in ascending order, using subject_id as the tie-breaker. Use the first 80% of rows In training and the final 20% as the chronological holdout. Fit a random forest model using the features x, y and z. Forecast the activity label In the first row in the holdout set.",
+      "query_version": "v1",
+      "operator_skeleton": [
+        "PREDICTIVE_PIPELINE"
+      ],
+      "operator_contract_hash": null,
+      "schema_fingerprint": "7ad69ccf7f729a4d",
+      "semantic_signature": {
+        "admissibility": "in_scope",
+        "confidence": 0.85,
+        "aggregate": null,
+        "fields": [
+          "subject_id",
+          "timestamp",
+          "x",
+          "y",
+          "z"
+        ],
+        "predicate_ops": {},
+        "filter_values": {},
+        "intent_flags": {
+          "rank": false,
+          "group_by": true,
+          "difference": false,
+          "derived_magnitude": false,
+          "time_bin": false,
+          "correlation": false,
+          "last_event": false,
+          "predictive": true
+        },
+        "predictive": {
+          "model": "random_forest",
+          "target_column": "activity_label",
+          "train_fraction": 0.8,
+          "holdout_row": "first"
+        },
+        "operator_skeleton_hint": [
+          "PREDICTIVE_PIPELINE"
+        ],
+        "output_shape": "predictive",
+        "operator_skeleton": [
+          "PREDICTIVE_PIPELINE"
+        ]
+      },
+      "source": "offline_semantic_registry_build"
+    },
+    "wisdm:56:v1": {
+      "template_id": "wisdm:56:v1",
+      "dataset": "wisdm",
+      "status": "reusable",
+      "query_id": "",
+      "query_text": "Contrast the overall acceleration magnitude between dynamic (walking,jogging,upstairs,downstairs) and resting (sitting,standing) states.",
+      "query_version": "v1",
+      "operator_skeleton": [
+        "FILTER_NOT_EMPTY",
+        "DERIVE_VECTOR_MAGNITUDE",
+        "SPLIT_BY_VALUES",
+        "SPLIT_BY_VALUES",
+        "AGGREGATE_PARTITIONS",
+        "COMPARE_PARTITIONS"
+      ],
+      "operator_contract_hash": null,
+      "schema_fingerprint": "7ad69ccf7f729a4d",
+      "semantic_signature": {
+        "admissibility": "unknown",
+        "confidence": 0.4,
+        "aggregate": null,
+        "fields": [],
+        "predicate_ops": {},
+        "filter_values": {},
+        "intent_flags": {
+          "rank": false,
+          "group_by": false,
+          "difference": false,
+          "derived_magnitude": true,
+          "time_bin": false,
+          "correlation": false,
+          "last_event": false,
+          "predictive": false
+        },
+        "predictive": {
+          "model": null,
+          "target_column": null,
+          "train_fraction": null,
+          "holdout_row": null
+        },
+        "operator_skeleton_hint": null,
+        "output_shape": "unknown",
+        "operator_skeleton": [
+          "FILTER_NOT_EMPTY",
+          "DERIVE_VECTOR_MAGNITUDE",
+          "SPLIT_BY_VALUES",
+          "SPLIT_BY_VALUES",
+          "AGGREGATE_PARTITIONS",
+          "COMPARE_PARTITIONS"
+        ]
+      },
+      "source": "offline_semantic_registry_build"
+    },
+    "wisdm:62:v1": {
+      "template_id": "wisdm:62:v1",
+      "dataset": "wisdm",
+      "status": "reusable",
+      "query_id": "",
+      "query_text": "Determine the user whose total observed duration of resting states (sitting,standing) exceeds their duration of dynamic movements (walking,jogging,upstairs,downstairs) by the largest margin.",
+      "query_version": "v1",
+      "operator_skeleton": [
+        "FILTER_NOT_EMPTY",
+        "DERIVE_DURATION_SECONDS",
+        "PARALLEL_AGGREGATE",
+        "DERIVE_BINARY",
+        "FILTER_COMPARE",
+        "RANK_ROWS"
+      ],
+      "operator_contract_hash": null,
+      "schema_fingerprint": "b927f02262d7702e",
+      "semantic_signature": {
+        "admissibility": "in_scope",
+        "confidence": 0.85,
+        "aggregate": "max",
+        "fields": [],
+        "predicate_ops": {},
+        "filter_values": {},
+        "intent_flags": {
+          "rank": true,
+          "group_by": true,
+          "difference": true,
+          "derived_magnitude": false,
+          "time_bin": false,
+          "correlation": false,
+          "last_event": false,
+          "predictive": false
+        },
+        "predictive": {
+          "model": null,
+          "target_column": null,
+          "train_fraction": null,
+          "holdout_row": null
+        },
+        "operator_skeleton_hint": null,
+        "output_shape": "scalar",
+        "operator_skeleton": [
+          "FILTER_NOT_EMPTY",
+          "DERIVE_DURATION_SECONDS",
+          "PARALLEL_AGGREGATE",
+          "DERIVE_BINARY",
+          "FILTER_COMPARE",
+          "RANK_ROWS"
+        ]
+      },
+      "source": "offline_semantic_registry_build"
+    },
+    "wisdm:64:v1": {
+      "template_id": "wisdm:64:v1",
+      "dataset": "wisdm",
+      "status": "reusable",
+      "query_id": "",
+      "query_text": "Compute the absolute difference between the mean z-axis acceleration of activity labels Upstairs and Downstairs.",
+      "query_version": "v1",
+      "operator_skeleton": [
+        "SPLIT_BY_VALUES",
+        "SPLIT_BY_VALUES",
+        "AGGREGATE_PARTITIONS",
+        "COMPARE_PARTITIONS"
+      ],
+      "operator_contract_hash": null,
+      "schema_fingerprint": "b927f02262d7702e",
+      "semantic_signature": {
+        "admissibility": "in_scope",
+        "confidence": 0.85,
+        "aggregate": "mean",
+        "fields": [
+          "z"
+        ],
+        "predicate_ops": {},
+        "filter_values": {},
+        "intent_flags": {
+          "rank": false,
+          "group_by": false,
+          "difference": true,
+          "derived_magnitude": false,
+          "time_bin": false,
+          "correlation": false,
+          "last_event": false,
+          "predictive": false
+        },
+        "predictive": {
+          "model": null,
+          "target_column": null,
+          "train_fraction": null,
+          "holdout_row": null
+        },
+        "operator_skeleton_hint": null,
+        "output_shape": "scalar",
+        "operator_skeleton": [
+          "SPLIT_BY_VALUES",
+          "SPLIT_BY_VALUES",
+          "AGGREGATE_PARTITIONS",
+          "COMPARE_PARTITIONS"
+        ]
+      },
+      "source": "offline_semantic_registry_build"
+    },
+    "wisdm:65:v1": {
+      "template_id": "wisdm:65:v1",
+      "dataset": "wisdm",
+      "status": "reusable",
+      "query_id": "",
+      "query_text": "Which user has the highest total number of observed data samples?",
+      "query_version": "v1",
+      "operator_skeleton": [
+        "GROUP_AGGREGATE",
+        "RANK_GROUPS"
+      ],
+      "operator_contract_hash": null,
+      "schema_fingerprint": "b927f02262d7702e",
+      "semantic_signature": {
+        "admissibility": "in_scope",
+        "confidence": 0.85,
+        "aggregate": "max",
+        "fields": [],
+        "predicate_ops": {},
+        "filter_values": {},
+        "intent_flags": {
+          "rank": true,
+          "group_by": false,
+          "difference": false,
+          "derived_magnitude": false,
+          "time_bin": false,
+          "correlation": false,
+          "last_event": false,
+          "predictive": false
+        },
+        "predictive": {
+          "model": null,
+          "target_column": null,
+          "train_fraction": null,
+          "holdout_row": null
+        },
+        "operator_skeleton_hint": null,
+        "output_shape": "scalar",
+        "operator_skeleton": [
+          "GROUP_AGGREGATE",
+          "RANK_GROUPS"
+        ]
+      },
+      "source": "offline_semantic_registry_build"
+    },
+    "wisdm:66:v1": {
+      "template_id": "wisdm:66:v1",
+      "dataset": "wisdm",
+      "status": "reusable",
+      "query_id": "",
+      "query_text": "Work out the absolute difference between the mean z-axis acceleration of activity labels Upstairs and Downstairs.",
+      "query_version": "v1",
+      "operator_skeleton": [
+        "SPLIT_BY_VALUES",
+        "SPLIT_BY_VALUES",
+        "AGGREGATE_PARTITIONS",
+        "COMPARE_PARTITIONS"
+      ],
+      "operator_contract_hash": null,
+      "schema_fingerprint": "b927f02262d7702e",
+      "semantic_signature": {
+        "admissibility": "in_scope",
+        "confidence": 0.85,
+        "aggregate": "mean",
+        "fields": [
+          "z"
+        ],
+        "predicate_ops": {},
+        "filter_values": {},
+        "intent_flags": {
+          "rank": false,
+          "group_by": false,
+          "difference": true,
+          "derived_magnitude": false,
+          "time_bin": false,
+          "correlation": false,
+          "last_event": false,
+          "predictive": false
+        },
+        "predictive": {
+          "model": null,
+          "target_column": null,
+          "train_fraction": null,
+          "holdout_row": null
+        },
+        "operator_skeleton_hint": null,
+        "output_shape": "scalar",
+        "operator_skeleton": [
+          "SPLIT_BY_VALUES",
+          "SPLIT_BY_VALUES",
+          "AGGREGATE_PARTITIONS",
+          "COMPARE_PARTITIONS"
+        ]
+      },
+      "source": "offline_semantic_registry_build"
+    },
+    "wisdm:67:v1": {
+      "template_id": "wisdm:67:v1",
+      "dataset": "wisdm",
+      "status": "reusable",
+      "query_id": "",
+      "query_text": "Tell me which user has the highest total number of recorded data samples?",
+      "query_version": "v1",
+      "operator_skeleton": [
+        "GROUP_AGGREGATE",
+        "RANK_GROUPS"
+      ],
+      "operator_contract_hash": null,
+      "schema_fingerprint": "7ad69ccf7f729a4d",
+      "semantic_signature": {
+        "admissibility": "in_scope",
+        "confidence": 0.85,
+        "aggregate": "max",
+        "fields": [],
+        "predicate_ops": {},
+        "filter_values": {},
+        "intent_flags": {
+          "rank": true,
+          "group_by": false,
+          "difference": false,
+          "derived_magnitude": false,
+          "time_bin": false,
+          "correlation": false,
+          "last_event": false,
+          "predictive": false
+        },
+        "predictive": {
+          "model": null,
+          "target_column": null,
+          "train_fraction": null,
+          "holdout_row": null
+        },
+        "operator_skeleton_hint": null,
+        "output_shape": "scalar",
+        "operator_skeleton": [
+          "GROUP_AGGREGATE",
+          "RANK_GROUPS"
+        ]
+      },
+      "source": "offline_semantic_registry_build"
+    },
+    "wisdm:82:v1": {
+      "template_id": "wisdm:82:v1",
+      "dataset": "wisdm",
+      "status": "reusable",
+      "query_id": "",
+      "query_text": "Could you report the average y-acceleration of user 5 with activity label Sitting?",
+      "query_version": "v1",
+      "operator_skeleton": [
+        "FILTER_COMPARE",
+        "FILTER_COMPARE",
+        "AGGREGATE_COLUMN"
+      ],
+      "operator_contract_hash": null,
+      "schema_fingerprint": "b927f02262d7702e",
+      "semantic_signature": {
+        "admissibility": "in_scope",
+        "confidence": 0.85,
+        "aggregate": "mean",
+        "fields": [
+          "y"
+        ],
+        "predicate_ops": {},
+        "filter_values": {
+          "subject_id": 5,
+          "activity": "sitting"
+        },
+        "intent_flags": {
+          "rank": false,
+          "group_by": false,
+          "difference": false,
+          "derived_magnitude": false,
+          "time_bin": false,
+          "correlation": false,
+          "last_event": false,
+          "predictive": false
+        },
+        "predictive": {
+          "model": null,
+          "target_column": "activity_label",
+          "train_fraction": null,
+          "holdout_row": null
+        },
+        "operator_skeleton_hint": null,
+        "output_shape": "scalar",
+        "operator_skeleton": [
+          "FILTER_COMPARE",
+          "FILTER_COMPARE",
+          "AGGREGATE_COLUMN"
+        ]
+      },
+      "source": "offline_semantic_registry_build"
+    },
+    "wisdm:83:v1": {
+      "template_id": "wisdm:83:v1",
+      "dataset": "wisdm",
+      "status": "reusable",
+      "query_id": "",
+      "query_text": "Please provide the highest recorded x-acceleration In user 15?",
+      "query_version": "v1",
+      "operator_skeleton": [
+        "FILTER_COMPARE",
+        "AGGREGATE_COLUMN"
+      ],
+      "operator_contract_hash": null,
+      "schema_fingerprint": "b927f02262d7702e",
+      "semantic_signature": {
+        "admissibility": "in_scope",
+        "confidence": 0.85,
+        "aggregate": "max",
+        "fields": [
+          "x"
+        ],
+        "predicate_ops": {},
+        "filter_values": {
+          "subject_id": 15
+        },
+        "intent_flags": {
+          "rank": true,
+          "group_by": false,
+          "difference": false,
+          "derived_magnitude": false,
+          "time_bin": false,
+          "correlation": false,
+          "last_event": false,
+          "predictive": false
+        },
+        "predictive": {
+          "model": null,
+          "target_column": null,
+          "train_fraction": null,
+          "holdout_row": null
+        },
+        "operator_skeleton_hint": null,
+        "output_shape": "scalar",
+        "operator_skeleton": [
+          "FILTER_COMPARE",
+          "AGGREGATE_COLUMN"
+        ]
+      },
+      "source": "offline_semantic_registry_build"
+    },
+    "wisdm:84:v1": {
+      "template_id": "wisdm:84:v1",
+      "dataset": "wisdm",
+      "status": "reusable",
+      "query_id": "",
+      "query_text": "Please provide the average y-acceleration of user 5 with activity label Sitting?",
+      "query_version": "v1",
+      "operator_skeleton": [
+        "FILTER_COMPARE",
+        "FILTER_COMPARE",
+        "AGGREGATE_COLUMN"
+      ],
+      "operator_contract_hash": null,
+      "schema_fingerprint": "b927f02262d7702e",
+      "semantic_signature": {
+        "admissibility": "in_scope",
+        "confidence": 0.85,
+        "aggregate": "mean",
+        "fields": [
+          "y"
+        ],
+        "predicate_ops": {},
+        "filter_values": {
+          "subject_id": 5,
+          "activity": "sitting"
+        },
+        "intent_flags": {
+          "rank": false,
+          "group_by": false,
+          "difference": false,
+          "derived_magnitude": false,
+          "time_bin": false,
+          "correlation": false,
+          "last_event": false,
+          "predictive": false
+        },
+        "predictive": {
+          "model": null,
+          "target_column": "activity_label",
+          "train_fraction": null,
+          "holdout_row": null
+        },
+        "operator_skeleton_hint": null,
+        "output_shape": "scalar",
+        "operator_skeleton": [
+          "FILTER_COMPARE",
+          "FILTER_COMPARE",
+          "AGGREGATE_COLUMN"
+        ]
+      },
+      "source": "offline_semantic_registry_build"
+    },
+    "wisdm:17:v1": {
+      "template_id": "wisdm:17:v1",
+      "dataset": "wisdm",
+      "status": "reusable",
+      "query_id": "17",
+      "query_text": "For every subject_id, compute mean acceleration magnitude separately for dynamic activities (Walking, Jogging, Upstairs, Downstairs) and resting activities (Sitting, Standing). Return the subject_id with the largest dynamic-minus-resting mean magnitude.",
+      "query_version": "v1",
+      "operator_skeleton": [
+        "DERIVE_VECTOR_MAGNITUDE",
+        "PARALLEL_AGGREGATE",
+        "DERIVE_BINARY",
+        "RANK_ROWS"
+      ],
+      "operator_contract_hash": "2be2d0b165f22ee01479bee3042b9568475c1f3b99a8aa028e2d2f5b4c5d0240",
+      "schema_fingerprint": null,
+      "semantic_signature": {
+        "admissibility": "in_scope",
+        "confidence": 0.85,
+        "aggregate": "max",
+        "fields": [
+          "subject_id"
+        ],
+        "predicate_ops": {},
+        "filter_values": {},
+        "intent_flags": {
+          "rank": true,
+          "group_by": false,
+          "difference": false,
+          "derived_magnitude": true,
+          "time_bin": false,
+          "correlation": false,
+          "last_event": false,
+          "predictive": false
+        },
+        "predictive": {
+          "model": null,
+          "target_column": null,
+          "train_fraction": null,
+          "holdout_row": null
+        },
+        "operator_skeleton_hint": null,
+        "output_shape": "scalar",
+        "operator_skeleton": [
+          "DERIVE_VECTOR_MAGNITUDE",
+          "PARALLEL_AGGREGATE",
+          "DERIVE_BINARY",
+          "RANK_ROWS"
+        ]
+      },
+      "source": "offline_semantic_registry_build"
+    },
+    "wisdm:18:v1": {
+      "template_id": "wisdm:18:v1",
+      "dataset": "wisdm",
+      "status": "reusable",
+      "query_id": "18",
+      "query_text": "For every subject_id, compute x-acceleration variance separately while Jogging and while Walking. Among subject_id values whose Jogging variance exceeds their Walking variance, return the subject_id with the largest Jogging-minus-Walking variance difference.",
+      "query_version": "v1",
+      "operator_skeleton": [
+        "PARALLEL_AGGREGATE",
+        "DERIVE_BINARY",
+        "FILTER_COMPARE",
+        "RANK_ROWS"
+      ],
+      "operator_contract_hash": "2be2d0b165f22ee01479bee3042b9568475c1f3b99a8aa028e2d2f5b4c5d0240",
+      "schema_fingerprint": null,
+      "semantic_signature": {
+        "admissibility": "in_scope",
+        "confidence": 0.85,
+        "aggregate": "max",
+        "fields": [
+          "subject_id",
+          "x"
+        ],
+        "predicate_ops": {},
+        "filter_values": {},
+        "intent_flags": {
+          "rank": true,
+          "group_by": false,
+          "difference": true,
+          "derived_magnitude": false,
+          "time_bin": false,
+          "correlation": false,
+          "last_event": false,
+          "predictive": false
+        },
+        "predictive": {
+          "model": null,
+          "target_column": null,
+          "train_fraction": null,
+          "holdout_row": null
+        },
+        "operator_skeleton_hint": null,
+        "output_shape": "scalar",
+        "operator_skeleton": [
+          "PARALLEL_AGGREGATE",
+          "DERIVE_BINARY",
+          "FILTER_COMPARE",
+          "RANK_ROWS"
+        ]
+      },
+      "source": "offline_semantic_registry_build"
+    },
+    "wisdm:19:v1": {
+      "template_id": "wisdm:19:v1",
+      "dataset": "wisdm",
+      "status": "reusable",
+      "query_id": "19",
+      "query_text": "For every subject_id, compute mean acceleration magnitude while Jogging and while Walking. Return the Pearson correlation between the two per-subject mean-magnitude columns.",
+      "query_version": "v1",
+      "operator_skeleton": [
+        "DERIVE_VECTOR_MAGNITUDE",
+        "PARALLEL_AGGREGATE",
+        "CORRELATE_COLUMNS"
+      ],
+      "operator_contract_hash": "2be2d0b165f22ee01479bee3042b9568475c1f3b99a8aa028e2d2f5b4c5d0240",
+      "schema_fingerprint": null,
+      "semantic_signature": {
+        "admissibility": "in_scope",
+        "confidence": 0.85,
+        "aggregate": "mean",
+        "fields": [
+          "subject_id"
+        ],
+        "predicate_ops": {},
+        "filter_values": {},
+        "intent_flags": {
+          "rank": false,
+          "group_by": true,
+          "difference": false,
+          "derived_magnitude": true,
+          "time_bin": false,
+          "correlation": true,
+          "last_event": false,
+          "predictive": false
+        },
+        "predictive": {
+          "model": null,
+          "target_column": null,
+          "train_fraction": null,
+          "holdout_row": null
+        },
+        "operator_skeleton_hint": null,
+        "output_shape": "scalar",
+        "operator_skeleton": [
+          "DERIVE_VECTOR_MAGNITUDE",
+          "PARALLEL_AGGREGATE",
+          "CORRELATE_COLUMNS"
+        ]
+      },
+      "source": "offline_semantic_registry_build"
+    },
+    "wisdm:20:v1": {
+      "template_id": "wisdm:20:v1",
+      "dataset": "wisdm",
+      "status": "reusable",
+      "query_id": "20",
+      "query_text": "For every subject_id, derive elapsed seconds from timestamp, then compute total locomotion duration (Walking, Jogging, Upstairs, Downstairs) and total resting duration (Sitting, Standing). Among subjects with more locomotion than resting time, return the subject_id with the largest locomotion-minus-resting duration.",
+      "query_version": "v1",
+      "operator_skeleton": [
+        "DERIVE_DURATION_SECONDS",
+        "PARALLEL_AGGREGATE",
+        "DERIVE_BINARY",
+        "FILTER_COMPARE",
+        "RANK_ROWS"
+      ],
+      "operator_contract_hash": "2be2d0b165f22ee01479bee3042b9568475c1f3b99a8aa028e2d2f5b4c5d0240",
+      "schema_fingerprint": null,
+      "semantic_signature": {
+        "admissibility": "in_scope",
+        "confidence": 0.85,
+        "aggregate": "max",
+        "fields": [
+          "subject_id",
+          "timestamp"
+        ],
+        "predicate_ops": {},
+        "filter_values": {},
+        "intent_flags": {
+          "rank": true,
+          "group_by": false,
+          "difference": false,
+          "derived_magnitude": false,
+          "time_bin": false,
+          "correlation": false,
+          "last_event": false,
+          "predictive": false
+        },
+        "predictive": {
+          "model": null,
+          "target_column": null,
+          "train_fraction": null,
+          "holdout_row": null
+        },
+        "operator_skeleton_hint": null,
+        "output_shape": "scalar",
+        "operator_skeleton": [
+          "DERIVE_DURATION_SECONDS",
+          "PARALLEL_AGGREGATE",
+          "DERIVE_BINARY",
+          "FILTER_COMPARE",
+          "RANK_ROWS"
         ]
       },
       "source": "offline_semantic_registry_build"

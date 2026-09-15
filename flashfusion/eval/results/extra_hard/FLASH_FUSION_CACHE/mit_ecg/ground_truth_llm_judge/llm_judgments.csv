@@ -1,0 +1,129 @@
+run_id,source_file,baseline,query_id,query_id_source,query_text,expected_rejection,gt_reference_answer,candidate_answer,candidate_rejected,candidate_executed,candidate_code,llm_verdict,llm_score,llm_reason,gt_sanity,gt_sanity_note,llm_parse_status,llm_attempts,llm_override_applied,llm_raw
+1,[in_memory_benchmark_run],FLASH_FUSION_CACHE,17,explicit,"Among rows whose annotation is one of the known MIT-ECG annotation codes, divide time_s into 10-second bins. For each (record_id, bin) pair, compute MLII RMS. Return the (record_id, bin) pair with the greatest RMS.",False,The greatest MLII RMS is 3.075804772738 for record_id 116 in the 1400.0-second bin.,"The result is {'record_id': 116, 'time_bin_10s': 1400.0, 'rms_MLII': 3.075804772738348}",False,True,"df = df[df['annotation'].notna() & df['annotation'].astype(str).str.strip().ne('')]
+df['time_bin_10s'] = (df['time_s'] // 10.0) * 10.0
+result = df.groupby(['record_id', 'time_bin_10s'])['MLII'].apply(rms)
+result = result.idxmax()",PASS,1.0,"The candidate answer matches the ground truth in record_id, time bin, and RMS value.",SOUND,"Answer is specific, consistent with the query, and includes all required components.",json,1,False,"{
+  ""verdict"": ""PASS"",
+  ""reason"": ""The candidate answer matches the ground truth in record_id, time bin, and RMS value."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Answer is specific, consistent with the query, and includes all required components.""
+}"
+1,[in_memory_benchmark_run],FLASH_FUSION_CACHE,18,explicit,"For every record_id, independently compute maximum and minimum MLII. Define MLII span as maximum minus minimum. Return the record_id with the largest MLII span.",False,record_id 116 has the largest MLII span: 10.235000000000.,The result is: 116,False,True,"grouped = df.groupby('record_id')['MLII']
+mlii_span = grouped.max() - grouped.min()
+result = mlii_span.idxmax()",PASS,1.0,"The candidate correctly identifies record_id 116 as having the largest MLII span, matching the ground truth.",SOUND,Clear and specific answer with correct record_id and span value.,json,1,False,"{
+  ""verdict"": ""PASS"",
+  ""reason"": ""The candidate correctly identifies record_id 116 as having the largest MLII span, matching the ground truth."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Clear and specific answer with correct record_id and span value.""
+}"
+1,[in_memory_benchmark_run],FLASH_FUSION_CACHE,19,explicit,"For record_id 101, divide time_s into 10-second bins. For each bin, compute annotated-row rate as rows with an annotation in the known annotation-code list divided by all rows in the bin. Return the Pearson correlation between bin index and annotated-row rate.",False,The Pearson correlation between 10-second bin index and annotated-row rate for record_id 101 is -0.460485689017.,The result is -0.46048568901662745,False,True,"df = df[df['record_id'] == 101]
+df['bin_start'] = (df['time_s'] // 10.0) * 10.0
+# PARALLEL_AGGREGATE branches:
+branch_0 = df[df['annotation'].isin(['!', '""', '+', '/', 'A', 'E', 'F', 'J', 'L', 'N', 'Q', 'R', 'S', 'V', '[', ']', 'a', 'e', 'f', 'j', 'x', '|', '~'])].groupby(['bin_start']).size()
+branch_1 = df.groupby(['bin_start']).size()
+merged = branch_0.merge(branch_1, on=['bin_start'], how='outer')
+merged[['annotated_count', 'total_count']] = merged[['annotated_count', 'total_count']].fillna(0)
+df['annotated_rate'] = df['annotated_count'] / df['total_count']
+result = df['bin_start'].corr(df['annotated_rate'], method='pearson')",PASS,1.0,The candidate answer matches the ground truth value exactly.,SOUND,"The provided ground truth is a clear, specific numeric value consistent with the query.",json,1,False,"{
+  ""verdict"": ""PASS"",
+  ""reason"": ""The candidate answer matches the ground truth value exactly."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""The provided ground truth is a clear, specific numeric value consistent with the query.""
+}"
+1,[in_memory_benchmark_run],FLASH_FUSION_CACHE,20,explicit,"For every record_id, independently compute MLII variance and V1 variance. Define total lead variability as their sum. Return the record_id with the largest total lead variability.",False,record_id 107 has the largest total lead variability: 1.110180227701.,"The result is {'record_id': 107, 'total_lead_variability': 1.1101802277013384}",False,True,"# PARALLEL_AGGREGATE branches:
+branch_0 = df.groupby(['record_id'])['MLII'].var()
+branch_1 = df.groupby(['record_id'])['V1'].var()
+merged = branch_0.merge(branch_1, on=['record_id'], how='outer')
+df['total_lead_variability'] = df['ml_ii_var'] + df['v1_var']
+idx = df['total_lead_variability'].idxmax(); result = df.loc[idx, ['record_id', 'total_lead_variability']].to_dict()",PASS,1.0,"The candidate answer identifies record_id 107 with total lead variability 1.11, matching the ground truth.",SOUND,Clear and consistent with the query.,json,1,False,"{
+  ""verdict"": ""PASS"",
+  ""reason"": ""The candidate answer identifies record_id 107 with total lead variability 1.11, matching the ground truth."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Clear and consistent with the query.""
+}"
+2,[in_memory_benchmark_run],FLASH_FUSION_CACHE,17,explicit,"Among rows whose annotation is one of the known MIT-ECG annotation codes, divide time_s into 10-second bins. For each (record_id, bin) pair, compute MLII RMS. Return the (record_id, bin) pair with the greatest RMS.",False,The greatest MLII RMS is 3.075804772738 for record_id 116 in the 1400.0-second bin.,"The result is {'record_id': 116, 'time_bin_10s': 1400.0, 'rms_MLII': 3.075804772738348}",False,True,"df = df[df['annotation'].notna() & df['annotation'].astype(str).str.strip().ne('')]
+df['time_bin_10s'] = (df['time_s'] // 10.0) * 10.0
+result = df.groupby(['record_id', 'time_bin_10s'])['MLII'].apply(rms)
+result = result.idxmax()",PASS,1.0,"The candidate answer matches the ground truth in record_id, time bin, and RMS value.",SOUND,"Answer is specific, consistent with the query, and includes all required elements.",json,1,False,"{
+  ""verdict"": ""PASS"",
+  ""reason"": ""The candidate answer matches the ground truth in record_id, time bin, and RMS value."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Answer is specific, consistent with the query, and includes all required elements.""
+}"
+2,[in_memory_benchmark_run],FLASH_FUSION_CACHE,18,explicit,"For every record_id, independently compute maximum and minimum MLII. Define MLII span as maximum minus minimum. Return the record_id with the largest MLII span.",False,record_id 116 has the largest MLII span: 10.235000000000.,The result is: 116,False,True,"grouped = df.groupby('record_id')['MLII']
+mlii_span = grouped.max() - grouped.min()
+result = mlii_span.idxmax()",PASS,1.0,"The candidate correctly identifies record_id 116 as having the largest MLII span, which matches the ground truth.",SOUND,The ground truth provides a clear and plausible answer consistent with the query.,json,1,False,"{
+  ""verdict"": ""PASS"",
+  ""reason"": ""The candidate correctly identifies record_id 116 as having the largest MLII span, which matches the ground truth."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""The ground truth provides a clear and plausible answer consistent with the query.""
+}"
+2,[in_memory_benchmark_run],FLASH_FUSION_CACHE,19,explicit,"For record_id 101, divide time_s into 10-second bins. For each bin, compute annotated-row rate as rows with an annotation in the known annotation-code list divided by all rows in the bin. Return the Pearson correlation between bin index and annotated-row rate.",False,The Pearson correlation between 10-second bin index and annotated-row rate for record_id 101 is -0.460485689017.,The result is -0.46048568901662745,False,True,"df = df[df['record_id'] == 101]
+df['time_bin'] = (df['time_s'] // 10.0) * 10.0
+# PARALLEL_AGGREGATE branches:
+branch_0 = df[df['annotation'].isin(['!', '""', '+', '/', 'A', 'E', 'F', 'J', 'L', 'N', 'Q', 'R', 'S', 'V', '[', ']', 'a', 'e', 'f', 'j', 'x', '|', '~'])].groupby(['time_bin']).size()
+branch_1 = df.groupby(['time_bin']).size()
+merged = branch_0.merge(branch_1, on=['time_bin'], how='outer')
+merged[['annotated_count', 'total_count']] = merged[['annotated_count', 'total_count']].fillna(0)
+df['annotated_rate'] = df['annotated_count'] / df['total_count']
+result = df['time_bin'].corr(df['annotated_rate'], method='pearson')",PASS,1.0,The candidate answer matches the ground truth value exactly.,SOUND,"The ground truth provides a clear, plausible correlation coefficient.",json,1,False,"{
+  ""verdict"": ""PASS"",
+  ""reason"": ""The candidate answer matches the ground truth value exactly."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""The ground truth provides a clear, plausible correlation coefficient.""
+}"
+2,[in_memory_benchmark_run],FLASH_FUSION_CACHE,20,explicit,"For every record_id, independently compute MLII variance and V1 variance. Define total lead variability as their sum. Return the record_id with the largest total lead variability.",False,record_id 107 has the largest total lead variability: 1.110180227701.,"The result is {'record_id': 107, 'total_lead_variability': 1.1101802277013384}",False,True,"# PARALLEL_AGGREGATE branches:
+branch_0 = df.groupby(['record_id'])['MLII'].var()
+branch_1 = df.groupby(['record_id'])['V1'].var()
+merged = branch_0.merge(branch_1, on=['record_id'], how='outer')
+df['total_lead_variability'] = df['mlii_var'] + df['v1_var']
+idx = df['total_lead_variability'].idxmax(); result = df.loc[idx, ['record_id', 'total_lead_variability']].to_dict()",PASS,1.0,"The candidate answer identifies record_id 107 with total lead variability 1.11, matching the ground truth.",SOUND,"Ground truth is consistent with the query and provides a specific, plausible result.",json,1,False,"{
+  ""verdict"": ""PASS"",
+  ""reason"": ""The candidate answer identifies record_id 107 with total lead variability 1.11, matching the ground truth."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Ground truth is consistent with the query and provides a specific, plausible result.""
+}"
+3,[in_memory_benchmark_run],FLASH_FUSION_CACHE,17,explicit,"Among rows whose annotation is one of the known MIT-ECG annotation codes, divide time_s into 10-second bins. For each (record_id, bin) pair, compute MLII RMS. Return the (record_id, bin) pair with the greatest RMS.",False,The greatest MLII RMS is 3.075804772738 for record_id 116 in the 1400.0-second bin.,"The result is {'record_id': 116, 'time_bin_10s': 1400.0, 'rms_MLII': 3.075804772738348}",False,True,"df = df[df['annotation'].notna() & df['annotation'].astype(str).str.strip().ne('')]
+df['time_bin_10s'] = (df['time_s'] // 10.0) * 10.0
+result = df.groupby(['record_id', 'time_bin_10s'])['MLII'].apply(rms)
+result = result.idxmax()",PASS,1.0,"The candidate answer matches the ground truth in record_id, time bin, and RMS value.",SOUND,"Answer is specific, consistent with the query, and includes all required elements.",json,1,False,"{
+  ""verdict"": ""PASS"",
+  ""reason"": ""The candidate answer matches the ground truth in record_id, time bin, and RMS value."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Answer is specific, consistent with the query, and includes all required elements.""
+}"
+3,[in_memory_benchmark_run],FLASH_FUSION_CACHE,18,explicit,"For every record_id, independently compute maximum and minimum MLII. Define MLII span as maximum minus minimum. Return the record_id with the largest MLII span.",False,record_id 116 has the largest MLII span: 10.235000000000.,The result is: 116,False,True,"# Group by record_id and compute the MLII span (max - min) for each group
+mlII_span_by_record = df.groupby('record_id')['MLII'].agg(lambda x: x.max() - x.min())
+
+# Find the record_id with the largest MLII span
+result = mlII_span_by_record.idxmax()",PASS,1.0,"The candidate correctly identifies record_id 116 as having the largest MLII span, matching the ground truth.",SOUND,The ground truth provides a clear and plausible answer consistent with the query.,json,1,False,"{
+  ""verdict"": ""PASS"",
+  ""reason"": ""The candidate correctly identifies record_id 116 as having the largest MLII span, matching the ground truth."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""The ground truth provides a clear and plausible answer consistent with the query.""
+}"
+3,[in_memory_benchmark_run],FLASH_FUSION_CACHE,19,explicit,"For record_id 101, divide time_s into 10-second bins. For each bin, compute annotated-row rate as rows with an annotation in the known annotation-code list divided by all rows in the bin. Return the Pearson correlation between bin index and annotated-row rate.",False,The Pearson correlation between 10-second bin index and annotated-row rate for record_id 101 is -0.460485689017.,The result is -0.46048568901662745,False,True,"df = df[df['record_id'] == 101]
+df['bin_start'] = (df['time_s'] // 10.0) * 10.0
+# PARALLEL_AGGREGATE branches:
+branch_0 = df[df['annotation'].isin(['!', '""', '+', '/', 'A', 'E', 'F', 'J', 'L', 'N', 'Q', 'R', 'S', 'V', '[', ']', 'a', 'e', 'f', 'j', 'x', '|', '~'])].groupby(['bin_start']).size()
+branch_1 = df.groupby(['bin_start']).size()
+merged = branch_0.merge(branch_1, on=['bin_start'], how='outer')
+merged[['annotated_count', 'total_count']] = merged[['annotated_count', 'total_count']].fillna(0)
+df['annotated_rate'] = df['annotated_count'] / df['total_count']
+result = df['bin_start'].corr(df['annotated_rate'], method='pearson')",PASS,1.0,The candidate answer matches the ground truth value exactly.,SOUND,The provided ground truth is a reasonable and specific numeric result.,json,1,False,"{
+  ""verdict"": ""PASS"",
+  ""reason"": ""The candidate answer matches the ground truth value exactly."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""The provided ground truth is a reasonable and specific numeric result.""
+}"
+3,[in_memory_benchmark_run],FLASH_FUSION_CACHE,20,explicit,"For every record_id, independently compute MLII variance and V1 variance. Define total lead variability as their sum. Return the record_id with the largest total lead variability.",False,record_id 107 has the largest total lead variability: 1.110180227701.,"The result is {'record_id': 107, 'total_lead_variability': 1.1101802277013384}",False,True,"# PARALLEL_AGGREGATE branches:
+branch_0 = df.groupby(['record_id'])['MLII'].var()
+branch_1 = df.groupby(['record_id'])['V1'].var()
+merged = branch_0.merge(branch_1, on=['record_id'], how='outer')
+df['total_lead_variability'] = df['mlii_var'] + df['v1_var']
+idx = df['total_lead_variability'].idxmax(); result = df.loc[idx, ['record_id', 'total_lead_variability']].to_dict()",PASS,1.0,"The candidate answer identifies record_id 107 with total lead variability 1.11, matching the ground truth.",SOUND,Ground truth is consistent with the query and candidate answer.,json,1,False,"{
+  ""verdict"": ""PASS"",
+  ""reason"": ""The candidate answer identifies record_id 107 with total lead variability 1.11, matching the ground truth."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Ground truth is consistent with the query and candidate answer.""
+}"

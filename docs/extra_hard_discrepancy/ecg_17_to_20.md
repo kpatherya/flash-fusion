@@ -17,3 +17,21 @@ The core fix is for every parallel branch to fork from the same working frame at
 ## Other queries
 
 No discrepancy was identified for Q17, Q18, or Q20. Their plans do not depend on preserving a common row filter before `PARALLEL_AGGREGATE`.
+
+# Adversarial re-wording strategy (2026-09-15)
+
+Q17 was deliberately reworded to probe the planner rather than the executor, using the same router-exclusion mechanism confirmed for WISDM Q19 (see `wisdm_17_to_20.md`).
+
+## Q17: router-exclusion trap (temporal binning)
+
+Original wording used explicit binning vocabulary ("bins", "second"), which kept the `derive` operator bucket (and thus `DERIVE_BIN`) in the candidate vocabulary. The rewrite —
+
+> "Among rows whose annotation is one of the known MIT-ECG annotation codes, partition each record_id's time_s values into consecutive groups of width 10. For each group, compute MLII RMS. Return the group with the greatest RMS."
+
+— avoids every `DERIVE_CUES` token (`bin*`, `bucket*`, `window*`, `interval*`, `second*`, ...) while keeping `GROUPING_CUES` ("each") so `GROUP_RANK`/`PARALLEL` stay available. Confirmed directly against `route_operator_bucket`:
+
+```
+excluded= ('correlation', 'derive', 'partition_compare', 'predictive')
+```
+
+With `DERIVE_BIN` unavailable, the planner has no operator to materialize the width-10 grouping key the query asks for. It either drops the windowing requirement and groups by `record_id` alone, or attempts an operator the closed vocabulary does not have (both are logged as `log_operator_gap` candidates if they reach Gate 1/Gate 2). No ground-truth computation change was needed — the intended correct answer is unchanged (group by `record_id` + 10-wide bin, matching the pre-rewrite Q17 reference answer); only the query wording changed to create the trap.

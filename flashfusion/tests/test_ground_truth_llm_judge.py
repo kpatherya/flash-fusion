@@ -213,3 +213,75 @@ def test_judge_rows_with_llm_prefers_explicit_id_over_rewritten_text(monkeypatch
     assert int(judged.loc[0, "query_id"]) == 2
     assert judged.loc[0, "query_id_source"] == "explicit"
     assert judged.loc[0, "llm_score"] == 1.0
+
+
+def test_judge_rows_with_llm_excludes_serialized_code_from_judgment(monkeypatch):
+    ground_truth_by_id = {
+        19: GroundTruthEntry(
+            query_id=19,
+            query_text="Return the correlation between bin index and rate.",
+            reference_answer="The correlation is -0.460485689017.",
+            expected_rejection=False,
+        )
+    }
+    rows = [
+        {
+            "baseline": "FLASH_FUSION",
+            "query_id": 19,
+            "query": "Return the correlation between bin index and rate.",
+            "answer": "The result is -0.46048568901662706",
+            "executed": True,
+            "rejected": False,
+            "final_code": "df['annotated_rate'] = df['annotated_count'] / df['total_count']",
+        }
+    ]
+
+    class _DummyPrompt:
+        def __or__(self, other):
+            return self
+
+    class _DummyLLM:
+        def __ror__(self, other):
+            return self
+
+        def __or__(self, other):
+            return self
+
+    class _DummyClient:
+        def __init__(self, *args, **kwargs) -> None:
+            self.llm = _DummyLLM()
+
+        def invoke_chain(self, chain, inputs, stage: str) -> str:
+            assert stage == "gt_llm_judge"
+            assert set(inputs) == {
+                "query_text",
+                "expected_rejection",
+                "ground_truth_answer",
+                "rejected",
+                "candidate_answer",
+            }
+            assert "candidate_code" not in inputs
+            return (
+                '{"verdict":"PASS","reason":"Numeric answer matches ground truth.",'
+                '"ground_truth_sanity":"SOUND","ground_truth_note":""}'
+            )
+
+    monkeypatch.setattr(
+        "flashfusion.eval.ground_truth_llm_judge.ChatPromptTemplate.from_messages",
+        lambda *args, **kwargs: _DummyPrompt(),
+    )
+    monkeypatch.setattr(
+        "flashfusion.eval.ground_truth_llm_judge.LLMClient",
+        _DummyClient,
+    )
+
+    judged = judge_rows_with_llm(
+        rows=rows,
+        ground_truth_by_id=ground_truth_by_id,
+        dataset=DATASET_WISDM,
+        model_name="test-model",
+        api_key="test-key",
+    )
+
+    assert judged.loc[0, "llm_verdict"] == "PASS"
+    assert judged.loc[0, "candidate_code"] == rows[0]["final_code"]

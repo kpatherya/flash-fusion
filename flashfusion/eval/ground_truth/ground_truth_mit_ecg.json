@@ -97,7 +97,7 @@
   },
   {
     "query_id": 17,
-    "query_text": "Among rows whose annotation is one of the known MIT-ECG annotation codes, divide time_s into 10-second bins. For each (record_id, bin) pair, compute MLII RMS. Return the (record_id, bin) pair with the greatest RMS.",
+    "query_text": "Among rows whose annotation is one of the known MIT-ECG annotation codes, partition each record_id's time_s values into consecutive groups of width 10. For each group, compute MLII RMS. Return the group with the greatest RMS.",
     "reference_answer": "The greatest MLII RMS is 3.075804772738 for record_id 116 in the 1400.0-second bin.",
     "expected_rejection": false
   },

@@ -85,7 +85,7 @@ MODEL_RATE_PER_1M_TOKENS: dict[str, dict[str, float]] = {
         "input": 0.12,
         "output": 0.39,
     },
-    "ibm-granite/granite-4.1-8b": {
+    "ibm-granite/granite-4.2-8b": {
         "input": 0.05,
         "output": 0.10,
     },
@@ -99,7 +99,7 @@ MODEL_RATE_PER_1M_TOKENS: dict[str, dict[str, float]] = {
 
 # Default model used when --model is not supplied to the CLI
 DEFAULT_MODEL = "qwen/qwen3-max"
-DEFAULT_LIGHT_MODEL = "ibm-granite/granite-4.1-8b"
+DEFAULT_LIGHT_MODEL = "ibm-granite/granite-4.2-8b"
 
 # ---------------------------------------------------------------------------
 # Per-model invocation overrides passed to the chat-model constructor.
@@ -127,7 +127,7 @@ MODEL_INVOCATION_CONFIG: dict[str, dict[str, Any]] = {
         "temperature": 0,
         "response_format": {"type": "json_object"},
     },
-    "ibm-granite/granite-4.1-8b": {
+    "ibm-granite/granite-4.2-8b": {
         "max_tokens": 150,
         "temperature": 0,
         "response_format": {"type": "json_object"},

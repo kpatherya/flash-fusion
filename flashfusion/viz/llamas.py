@@ -153,7 +153,7 @@ GROUNDING_MODEL_SPECS = [
         "is_granite": False,
     },
     {
-        "model": "ibm-granite/granite-4.1-8b",
+        "model": "ibm-granite/granite-4.2-8b",
         "label": "granite-4.1",
         "params": "8B",
         "is_granite": True,

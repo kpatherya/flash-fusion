@@ -103,13 +103,13 @@
   },
   {
     "query_id": 18,
-    "query_text": "Derive peak acceleration magnitude from accel_stats_x_p99, accel_stats_y_p99, and accel_stats_z_p99. Split the route at the median latitude and report the absolute difference between the northern and southern halves' mean peak magnitudes.",
+    "query_text": "For each recorded latitude reading, derive peak acceleration magnitude from accel_stats_x_p99, accel_stats_y_p99, and accel_stats_z_p99. Report the absolute difference between the mean peak magnitude north versus south of the median latitude.",
     "reference_answer": "Northern mean peak magnitude is 11.722590691853; southern mean peak magnitude is 11.194853285219; their absolute difference is 0.527737406634.",
     "expected_rejection": false
   },
   {
     "query_id": 19,
-    "query_text": "Derive the vertical shock range as accel_stats_z_p99 minus accel_stats_z_p1. Compute its mean separately for aggressive and calm behavior labels, then report the aggressive-minus-calm difference.",
+    "query_text": "For each 5-minute timestamp window, derive the vertical shock range as accel_stats_z_p99 minus accel_stats_z_p1 and compute its mean separately for aggressive and calm behavior labels. Report the overall aggressive-minus-calm difference across the route.",
     "reference_answer": "Aggressive mean vertical shock range is 4.869682926829; calm mean is 1.433177419355; aggressive-minus-calm is 3.436505507474.",
     "expected_rejection": false
   },

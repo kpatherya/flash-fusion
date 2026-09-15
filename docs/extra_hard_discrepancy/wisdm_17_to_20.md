@@ -57,3 +57,34 @@ Missing sums remain zero-filled intentionally. Unlike a missing mean or variance
 - Ground truth uses complete pairs for Q17-Q19.
 - `PARALLEL_AGGREGATE` preserves missing non-additive aggregates.
 - The planner contract now states the missing-value policy explicitly. This is a small operator-contract correction, not a new operator or a fundamental expressivity gap.
+
+# Adversarial re-wording strategy (2026-09-15)
+
+After the ground-truth/executor bugs above were fixed, Q18 and Q19 were deliberately reworded to probe the *planner's* correctness rather than the executor's — same underlying question, phrased to make a wrong-but-schema-valid operator chain attractive. Each rewrite targets a specific mechanism, verified against `flashfusion/pipeline/operator_router.py` and/or the `OPERATOR_VOCABULARY_SPEC` planner prompt in `flashfusion/pipeline/operators.py`.
+
+## Q18: router-exclusion trap (signed-difference)
+
+Original wording used explicit comparison/derive vocabulary ("difference", "margin", "exceeds"), which kept the `partition_compare` and `derive` operator buckets in the candidate vocabulary and the planner answered correctly. The rewrite —
+
+> "For every subject_id, compute x-acceleration variance separately while Jogging and while Walking. Return the subject_id for whom Jogging pulls furthest ahead of Walking."
+
+— strips every `COMPARISON_CUES`/`THRESHOLD_CUES`/`DERIVE_CUES` token while keeping `GROUPING_CUES` ("every") and `MULTI_BRANCH_CUES` ("separately"). Confirmed directly against `route_operator_bucket`:
+
+```
+excluded= ('correlation', 'derive', 'partition_compare', 'predictive')
+candidate_ops= [AGGREGATE_COLUMN, AGGREGATE_GROUPS, COUNT_DISTINCT, COUNT_ROWS, FILTER_COMPARE,
+                FILTER_EQ_AGGREGATE, FILTER_IN, FILTER_NOT_EMPTY, GROUP_AGGREGATE, PARALLEL_AGGREGATE,
+                RANK_GROUPS, RANK_ROWS, SELECT_COLUMN]
+```
+
+`DERIVE_BINARY` and `COMPARE_VALUES` are excluded before the planner LLM ever runs, so it cannot express a signed difference at all and is left to rank by a single raw branch column — a different question, answered with a syntactically valid chain.
+
+## Q19: router-exclusion trap (correlation method) — confirmed live
+
+Rewrite:
+
+> "For every subject_id, compute mean acceleration magnitude while Jogging and while Walking. Report whether subjects who jog harder also walk harder, ranking subjects consistently across both activities."
+
+This avoids every `CORRELATION_CUES` token (`correlat*`, `relationship`, `related`, `associat*`, ...), so `_rule_correlation` excludes the `correlation` bucket and `CORRELATE_COLUMNS` never reaches the planner. Live trace (`python -m flashfusion.eval.trace_query --dataset wisdm --query-id 19`) confirmed the failure mode exactly: the planner produced `FILTER_NOT_EMPTY -> DERIVE_VECTOR_MAGNITUDE -> PARALLEL_AGGREGATE -> RANK_ROWS`, returning the single subject with the highest Jogging magnitude (`subject_id 23`) instead of a correlation coefficient. This is a router-elimination failure, one level earlier and more severe than the originally-intended "planner defaults `method` to pearson instead of spearman" trap — the operator is absent from the candidate vocabulary entirely, not merely mis-parameterized.
+
+The ground-truth reference answer was reworded to lead with the qualitative verdict ("Yes — subjects who jog harder also tend to walk harder: the Spearman rank correlation ... is 0.7038...") so a correct planner run is scored fairly against the literal "report whether" framing of the question.

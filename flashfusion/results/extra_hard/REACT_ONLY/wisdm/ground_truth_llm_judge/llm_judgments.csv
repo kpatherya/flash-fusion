@@ -1,0 +1,390 @@
+run_id,source_file,baseline,query_id,query_id_source,query_text,expected_rejection,gt_reference_answer,candidate_answer,candidate_rejected,candidate_executed,candidate_code,llm_verdict,llm_score,llm_reason,gt_sanity,gt_sanity_note,llm_parse_status,llm_attempts,llm_override_applied,llm_raw
+1,[in_memory_benchmark_run],REACT_ONLY,17,explicit,"For every subject_id, compute mean acceleration magnitude separately for dynamic activities (Walking, Jogging, Upstairs, Downstairs) and resting activities (Sitting, Standing). Return the subject_id with the largest dynamic-minus-resting mean magnitude.",False,subject_id 24 has the largest dynamic-minus-resting mean magnitude: 4.739240077985.,The result is: 24,False,True,"# Filter out rows with missing activity labels
+df = df[df['activity_label'] != '']
+
+# Compute acceleration magnitude
+df['magnitude'] = (df['x']**2 + df['y']**2 + df['z']**2)**0.5
+
+# Define activity groups
+dynamic_activities = ['Walking', 'Jogging', 'Upstairs', 'Downstairs']
+resting_activities = ['Sitting', 'Standing']
+
+# Calculate mean magnitudes for each group by subject
+dynamic_means = df[df['activity_label'].isin(dynamic_activities)].groupby('subject_id')['magnitude'].mean()
+resting_means = df[df['activity_label'].isin(resting_activities)].groupby('subject_id')['magnitude'].mean()
+
+# Combine means and compute difference
+mean_diffs = dynamic_means - resting_means
+
+# Find subject_id with largest difference
+result = mean_diffs.idxmax()",PASS,1.0,"The candidate answer '24' correctly identifies the subject_id with the largest dynamic-minus-resting mean magnitude, matching the ground truth referent.",SOUND,Matches deterministic hint and is consistent with the query's requirements.,json,1,False,"{
+  ""verdict"": ""PASS"",
+  ""reason"": ""The candidate answer '24' correctly identifies the subject_id with the largest dynamic-minus-resting mean magnitude, matching the ground truth referent."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Matches deterministic hint and is consistent with the query's requirements.""
+}"
+1,[in_memory_benchmark_run],REACT_ONLY,18,explicit,"For every subject_id, compute x-acceleration variance separately while Jogging and while Walking. Among subject_id values whose Jogging variance exceeds their Walking variance, return the subject_id with the largest Jogging-minus-Walking variance difference.",False,subject_id 31 has the largest positive Jogging-minus-Walking x-variance difference: 101.804056286613.,The result is: 31,False,True,"# Filter out rows with empty activity_label
+df_filtered = df[df['activity_label'] != '']
+
+# Compute variance of x for Jogging and Walking per subject_id
+var_jogging = df_filtered[df_filtered['activity_label'] == 'Jogging'].groupby('subject_id')['x'].var()
+var_walking = df_filtered[df_filtered['activity_label'] == 'Walking'].groupby('subject_id')['x'].var()
+
+# Combine variances into a DataFrame
+var_df = pd.DataFrame({'jogging_var': var_jogging, 'walking_var': var_walking})
+
+# Drop rows where either variance is NaN (subject didn't perform one of the activities)
+var_df = var_df.dropna()
+
+# Filter subjects where jogging variance exceeds walking variance
+var_df = var_df[var_df['jogging_var'] > var_df['walking_var']]
+
+# If no subjects meet the criteria, return None
+if var_df.empty:
+    result = None
+else:
+    # Compute the difference and find the subject_id with the largest difference
+    var_df['diff'] = var_df['jogging_var'] - var_df['walking_var']
+    result = var_df['diff'].idxmax()",PASS,1.0,"The candidate answer '31' correctly identifies the subject_id with the largest positive Jogging-minus-Walking x-variance difference, matching the ground truth referent.",SOUND,Matches deterministic hint and is consistent with the query's requirements.,json,1,False,"{
+  ""verdict"": ""PASS"",
+  ""reason"": ""The candidate answer '31' correctly identifies the subject_id with the largest positive Jogging-minus-Walking x-variance difference, matching the ground truth referent."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Matches deterministic hint and is consistent with the query's requirements.""
+}"
+1,[in_memory_benchmark_run],REACT_ONLY,19,explicit,"For every subject_id, compute mean acceleration magnitude while Jogging and while Walking. Return the Pearson correlation between the two per-subject mean-magnitude columns.",False,The Pearson correlation between per-subject Jogging and Walking mean magnitudes is 0.749194840548.,The result is: 0.7491948405475501,False,True,"# Filter out rows with empty activity_label
+df = df[df['activity_label'] != '']
+
+# Compute acceleration magnitude
+df['magnitude'] = (df['x']**2 + df['y']**2 + df['z']**2)**0.5
+
+# Get mean magnitude for Jogging and Walking per subject
+jogging_means = df[df['activity_label'] == 'Jogging'].groupby('subject_id')['magnitude'].mean()
+walking_means = df[df['activity_label'] == 'Walking'].groupby('subject_id')['magnitude'].mean()
+
+# Combine into a single DataFrame to align subjects
+means_df = pd.DataFrame({
+    'jogging_mean': jogging_means,
+    'walking_mean': walking_means
+})
+
+# Drop any subjects that don't have both activities
+means_df = means_df.dropna()
+
+# Compute Pearson correlation
+result = means_df['jogging_mean'].corr(means_df['walking_mean'])",PASS,1.0,The candidate answer matches the ground truth value of 0.749 for the Pearson correlation between per-subject mean acceleration magnitudes during Jogging and Walking.,SOUND,Matches deterministic sanity hint and is consistent with the described computation.,json,1,False,"{
+  ""verdict"": ""PASS"",
+  ""reason"": ""The candidate answer matches the ground truth value of 0.749 for the Pearson correlation between per-subject mean acceleration magnitudes during Jogging and Walking."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Matches deterministic sanity hint and is consistent with the described computation.""
+}"
+1,[in_memory_benchmark_run],REACT_ONLY,20,explicit,"For every subject_id, derive elapsed seconds from timestamp, then compute total locomotion duration (Walking, Jogging, Upstairs, Downstairs) and total resting duration (Sitting, Standing). Among subjects with more locomotion than resting time, return the subject_id with the largest locomotion-minus-resting duration.",False,subject_id 19 has the largest positive locomotion-minus-resting duration: 131091.171906999982 seconds.,The result is: 19,False,True,"import pandas as pd
+
+# Filter out rows with empty activity_label
+df_filtered = df[df['activity_label'] != '']
+
+# Define locomotion and resting activities
+locomotion_activities = {'Walking', 'Jogging', 'Upstairs', 'Downstairs'}
+resting_activities = {'Sitting', 'Standing'}
+
+# Ensure all activity labels are in the expected set
+df_filtered = df_filtered[df_filtered['activity_label'].isin(locomotion_activities | resting_activities)]
+
+# Sort by subject_id and timestamp to compute time differences
+df_sorted = df_filtered.sort_values(['subject_id', 'timestamp'])
+
+# Compute elapsed seconds: convert timestamp (assumed in microseconds) to seconds
+df_sorted['timestamp_sec'] = df_sorted['timestamp'] / 1_000_000
+
+# Compute time difference between consecutive samples within each subject
+df_sorted['dt_sec'] = df_sorted.groupby('subject_id')['timestamp_sec'].diff().fillna(0)
+
+# For each row, assign duration to either locomotion or resting
+df_sorted['locomotion_time'] = df_sorted['dt_sec'].where(df_sorted['activity_label'].isin(locomotion_activities), 0)
+df_sorted['resting_time'] = df_sorted['dt_sec'].where(df_sorted['activity_label'].isin(resting_activities), 0)
+
+# Aggregate total locomotion and resting time per subject
+summary = df_sorted.groupby('subject_id').agg(
+    total_locomotion=('locomotion_time', 'sum'),
+    total_resting=('resting_time', 'sum')
+).reset_index()
+
+# Compute difference
+summary['locomotion_minus_resting'] = summary['total_locomotion'] - summary['total_resting']
+
+# Filter subjects with more locomotion than resting time
+candidates = summary[summary['total_locomotion'] > summary['total_resting']]
+
+if candidates.empty:
+    result = None
+else:
+    # Get subject_id with largest locomotion-minus-resting duration
+    result = candidates.loc[candidates['locomotion_minus_resting'].idxmax(), 'subject_id']",PASS,1.0,"The candidate answer '19' correctly identifies the subject_id with the largest positive locomotion-minus-resting duration, matching the ground truth.",SOUND,Matches deterministic hint and is consistent with the query's requirements.,json,1,False,"{
+  ""verdict"": ""PASS"",
+  ""reason"": ""The candidate answer '19' correctly identifies the subject_id with the largest positive locomotion-minus-resting duration, matching the ground truth."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Matches deterministic hint and is consistent with the query's requirements.""
+}"
+2,[in_memory_benchmark_run],REACT_ONLY,17,explicit,"For every subject_id, compute mean acceleration magnitude separately for dynamic activities (Walking, Jogging, Upstairs, Downstairs) and resting activities (Sitting, Standing). Return the subject_id with the largest dynamic-minus-resting mean magnitude.",False,subject_id 24 has the largest dynamic-minus-resting mean magnitude: 4.739240077985.,The result is: 24,False,True,"# Filter out rows with empty activity_label
+df = df[df['activity_label'] != '']
+
+# Compute acceleration magnitude
+df['magnitude'] = (df['x']**2 + df['y']**2 + df['z']**2)**0.5
+
+# Define activity groups
+dynamic_activities = ['Walking', 'Jogging', 'Upstairs', 'Downstairs']
+resting_activities = ['Sitting', 'Standing']
+
+# Compute mean magnitude for dynamic and resting activities per subject
+dynamic_means = df[df['activity_label'].isin(dynamic_activities)].groupby('subject_id')['magnitude'].mean()
+resting_means = df[df['activity_label'].isin(resting_activities)].groupby('subject_id')['magnitude'].mean()
+
+# Combine means into a single DataFrame
+means_df = pd.DataFrame({
+    'dynamic_mean': dynamic_means,
+    'resting_mean': resting_means
+})
+
+# Compute the difference
+means_df['difference'] = means_df['dynamic_mean'] - means_df['resting_mean']
+
+# Find the subject_id with the largest difference
+result = means_df['difference'].idxmax()",PASS,1.0,"The candidate answer '24' correctly identifies the subject_id with the largest dynamic-minus-resting mean magnitude, matching the ground truth referent.",SOUND,Matches deterministic sanity hint and is consistent with the query's requirements.,json,1,False,"{
+  ""verdict"": ""PASS"",
+  ""reason"": ""The candidate answer '24' correctly identifies the subject_id with the largest dynamic-minus-resting mean magnitude, matching the ground truth referent."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Matches deterministic sanity hint and is consistent with the query's requirements.""
+}"
+2,[in_memory_benchmark_run],REACT_ONLY,18,explicit,"For every subject_id, compute x-acceleration variance separately while Jogging and while Walking. Among subject_id values whose Jogging variance exceeds their Walking variance, return the subject_id with the largest Jogging-minus-Walking variance difference.",False,subject_id 31 has the largest positive Jogging-minus-Walking x-variance difference: 101.804056286613.,The result is: 31,False,True,"# Filter out rows with empty activity_label
+df_filtered = df[df['activity_label'] != '']
+
+# Compute variance of x for Jogging and Walking per subject_id
+jogging_var = df_filtered[df_filtered['activity_label'] == 'Jogging'].groupby('subject_id')['x'].var()
+walking_var = df_filtered[df_filtered['activity_label'] == 'Walking'].groupby('subject_id')['x'].var()
+
+# Merge the two series to align subject_ids
+var_diff = jogging_var.subtract(walking_var, fill_value=0)
+
+# Find subject_ids where Jogging variance exceeds Walking variance
+valid_subjects = var_diff[var_diff > 0]
+
+# If no such subjects exist, return None or appropriate indicator
+if valid_subjects.empty:
+    result = None
+else:
+    # Return the subject_id with the largest difference
+    result = valid_subjects.idxmax()",PASS,1.0,The candidate answer '31' matches the ground truth's canonical referent: subject_id 31 has the largest positive Jogging-minus-Walking x-variance difference.,SOUND,Matches deterministic hint and is consistent with the query.,json,1,False,"{
+  ""verdict"": ""PASS"",
+  ""reason"": ""The candidate answer '31' matches the ground truth's canonical referent: subject_id 31 has the largest positive Jogging-minus-Walking x-variance difference."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Matches deterministic hint and is consistent with the query.""
+}"
+2,[in_memory_benchmark_run],REACT_ONLY,19,explicit,"For every subject_id, compute mean acceleration magnitude while Jogging and while Walking. Return the Pearson correlation between the two per-subject mean-magnitude columns.",False,The Pearson correlation between per-subject Jogging and Walking mean magnitudes is 0.749194840548.,The result is: 0.7491948405475501,False,True,"# Filter out rows with empty activity_label
+df = df[df['activity_label'] != '']
+
+# Compute acceleration magnitude
+df['magnitude'] = (df['x']**2 + df['y']**2 + df['z']**2)**0.5
+
+# Get mean magnitude for Jogging and Walking per subject
+jogging_means = df[df['activity_label'] == 'Jogging'].groupby('subject_id')['magnitude'].mean()
+walking_means = df[df['activity_label'] == 'Walking'].groupby('subject_id')['magnitude'].mean()
+
+# Combine into a DataFrame to align subjects
+means_df = pd.DataFrame({
+    'jogging_mean': jogging_means,
+    'walking_mean': walking_means
+})
+
+# Drop any subjects that don't have both activities
+means_df = means_df.dropna()
+
+# Calculate Pearson correlation
+result = means_df['jogging_mean'].corr(means_df['walking_mean'])",PASS,1.0,The candidate answer matches the ground truth value of 0.749 for the Pearson correlation between per-subject mean acceleration magnitudes for Jogging and Walking.,SOUND,Matches deterministic sanity hint and is consistent with the described computation.,json,1,False,"{
+  ""verdict"": ""PASS"",
+  ""reason"": ""The candidate answer matches the ground truth value of 0.749 for the Pearson correlation between per-subject mean acceleration magnitudes for Jogging and Walking."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Matches deterministic sanity hint and is consistent with the described computation.""
+}"
+2,[in_memory_benchmark_run],REACT_ONLY,20,explicit,"For every subject_id, derive elapsed seconds from timestamp, then compute total locomotion duration (Walking, Jogging, Upstairs, Downstairs) and total resting duration (Sitting, Standing). Among subjects with more locomotion than resting time, return the subject_id with the largest locomotion-minus-resting duration.",False,subject_id 19 has the largest positive locomotion-minus-resting duration: 131091.171906999982 seconds.,The result is: 19,False,True,"# Filter out rows with empty activity_label
+df_filtered = df[df['activity_label'] != '']
+
+# Define locomotion and resting activities
+locomotion_activities = ['Walking', 'Jogging', 'Upstairs', 'Downstairs']
+resting_activities = ['Sitting', 'Standing']
+
+# Add a column to identify locomotion vs resting
+df_filtered['is_locomotion'] = df_filtered['activity_label'].isin(locomotion_activities)
+df_filtered['is_resting'] = df_filtered['activity_label'].isin(resting_activities)
+
+# Sort by subject_id and timestamp to ensure proper time ordering
+df_sorted = df_filtered.sort_values(['subject_id', 'timestamp'])
+
+# Calculate time differences between consecutive timestamps for each subject
+df_sorted['time_diff'] = df_sorted.groupby('subject_id')['timestamp'].diff().fillna(0)
+
+# For the first record of each subject, we can't determine duration, so set to 0
+# Now compute total locomotion and resting durations per subject
+grouped = df_sorted.groupby('subject_id')
+locomotion_duration = grouped.apply(lambda g: g[g['is_locomotion']]['time_diff'].sum())
+resting_duration = grouped.apply(lambda g: g[g['is_resting']]['time_diff'].sum())
+
+# Create a DataFrame with both durations
+durations = pd.DataFrame({
+    'locomotion': locomotion_duration,
+    'resting': resting_duration
+})
+
+# Filter subjects with more locomotion than resting time
+durations['difference'] = durations['locomotion'] - durations['resting']
+filtered_durations = durations[durations['difference'] > 0]
+
+# Return the subject_id with the largest difference
+if filtered_durations.empty:
+    result = None
+else:
+    result = filtered_durations['difference'].idxmax()",PASS,1.0,"The candidate answer '19' correctly identifies the subject_id with the largest positive locomotion-minus-resting duration, matching the ground truth.",SOUND,Matches deterministic hint and is consistent with the query's requirements.,json,1,False,"{
+  ""verdict"": ""PASS"",
+  ""reason"": ""The candidate answer '19' correctly identifies the subject_id with the largest positive locomotion-minus-resting duration, matching the ground truth."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Matches deterministic hint and is consistent with the query's requirements.""
+}"
+3,[in_memory_benchmark_run],REACT_ONLY,17,explicit,"For every subject_id, compute mean acceleration magnitude separately for dynamic activities (Walking, Jogging, Upstairs, Downstairs) and resting activities (Sitting, Standing). Return the subject_id with the largest dynamic-minus-resting mean magnitude.",False,subject_id 24 has the largest dynamic-minus-resting mean magnitude: 4.739240077985.,The result is: 24,False,True,"# Filter out rows with empty activity_label
+df = df[df['activity_label'] != '']
+
+# Compute acceleration magnitude
+df['magnitude'] = (df['x']**2 + df['y']**2 + df['z']**2)**0.5
+
+# Define activity groups
+dynamic_activities = ['Walking', 'Jogging', 'Upstairs', 'Downstairs']
+resting_activities = ['Sitting', 'Standing']
+
+# Compute mean magnitude for dynamic and resting activities per subject
+dynamic_means = df[df['activity_label'].isin(dynamic_activities)].groupby('subject_id')['magnitude'].mean()
+resting_means = df[df['activity_label'].isin(resting_activities)].groupby('subject_id')['magnitude'].mean()
+
+# Combine means into a single DataFrame
+means_df = pd.DataFrame({
+    'dynamic_mean': dynamic_means,
+    'resting_mean': resting_means
+})
+
+# Compute the difference
+means_df['difference'] = means_df['dynamic_mean'] - means_df['resting_mean']
+
+# Find the subject_id with the largest difference
+result = means_df['difference'].idxmax()",PASS,1.0,"The candidate answer '24' correctly identifies the subject_id with the largest dynamic-minus-resting mean magnitude, matching the ground truth referent.",SOUND,Matches deterministic hint and is consistent with the query's requirements.,json,1,False,"{
+  ""verdict"": ""PASS"",
+  ""reason"": ""The candidate answer '24' correctly identifies the subject_id with the largest dynamic-minus-resting mean magnitude, matching the ground truth referent."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Matches deterministic hint and is consistent with the query's requirements.""
+}"
+3,[in_memory_benchmark_run],REACT_ONLY,18,explicit,"For every subject_id, compute x-acceleration variance separately while Jogging and while Walking. Among subject_id values whose Jogging variance exceeds their Walking variance, return the subject_id with the largest Jogging-minus-Walking variance difference.",False,subject_id 31 has the largest positive Jogging-minus-Walking x-variance difference: 101.804056286613.,The result is: 31,False,True,"# Filter out rows with empty activity_label
+df_filtered = df[df['activity_label'] != '']
+
+# Compute variance of x for Jogging and Walking per subject_id
+var_jogging = df_filtered[df_filtered['activity_label'] == 'Jogging'].groupby('subject_id')['x'].var()
+var_walking = df_filtered[df_filtered['activity_label'] == 'Walking'].groupby('subject_id')['x'].var()
+
+# Combine variances into a DataFrame
+var_df = pd.DataFrame({'jogging_var': var_jogging, 'walking_var': var_walking})
+
+# Drop rows where either variance is NaN (subject didn't perform one of the activities)
+var_df = var_df.dropna()
+
+# Filter subjects where jogging variance exceeds walking variance
+var_df = var_df[var_df['jogging_var'] > var_df['walking_var']]
+
+# If no subjects meet the criteria, return None
+if var_df.empty:
+    result = None
+else:
+    # Compute the difference
+    var_df['diff'] = var_df['jogging_var'] - var_df['walking_var']
+    
+    # Find the subject_id with the largest difference
+    result = var_df['diff'].idxmax()",PASS,1.0,"The candidate answer '31' correctly identifies the subject_id with the largest positive Jogging-minus-Walking x-variance difference, matching the ground truth referent.",SOUND,Matches deterministic hint and is consistent with the query's requirements.,json,1,False,"{
+  ""verdict"": ""PASS"",
+  ""reason"": ""The candidate answer '31' correctly identifies the subject_id with the largest positive Jogging-minus-Walking x-variance difference, matching the ground truth referent."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Matches deterministic hint and is consistent with the query's requirements.""
+}"
+3,[in_memory_benchmark_run],REACT_ONLY,19,explicit,"For every subject_id, compute mean acceleration magnitude while Jogging and while Walking. Return the Pearson correlation between the two per-subject mean-magnitude columns.",False,The Pearson correlation between per-subject Jogging and Walking mean magnitudes is 0.749194840548.,The result is: 0.7491948405475501,False,True,"# Filter out rows with empty activity_label
+df = df[df['activity_label'] != '']
+
+# Compute acceleration magnitude
+df['magnitude'] = (df['x']**2 + df['y']**2 + df['z']**2)**0.5
+
+# Get mean magnitude for Jogging and Walking per subject
+jogging_means = df[df['activity_label'] == 'Jogging'].groupby('subject_id')['magnitude'].mean()
+walking_means = df[df['activity_label'] == 'Walking'].groupby('subject_id')['magnitude'].mean()
+
+# Combine into a DataFrame to align subjects
+means_df = pd.DataFrame({
+    'jogging': jogging_means,
+    'walking': walking_means
+})
+
+# Compute Pearson correlation between the two columns
+result = means_df['jogging'].corr(means_df['walking'])",PASS,1.0,The candidate answer matches the ground truth value of 0.749 for the Pearson correlation between per-subject mean acceleration magnitudes for Jogging and Walking.,SOUND,Matches deterministic sanity hint and is consistent with the described computation.,json,1,False,"{
+  ""verdict"": ""PASS"",
+  ""reason"": ""The candidate answer matches the ground truth value of 0.749 for the Pearson correlation between per-subject mean acceleration magnitudes for Jogging and Walking."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Matches deterministic sanity hint and is consistent with the described computation.""
+}"
+3,[in_memory_benchmark_run],REACT_ONLY,20,explicit,"For every subject_id, derive elapsed seconds from timestamp, then compute total locomotion duration (Walking, Jogging, Upstairs, Downstairs) and total resting duration (Sitting, Standing). Among subjects with more locomotion than resting time, return the subject_id with the largest locomotion-minus-resting duration.",False,subject_id 19 has the largest positive locomotion-minus-resting duration: 131091.171906999982 seconds.,The result is: 3,False,True,"# Filter out rows with empty activity_label
+df = df[df['activity_label'] != '']
+
+# Define locomotion and resting activities
+locomotion_activities = {'Walking', 'Jogging', 'Upstairs', 'Downstairs'}
+resting_activities = {'Sitting', 'Standing'}
+
+# Ensure all activity labels are accounted for
+assert set(df['activity_label'].unique()) <= (locomotion_activities | resting_activities)
+
+# Sort by subject_id and timestamp to ensure correct time ordering
+df = df.sort_values(['subject_id', 'timestamp']).reset_index(drop=True)
+
+# Compute elapsed seconds: convert timestamp from microseconds to seconds
+df['elapsed_sec'] = df['timestamp'] / 1_000_000
+
+# Group by subject_id and activity_label to compute total duration per activity per subject
+# Since each row represents a sample (not an interval), we cannot directly sum elapsed_sec.
+# Instead, we must compute time intervals between consecutive samples within each (subject_id, activity_label) block.
+
+# To handle continuous blocks of the same activity for a subject, we need to identify block boundaries
+df['activity_change'] = df.groupby('subject_id')['activity_label'].shift(1) != df['activity_label']
+df['block_id'] = df.groupby('subject_id')['activity_change'].cumsum()
+
+# Now compute duration per block: last timestamp - first timestamp in block
+block_durations = df.groupby(['subject_id', 'block_id', 'activity_label'])['elapsed_sec'].agg(['first', 'last'])
+block_durations['block_duration'] = block_durations['last'] - block_durations['first']
+block_durations = block_durations.reset_index()
+
+# Classify each block as locomotion or resting
+block_durations['is_locomotion'] = block_durations['activity_label'].isin(locomotion_activities)
+
+# Aggregate total locomotion and resting durations per subject
+locomotion_total = block_durations[block_durations['is_locomotion']].groupby('subject_id')['block_duration'].sum()
+resting_total = block_durations[~block_durations['is_locomotion']].groupby('subject_id')['block_duration'].sum()
+
+# Combine into a single DataFrame
+duration_summary = pd.DataFrame({
+    'locomotion_duration': locomotion_total,
+    'resting_duration': resting_total
+}).fillna(0)
+
+# Filter subjects with more locomotion than resting time
+duration_summary = duration_summary[duration_summary['locomotion_duration'] > duration_summary['resting_duration']]
+
+# Compute difference
+duration_summary['diff'] = duration_summary['locomotion_duration'] - duration_summary['resting_duration']
+
+# Find subject_id with largest difference
+if duration_summary.empty:
+    result = None
+else:
+    result = duration_summary['diff'].idxmax()",FAIL,0.0,Candidate answer '3' does not match the correct subject_id '19' as stated in the ground truth.,SOUND,Ground truth is consistent with the deterministic hint and specifies subject_id 19 with a precise duration.,json,1,False,"{
+  ""verdict"": ""FAIL"",
+  ""reason"": ""Candidate answer '3' does not match the correct subject_id '19' as stated in the ground truth."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Ground truth is consistent with the deterministic hint and specifies subject_id 19 with a precise duration.""
+}"

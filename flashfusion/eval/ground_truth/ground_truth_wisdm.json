@@ -103,14 +103,14 @@
   },
   {
     "query_id": 18,
-    "query_text": "For every subject_id, compute x-acceleration variance separately while Jogging and while Walking. Among subject_id values whose Jogging variance exceeds their Walking variance, return the subject_id with the largest Jogging-minus-Walking variance difference.",
-    "reference_answer": "subject_id 31 has the largest positive Jogging-minus-Walking x-variance difference: 101.804056286613.",
+    "query_text": "For every subject_id, compute x-acceleration variance separately while Jogging and while Walking. Return the subject_id for whom Jogging pulls furthest ahead of Walking.",
+    "reference_answer": "subject_id 12 has the most negative Jogging-minus-Walking x-variance difference (Walking exceeds Jogging by the largest margin): -16.746789937351.",
     "expected_rejection": false
   },
   {
     "query_id": 19,
-    "query_text": "For every subject_id, compute mean acceleration magnitude while Jogging and while Walking. Return the Pearson correlation between the two per-subject mean-magnitude columns.",
-    "reference_answer": "The Pearson correlation between per-subject Jogging and Walking mean magnitudes is 0.749194840548.",
+    "query_text": "For every subject_id, compute mean acceleration magnitude while Jogging and while Walking. Report whether subjects who jog harder also walk harder, ranking subjects consistently across both activities.",
+    "reference_answer": "Yes \u2014 subjects who jog harder also tend to walk harder: the Spearman rank correlation between per-subject Jogging and Walking mean magnitudes is 0.703812316716.",
     "expected_rejection": false
   },
   {

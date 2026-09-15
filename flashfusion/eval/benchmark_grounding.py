@@ -10,8 +10,8 @@ End-to-end run command example (single dataset):
 BUS:
 python -m flashfusion.eval.benchmark_grounding \
     --dataset bus \
-    --model ibm-granite/granite-4.1-8b \
-    --models meta-llama/llama-3.2-1b-instruct,meta-llama/llama-3.2-3b-instruct,qwen/qwen-2.5-7b-instruct,ibm-granite/granite-4.1-8b,google/gemma-3-12b-it,qwen/qwen3-14b \
+    --model ibm-granite/granite-4.2-8b \
+    --models meta-llama/llama-3.2-1b-instruct,meta-llama/llama-3.2-3b-instruct,qwen/qwen-2.5-7b-instruct,ibm-granite/granite-4.2-8b,google/gemma-3-12b-it,qwen/qwen3-14b \
     --runs 3 \
     --query-versions v1,v2,v3 \
     --output-dir flashfusion/results/ff_hybrid_cache/grounding_benchmark/bus \
@@ -25,8 +25,8 @@ python -m flashfusion.eval.benchmark_grounding \
 WISDM:
 python -m flashfusion.eval.benchmark_grounding \
     --dataset wisdm \
-    --model ibm-granite/granite-4.1-8b \
-    --models meta-llama/llama-3.2-1b-instruct,meta-llama/llama-3.2-3b-instruct,qwen/qwen-2.5-7b-instruct,ibm-granite/granite-4.1-8b,google/gemma-3-12b-it,qwen/qwen3-14b \
+    --model ibm-granite/granite-4.2-8b \
+    --models meta-llama/llama-3.2-1b-instruct,meta-llama/llama-3.2-3b-instruct,qwen/qwen-2.5-7b-instruct,ibm-granite/granite-4.2-8b,google/gemma-3-12b-it,qwen/qwen3-14b \
     --runs 3 \
     --query-versions v1,v2,v3 \
     --output-dir flashfusion/results/ff_hybrid_cache/grounding_benchmark/wisdm \
@@ -40,8 +40,8 @@ python -m flashfusion.eval.benchmark_grounding \
 ECG:
 python -m flashfusion.eval.benchmark_grounding \
     --dataset mit_ecg \
-    --model ibm-granite/granite-4.1-8b \
-    --models meta-llama/llama-3.2-1b-instruct,meta-llama/llama-3.2-3b-instruct,qwen/qwen-2.5-7b-instruct,ibm-granite/granite-4.1-8b,google/gemma-3-12b-it \
+    --model ibm-granite/granite-4.2-8b \
+    --models meta-llama/llama-3.2-1b-instruct,meta-llama/llama-3.2-3b-instruct,qwen/qwen-2.5-7b-instruct,ibm-granite/granite-4.2-8b,google/gemma-3-12b-it \
     --runs 3 \
     --query-versions v1,v2,v3 \
     --output-dir flashfusion/results/ff_hybrid_cache/grounding_benchmark/mit_ecg \
@@ -84,7 +84,7 @@ DEFAULT_STAGE12_MODELS = [
     "meta-llama/llama-3.2-1b-instruct",
     "meta-llama/llama-3.2-3b-instruct",
     "qwen/qwen-2.5-7b-instruct",
-    "ibm-granite/granite-4.1-8b",
+    "ibm-granite/granite-4.2-8b",
     "google/gemma-3-12b-it",
     "qwen/qwen3-14b",
 ]
@@ -93,7 +93,7 @@ MODEL_SIZE_META = {
     "meta-llama/llama-3.2-1b-instruct": {"label": "1b", "params_b": 1.0},
     "meta-llama/llama-3.2-3b-instruct": {"label": "3b", "params_b": 3.0},
     "qwen/qwen-2.5-7b-instruct": {"label": "7b", "params_b": 7.0},
-    "ibm-granite/granite-4.1-8b": {"label": "8b", "params_b": 8.0},
+    "ibm-granite/granite-4.2-8b": {"label": "8b", "params_b": 8.0},
     "google/gemma-3-12b-it": {"label": "12b", "params_b": 12.0},
     "qwen/qwen3-14b": {"label": "14b", "params_b": 14.0},
 }
@@ -857,7 +857,7 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--granite-model-id",
-        default="ibm-granite/granite-4.1-8b",
+        default="ibm-granite/granite-4.2-8b",
         help="Model id to tag reused granite rows with.",
     )
     parser.add_argument(

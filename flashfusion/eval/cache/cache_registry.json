@@ -3968,6 +3968,1904 @@
         }
       },
       "status": "reusable"
+    },
+    {
+      "dataset": "bus",
+      "example_run_ids": [
+        "query_def_seed"
+      ],
+      "field_level_skeleton": [
+        {
+          "op": "FILTER_COMPARE",
+          "slots": [
+            "column",
+            "comparator",
+            "value"
+          ]
+        },
+        {
+          "op": "DERIVE_BIN",
+          "slots": [
+            "column",
+            "epoch_unit",
+            "freq",
+            "kind",
+            "result",
+            "width"
+          ]
+        },
+        {
+          "op": "GROUP_AGGREGATE",
+          "slots": [
+            "aggregate",
+            "column",
+            "freq",
+            "group_by"
+          ]
+        },
+        {
+          "op": "RANK_GROUPS",
+          "slots": [
+            "direction"
+          ]
+        }
+      ],
+      "n_runs_agreeing": 0,
+      "n_runs_observed": 0,
+      "operator_contract_hash": "2be2d0b165f22ee01479bee3042b9568475c1f3b99a8aa028e2d2f5b4c5d0240",
+      "operator_skeleton": [
+        "FILTER_IN",
+        "DERIVE_BIN",
+        "GROUP_AGGREGATE",
+        "RANK_GROUPS"
+      ],
+      "plan_source_modes": [
+        "query_def_seed"
+      ],
+      "query_id": "17",
+      "query_text": "Filter the route to rows labeled aggressive, group them into 5-minute timestamp windows, and return the window with the highest mean instability_score.",
+      "query_text_source": "query_def_seed",
+      "reasons": [],
+      "schema_fingerprint": "1d29adee7efb7ed4",
+      "semantic_signature": {
+        "admissibility": "in_scope",
+        "aggregate": "max",
+        "confidence": 0.85,
+        "fields": [
+          "instability_score",
+          "timestamp"
+        ],
+        "filter_values": {},
+        "intent_flags": {
+          "correlation": false,
+          "derived_magnitude": false,
+          "difference": false,
+          "group_by": true,
+          "last_event": false,
+          "predictive": false,
+          "rank": true,
+          "time_bin": true
+        },
+        "operator_skeleton_hint": null,
+        "output_shape": "scalar",
+        "predicate_ops": {},
+        "predictive": {
+          "holdout_row": null,
+          "model": null,
+          "target_column": null,
+          "train_fraction": null
+        }
+      },
+      "status": "reusable"
+    },
+    {
+      "dataset": "bus",
+      "example_run_ids": [
+        "query_def_seed"
+      ],
+      "field_level_skeleton": [
+        {
+          "op": "DERIVE_VECTOR_MAGNITUDE",
+          "slots": [
+            "columns",
+            "result"
+          ]
+        },
+        {
+          "op": "SPLIT_BY_THRESHOLD",
+          "slots": [
+            "column",
+            "comparator",
+            "label",
+            "threshold"
+          ]
+        },
+        {
+          "op": "SPLIT_BY_THRESHOLD",
+          "slots": [
+            "column",
+            "comparator",
+            "label",
+            "threshold"
+          ]
+        },
+        {
+          "op": "AGGREGATE_PARTITIONS",
+          "slots": [
+            "aggregate",
+            "column",
+            "partitions"
+          ]
+        },
+        {
+          "op": "COMPARE_PARTITIONS",
+          "slots": [
+            "mode"
+          ]
+        }
+      ],
+      "n_runs_agreeing": 0,
+      "n_runs_observed": 0,
+      "operator_contract_hash": "2be2d0b165f22ee01479bee3042b9568475c1f3b99a8aa028e2d2f5b4c5d0240",
+      "operator_skeleton": [
+        "DERIVE_VECTOR_MAGNITUDE",
+        "SPLIT_BY_THRESHOLD",
+        "SPLIT_BY_THRESHOLD",
+        "AGGREGATE_PARTITIONS",
+        "COMPARE_PARTITIONS"
+      ],
+      "plan_source_modes": [
+        "query_def_seed"
+      ],
+      "query_id": "18",
+      "query_text": "Derive peak acceleration magnitude from accel_stats_x_p99, accel_stats_y_p99, and accel_stats_z_p99. Split the route at the median latitude and report the absolute difference between the northern and southern halves' mean peak magnitudes.",
+      "query_text_source": "query_def_seed",
+      "reasons": [],
+      "schema_fingerprint": "1d29adee7efb7ed4",
+      "semantic_signature": {
+        "admissibility": "in_scope",
+        "aggregate": "median",
+        "confidence": 0.85,
+        "fields": [
+          "accel_stats_x_p99",
+          "accel_stats_y_p99",
+          "accel_stats_z_p99",
+          "latitude"
+        ],
+        "filter_values": {},
+        "intent_flags": {
+          "correlation": false,
+          "derived_magnitude": true,
+          "difference": true,
+          "group_by": false,
+          "last_event": false,
+          "predictive": false,
+          "rank": false,
+          "time_bin": false
+        },
+        "operator_skeleton_hint": null,
+        "output_shape": "scalar",
+        "predicate_ops": {},
+        "predictive": {
+          "holdout_row": null,
+          "model": null,
+          "target_column": null,
+          "train_fraction": null
+        }
+      },
+      "status": "reusable"
+    },
+    {
+      "dataset": "bus",
+      "example_run_ids": [
+        "query_def_seed"
+      ],
+      "field_level_skeleton": [
+        {
+          "op": "DERIVE_BINARY",
+          "slots": [
+            "left",
+            "operation",
+            "result",
+            "right"
+          ]
+        },
+        {
+          "op": "SPLIT_BY_VALUES",
+          "slots": [
+            "column",
+            "label",
+            "values"
+          ]
+        },
+        {
+          "op": "SPLIT_BY_VALUES",
+          "slots": [
+            "column",
+            "label",
+            "values"
+          ]
+        },
+        {
+          "op": "AGGREGATE_PARTITIONS",
+          "slots": [
+            "aggregate",
+            "column",
+            "partitions"
+          ]
+        },
+        {
+          "op": "COMPARE_PARTITIONS",
+          "slots": [
+            "mode"
+          ]
+        }
+      ],
+      "n_runs_agreeing": 0,
+      "n_runs_observed": 0,
+      "operator_contract_hash": "2be2d0b165f22ee01479bee3042b9568475c1f3b99a8aa028e2d2f5b4c5d0240",
+      "operator_skeleton": [
+        "DERIVE_BINARY",
+        "SPLIT_BY_VALUES",
+        "SPLIT_BY_VALUES",
+        "AGGREGATE_PARTITIONS",
+        "COMPARE_PARTITIONS"
+      ],
+      "plan_source_modes": [
+        "query_def_seed"
+      ],
+      "query_id": "19",
+      "query_text": "Derive the vertical shock range as accel_stats_z_p99 minus accel_stats_z_p1. Compute its mean separately for aggressive and calm behavior labels, then report the aggressive-minus-calm difference.",
+      "query_text_source": "query_def_seed",
+      "reasons": [],
+      "schema_fingerprint": "1d29adee7efb7ed4",
+      "semantic_signature": {
+        "admissibility": "in_scope",
+        "aggregate": "mean",
+        "confidence": 0.85,
+        "fields": [
+          "accel_stats_z_p1",
+          "accel_stats_z_p99",
+          "behavior"
+        ],
+        "filter_values": {},
+        "intent_flags": {
+          "correlation": false,
+          "derived_magnitude": false,
+          "difference": true,
+          "group_by": false,
+          "last_event": false,
+          "predictive": false,
+          "rank": false,
+          "time_bin": false
+        },
+        "operator_skeleton_hint": null,
+        "output_shape": "scalar",
+        "predicate_ops": {},
+        "predictive": {
+          "holdout_row": null,
+          "model": null,
+          "target_column": null,
+          "train_fraction": null
+        }
+      },
+      "status": "reusable"
+    },
+    {
+      "dataset": "bus",
+      "example_run_ids": [
+        "query_def_seed"
+      ],
+      "field_level_skeleton": [
+        {
+          "op": "DERIVE_BINARY",
+          "slots": [
+            "left",
+            "operation",
+            "result",
+            "right"
+          ]
+        },
+        {
+          "op": "FILTER_COMPARE",
+          "slots": [
+            "column",
+            "comparator",
+            "value"
+          ]
+        },
+        {
+          "op": "DERIVE_BIN",
+          "slots": [
+            "column",
+            "epoch_unit",
+            "freq",
+            "kind",
+            "result",
+            "width"
+          ]
+        },
+        {
+          "op": "GROUP_AGGREGATE",
+          "slots": [
+            "aggregate",
+            "column",
+            "freq",
+            "group_by"
+          ]
+        },
+        {
+          "op": "RANK_GROUPS",
+          "slots": [
+            "direction"
+          ]
+        }
+      ],
+      "n_runs_agreeing": 0,
+      "n_runs_observed": 0,
+      "operator_contract_hash": "2be2d0b165f22ee01479bee3042b9568475c1f3b99a8aa028e2d2f5b4c5d0240",
+      "operator_skeleton": [
+        "DERIVE_BINARY",
+        "FILTER_IN",
+        "DERIVE_BIN",
+        "GROUP_AGGREGATE",
+        "RANK_GROUPS"
+      ],
+      "plan_source_modes": [
+        "query_def_seed"
+      ],
+      "query_id": "20",
+      "query_text": "Derive the vertical shock range as accel_stats_z_p99 minus accel_stats_z_p1. Filter to aggressive behavior, group rows into 5-minute timestamp windows, and return the window with the highest mean vertical shock range.",
+      "query_text_source": "query_def_seed",
+      "reasons": [],
+      "schema_fingerprint": "1d29adee7efb7ed4",
+      "semantic_signature": {
+        "admissibility": "in_scope",
+        "aggregate": "max",
+        "confidence": 0.85,
+        "fields": [
+          "accel_stats_z_p1",
+          "accel_stats_z_p99",
+          "behavior",
+          "timestamp"
+        ],
+        "filter_values": {},
+        "intent_flags": {
+          "correlation": false,
+          "derived_magnitude": false,
+          "difference": false,
+          "group_by": true,
+          "last_event": false,
+          "predictive": false,
+          "rank": true,
+          "time_bin": true
+        },
+        "operator_skeleton_hint": null,
+        "output_shape": "scalar",
+        "predicate_ops": {},
+        "predictive": {
+          "holdout_row": null,
+          "model": null,
+          "target_column": null,
+          "train_fraction": null
+        }
+      },
+      "status": "reusable"
+    },
+    {
+      "dataset": "wisdm",
+      "example_run_ids": [
+        "query_def_seed"
+      ],
+      "field_level_skeleton": [
+        {
+          "op": "DERIVE_VECTOR_MAGNITUDE",
+          "slots": [
+            "columns",
+            "result"
+          ]
+        },
+        {
+          "op": "PARALLEL_AGGREGATE",
+          "slots": [
+            "branches"
+          ]
+        },
+        {
+          "op": "DERIVE_BINARY",
+          "slots": [
+            "left",
+            "operation",
+            "result",
+            "right"
+          ]
+        },
+        {
+          "op": "RANK_ROWS",
+          "slots": [
+            "column",
+            "direction",
+            "return_columns"
+          ]
+        }
+      ],
+      "n_runs_agreeing": 0,
+      "n_runs_observed": 0,
+      "operator_contract_hash": "2be2d0b165f22ee01479bee3042b9568475c1f3b99a8aa028e2d2f5b4c5d0240",
+      "operator_skeleton": [
+        "FILTER_NOT_EMPTY",
+        "DERIVE_VECTOR_MAGNITUDE",
+        "PARALLEL_AGGREGATE",
+        "DERIVE_BINARY",
+        "RANK_ROWS"
+      ],
+      "plan_source_modes": [
+        "query_def_seed"
+      ],
+      "query_id": "17",
+      "query_text": "For every subject_id, compute mean acceleration magnitude separately for dynamic activities (Walking, Jogging, Upstairs, Downstairs) and resting activities (Sitting, Standing). Return the subject_id with the largest dynamic-minus-resting mean magnitude.",
+      "query_text_source": "query_def_seed",
+      "reasons": [],
+      "schema_fingerprint": "7ad69ccf7f729a4d",
+      "semantic_signature": {
+        "admissibility": "in_scope",
+        "aggregate": "max",
+        "confidence": 0.85,
+        "fields": [
+          "subject_id"
+        ],
+        "filter_values": {},
+        "intent_flags": {
+          "correlation": false,
+          "derived_magnitude": true,
+          "difference": false,
+          "group_by": false,
+          "last_event": false,
+          "predictive": false,
+          "rank": true,
+          "time_bin": false
+        },
+        "operator_skeleton_hint": null,
+        "output_shape": "scalar",
+        "predicate_ops": {},
+        "predictive": {
+          "holdout_row": null,
+          "model": null,
+          "target_column": null,
+          "train_fraction": null
+        }
+      },
+      "status": "reusable"
+    },
+    {
+      "dataset": "wisdm",
+      "example_run_ids": [
+        "query_def_seed"
+      ],
+      "field_level_skeleton": [
+        {
+          "op": "PARALLEL_AGGREGATE",
+          "slots": [
+            "branches"
+          ]
+        },
+        {
+          "op": "DERIVE_BINARY",
+          "slots": [
+            "left",
+            "operation",
+            "result",
+            "right"
+          ]
+        },
+        {
+          "op": "FILTER_COMPARE",
+          "slots": [
+            "column",
+            "comparator",
+            "value"
+          ]
+        },
+        {
+          "op": "RANK_ROWS",
+          "slots": [
+            "column",
+            "direction",
+            "return_columns"
+          ]
+        }
+      ],
+      "n_runs_agreeing": 0,
+      "n_runs_observed": 0,
+      "operator_contract_hash": "2be2d0b165f22ee01479bee3042b9568475c1f3b99a8aa028e2d2f5b4c5d0240",
+      "operator_skeleton": [
+        "FILTER_NOT_EMPTY",
+        "PARALLEL_AGGREGATE",
+        "DERIVE_BINARY",
+        "FILTER_COMPARE",
+        "RANK_ROWS"
+      ],
+      "plan_source_modes": [
+        "query_def_seed"
+      ],
+      "query_id": "18",
+      "query_text": "For every subject_id, compute x-acceleration variance separately while Jogging and while Walking. Among subject_id values whose Jogging variance exceeds their Walking variance, return the subject_id with the largest Jogging-minus-Walking variance difference.",
+      "query_text_source": "query_def_seed",
+      "reasons": [],
+      "schema_fingerprint": "7ad69ccf7f729a4d",
+      "semantic_signature": {
+        "admissibility": "in_scope",
+        "aggregate": "max",
+        "confidence": 0.85,
+        "fields": [
+          "subject_id",
+          "x"
+        ],
+        "filter_values": {},
+        "intent_flags": {
+          "correlation": false,
+          "derived_magnitude": false,
+          "difference": true,
+          "group_by": false,
+          "last_event": false,
+          "predictive": false,
+          "rank": true,
+          "time_bin": false
+        },
+        "operator_skeleton_hint": null,
+        "output_shape": "scalar",
+        "predicate_ops": {},
+        "predictive": {
+          "holdout_row": null,
+          "model": null,
+          "target_column": null,
+          "train_fraction": null
+        }
+      },
+      "status": "reusable"
+    },
+    {
+      "dataset": "wisdm",
+      "example_run_ids": [
+        "query_def_seed"
+      ],
+      "field_level_skeleton": [
+        {
+          "op": "DERIVE_VECTOR_MAGNITUDE",
+          "slots": [
+            "columns",
+            "result"
+          ]
+        },
+        {
+          "op": "PARALLEL_AGGREGATE",
+          "slots": [
+            "branches"
+          ]
+        },
+        {
+          "op": "CORRELATE_COLUMNS",
+          "slots": [
+            "left",
+            "method",
+            "right"
+          ]
+        }
+      ],
+      "n_runs_agreeing": 0,
+      "n_runs_observed": 0,
+      "operator_contract_hash": "2be2d0b165f22ee01479bee3042b9568475c1f3b99a8aa028e2d2f5b4c5d0240",
+      "operator_skeleton": [
+        "FILTER_NOT_EMPTY",
+        "DERIVE_VECTOR_MAGNITUDE",
+        "PARALLEL_AGGREGATE",
+        "CORRELATE_COLUMNS"
+      ],
+      "plan_source_modes": [
+        "query_def_seed"
+      ],
+      "query_id": "19",
+      "query_text": "For every subject_id, compute mean acceleration magnitude while Jogging and while Walking. Return the Pearson correlation between the two per-subject mean-magnitude columns.",
+      "query_text_source": "query_def_seed",
+      "reasons": [],
+      "schema_fingerprint": "7ad69ccf7f729a4d",
+      "semantic_signature": {
+        "admissibility": "in_scope",
+        "aggregate": "mean",
+        "confidence": 0.85,
+        "fields": [
+          "subject_id"
+        ],
+        "filter_values": {},
+        "intent_flags": {
+          "correlation": true,
+          "derived_magnitude": true,
+          "difference": false,
+          "group_by": true,
+          "last_event": false,
+          "predictive": false,
+          "rank": false,
+          "time_bin": false
+        },
+        "operator_skeleton_hint": null,
+        "output_shape": "scalar",
+        "predicate_ops": {},
+        "predictive": {
+          "holdout_row": null,
+          "model": null,
+          "target_column": null,
+          "train_fraction": null
+        }
+      },
+      "status": "reusable"
+    },
+    {
+      "dataset": "wisdm",
+      "example_run_ids": [
+        "query_def_seed"
+      ],
+      "field_level_skeleton": [
+        {
+          "op": "DERIVE_DURATION_SECONDS",
+          "slots": [
+            "clip_negative",
+            "fill_first",
+            "group_by",
+            "result",
+            "timestamp_column"
+          ]
+        },
+        {
+          "op": "PARALLEL_AGGREGATE",
+          "slots": [
+            "branches"
+          ]
+        },
+        {
+          "op": "DERIVE_BINARY",
+          "slots": [
+            "left",
+            "operation",
+            "result",
+            "right"
+          ]
+        },
+        {
+          "op": "FILTER_COMPARE",
+          "slots": [
+            "column",
+            "comparator",
+            "value"
+          ]
+        },
+        {
+          "op": "RANK_ROWS",
+          "slots": [
+            "column",
+            "direction",
+            "return_columns"
+          ]
+        }
+      ],
+      "n_runs_agreeing": 0,
+      "n_runs_observed": 0,
+      "operator_contract_hash": "2be2d0b165f22ee01479bee3042b9568475c1f3b99a8aa028e2d2f5b4c5d0240",
+      "operator_skeleton": [
+        "FILTER_NOT_EMPTY",
+        "DERIVE_DURATION_SECONDS",
+        "PARALLEL_AGGREGATE",
+        "DERIVE_BINARY",
+        "FILTER_COMPARE",
+        "RANK_ROWS"
+      ],
+      "plan_source_modes": [
+        "query_def_seed"
+      ],
+      "query_id": "20",
+      "query_text": "For every subject_id, derive elapsed seconds from timestamp, then compute total locomotion duration (Walking, Jogging, Upstairs, Downstairs) and total resting duration (Sitting, Standing). Among subjects with more locomotion than resting time, return the subject_id with the largest locomotion-minus-resting duration.",
+      "query_text_source": "query_def_seed",
+      "reasons": [],
+      "schema_fingerprint": "7ad69ccf7f729a4d",
+      "semantic_signature": {
+        "admissibility": "in_scope",
+        "aggregate": "max",
+        "confidence": 0.85,
+        "fields": [
+          "subject_id",
+          "timestamp"
+        ],
+        "filter_values": {},
+        "intent_flags": {
+          "correlation": false,
+          "derived_magnitude": false,
+          "difference": false,
+          "group_by": false,
+          "last_event": false,
+          "predictive": false,
+          "rank": true,
+          "time_bin": false
+        },
+        "operator_skeleton_hint": null,
+        "output_shape": "scalar",
+        "predicate_ops": {},
+        "predictive": {
+          "holdout_row": null,
+          "model": null,
+          "target_column": null,
+          "train_fraction": null
+        }
+      },
+      "status": "reusable"
+    },
+    {
+      "dataset": "ecg",
+      "example_run_ids": [
+        "query_def_seed"
+      ],
+      "field_level_skeleton": [
+        {
+          "op": "FILTER_NOT_EMPTY",
+          "slots": [
+            "column"
+          ]
+        },
+        {
+          "op": "DERIVE_BIN",
+          "slots": [
+            "column",
+            "epoch_unit",
+            "freq",
+            "kind",
+            "result",
+            "width"
+          ]
+        },
+        {
+          "op": "GROUP_AGGREGATE",
+          "slots": [
+            "aggregate",
+            "column",
+            "freq",
+            "group_by"
+          ]
+        },
+        {
+          "op": "RANK_GROUPS",
+          "slots": [
+            "direction"
+          ]
+        }
+      ],
+      "n_runs_agreeing": 0,
+      "n_runs_observed": 0,
+      "operator_contract_hash": "2be2d0b165f22ee01479bee3042b9568475c1f3b99a8aa028e2d2f5b4c5d0240",
+      "operator_skeleton": [
+        "FILTER_NOT_EMPTY",
+        "DERIVE_BIN",
+        "GROUP_AGGREGATE",
+        "RANK_GROUPS"
+      ],
+      "plan_source_modes": [
+        "query_def_seed"
+      ],
+      "query_id": "17",
+      "query_text": "Among rows whose annotation is one of the known MIT-ECG annotation codes, divide time_s into 10-second bins. For each (record_id, bin) pair, compute MLII RMS. Return the (record_id, bin) pair with the greatest RMS.",
+      "query_text_source": "query_def_seed",
+      "reasons": [],
+      "schema_fingerprint": "3e2dc640c05be9c3",
+      "semantic_signature": {
+        "admissibility": "in_scope",
+        "aggregate": "max",
+        "confidence": 0.85,
+        "fields": [
+          "MLII",
+          "annotation",
+          "record_id",
+          "time_s"
+        ],
+        "filter_values": {},
+        "intent_flags": {
+          "correlation": false,
+          "derived_magnitude": true,
+          "difference": false,
+          "group_by": true,
+          "last_event": false,
+          "predictive": false,
+          "rank": false,
+          "time_bin": true
+        },
+        "operator_skeleton_hint": null,
+        "output_shape": "scalar",
+        "predicate_ops": {},
+        "predictive": {
+          "holdout_row": null,
+          "model": null,
+          "target_column": null,
+          "train_fraction": null
+        }
+      },
+      "status": "reusable"
+    },
+    {
+      "dataset": "ecg",
+      "example_run_ids": [
+        "query_def_seed"
+      ],
+      "field_level_skeleton": [
+        {
+          "op": "PARALLEL_AGGREGATE",
+          "slots": [
+            "branches"
+          ]
+        },
+        {
+          "op": "DERIVE_BINARY",
+          "slots": [
+            "left",
+            "operation",
+            "result",
+            "right"
+          ]
+        },
+        {
+          "op": "RANK_ROWS",
+          "slots": [
+            "column",
+            "direction",
+            "return_columns"
+          ]
+        }
+      ],
+      "n_runs_agreeing": 0,
+      "n_runs_observed": 0,
+      "operator_contract_hash": "2be2d0b165f22ee01479bee3042b9568475c1f3b99a8aa028e2d2f5b4c5d0240",
+      "operator_skeleton": [
+        "PARALLEL_AGGREGATE",
+        "DERIVE_BINARY",
+        "RANK_ROWS"
+      ],
+      "plan_source_modes": [
+        "query_def_seed"
+      ],
+      "query_id": "18",
+      "query_text": "For every record_id, independently compute maximum and minimum MLII. Define MLII span as maximum minus minimum. Return the record_id with the largest MLII span.",
+      "query_text_source": "query_def_seed",
+      "reasons": [],
+      "status": "reusable"
+    },
+    {
+      "dataset": "ecg",
+      "example_run_ids": [
+        "query_def_seed"
+      ],
+      "field_level_skeleton": [
+        {
+          "op": "FILTER_COMPARE",
+          "slots": [
+            "column",
+            "comparator",
+            "value"
+          ]
+        },
+        {
+          "op": "DERIVE_BIN",
+          "slots": [
+            "column",
+            "epoch_unit",
+            "freq",
+            "kind",
+            "result",
+            "width"
+          ]
+        },
+        {
+          "op": "PARALLEL_AGGREGATE",
+          "slots": [
+            "branches"
+          ]
+        },
+        {
+          "op": "DERIVE_BINARY",
+          "slots": [
+            "left",
+            "operation",
+            "result",
+            "right"
+          ]
+        },
+        {
+          "op": "CORRELATE_COLUMNS",
+          "slots": [
+            "left",
+            "method",
+            "right"
+          ]
+        }
+      ],
+      "n_runs_agreeing": 0,
+      "n_runs_observed": 0,
+      "operator_contract_hash": "2be2d0b165f22ee01479bee3042b9568475c1f3b99a8aa028e2d2f5b4c5d0240",
+      "operator_skeleton": [
+        "FILTER_COMPARE",
+        "DERIVE_BIN",
+        "PARALLEL_AGGREGATE",
+        "DERIVE_BINARY",
+        "CORRELATE_COLUMNS"
+      ],
+      "plan_source_modes": [
+        "query_def_seed"
+      ],
+      "query_id": "19",
+      "query_text": "For record_id 101, divide time_s into 10-second bins. For each bin, compute annotated-row rate as rows with an annotation in the known annotation-code list divided by all rows in the bin. Return the Pearson correlation between bin index and annotated-row rate.",
+      "query_text_source": "query_def_seed",
+      "reasons": [],
+      "schema_fingerprint": "3e2dc640c05be9c3",
+      "semantic_signature": {
+        "admissibility": "in_scope",
+        "aggregate": null,
+        "confidence": 0.85,
+        "fields": [
+          "annotation",
+          "record_id",
+          "time_s"
+        ],
+        "filter_values": {
+          "record_id": 101
+        },
+        "intent_flags": {
+          "correlation": true,
+          "derived_magnitude": false,
+          "difference": false,
+          "group_by": true,
+          "last_event": false,
+          "predictive": false,
+          "rank": false,
+          "time_bin": true
+        },
+        "operator_skeleton_hint": null,
+        "output_shape": "list",
+        "predicate_ops": {
+          "record_id": "eq"
+        },
+        "predictive": {
+          "holdout_row": null,
+          "model": null,
+          "target_column": null,
+          "train_fraction": null
+        }
+      },
+      "status": "reusable"
+    },
+    {
+      "dataset": "ecg",
+      "example_run_ids": [
+        "query_def_seed"
+      ],
+      "field_level_skeleton": [
+        {
+          "op": "PARALLEL_AGGREGATE",
+          "slots": [
+            "branches"
+          ]
+        },
+        {
+          "op": "DERIVE_BINARY",
+          "slots": [
+            "left",
+            "operation",
+            "result",
+            "right"
+          ]
+        },
+        {
+          "op": "RANK_ROWS",
+          "slots": [
+            "column",
+            "direction",
+            "return_columns"
+          ]
+        }
+      ],
+      "n_runs_agreeing": 0,
+      "n_runs_observed": 0,
+      "operator_contract_hash": "2be2d0b165f22ee01479bee3042b9568475c1f3b99a8aa028e2d2f5b4c5d0240",
+      "operator_skeleton": [
+        "PARALLEL_AGGREGATE",
+        "DERIVE_BINARY",
+        "RANK_ROWS"
+      ],
+      "plan_source_modes": [
+        "query_def_seed"
+      ],
+      "query_id": "20",
+      "query_text": "For every record_id, independently compute MLII variance and V1 variance. Define total lead variability as their sum. Return the record_id with the largest total lead variability.",
+      "query_text_source": "query_def_seed",
+      "reasons": [],
+      "schema_fingerprint": "3e2dc640c05be9c3",
+      "semantic_signature": {
+        "admissibility": "in_scope",
+        "aggregate": "max",
+        "confidence": 0.85,
+        "fields": [
+          "MLII",
+          "V1",
+          "record_id"
+        ],
+        "filter_values": {},
+        "intent_flags": {
+          "correlation": false,
+          "derived_magnitude": false,
+          "difference": false,
+          "group_by": false,
+          "last_event": false,
+          "predictive": false,
+          "rank": true,
+          "time_bin": false
+        },
+        "operator_skeleton_hint": null,
+        "output_shape": "scalar",
+        "predicate_ops": {},
+        "predictive": {
+          "holdout_row": null,
+          "model": null,
+          "target_column": null,
+          "train_fraction": null
+        }
+      },
+      "status": "reusable"
+    },
+    {
+      "dataset": "bus",
+      "operator_skeleton": [
+        "DERIVE_VECTOR_MAGNITUDE",
+        "SPLIT_BY_THRESHOLD",
+        "SPLIT_BY_THRESHOLD",
+        "AGGREGATE_PARTITIONS",
+        "COMPARE_PARTITIONS"
+      ],
+      "query_text": "Derive peak acceleration magnitude from accel_stats_x_p99, accel_stats_y_p99, and accel_stats_z_p99. Partition the route at the median latitude and report the absolute difference between the northern and southern halves' mean peak magnitudes.",
+      "schema_fingerprint": "1d29adee7efb7ed4",
+      "semantic_signature": {
+        "admissibility": "in_scope",
+        "aggregate": "median",
+        "confidence": 0.85,
+        "fields": [
+          "accel_stats_x_p99",
+          "accel_stats_y_p99",
+          "accel_stats_z_p99",
+          "latitude"
+        ],
+        "filter_values": {},
+        "intent_flags": {
+          "correlation": false,
+          "derived_magnitude": true,
+          "difference": true,
+          "group_by": false,
+          "last_event": false,
+          "predictive": false,
+          "rank": false,
+          "time_bin": false
+        },
+        "operator_skeleton_hint": null,
+        "output_shape": "scalar",
+        "predicate_ops": {},
+        "predictive": {
+          "holdout_row": null,
+          "model": null,
+          "target_column": null,
+          "train_fraction": null
+        }
+      },
+      "status": "reusable"
+    },
+    {
+      "dataset": "bus",
+      "operator_skeleton": [
+        "DERIVE_VECTOR_MAGNITUDE",
+        "SPLIT_BY_THRESHOLD",
+        "SPLIT_BY_THRESHOLD",
+        "AGGREGATE_PARTITIONS",
+        "COMPARE_PARTITIONS"
+      ],
+      "query_text": "Derive peak acceleration magnitude from accel_stats_x_p99, accel_stats_y_p99, and accel_stats_z_p99. Divide the route at the median latitude and report the absolute difference between the northern and southern halves' mean peak magnitudes.",
+      "schema_fingerprint": "1d29adee7efb7ed4",
+      "semantic_signature": {
+        "admissibility": "in_scope",
+        "aggregate": "median",
+        "confidence": 0.85,
+        "fields": [
+          "accel_stats_x_p99",
+          "accel_stats_y_p99",
+          "accel_stats_z_p99",
+          "latitude"
+        ],
+        "filter_values": {},
+        "intent_flags": {
+          "correlation": false,
+          "derived_magnitude": true,
+          "difference": true,
+          "group_by": false,
+          "last_event": false,
+          "predictive": false,
+          "rank": false,
+          "time_bin": false
+        },
+        "operator_skeleton_hint": null,
+        "output_shape": "scalar",
+        "predicate_ops": {},
+        "predictive": {
+          "holdout_row": null,
+          "model": null,
+          "target_column": null,
+          "train_fraction": null
+        }
+      },
+      "status": "reusable"
+    },
+    {
+      "dataset": "bus",
+      "operator_skeleton": [
+        "DERIVE_BINARY",
+        "SPLIT_BY_VALUES",
+        "SPLIT_BY_VALUES",
+        "AGGREGATE_PARTITIONS",
+        "COMPARE_PARTITIONS"
+      ],
+      "query_text": "Derive the vertical shock range as accel_stats_z_p99 minus accel_stats_z_p1. Calculate its mean separately for aggressive and calm behavior labels, then report the aggressive-minus-calm difference.",
+      "schema_fingerprint": "1d29adee7efb7ed4",
+      "semantic_signature": {
+        "admissibility": "in_scope",
+        "aggregate": "mean",
+        "confidence": 0.85,
+        "fields": [
+          "accel_stats_z_p1",
+          "accel_stats_z_p99",
+          "behavior"
+        ],
+        "filter_values": {},
+        "intent_flags": {
+          "correlation": false,
+          "derived_magnitude": false,
+          "difference": true,
+          "group_by": false,
+          "last_event": false,
+          "predictive": false,
+          "rank": false,
+          "time_bin": false
+        },
+        "operator_skeleton_hint": null,
+        "output_shape": "scalar",
+        "predicate_ops": {},
+        "predictive": {
+          "holdout_row": null,
+          "model": null,
+          "target_column": null,
+          "train_fraction": null
+        }
+      },
+      "status": "reusable"
+    },
+    {
+      "dataset": "bus",
+      "operator_skeleton": [
+        "FILTER_IN",
+        "DERIVE_BINARY",
+        "DERIVE_BIN",
+        "GROUP_AGGREGATE",
+        "RANK_GROUPS"
+      ],
+      "query_text": "Derive the vertical shock range as accel_stats_z_p99 minus accel_stats_z_p1. Restrict to aggressive behavior, group rows into 5-minute timestamp windows, and return the window with the highest mean vertical shock range.",
+      "schema_fingerprint": "1d29adee7efb7ed4",
+      "semantic_signature": {
+        "admissibility": "in_scope",
+        "aggregate": "max",
+        "confidence": 0.85,
+        "fields": [
+          "accel_stats_z_p1",
+          "accel_stats_z_p99",
+          "behavior",
+          "timestamp"
+        ],
+        "filter_values": {},
+        "intent_flags": {
+          "correlation": false,
+          "derived_magnitude": false,
+          "difference": false,
+          "group_by": true,
+          "last_event": false,
+          "predictive": false,
+          "rank": true,
+          "time_bin": true
+        },
+        "operator_skeleton_hint": null,
+        "output_shape": "scalar",
+        "predicate_ops": {},
+        "predictive": {
+          "holdout_row": null,
+          "model": null,
+          "target_column": null,
+          "train_fraction": null
+        }
+      },
+      "status": "reusable"
+    },
+    {
+      "dataset": "bus",
+      "operator_skeleton": [
+        "FILTER_IN",
+        "DERIVE_BIN",
+        "GROUP_AGGREGATE",
+        "RANK_GROUPS"
+      ],
+      "query_text": "Restrict the route to rows labeled aggressive, group them into 5-minute timestamp windows, and return the window with the highest mean instability_score.",
+      "schema_fingerprint": "1d29adee7efb7ed4",
+      "semantic_signature": {
+        "admissibility": "in_scope",
+        "aggregate": "max",
+        "confidence": 0.85,
+        "fields": [
+          "instability_score",
+          "timestamp"
+        ],
+        "filter_values": {},
+        "intent_flags": {
+          "correlation": false,
+          "derived_magnitude": false,
+          "difference": false,
+          "group_by": true,
+          "last_event": false,
+          "predictive": false,
+          "rank": true,
+          "time_bin": true
+        },
+        "operator_skeleton_hint": null,
+        "output_shape": "scalar",
+        "predicate_ops": {},
+        "predictive": {
+          "holdout_row": null,
+          "model": null,
+          "target_column": null,
+          "train_fraction": null
+        }
+      },
+      "status": "reusable"
+    },
+    {
+      "dataset": "bus",
+      "operator_skeleton": [
+        "DERIVE_BINARY",
+        "SPLIT_BY_VALUES",
+        "SPLIT_BY_VALUES",
+        "AGGREGATE_PARTITIONS",
+        "COMPARE_PARTITIONS"
+      ],
+      "query_text": "Derive the vertical shock range as accel_stats_z_p99 minus accel_stats_z_p1. Determine its mean separately for aggressive and calm behavior labels, then report the aggressive-minus-calm difference.",
+      "schema_fingerprint": "1d29adee7efb7ed4",
+      "semantic_signature": {
+        "admissibility": "in_scope",
+        "aggregate": "mean",
+        "confidence": 0.85,
+        "fields": [
+          "accel_stats_z_p1",
+          "accel_stats_z_p99",
+          "behavior"
+        ],
+        "filter_values": {},
+        "intent_flags": {
+          "correlation": false,
+          "derived_magnitude": false,
+          "difference": true,
+          "group_by": false,
+          "last_event": false,
+          "predictive": false,
+          "rank": false,
+          "time_bin": false
+        },
+        "operator_skeleton_hint": null,
+        "output_shape": "scalar",
+        "predicate_ops": {},
+        "predictive": {
+          "holdout_row": null,
+          "model": null,
+          "target_column": null,
+          "train_fraction": null
+        }
+      },
+      "status": "reusable"
+    },
+    {
+      "dataset": "wisdm",
+      "operator_skeleton": [
+        "FILTER_NOT_EMPTY",
+        "PARALLEL_AGGREGATE",
+        "DERIVE_BINARY",
+        "FILTER_COMPARE",
+        "RANK_ROWS"
+      ],
+      "query_text": "For every subject_id, Calculate x-acceleration variance separately while Jogging and while Walking. Among subject_id values whose Jogging variance exceeds their Walking variance, return the subject_id with the largest Jogging-minus-Walking variance difference.",
+      "schema_fingerprint": "7ad69ccf7f729a4d",
+      "semantic_signature": {
+        "admissibility": "in_scope",
+        "aggregate": "max",
+        "confidence": 0.85,
+        "fields": [
+          "subject_id",
+          "x"
+        ],
+        "filter_values": {},
+        "intent_flags": {
+          "correlation": false,
+          "derived_magnitude": false,
+          "difference": true,
+          "group_by": false,
+          "last_event": false,
+          "predictive": false,
+          "rank": true,
+          "time_bin": false
+        },
+        "operator_skeleton_hint": null,
+        "output_shape": "scalar",
+        "predicate_ops": {},
+        "predictive": {
+          "holdout_row": null,
+          "model": null,
+          "target_column": null,
+          "train_fraction": null
+        }
+      },
+      "status": "reusable"
+    },
+    {
+      "dataset": "wisdm",
+      "operator_skeleton": [
+        "FILTER_NOT_EMPTY",
+        "DERIVE_VECTOR_MAGNITUDE",
+        "PARALLEL_AGGREGATE",
+        "CORRELATE_COLUMNS"
+      ],
+      "query_text": "For every subject_id, Calculate mean acceleration magnitude while Jogging and while Walking. Return the Pearson correlation between the two per-subject mean-magnitude columns.",
+      "schema_fingerprint": "7ad69ccf7f729a4d",
+      "semantic_signature": {
+        "admissibility": "in_scope",
+        "aggregate": "mean",
+        "confidence": 0.85,
+        "fields": [
+          "subject_id"
+        ],
+        "filter_values": {},
+        "intent_flags": {
+          "correlation": true,
+          "derived_magnitude": true,
+          "difference": false,
+          "group_by": true,
+          "last_event": false,
+          "predictive": false,
+          "rank": false,
+          "time_bin": false
+        },
+        "operator_skeleton_hint": null,
+        "output_shape": "scalar",
+        "predicate_ops": {},
+        "predictive": {
+          "holdout_row": null,
+          "model": null,
+          "target_column": null,
+          "train_fraction": null
+        }
+      },
+      "status": "reusable"
+    },
+    {
+      "dataset": "wisdm",
+      "operator_skeleton": [
+        "FILTER_NOT_EMPTY",
+        "DERIVE_DURATION_SECONDS",
+        "PARALLEL_AGGREGATE",
+        "DERIVE_BINARY",
+        "FILTER_COMPARE",
+        "RANK_ROWS"
+      ],
+      "query_text": "For every subject_id, derive elapsed seconds from timestamp, then Calculate total locomotion duration (Walking, Jogging, Upstairs, Downstairs) and total resting duration (Sitting, Standing). Among subjects with more locomotion than resting time, return the subject_id with the largest locomotion-minus-resting duration.",
+      "schema_fingerprint": "7ad69ccf7f729a4d",
+      "semantic_signature": {
+        "admissibility": "in_scope",
+        "aggregate": "max",
+        "confidence": 0.85,
+        "fields": [
+          "subject_id",
+          "timestamp"
+        ],
+        "filter_values": {},
+        "intent_flags": {
+          "correlation": false,
+          "derived_magnitude": false,
+          "difference": false,
+          "group_by": false,
+          "last_event": false,
+          "predictive": false,
+          "rank": true,
+          "time_bin": false
+        },
+        "operator_skeleton_hint": null,
+        "output_shape": "scalar",
+        "predicate_ops": {},
+        "predictive": {
+          "holdout_row": null,
+          "model": null,
+          "target_column": null,
+          "train_fraction": null
+        }
+      },
+      "status": "reusable"
+    },
+    {
+      "dataset": "wisdm",
+      "operator_skeleton": [
+        "FILTER_NOT_EMPTY",
+        "DERIVE_VECTOR_MAGNITUDE",
+        "PARALLEL_AGGREGATE",
+        "DERIVE_BINARY",
+        "RANK_ROWS"
+      ],
+      "query_text": "For every subject_id, Calculate mean acceleration magnitude separately for dynamic activities (Walking, Jogging, Upstairs, Downstairs) and resting activities (Sitting, Standing). Return the subject_id with the largest dynamic-minus-resting mean magnitude.",
+      "schema_fingerprint": "7ad69ccf7f729a4d",
+      "semantic_signature": {
+        "admissibility": "in_scope",
+        "aggregate": "max",
+        "confidence": 0.85,
+        "fields": [
+          "subject_id"
+        ],
+        "filter_values": {},
+        "intent_flags": {
+          "correlation": false,
+          "derived_magnitude": true,
+          "difference": false,
+          "group_by": false,
+          "last_event": false,
+          "predictive": false,
+          "rank": true,
+          "time_bin": false
+        },
+        "operator_skeleton_hint": null,
+        "output_shape": "scalar",
+        "predicate_ops": {},
+        "predictive": {
+          "holdout_row": null,
+          "model": null,
+          "target_column": null,
+          "train_fraction": null
+        }
+      },
+      "status": "reusable"
+    },
+    {
+      "dataset": "wisdm",
+      "operator_skeleton": [
+        "FILTER_NOT_EMPTY",
+        "DERIVE_VECTOR_MAGNITUDE",
+        "PARALLEL_AGGREGATE",
+        "CORRELATE_COLUMNS"
+      ],
+      "query_text": "For every subject_id, Determine mean acceleration magnitude while Jogging and while Walking. Return the Pearson correlation between the two per-subject mean-magnitude columns.",
+      "schema_fingerprint": "7ad69ccf7f729a4d",
+      "semantic_signature": {
+        "admissibility": "in_scope",
+        "aggregate": "mean",
+        "confidence": 0.85,
+        "fields": [
+          "subject_id"
+        ],
+        "filter_values": {},
+        "intent_flags": {
+          "correlation": true,
+          "derived_magnitude": true,
+          "difference": false,
+          "group_by": true,
+          "last_event": false,
+          "predictive": false,
+          "rank": false,
+          "time_bin": false
+        },
+        "operator_skeleton_hint": null,
+        "output_shape": "scalar",
+        "predicate_ops": {},
+        "predictive": {
+          "holdout_row": null,
+          "model": null,
+          "target_column": null,
+          "train_fraction": null
+        }
+      },
+      "status": "reusable"
+    },
+    {
+      "dataset": "wisdm",
+      "operator_skeleton": [
+        "FILTER_NOT_EMPTY",
+        "PARALLEL_AGGREGATE",
+        "DERIVE_BINARY",
+        "FILTER_COMPARE",
+        "RANK_ROWS"
+      ],
+      "query_text": "For every subject_id, Determine x-acceleration variance separately while Jogging and while Walking. Among subject_id values whose Jogging variance exceeds their Walking variance, return the subject_id with the largest Jogging-minus-Walking variance difference.",
+      "schema_fingerprint": "7ad69ccf7f729a4d",
+      "semantic_signature": {
+        "admissibility": "in_scope",
+        "aggregate": "max",
+        "confidence": 0.85,
+        "fields": [
+          "subject_id",
+          "x"
+        ],
+        "filter_values": {},
+        "intent_flags": {
+          "correlation": false,
+          "derived_magnitude": false,
+          "difference": true,
+          "group_by": false,
+          "last_event": false,
+          "predictive": false,
+          "rank": true,
+          "time_bin": false
+        },
+        "operator_skeleton_hint": null,
+        "output_shape": "scalar",
+        "predicate_ops": {},
+        "predictive": {
+          "holdout_row": null,
+          "model": null,
+          "target_column": null,
+          "train_fraction": null
+        }
+      },
+      "status": "reusable"
+    },
+    {
+      "dataset": "wisdm",
+      "operator_skeleton": [
+        "FILTER_NOT_EMPTY",
+        "DERIVE_VECTOR_MAGNITUDE",
+        "PARALLEL_AGGREGATE",
+        "DERIVE_BINARY",
+        "RANK_ROWS"
+      ],
+      "query_text": "For every subject_id, Determine mean acceleration magnitude separately for dynamic activities (Walking, Jogging, Upstairs, Downstairs) and resting activities (Sitting, Standing). Return the subject_id with the largest dynamic-minus-resting mean magnitude.",
+      "schema_fingerprint": "7ad69ccf7f729a4d",
+      "semantic_signature": {
+        "admissibility": "in_scope",
+        "aggregate": "max",
+        "confidence": 0.85,
+        "fields": [
+          "subject_id"
+        ],
+        "filter_values": {},
+        "intent_flags": {
+          "correlation": false,
+          "derived_magnitude": true,
+          "difference": false,
+          "group_by": false,
+          "last_event": false,
+          "predictive": false,
+          "rank": true,
+          "time_bin": false
+        },
+        "operator_skeleton_hint": null,
+        "output_shape": "scalar",
+        "predicate_ops": {},
+        "predictive": {
+          "holdout_row": null,
+          "model": null,
+          "target_column": null,
+          "train_fraction": null
+        }
+      },
+      "status": "reusable"
+    },
+    {
+      "dataset": "wisdm",
+      "operator_skeleton": [
+        "FILTER_NOT_EMPTY",
+        "DERIVE_DURATION_SECONDS",
+        "PARALLEL_AGGREGATE",
+        "DERIVE_BINARY",
+        "FILTER_COMPARE",
+        "RANK_ROWS"
+      ],
+      "query_text": "For every subject_id, derive elapsed seconds from timestamp, then Determine total locomotion duration (Walking, Jogging, Upstairs, Downstairs) and total resting duration (Sitting, Standing). Among subjects with more locomotion than resting time, return the subject_id with the largest locomotion-minus-resting duration.",
+      "schema_fingerprint": "7ad69ccf7f729a4d",
+      "semantic_signature": {
+        "admissibility": "in_scope",
+        "aggregate": "max",
+        "confidence": 0.85,
+        "fields": [
+          "subject_id",
+          "timestamp"
+        ],
+        "filter_values": {},
+        "intent_flags": {
+          "correlation": false,
+          "derived_magnitude": false,
+          "difference": false,
+          "group_by": false,
+          "last_event": false,
+          "predictive": false,
+          "rank": true,
+          "time_bin": false
+        },
+        "operator_skeleton_hint": null,
+        "output_shape": "scalar",
+        "predicate_ops": {},
+        "predictive": {
+          "holdout_row": null,
+          "model": null,
+          "target_column": null,
+          "train_fraction": null
+        }
+      },
+      "status": "reusable"
+    },
+    {
+      "dataset": "ecg",
+      "operator_skeleton": [
+        "FILTER_COMPARE",
+        "DERIVE_BIN",
+        "PARALLEL_AGGREGATE",
+        "DERIVE_BINARY",
+        "CORRELATE_COLUMNS"
+      ],
+      "query_text": "For record_id 101, divide time_s into 10-second bins. For every bin, Calculate annotated-row rate as rows with an annotation in the known annotation-code list divided by all rows in the bin. Return the Pearson correlation between bin index and annotated-row rate.",
+      "schema_fingerprint": "3e2dc640c05be9c3",
+      "semantic_signature": {
+        "admissibility": "in_scope",
+        "aggregate": null,
+        "confidence": 0.85,
+        "fields": [
+          "annotation",
+          "record_id",
+          "time_s"
+        ],
+        "filter_values": {
+          "record_id": 101
+        },
+        "intent_flags": {
+          "correlation": true,
+          "derived_magnitude": false,
+          "difference": false,
+          "group_by": true,
+          "last_event": false,
+          "predictive": false,
+          "rank": false,
+          "time_bin": true
+        },
+        "operator_skeleton_hint": null,
+        "output_shape": "list",
+        "predicate_ops": {
+          "record_id": "eq"
+        },
+        "predictive": {
+          "holdout_row": null,
+          "model": null,
+          "target_column": null,
+          "train_fraction": null
+        }
+      },
+      "status": "reusable"
+    },
+    {
+      "dataset": "ecg",
+      "operator_skeleton": [
+        "PARALLEL_AGGREGATE",
+        "DERIVE_BINARY",
+        "RANK_ROWS"
+      ],
+      "query_text": "For every record_id, independently Calculate MLII variance and V1 variance. Define total lead variability as their sum. Return the record_id with the largest total lead variability.",
+      "schema_fingerprint": "3e2dc640c05be9c3",
+      "semantic_signature": {
+        "admissibility": "in_scope",
+        "aggregate": "max",
+        "confidence": 0.85,
+        "fields": [
+          "MLII",
+          "V1",
+          "record_id"
+        ],
+        "filter_values": {},
+        "intent_flags": {
+          "correlation": false,
+          "derived_magnitude": false,
+          "difference": false,
+          "group_by": false,
+          "last_event": false,
+          "predictive": false,
+          "rank": true,
+          "time_bin": false
+        },
+        "operator_skeleton_hint": null,
+        "output_shape": "scalar",
+        "predicate_ops": {},
+        "predictive": {
+          "holdout_row": null,
+          "model": null,
+          "target_column": null,
+          "train_fraction": null
+        }
+      },
+      "status": "reusable"
+    },
+    {
+      "dataset": "ecg",
+      "operator_skeleton": [
+        "FILTER_NOT_EMPTY",
+        "DERIVE_BIN",
+        "GROUP_AGGREGATE",
+        "RANK_GROUPS"
+      ],
+      "query_text": "Among rows whose annotation is one of the known MIT-ECG annotation codes, divide time_s into 10-second bins. For every (record_id, bin) pair, Calculate MLII RMS. Return the (record_id, bin) pair with the greatest RMS.",
+      "schema_fingerprint": "3e2dc640c05be9c3",
+      "semantic_signature": {
+        "admissibility": "in_scope",
+        "aggregate": "max",
+        "confidence": 0.85,
+        "fields": [
+          "MLII",
+          "annotation",
+          "record_id",
+          "time_s"
+        ],
+        "filter_values": {},
+        "intent_flags": {
+          "correlation": false,
+          "derived_magnitude": true,
+          "difference": false,
+          "group_by": false,
+          "last_event": false,
+          "predictive": false,
+          "rank": false,
+          "time_bin": true
+        },
+        "operator_skeleton_hint": null,
+        "output_shape": "scalar",
+        "predicate_ops": {},
+        "predictive": {
+          "holdout_row": null,
+          "model": null,
+          "target_column": null,
+          "train_fraction": null
+        }
+      },
+      "status": "reusable"
+    },
+    {
+      "dataset": "ecg",
+      "operator_skeleton": [
+        "FILTER_COMPARE",
+        "DERIVE_BIN",
+        "PARALLEL_AGGREGATE",
+        "DERIVE_BINARY",
+        "CORRELATE_COLUMNS"
+      ],
+      "query_text": "For record_id 101, divide time_s into 10-second bins. For every bin, Determine annotated-row rate as rows with an annotation in the known annotation-code list divided by all rows in the bin. Return the Pearson correlation between bin index and annotated-row rate.",
+      "schema_fingerprint": "3e2dc640c05be9c3",
+      "semantic_signature": {
+        "admissibility": "in_scope",
+        "aggregate": null,
+        "confidence": 0.85,
+        "fields": [
+          "annotation",
+          "record_id",
+          "time_s"
+        ],
+        "filter_values": {
+          "record_id": 101
+        },
+        "intent_flags": {
+          "correlation": true,
+          "derived_magnitude": false,
+          "difference": false,
+          "group_by": true,
+          "last_event": false,
+          "predictive": false,
+          "rank": false,
+          "time_bin": true
+        },
+        "operator_skeleton_hint": null,
+        "output_shape": "list",
+        "predicate_ops": {
+          "record_id": "eq"
+        },
+        "predictive": {
+          "holdout_row": null,
+          "model": null,
+          "target_column": null,
+          "train_fraction": null
+        }
+      },
+      "status": "reusable"
+    },
+    {
+      "dataset": "ecg",
+      "operator_skeleton": [
+        "FILTER_NOT_EMPTY",
+        "DERIVE_BIN",
+        "GROUP_AGGREGATE",
+        "RANK_GROUPS"
+      ],
+      "query_text": "Among rows whose annotation is one of the known MIT-ECG annotation codes, divide time_s into 10-second bins. For every (record_id, bin) pair, Determine MLII RMS. Return the (record_id, bin) pair with the greatest RMS.",
+      "schema_fingerprint": "3e2dc640c05be9c3",
+      "semantic_signature": {
+        "admissibility": "in_scope",
+        "aggregate": "max",
+        "confidence": 0.85,
+        "fields": [
+          "MLII",
+          "annotation",
+          "record_id",
+          "time_s"
+        ],
+        "filter_values": {},
+        "intent_flags": {
+          "correlation": false,
+          "derived_magnitude": true,
+          "difference": false,
+          "group_by": false,
+          "last_event": false,
+          "predictive": false,
+          "rank": false,
+          "time_bin": true
+        },
+        "operator_skeleton_hint": null,
+        "output_shape": "scalar",
+        "predicate_ops": {},
+        "predictive": {
+          "holdout_row": null,
+          "model": null,
+          "target_column": null,
+          "train_fraction": null
+        }
+      },
+      "status": "reusable"
+    },
+    {
+      "dataset": "ecg",
+      "operator_skeleton": [
+        "PARALLEL_AGGREGATE",
+        "DERIVE_BINARY",
+        "RANK_ROWS"
+      ],
+      "query_text": "For every record_id, independently Determine MLII variance and V1 variance. Define total lead variability as their sum. Return the record_id with the largest total lead variability.",
+      "schema_fingerprint": "3e2dc640c05be9c3",
+      "semantic_signature": {
+        "admissibility": "in_scope",
+        "aggregate": "max",
+        "confidence": 0.85,
+        "fields": [
+          "MLII",
+          "V1",
+          "record_id"
+        ],
+        "filter_values": {},
+        "intent_flags": {
+          "correlation": false,
+          "derived_magnitude": false,
+          "difference": false,
+          "group_by": false,
+          "last_event": false,
+          "predictive": false,
+          "rank": true,
+          "time_bin": false
+        },
+        "operator_skeleton_hint": null,
+        "output_shape": "scalar",
+        "predicate_ops": {},
+        "predictive": {
+          "holdout_row": null,
+          "model": null,
+          "target_column": null,
+          "train_fraction": null
+        }
+      },
+      "status": "reusable"
     }
   ]
 }

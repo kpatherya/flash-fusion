@@ -2,7 +2,7 @@
   "version": 1,
   "dataset": "ecg",
   "query_version": "v1",
-  "count": 12,
+  "count": 28,
   "entries": {
     "ecg:13:v1": {
       "template_id": "ecg:13:v1",
@@ -15,7 +15,7 @@
         "PREDICTIVE_PIPELINE"
       ],
       "operator_contract_hash": "78a4cd22b7dbe6673097919cfed0b476be06682bdfc09df50fed9b6a234f751b",
-      "schema_fingerprint": null,
+      "schema_fingerprint": "8a468207a2c8d18a",
       "semantic_signature": {
         "admissibility": "in_scope",
         "confidence": 0.85,
@@ -127,7 +127,7 @@
         "RANK_ROWS"
       ],
       "operator_contract_hash": "78a4cd22b7dbe6673097919cfed0b476be06682bdfc09df50fed9b6a234f751b",
-      "schema_fingerprint": null,
+      "schema_fingerprint": "8a468207a2c8d18a",
       "semantic_signature": {
         "admissibility": "in_scope",
         "confidence": 0.85,
@@ -227,7 +227,7 @@
         "PREDICTIVE_PIPELINE"
       ],
       "operator_contract_hash": "78a4cd22b7dbe6673097919cfed0b476be06682bdfc09df50fed9b6a234f751b",
-      "schema_fingerprint": null,
+      "schema_fingerprint": "3e2dc640c05be9c3",
       "semantic_signature": {
         "admissibility": "in_scope",
         "confidence": 0.85,
@@ -280,11 +280,11 @@
       "query_version": "v1",
       "operator_skeleton": [
         "FILTER_COMPARE",
-        "FILTER_COMPARE",
+        "FILTER_EQ_AGGREGATE",
         "COUNT_ROWS"
       ],
       "operator_contract_hash": "78a4cd22b7dbe6673097919cfed0b476be06682bdfc09df50fed9b6a234f751b",
-      "schema_fingerprint": null,
+      "schema_fingerprint": "8a468207a2c8d18a",
       "semantic_signature": {
         "admissibility": "in_scope",
         "confidence": 0.85,
@@ -324,7 +324,7 @@
         "output_shape": "scalar",
         "operator_skeleton": [
           "FILTER_COMPARE",
-          "FILTER_COMPARE",
+          "FILTER_EQ_AGGREGATE",
           "COUNT_ROWS"
         ]
       },
@@ -399,7 +399,7 @@
         "AGGREGATE_GROUPS"
       ],
       "operator_contract_hash": "78a4cd22b7dbe6673097919cfed0b476be06682bdfc09df50fed9b6a234f751b",
-      "schema_fingerprint": null,
+      "schema_fingerprint": "3e2dc640c05be9c3",
       "semantic_signature": {
         "admissibility": "in_scope",
         "confidence": 0.85,
@@ -510,7 +510,7 @@
         "RANK_GROUPS"
       ],
       "operator_contract_hash": "78a4cd22b7dbe6673097919cfed0b476be06682bdfc09df50fed9b6a234f751b",
-      "schema_fingerprint": null,
+      "schema_fingerprint": "8a468207a2c8d18a",
       "semantic_signature": {
         "admissibility": "in_scope",
         "confidence": 0.85,
@@ -655,6 +655,893 @@
         "operator_skeleton": [
           "FILTER_COMPARE",
           "AGGREGATE_COLUMN"
+        ]
+      },
+      "source": "offline_semantic_registry_build"
+    },
+    "ecg:57:v1": {
+      "template_id": "ecg:57:v1",
+      "dataset": "ecg",
+      "status": "reusable",
+      "query_id": "",
+      "query_text": "Filter to record_id 101 and sort its rows by time_s in ascending order. Use the first 80% of rows for training and the final 20% as the chronological holdout. Train a random forest model using the features MLII and V1. Estimate whether an annotation is present for the first row in the holdout set.",
+      "query_version": "v1",
+      "operator_skeleton": [
+        "PREDICTIVE_PIPELINE"
+      ],
+      "operator_contract_hash": null,
+      "schema_fingerprint": "3e2dc640c05be9c3",
+      "semantic_signature": {
+        "admissibility": "in_scope",
+        "confidence": 0.85,
+        "aggregate": null,
+        "fields": [
+          "MLII",
+          "V1",
+          "annotation",
+          "record_id",
+          "time_s"
+        ],
+        "predicate_ops": {
+          "record_id": "eq"
+        },
+        "filter_values": {
+          "record_id": 101
+        },
+        "intent_flags": {
+          "rank": false,
+          "group_by": true,
+          "difference": false,
+          "derived_magnitude": false,
+          "time_bin": false,
+          "correlation": false,
+          "last_event": false,
+          "predictive": true
+        },
+        "predictive": {
+          "model": "random_forest",
+          "target_column": null,
+          "train_fraction": 0.8,
+          "holdout_row": "first"
+        },
+        "operator_skeleton_hint": [
+          "PREDICTIVE_PIPELINE"
+        ],
+        "output_shape": "predictive",
+        "operator_skeleton": [
+          "PREDICTIVE_PIPELINE"
+        ]
+      },
+      "source": "offline_semantic_registry_build"
+    },
+    "ecg:58:v1": {
+      "template_id": "ecg:58:v1",
+      "dataset": "ecg",
+      "status": "reusable",
+      "query_id": "",
+      "query_text": "For record_id 208, Could you report the average count of rows with a non-empty annotation in each 60-second time_s bin?",
+      "query_version": "v1",
+      "operator_skeleton": [
+        "FILTER_COMPARE",
+        "FILTER_NOT_EMPTY",
+        "DERIVE_BIN",
+        "GROUP_AGGREGATE",
+        "AGGREGATE_GROUPS"
+      ],
+      "operator_contract_hash": null,
+      "schema_fingerprint": "3e2dc640c05be9c3",
+      "semantic_signature": {
+        "admissibility": "in_scope",
+        "confidence": 0.85,
+        "aggregate": "mean",
+        "fields": [
+          "annotation",
+          "record_id",
+          "time_s"
+        ],
+        "predicate_ops": {
+          "record_id": "eq"
+        },
+        "filter_values": {
+          "record_id": 208
+        },
+        "intent_flags": {
+          "rank": false,
+          "group_by": true,
+          "difference": false,
+          "derived_magnitude": false,
+          "time_bin": true,
+          "correlation": false,
+          "last_event": false,
+          "predictive": false
+        },
+        "predictive": {
+          "model": null,
+          "target_column": null,
+          "train_fraction": null,
+          "holdout_row": null
+        },
+        "operator_skeleton_hint": null,
+        "output_shape": "scalar",
+        "operator_skeleton": [
+          "FILTER_COMPARE",
+          "FILTER_NOT_EMPTY",
+          "DERIVE_BIN",
+          "GROUP_AGGREGATE",
+          "AGGREGATE_GROUPS"
+        ]
+      },
+      "source": "offline_semantic_registry_build"
+    },
+    "ecg:59:v1": {
+      "template_id": "ecg:59:v1",
+      "dataset": "ecg",
+      "status": "reusable",
+      "query_id": "",
+      "query_text": "In record_id 101, Tell me which 10-second interval contains the highest number of annotated beats?",
+      "query_version": "v1",
+      "operator_skeleton": [
+        "FILTER_COMPARE",
+        "FILTER_NOT_EMPTY",
+        "DERIVE_BIN",
+        "GROUP_AGGREGATE",
+        "RANK_GROUPS"
+      ],
+      "operator_contract_hash": null,
+      "schema_fingerprint": "8a468207a2c8d18a",
+      "semantic_signature": {
+        "admissibility": "in_scope",
+        "confidence": 0.85,
+        "aggregate": "max",
+        "fields": [
+          "record_id"
+        ],
+        "predicate_ops": {
+          "record_id": "eq"
+        },
+        "filter_values": {
+          "record_id": 101
+        },
+        "intent_flags": {
+          "rank": true,
+          "group_by": false,
+          "difference": false,
+          "derived_magnitude": false,
+          "time_bin": true,
+          "correlation": false,
+          "last_event": false,
+          "predictive": false
+        },
+        "predictive": {
+          "model": null,
+          "target_column": null,
+          "train_fraction": null,
+          "holdout_row": null
+        },
+        "operator_skeleton_hint": null,
+        "output_shape": "scalar",
+        "operator_skeleton": [
+          "FILTER_COMPARE",
+          "FILTER_NOT_EMPTY",
+          "DERIVE_BIN",
+          "GROUP_AGGREGATE",
+          "RANK_GROUPS"
+        ]
+      },
+      "source": "offline_semantic_registry_build"
+    },
+    "ecg:60:v1": {
+      "template_id": "ecg:60:v1",
+      "dataset": "ecg",
+      "status": "reusable",
+      "query_id": "",
+      "query_text": "Filter to record_id 101 and sort its rows by time_s in ascending order. Use the first 80% of rows In training and the final 20% as the chronological holdout. Fit a random forest model using the features MLII and V1. Forecast whether an annotation is present In the first row in the holdout set.",
+      "query_version": "v1",
+      "operator_skeleton": [
+        "PREDICTIVE_PIPELINE"
+      ],
+      "operator_contract_hash": null,
+      "schema_fingerprint": "3e2dc640c05be9c3",
+      "semantic_signature": {
+        "admissibility": "in_scope",
+        "confidence": 0.85,
+        "aggregate": null,
+        "fields": [
+          "MLII",
+          "V1",
+          "annotation",
+          "record_id",
+          "time_s"
+        ],
+        "predicate_ops": {
+          "record_id": "eq"
+        },
+        "filter_values": {
+          "record_id": 101
+        },
+        "intent_flags": {
+          "rank": false,
+          "group_by": true,
+          "difference": false,
+          "derived_magnitude": false,
+          "time_bin": false,
+          "correlation": false,
+          "last_event": false,
+          "predictive": true
+        },
+        "predictive": {
+          "model": "random_forest",
+          "target_column": null,
+          "train_fraction": 0.8,
+          "holdout_row": "first"
+        },
+        "operator_skeleton_hint": [
+          "PREDICTIVE_PIPELINE"
+        ],
+        "output_shape": "predictive",
+        "operator_skeleton": [
+          "PREDICTIVE_PIPELINE"
+        ]
+      },
+      "source": "offline_semantic_registry_build"
+    },
+    "ecg:61:v1": {
+      "template_id": "ecg:61:v1",
+      "dataset": "ecg",
+      "status": "reusable",
+      "query_id": "",
+      "query_text": "In record_id 208, Please provide the average count of rows with a non-empty annotation in each 60-second time_s bin?",
+      "query_version": "v1",
+      "operator_skeleton": [
+        "FILTER_COMPARE",
+        "FILTER_NOT_EMPTY",
+        "DERIVE_BIN",
+        "GROUP_AGGREGATE",
+        "AGGREGATE_GROUPS"
+      ],
+      "operator_contract_hash": null,
+      "schema_fingerprint": "3e2dc640c05be9c3",
+      "semantic_signature": {
+        "admissibility": "in_scope",
+        "confidence": 0.85,
+        "aggregate": "mean",
+        "fields": [
+          "annotation",
+          "record_id",
+          "time_s"
+        ],
+        "predicate_ops": {
+          "record_id": "eq"
+        },
+        "filter_values": {
+          "record_id": 208
+        },
+        "intent_flags": {
+          "rank": false,
+          "group_by": true,
+          "difference": false,
+          "derived_magnitude": false,
+          "time_bin": true,
+          "correlation": false,
+          "last_event": false,
+          "predictive": false
+        },
+        "predictive": {
+          "model": null,
+          "target_column": null,
+          "train_fraction": null,
+          "holdout_row": null
+        },
+        "operator_skeleton_hint": null,
+        "output_shape": "scalar",
+        "operator_skeleton": [
+          "FILTER_COMPARE",
+          "FILTER_NOT_EMPTY",
+          "DERIVE_BIN",
+          "GROUP_AGGREGATE",
+          "AGGREGATE_GROUPS"
+        ]
+      },
+      "source": "offline_semantic_registry_build"
+    },
+    "ecg:69:v1": {
+      "template_id": "ecg:69:v1",
+      "dataset": "ecg",
+      "status": "reusable",
+      "query_id": "",
+      "query_text": "Filter to record_id 101 and sort its rows by time_s in ascending order. Use the first 80% of rows In training and the final 20% as the chronological holdout. Fit a hist gradient boosting model using the features MLII and V1. Forecast whether an annotation is present In the first row in the holdout set.",
+      "query_version": "v1",
+      "operator_skeleton": [
+        "PREDICTIVE_PIPELINE"
+      ],
+      "operator_contract_hash": null,
+      "schema_fingerprint": "8a468207a2c8d18a",
+      "semantic_signature": {
+        "admissibility": "in_scope",
+        "confidence": 0.85,
+        "aggregate": null,
+        "fields": [
+          "MLII",
+          "V1",
+          "annotation",
+          "record_id",
+          "time_s"
+        ],
+        "predicate_ops": {
+          "record_id": "eq"
+        },
+        "filter_values": {
+          "record_id": 101
+        },
+        "intent_flags": {
+          "rank": false,
+          "group_by": true,
+          "difference": false,
+          "derived_magnitude": false,
+          "time_bin": false,
+          "correlation": false,
+          "last_event": false,
+          "predictive": true
+        },
+        "predictive": {
+          "model": "hist_gradient_boosting",
+          "target_column": null,
+          "train_fraction": 0.8,
+          "holdout_row": "first"
+        },
+        "operator_skeleton_hint": [
+          "PREDICTIVE_PIPELINE"
+        ],
+        "output_shape": "predictive",
+        "operator_skeleton": [
+          "PREDICTIVE_PIPELINE"
+        ]
+      },
+      "source": "offline_semantic_registry_build"
+    },
+    "ecg:70:v1": {
+      "template_id": "ecg:70:v1",
+      "dataset": "ecg",
+      "status": "reusable",
+      "query_id": "",
+      "query_text": "Filter to record_id 101 and sort its rows by time_s in ascending order. Use the first 80% of rows for training and the final 20% as the chronological holdout. Train a hist gradient boosting model using the features MLII and V1. Estimate whether an annotation is present for the first row in the holdout set.",
+      "query_version": "v1",
+      "operator_skeleton": [
+        "PREDICTIVE_PIPELINE"
+      ],
+      "operator_contract_hash": null,
+      "schema_fingerprint": "8a468207a2c8d18a",
+      "semantic_signature": {
+        "admissibility": "in_scope",
+        "confidence": 0.85,
+        "aggregate": null,
+        "fields": [
+          "MLII",
+          "V1",
+          "annotation",
+          "record_id",
+          "time_s"
+        ],
+        "predicate_ops": {
+          "record_id": "eq"
+        },
+        "filter_values": {
+          "record_id": 101
+        },
+        "intent_flags": {
+          "rank": false,
+          "group_by": true,
+          "difference": false,
+          "derived_magnitude": false,
+          "time_bin": false,
+          "correlation": false,
+          "last_event": false,
+          "predictive": true
+        },
+        "predictive": {
+          "model": "hist_gradient_boosting",
+          "target_column": null,
+          "train_fraction": 0.8,
+          "holdout_row": "first"
+        },
+        "operator_skeleton_hint": [
+          "PREDICTIVE_PIPELINE"
+        ],
+        "output_shape": "predictive",
+        "operator_skeleton": [
+          "PREDICTIVE_PIPELINE"
+        ]
+      },
+      "source": "offline_semantic_registry_build"
+    },
+    "ecg:71:v1": {
+      "template_id": "ecg:71:v1",
+      "dataset": "ecg",
+      "status": "reusable",
+      "query_id": "",
+      "query_text": "Filter to record_id 101 and sort its rows by time_s in ascending order. Use the first 80% of rows for training and the final 20% as the chronological holdout. Train a logistic regression model using the features MLII and V1. Estimate whether an annotation is present for the first row in the holdout set.",
+      "query_version": "v1",
+      "operator_skeleton": [
+        "PREDICTIVE_PIPELINE"
+      ],
+      "operator_contract_hash": null,
+      "schema_fingerprint": "3e2dc640c05be9c3",
+      "semantic_signature": {
+        "admissibility": "in_scope",
+        "confidence": 0.85,
+        "aggregate": null,
+        "fields": [
+          "MLII",
+          "V1",
+          "annotation",
+          "record_id",
+          "time_s"
+        ],
+        "predicate_ops": {
+          "record_id": "eq"
+        },
+        "filter_values": {
+          "record_id": 101
+        },
+        "intent_flags": {
+          "rank": false,
+          "group_by": true,
+          "difference": false,
+          "derived_magnitude": false,
+          "time_bin": false,
+          "correlation": false,
+          "last_event": false,
+          "predictive": true
+        },
+        "predictive": {
+          "model": "logistic_regression",
+          "target_column": null,
+          "train_fraction": 0.8,
+          "holdout_row": "first"
+        },
+        "operator_skeleton_hint": [
+          "PREDICTIVE_PIPELINE"
+        ],
+        "output_shape": "predictive",
+        "operator_skeleton": [
+          "PREDICTIVE_PIPELINE"
+        ]
+      },
+      "source": "offline_semantic_registry_build"
+    },
+    "ecg:72:v1": {
+      "template_id": "ecg:72:v1",
+      "dataset": "ecg",
+      "status": "reusable",
+      "query_id": "",
+      "query_text": "Tell me which record_id exhibits the largest difference between highest and lowest MLII?",
+      "query_version": "v1",
+      "operator_skeleton": [
+        "PARALLEL_AGGREGATE",
+        "DERIVE_BINARY",
+        "RANK_ROWS"
+      ],
+      "operator_contract_hash": null,
+      "schema_fingerprint": "3e2dc640c05be9c3",
+      "semantic_signature": {
+        "admissibility": "in_scope",
+        "confidence": 0.85,
+        "aggregate": "min",
+        "fields": [
+          "MLII",
+          "record_id"
+        ],
+        "predicate_ops": {},
+        "filter_values": {},
+        "intent_flags": {
+          "rank": true,
+          "group_by": false,
+          "difference": true,
+          "derived_magnitude": false,
+          "time_bin": false,
+          "correlation": false,
+          "last_event": false,
+          "predictive": false
+        },
+        "predictive": {
+          "model": null,
+          "target_column": null,
+          "train_fraction": null,
+          "holdout_row": null
+        },
+        "operator_skeleton_hint": null,
+        "output_shape": "scalar",
+        "operator_skeleton": [
+          "PARALLEL_AGGREGATE",
+          "DERIVE_BINARY",
+          "RANK_ROWS"
+        ]
+      },
+      "source": "offline_semantic_registry_build"
+    },
+    "ecg:73:v1": {
+      "template_id": "ecg:73:v1",
+      "dataset": "ecg",
+      "status": "reusable",
+      "query_id": "",
+      "query_text": "Filter to record_id 101 and sort its rows by time_s in ascending order. Use the first 80% of rows In training and the final 20% as the chronological holdout. Fit a logistic regression model using the features MLII and V1. Forecast whether an annotation is present In the first row in the holdout set.",
+      "query_version": "v1",
+      "operator_skeleton": [
+        "PREDICTIVE_PIPELINE"
+      ],
+      "operator_contract_hash": null,
+      "schema_fingerprint": "3e2dc640c05be9c3",
+      "semantic_signature": {
+        "admissibility": "in_scope",
+        "confidence": 0.85,
+        "aggregate": null,
+        "fields": [
+          "MLII",
+          "V1",
+          "annotation",
+          "record_id",
+          "time_s"
+        ],
+        "predicate_ops": {
+          "record_id": "eq"
+        },
+        "filter_values": {
+          "record_id": 101
+        },
+        "intent_flags": {
+          "rank": false,
+          "group_by": true,
+          "difference": false,
+          "derived_magnitude": false,
+          "time_bin": false,
+          "correlation": false,
+          "last_event": false,
+          "predictive": true
+        },
+        "predictive": {
+          "model": "logistic_regression",
+          "target_column": null,
+          "train_fraction": 0.8,
+          "holdout_row": "first"
+        },
+        "operator_skeleton_hint": [
+          "PREDICTIVE_PIPELINE"
+        ],
+        "output_shape": "predictive",
+        "operator_skeleton": [
+          "PREDICTIVE_PIPELINE"
+        ]
+      },
+      "source": "offline_semantic_registry_build"
+    },
+    "ecg:85:v1": {
+      "template_id": "ecg:85:v1",
+      "dataset": "ecg",
+      "status": "reusable",
+      "query_id": "",
+      "query_text": "For record_id 106, What number of samples have MLII > 0?",
+      "query_version": "v1",
+      "operator_skeleton": [
+        "FILTER_COMPARE",
+        "FILTER_EQ_AGGREGATE",
+        "COUNT_ROWS"
+      ],
+      "operator_contract_hash": null,
+      "schema_fingerprint": "8a468207a2c8d18a",
+      "semantic_signature": {
+        "admissibility": "in_scope",
+        "confidence": 0.85,
+        "aggregate": "count",
+        "fields": [
+          "MLII",
+          "record_id"
+        ],
+        "predicate_ops": {
+          "mlii": "gt",
+          "record_id": "eq"
+        },
+        "filter_values": {
+          "record_id": 106,
+          "mlii__value": 0
+        },
+        "intent_flags": {
+          "rank": false,
+          "group_by": false,
+          "difference": false,
+          "derived_magnitude": false,
+          "time_bin": false,
+          "correlation": false,
+          "last_event": false,
+          "predictive": false
+        },
+        "predictive": {
+          "model": null,
+          "target_column": null,
+          "train_fraction": null,
+          "holdout_row": null
+        },
+        "operator_skeleton_hint": [
+          "FILTER_COMPARE",
+          "COUNT_ROWS"
+        ],
+        "output_shape": "scalar",
+        "operator_skeleton": [
+          "FILTER_COMPARE",
+          "FILTER_EQ_AGGREGATE",
+          "COUNT_ROWS"
+        ]
+      },
+      "source": "offline_semantic_registry_build"
+    },
+    "ecg:86:v1": {
+      "template_id": "ecg:86:v1",
+      "dataset": "ecg",
+      "status": "reusable",
+      "query_id": "",
+      "query_text": "In record_id 106, How much of a count of samples have MLII > 0?",
+      "query_version": "v1",
+      "operator_skeleton": [
+        "FILTER_COMPARE",
+        "FILTER_COMPARE",
+        "COUNT_ROWS"
+      ],
+      "operator_contract_hash": null,
+      "schema_fingerprint": "8a468207a2c8d18a",
+      "semantic_signature": {
+        "admissibility": "in_scope",
+        "confidence": 0.85,
+        "aggregate": "count",
+        "fields": [
+          "MLII",
+          "record_id"
+        ],
+        "predicate_ops": {
+          "mlii": "gt",
+          "record_id": "eq"
+        },
+        "filter_values": {
+          "record_id": 106,
+          "mlii__value": 0
+        },
+        "intent_flags": {
+          "rank": false,
+          "group_by": false,
+          "difference": false,
+          "derived_magnitude": false,
+          "time_bin": false,
+          "correlation": false,
+          "last_event": false,
+          "predictive": false
+        },
+        "predictive": {
+          "model": null,
+          "target_column": null,
+          "train_fraction": null,
+          "holdout_row": null
+        },
+        "operator_skeleton_hint": [
+          "FILTER_COMPARE",
+          "COUNT_ROWS"
+        ],
+        "output_shape": "scalar",
+        "operator_skeleton": [
+          "FILTER_COMPARE",
+          "FILTER_COMPARE",
+          "COUNT_ROWS"
+        ]
+      },
+      "source": "offline_semantic_registry_build"
+    },
+    "ecg:17:v1": {
+      "template_id": "ecg:17:v1",
+      "dataset": "ecg",
+      "status": "reusable",
+      "query_id": "17",
+      "query_text": "Among rows whose annotation is one of the known MIT-ECG annotation codes, divide time_s into 10-second bins. For each (record_id, bin) pair, compute MLII RMS. Return the (record_id, bin) pair with the greatest RMS.",
+      "query_version": "v1",
+      "operator_skeleton": [
+        "FILTER_NOT_EMPTY",
+        "DERIVE_BIN",
+        "GROUP_AGGREGATE",
+        "RANK_GROUPS"
+      ],
+      "operator_contract_hash": "2be2d0b165f22ee01479bee3042b9568475c1f3b99a8aa028e2d2f5b4c5d0240",
+      "schema_fingerprint": null,
+      "semantic_signature": {
+        "admissibility": "in_scope",
+        "confidence": 0.85,
+        "aggregate": "max",
+        "fields": [
+          "MLII",
+          "annotation",
+          "record_id",
+          "time_s"
+        ],
+        "predicate_ops": {},
+        "filter_values": {},
+        "intent_flags": {
+          "rank": false,
+          "group_by": true,
+          "difference": false,
+          "derived_magnitude": true,
+          "time_bin": true,
+          "correlation": false,
+          "last_event": false,
+          "predictive": false
+        },
+        "predictive": {
+          "model": null,
+          "target_column": null,
+          "train_fraction": null,
+          "holdout_row": null
+        },
+        "operator_skeleton_hint": null,
+        "output_shape": "scalar",
+        "operator_skeleton": [
+          "FILTER_NOT_EMPTY",
+          "DERIVE_BIN",
+          "GROUP_AGGREGATE",
+          "RANK_GROUPS"
+        ]
+      },
+      "source": "offline_semantic_registry_build"
+    },
+    "ecg:18:v1": {
+      "template_id": "ecg:18:v1",
+      "dataset": "ecg",
+      "status": "reusable",
+      "query_id": "18",
+      "query_text": "For every record_id, independently compute maximum and minimum MLII. Define MLII span as maximum minus minimum. Return the record_id with the largest MLII span.",
+      "query_version": "v1",
+      "operator_skeleton": [
+        "PARALLEL_AGGREGATE",
+        "DERIVE_BINARY",
+        "RANK_ROWS"
+      ],
+      "operator_contract_hash": "2be2d0b165f22ee01479bee3042b9568475c1f3b99a8aa028e2d2f5b4c5d0240",
+      "schema_fingerprint": null,
+      "semantic_signature": {
+        "admissibility": "in_scope",
+        "confidence": 0.85,
+        "aggregate": "min",
+        "fields": [
+          "MLII",
+          "record_id"
+        ],
+        "predicate_ops": {},
+        "filter_values": {},
+        "intent_flags": {
+          "rank": true,
+          "group_by": false,
+          "difference": false,
+          "derived_magnitude": false,
+          "time_bin": false,
+          "correlation": false,
+          "last_event": false,
+          "predictive": false
+        },
+        "predictive": {
+          "model": null,
+          "target_column": null,
+          "train_fraction": null,
+          "holdout_row": null
+        },
+        "operator_skeleton_hint": null,
+        "output_shape": "scalar",
+        "operator_skeleton": [
+          "PARALLEL_AGGREGATE",
+          "DERIVE_BINARY",
+          "RANK_ROWS"
+        ]
+      },
+      "source": "offline_semantic_registry_build"
+    },
+    "ecg:19:v1": {
+      "template_id": "ecg:19:v1",
+      "dataset": "ecg",
+      "status": "reusable",
+      "query_id": "19",
+      "query_text": "For record_id 101, divide time_s into 10-second bins. For each bin, compute annotated-row rate as rows with an annotation in the known annotation-code list divided by all rows in the bin. Return the Pearson correlation between bin index and annotated-row rate.",
+      "query_version": "v1",
+      "operator_skeleton": [
+        "FILTER_COMPARE",
+        "DERIVE_BIN",
+        "PARALLEL_AGGREGATE",
+        "DERIVE_BINARY",
+        "CORRELATE_COLUMNS"
+      ],
+      "operator_contract_hash": "2be2d0b165f22ee01479bee3042b9568475c1f3b99a8aa028e2d2f5b4c5d0240",
+      "schema_fingerprint": null,
+      "semantic_signature": {
+        "admissibility": "in_scope",
+        "confidence": 0.85,
+        "aggregate": null,
+        "fields": [
+          "annotation",
+          "record_id",
+          "time_s"
+        ],
+        "predicate_ops": {
+          "record_id": "eq"
+        },
+        "filter_values": {
+          "record_id": 101
+        },
+        "intent_flags": {
+          "rank": false,
+          "group_by": true,
+          "difference": false,
+          "derived_magnitude": false,
+          "time_bin": true,
+          "correlation": true,
+          "last_event": false,
+          "predictive": false
+        },
+        "predictive": {
+          "model": null,
+          "target_column": null,
+          "train_fraction": null,
+          "holdout_row": null
+        },
+        "operator_skeleton_hint": null,
+        "output_shape": "list",
+        "operator_skeleton": [
+          "FILTER_COMPARE",
+          "DERIVE_BIN",
+          "PARALLEL_AGGREGATE",
+          "DERIVE_BINARY",
+          "CORRELATE_COLUMNS"
+        ]
+      },
+      "source": "offline_semantic_registry_build"
+    },
+    "ecg:20:v1": {
+      "template_id": "ecg:20:v1",
+      "dataset": "ecg",
+      "status": "reusable",
+      "query_id": "20",
+      "query_text": "For every record_id, independently compute MLII variance and V1 variance. Define total lead variability as their sum. Return the record_id with the largest total lead variability.",
+      "query_version": "v1",
+      "operator_skeleton": [
+        "PARALLEL_AGGREGATE",
+        "DERIVE_BINARY",
+        "RANK_ROWS"
+      ],
+      "operator_contract_hash": "2be2d0b165f22ee01479bee3042b9568475c1f3b99a8aa028e2d2f5b4c5d0240",
+      "schema_fingerprint": null,
+      "semantic_signature": {
+        "admissibility": "in_scope",
+        "confidence": 0.85,
+        "aggregate": "max",
+        "fields": [
+          "MLII",
+          "V1",
+          "record_id"
+        ],
+        "predicate_ops": {},
+        "filter_values": {},
+        "intent_flags": {
+          "rank": true,
+          "group_by": false,
+          "difference": false,
+          "derived_magnitude": false,
+          "time_bin": false,
+          "correlation": false,
+          "last_event": false,
+          "predictive": false
+        },
+        "predictive": {
+          "model": null,
+          "target_column": null,
+          "train_fraction": null,
+          "holdout_row": null
+        },
+        "operator_skeleton_hint": null,
+        "output_shape": "scalar",
+        "operator_skeleton": [
+          "PARALLEL_AGGREGATE",
+          "DERIVE_BINARY",
+          "RANK_ROWS"
         ]
       },
       "source": "offline_semantic_registry_build"

@@ -2,7 +2,7 @@
   "version": 1,
   "dataset": "bus",
   "query_version": "v1",
-  "count": 12,
+  "count": 29,
   "entries": {
     "bus:14:v1": {
       "template_id": "bus:14:v1",
@@ -63,7 +63,7 @@
         "AGGREGATE_COLUMN"
       ],
       "operator_contract_hash": "78a4cd22b7dbe6673097919cfed0b476be06682bdfc09df50fed9b6a234f751b",
-      "schema_fingerprint": null,
+      "schema_fingerprint": "1856b7e244a7940d",
       "semantic_signature": {
         "admissibility": "in_scope",
         "confidence": 0.85,
@@ -159,7 +159,7 @@
         "COMPARE_PARTITIONS"
       ],
       "operator_contract_hash": "78a4cd22b7dbe6673097919cfed0b476be06682bdfc09df50fed9b6a234f751b",
-      "schema_fingerprint": null,
+      "schema_fingerprint": "1856b7e244a7940d",
       "semantic_signature": {
         "admissibility": "in_scope",
         "confidence": 0.85,
@@ -256,7 +256,7 @@
         "AGGREGATE_COLUMN"
       ],
       "operator_contract_hash": "78a4cd22b7dbe6673097919cfed0b476be06682bdfc09df50fed9b6a234f751b",
-      "schema_fingerprint": null,
+      "schema_fingerprint": "1856b7e244a7940d",
       "semantic_signature": {
         "admissibility": "in_scope",
         "confidence": 0.85,
@@ -302,7 +302,7 @@
         "COUNT_ROWS"
       ],
       "operator_contract_hash": "78a4cd22b7dbe6673097919cfed0b476be06682bdfc09df50fed9b6a234f751b",
-      "schema_fingerprint": null,
+      "schema_fingerprint": "1856b7e244a7940d",
       "semantic_signature": {
         "admissibility": "in_scope",
         "confidence": 0.85,
@@ -397,7 +397,7 @@
         "AGGREGATE_COLUMN"
       ],
       "operator_contract_hash": "78a4cd22b7dbe6673097919cfed0b476be06682bdfc09df50fed9b6a234f751b",
-      "schema_fingerprint": null,
+      "schema_fingerprint": "1856b7e244a7940d",
       "semantic_signature": {
         "admissibility": "in_scope",
         "confidence": 0.85,
@@ -438,11 +438,10 @@
       "query_text": "List all timestamps where accel_stats_z_p99 reaches its maximum value across the dataset.",
       "query_version": "v1",
       "operator_skeleton": [
-        "FILTER_EQ_AGGREGATE",
-        "SELECT_COLUMN"
+        "FILTER_EQ_AGGREGATE"
       ],
       "operator_contract_hash": "78a4cd22b7dbe6673097919cfed0b476be06682bdfc09df50fed9b6a234f751b",
-      "schema_fingerprint": null,
+      "schema_fingerprint": "1856b7e244a7940d",
       "semantic_signature": {
         "admissibility": "in_scope",
         "confidence": 0.85,
@@ -471,8 +470,7 @@
         "operator_skeleton_hint": null,
         "output_shape": "list",
         "operator_skeleton": [
-          "FILTER_EQ_AGGREGATE",
-          "SELECT_COLUMN"
+          "FILTER_EQ_AGGREGATE"
         ]
       },
       "source": "offline_semantic_registry_build"
@@ -533,12 +531,11 @@
       "query_text": "Which location (latitude, longitude) recorded the largest difference between the 99th and 1st percentile of the z-axis acceleration?",
       "query_version": "v1",
       "operator_skeleton": [
-        "PARALLEL_AGGREGATE",
         "DERIVE_BINARY",
         "RANK_ROWS"
       ],
       "operator_contract_hash": "78a4cd22b7dbe6673097919cfed0b476be06682bdfc09df50fed9b6a234f751b",
-      "schema_fingerprint": null,
+      "schema_fingerprint": "1856b7e244a7940d",
       "semantic_signature": {
         "admissibility": "in_scope",
         "confidence": 0.85,
@@ -568,9 +565,838 @@
         "operator_skeleton_hint": null,
         "output_shape": "scalar",
         "operator_skeleton": [
-          "PARALLEL_AGGREGATE",
           "DERIVE_BINARY",
           "RANK_ROWS"
+        ]
+      },
+      "source": "offline_semantic_registry_build"
+    },
+    "bus:49:v1": {
+      "template_id": "bus:49:v1",
+      "dataset": "bus",
+      "status": "reusable",
+      "query_id": "",
+      "query_text": "If we group the data into 1-minute intervals, which time window has the highest mean instability_score?",
+      "query_version": "v1",
+      "operator_skeleton": [
+        "DERIVE_BIN",
+        "GROUP_AGGREGATE",
+        "RANK_GROUPS"
+      ],
+      "operator_contract_hash": null,
+      "schema_fingerprint": "1856b7e244a7940d",
+      "semantic_signature": {
+        "admissibility": "in_scope",
+        "confidence": 0.85,
+        "aggregate": "max",
+        "fields": [
+          "instability_score"
+        ],
+        "predicate_ops": {},
+        "filter_values": {},
+        "intent_flags": {
+          "rank": true,
+          "group_by": true,
+          "difference": false,
+          "derived_magnitude": false,
+          "time_bin": true,
+          "correlation": false,
+          "last_event": false,
+          "predictive": false
+        },
+        "predictive": {
+          "model": null,
+          "target_column": null,
+          "train_fraction": null,
+          "holdout_row": null
+        },
+        "operator_skeleton_hint": null,
+        "output_shape": "scalar",
+        "operator_skeleton": [
+          "DERIVE_BIN",
+          "GROUP_AGGREGATE",
+          "RANK_GROUPS"
+        ]
+      },
+      "source": "offline_semantic_registry_build"
+    },
+    "bus:50:v1": {
+      "template_id": "bus:50:v1",
+      "dataset": "bus",
+      "status": "reusable",
+      "query_id": "",
+      "query_text": "If we group the data into 1-minute intervals, Tell me which time window has the highest mean instability_score?",
+      "query_version": "v1",
+      "operator_skeleton": [
+        "DERIVE_BIN",
+        "GROUP_AGGREGATE",
+        "RANK_GROUPS"
+      ],
+      "operator_contract_hash": null,
+      "schema_fingerprint": "1856b7e244a7940d",
+      "semantic_signature": {
+        "admissibility": "in_scope",
+        "confidence": 0.85,
+        "aggregate": "max",
+        "fields": [
+          "instability_score"
+        ],
+        "predicate_ops": {},
+        "filter_values": {},
+        "intent_flags": {
+          "rank": true,
+          "group_by": true,
+          "difference": false,
+          "derived_magnitude": false,
+          "time_bin": true,
+          "correlation": false,
+          "last_event": false,
+          "predictive": false
+        },
+        "predictive": {
+          "model": null,
+          "target_column": null,
+          "train_fraction": null,
+          "holdout_row": null
+        },
+        "operator_skeleton_hint": null,
+        "output_shape": "scalar",
+        "operator_skeleton": [
+          "DERIVE_BIN",
+          "GROUP_AGGREGATE",
+          "RANK_GROUPS"
+        ]
+      },
+      "source": "offline_semantic_registry_build"
+    },
+    "bus:51:v1": {
+      "template_id": "bus:51:v1",
+      "dataset": "bus",
+      "status": "reusable",
+      "query_id": "",
+      "query_text": "List all timestamps where accel_stats_z_p99 reaches its highest value across the dataset.",
+      "query_version": "v1",
+      "operator_skeleton": [
+        "FILTER_EQ_AGGREGATE",
+        "SELECT_COLUMN"
+      ],
+      "operator_contract_hash": null,
+      "schema_fingerprint": "1856b7e244a7940d",
+      "semantic_signature": {
+        "admissibility": "in_scope",
+        "confidence": 0.85,
+        "aggregate": "max",
+        "fields": [
+          "accel_stats_z_p99"
+        ],
+        "predicate_ops": {},
+        "filter_values": {},
+        "intent_flags": {
+          "rank": true,
+          "group_by": false,
+          "difference": false,
+          "derived_magnitude": false,
+          "time_bin": false,
+          "correlation": false,
+          "last_event": false,
+          "predictive": false
+        },
+        "predictive": {
+          "model": null,
+          "target_column": null,
+          "train_fraction": null,
+          "holdout_row": null
+        },
+        "operator_skeleton_hint": null,
+        "output_shape": "list",
+        "operator_skeleton": [
+          "FILTER_EQ_AGGREGATE",
+          "SELECT_COLUMN"
+        ]
+      },
+      "source": "offline_semantic_registry_build"
+    },
+    "bus:63:v1": {
+      "template_id": "bus:63:v1",
+      "dataset": "bus",
+      "status": "reusable",
+      "query_id": "",
+      "query_text": "Is the northern half of the route (latitude above median) rougher than the southern half, Using average acceleration variance?",
+      "query_version": "v1",
+      "operator_skeleton": [
+        "SPLIT_BY_THRESHOLD",
+        "SPLIT_BY_THRESHOLD",
+        "AGGREGATE_PARTITIONS",
+        "COMPARE_PARTITIONS"
+      ],
+      "operator_contract_hash": null,
+      "schema_fingerprint": "1856b7e244a7940d",
+      "semantic_signature": {
+        "admissibility": "in_scope",
+        "confidence": 0.85,
+        "aggregate": "median",
+        "fields": [
+          "latitude"
+        ],
+        "predicate_ops": {},
+        "filter_values": {},
+        "intent_flags": {
+          "rank": false,
+          "group_by": false,
+          "difference": false,
+          "derived_magnitude": false,
+          "time_bin": false,
+          "correlation": false,
+          "last_event": false,
+          "predictive": false
+        },
+        "predictive": {
+          "model": null,
+          "target_column": null,
+          "train_fraction": null,
+          "holdout_row": null
+        },
+        "operator_skeleton_hint": null,
+        "output_shape": "scalar",
+        "operator_skeleton": [
+          "SPLIT_BY_THRESHOLD",
+          "SPLIT_BY_THRESHOLD",
+          "AGGREGATE_PARTITIONS",
+          "COMPARE_PARTITIONS"
+        ]
+      },
+      "source": "offline_semantic_registry_build"
+    },
+    "bus:68:v1": {
+      "template_id": "bus:68:v1",
+      "dataset": "bus",
+      "status": "reusable",
+      "query_id": "",
+      "query_text": "List every timestamps where accel_stats_z_p99 reaches its maximum value across the dataset.",
+      "query_version": "v1",
+      "operator_skeleton": [
+        "FILTER_EQ_AGGREGATE"
+      ],
+      "operator_contract_hash": null,
+      "schema_fingerprint": "1856b7e244a7940d",
+      "semantic_signature": {
+        "admissibility": "in_scope",
+        "confidence": 0.85,
+        "aggregate": "max",
+        "fields": [
+          "accel_stats_z_p99"
+        ],
+        "predicate_ops": {},
+        "filter_values": {},
+        "intent_flags": {
+          "rank": false,
+          "group_by": false,
+          "difference": false,
+          "derived_magnitude": false,
+          "time_bin": false,
+          "correlation": false,
+          "last_event": false,
+          "predictive": false
+        },
+        "predictive": {
+          "model": null,
+          "target_column": null,
+          "train_fraction": null,
+          "holdout_row": null
+        },
+        "operator_skeleton_hint": null,
+        "output_shape": "list",
+        "operator_skeleton": [
+          "FILTER_EQ_AGGREGATE"
+        ]
+      },
+      "source": "offline_semantic_registry_build"
+    },
+    "bus:74:v1": {
+      "template_id": "bus:74:v1",
+      "dataset": "bus",
+      "status": "reusable",
+      "query_id": "",
+      "query_text": "Could you report the maximum accel_variance observed in this dataset?",
+      "query_version": "v1",
+      "operator_skeleton": [
+        "AGGREGATE_COLUMN"
+      ],
+      "operator_contract_hash": null,
+      "schema_fingerprint": "1856b7e244a7940d",
+      "semantic_signature": {
+        "admissibility": "in_scope",
+        "confidence": 0.85,
+        "aggregate": "max",
+        "fields": [
+          "accel_variance"
+        ],
+        "predicate_ops": {},
+        "filter_values": {},
+        "intent_flags": {
+          "rank": false,
+          "group_by": false,
+          "difference": false,
+          "derived_magnitude": false,
+          "time_bin": false,
+          "correlation": false,
+          "last_event": false,
+          "predictive": false
+        },
+        "predictive": {
+          "model": null,
+          "target_column": null,
+          "train_fraction": null,
+          "holdout_row": null
+        },
+        "operator_skeleton_hint": null,
+        "output_shape": "scalar",
+        "operator_skeleton": [
+          "AGGREGATE_COLUMN"
+        ]
+      },
+      "source": "offline_semantic_registry_build"
+    },
+    "bus:75:v1": {
+      "template_id": "bus:75:v1",
+      "dataset": "bus",
+      "status": "reusable",
+      "query_id": "",
+      "query_text": "Could you report the average accel_mean across all observed samples?",
+      "query_version": "v1",
+      "operator_skeleton": [
+        "AGGREGATE_COLUMN"
+      ],
+      "operator_contract_hash": null,
+      "schema_fingerprint": "1856b7e244a7940d",
+      "semantic_signature": {
+        "admissibility": "in_scope",
+        "confidence": 0.85,
+        "aggregate": "mean",
+        "fields": [
+          "accel_mean"
+        ],
+        "predicate_ops": {},
+        "filter_values": {},
+        "intent_flags": {
+          "rank": false,
+          "group_by": false,
+          "difference": false,
+          "derived_magnitude": false,
+          "time_bin": false,
+          "correlation": false,
+          "last_event": false,
+          "predictive": false
+        },
+        "predictive": {
+          "model": null,
+          "target_column": null,
+          "train_fraction": null,
+          "holdout_row": null
+        },
+        "operator_skeleton_hint": null,
+        "output_shape": "scalar",
+        "operator_skeleton": [
+          "AGGREGATE_COLUMN"
+        ]
+      },
+      "source": "offline_semantic_registry_build"
+    },
+    "bus:76:v1": {
+      "template_id": "bus:76:v1",
+      "dataset": "bus",
+      "status": "reusable",
+      "query_id": "",
+      "query_text": "What number of data samples show an accel_variance strictly greater than 0.20?",
+      "query_version": "v1",
+      "operator_skeleton": [
+        "FILTER_COMPARE",
+        "COUNT_ROWS"
+      ],
+      "operator_contract_hash": null,
+      "schema_fingerprint": "1856b7e244a7940d",
+      "semantic_signature": {
+        "admissibility": "in_scope",
+        "confidence": 0.85,
+        "aggregate": "count",
+        "fields": [
+          "accel_variance"
+        ],
+        "predicate_ops": {},
+        "filter_values": {},
+        "intent_flags": {
+          "rank": false,
+          "group_by": false,
+          "difference": false,
+          "derived_magnitude": false,
+          "time_bin": false,
+          "correlation": false,
+          "last_event": false,
+          "predictive": false
+        },
+        "predictive": {
+          "model": null,
+          "target_column": null,
+          "train_fraction": null,
+          "holdout_row": null
+        },
+        "operator_skeleton_hint": null,
+        "output_shape": "scalar",
+        "operator_skeleton": [
+          "FILTER_COMPARE",
+          "COUNT_ROWS"
+        ]
+      },
+      "source": "offline_semantic_registry_build"
+    },
+    "bus:77:v1": {
+      "template_id": "bus:77:v1",
+      "dataset": "bus",
+      "status": "reusable",
+      "query_id": "",
+      "query_text": "Which location (latitude, longitude) observed the largest difference between the 99th and 1st percentile of the z-axis acceleration?",
+      "query_version": "v1",
+      "operator_skeleton": [
+        "DERIVE_BINARY",
+        "RANK_ROWS"
+      ],
+      "operator_contract_hash": null,
+      "schema_fingerprint": "1856b7e244a7940d",
+      "semantic_signature": {
+        "admissibility": "in_scope",
+        "confidence": 0.85,
+        "aggregate": "max",
+        "fields": [
+          "latitude",
+          "longitude"
+        ],
+        "predicate_ops": {},
+        "filter_values": {},
+        "intent_flags": {
+          "rank": true,
+          "group_by": false,
+          "difference": true,
+          "derived_magnitude": false,
+          "time_bin": false,
+          "correlation": false,
+          "last_event": false,
+          "predictive": false
+        },
+        "predictive": {
+          "model": null,
+          "target_column": null,
+          "train_fraction": null,
+          "holdout_row": null
+        },
+        "operator_skeleton_hint": null,
+        "output_shape": "scalar",
+        "operator_skeleton": [
+          "DERIVE_BINARY",
+          "RANK_ROWS"
+        ]
+      },
+      "source": "offline_semantic_registry_build"
+    },
+    "bus:78:v1": {
+      "template_id": "bus:78:v1",
+      "dataset": "bus",
+      "status": "reusable",
+      "query_id": "",
+      "query_text": "Please provide the highest accel_variance observed in this dataset?",
+      "query_version": "v1",
+      "operator_skeleton": [
+        "AGGREGATE_COLUMN"
+      ],
+      "operator_contract_hash": null,
+      "schema_fingerprint": "1856b7e244a7940d",
+      "semantic_signature": {
+        "admissibility": "in_scope",
+        "confidence": 0.85,
+        "aggregate": "max",
+        "fields": [
+          "accel_variance"
+        ],
+        "predicate_ops": {},
+        "filter_values": {},
+        "intent_flags": {
+          "rank": true,
+          "group_by": false,
+          "difference": false,
+          "derived_magnitude": false,
+          "time_bin": false,
+          "correlation": false,
+          "last_event": false,
+          "predictive": false
+        },
+        "predictive": {
+          "model": null,
+          "target_column": null,
+          "train_fraction": null,
+          "holdout_row": null
+        },
+        "operator_skeleton_hint": null,
+        "output_shape": "scalar",
+        "operator_skeleton": [
+          "AGGREGATE_COLUMN"
+        ]
+      },
+      "source": "offline_semantic_registry_build"
+    },
+    "bus:79:v1": {
+      "template_id": "bus:79:v1",
+      "dataset": "bus",
+      "status": "reusable",
+      "query_id": "",
+      "query_text": "Please provide the average accel_mean across all recorded samples?",
+      "query_version": "v1",
+      "operator_skeleton": [
+        "AGGREGATE_COLUMN"
+      ],
+      "operator_contract_hash": null,
+      "schema_fingerprint": "1856b7e244a7940d",
+      "semantic_signature": {
+        "admissibility": "in_scope",
+        "confidence": 0.85,
+        "aggregate": "mean",
+        "fields": [
+          "accel_mean"
+        ],
+        "predicate_ops": {},
+        "filter_values": {},
+        "intent_flags": {
+          "rank": false,
+          "group_by": false,
+          "difference": false,
+          "derived_magnitude": false,
+          "time_bin": false,
+          "correlation": false,
+          "last_event": false,
+          "predictive": false
+        },
+        "predictive": {
+          "model": null,
+          "target_column": null,
+          "train_fraction": null,
+          "holdout_row": null
+        },
+        "operator_skeleton_hint": null,
+        "output_shape": "scalar",
+        "operator_skeleton": [
+          "AGGREGATE_COLUMN"
+        ]
+      },
+      "source": "offline_semantic_registry_build"
+    },
+    "bus:80:v1": {
+      "template_id": "bus:80:v1",
+      "dataset": "bus",
+      "status": "reusable",
+      "query_id": "",
+      "query_text": "How much of a count of data samples show an accel_variance strictly greater than 0.20?",
+      "query_version": "v1",
+      "operator_skeleton": [
+        "FILTER_COMPARE",
+        "COUNT_ROWS"
+      ],
+      "operator_contract_hash": null,
+      "schema_fingerprint": "1856b7e244a7940d",
+      "semantic_signature": {
+        "admissibility": "in_scope",
+        "confidence": 0.85,
+        "aggregate": "count",
+        "fields": [
+          "accel_variance"
+        ],
+        "predicate_ops": {},
+        "filter_values": {},
+        "intent_flags": {
+          "rank": false,
+          "group_by": false,
+          "difference": false,
+          "derived_magnitude": false,
+          "time_bin": false,
+          "correlation": false,
+          "last_event": false,
+          "predictive": false
+        },
+        "predictive": {
+          "model": null,
+          "target_column": null,
+          "train_fraction": null,
+          "holdout_row": null
+        },
+        "operator_skeleton_hint": null,
+        "output_shape": "scalar",
+        "operator_skeleton": [
+          "FILTER_COMPARE",
+          "COUNT_ROWS"
+        ]
+      },
+      "source": "offline_semantic_registry_build"
+    },
+    "bus:81:v1": {
+      "template_id": "bus:81:v1",
+      "dataset": "bus",
+      "status": "reusable",
+      "query_id": "",
+      "query_text": "Tell me which location (latitude, longitude) recorded the largest difference between the 99th and 1st percentile of the z-axis acceleration?",
+      "query_version": "v1",
+      "operator_skeleton": [
+        "DERIVE_BINARY",
+        "RANK_ROWS"
+      ],
+      "operator_contract_hash": null,
+      "schema_fingerprint": "1856b7e244a7940d",
+      "semantic_signature": {
+        "admissibility": "in_scope",
+        "confidence": 0.85,
+        "aggregate": "max",
+        "fields": [
+          "latitude",
+          "longitude"
+        ],
+        "predicate_ops": {},
+        "filter_values": {},
+        "intent_flags": {
+          "rank": true,
+          "group_by": false,
+          "difference": true,
+          "derived_magnitude": false,
+          "time_bin": false,
+          "correlation": false,
+          "last_event": false,
+          "predictive": false
+        },
+        "predictive": {
+          "model": null,
+          "target_column": null,
+          "train_fraction": null,
+          "holdout_row": null
+        },
+        "operator_skeleton_hint": null,
+        "output_shape": "scalar",
+        "operator_skeleton": [
+          "DERIVE_BINARY",
+          "RANK_ROWS"
+        ]
+      },
+      "source": "offline_semantic_registry_build"
+    },
+    "bus:17:v1": {
+      "template_id": "bus:17:v1",
+      "dataset": "bus",
+      "status": "reusable",
+      "query_id": "17",
+      "query_text": "Filter the route to rows labeled aggressive, group them into 5-minute timestamp windows, and return the window with the highest mean instability_score.",
+      "query_version": "v1",
+      "operator_skeleton": [
+        "FILTER_COMPARE",
+        "DERIVE_BIN",
+        "GROUP_AGGREGATE",
+        "RANK_GROUPS"
+      ],
+      "operator_contract_hash": "2be2d0b165f22ee01479bee3042b9568475c1f3b99a8aa028e2d2f5b4c5d0240",
+      "schema_fingerprint": null,
+      "semantic_signature": {
+        "admissibility": "in_scope",
+        "confidence": 0.85,
+        "aggregate": "max",
+        "fields": [
+          "instability_score",
+          "timestamp"
+        ],
+        "predicate_ops": {},
+        "filter_values": {},
+        "intent_flags": {
+          "rank": true,
+          "group_by": true,
+          "difference": false,
+          "derived_magnitude": false,
+          "time_bin": true,
+          "correlation": false,
+          "last_event": false,
+          "predictive": false
+        },
+        "predictive": {
+          "model": null,
+          "target_column": null,
+          "train_fraction": null,
+          "holdout_row": null
+        },
+        "operator_skeleton_hint": null,
+        "output_shape": "scalar",
+        "operator_skeleton": [
+          "FILTER_COMPARE",
+          "DERIVE_BIN",
+          "GROUP_AGGREGATE",
+          "RANK_GROUPS"
+        ]
+      },
+      "source": "offline_semantic_registry_build"
+    },
+    "bus:18:v1": {
+      "template_id": "bus:18:v1",
+      "dataset": "bus",
+      "status": "reusable",
+      "query_id": "18",
+      "query_text": "Derive peak acceleration magnitude from accel_stats_x_p99, accel_stats_y_p99, and accel_stats_z_p99. Split the route at the median latitude and report the absolute difference between the northern and southern halves' mean peak magnitudes.",
+      "query_version": "v1",
+      "operator_skeleton": [
+        "DERIVE_VECTOR_MAGNITUDE",
+        "SPLIT_BY_THRESHOLD",
+        "SPLIT_BY_THRESHOLD",
+        "AGGREGATE_PARTITIONS",
+        "COMPARE_PARTITIONS"
+      ],
+      "operator_contract_hash": "2be2d0b165f22ee01479bee3042b9568475c1f3b99a8aa028e2d2f5b4c5d0240",
+      "schema_fingerprint": null,
+      "semantic_signature": {
+        "admissibility": "in_scope",
+        "confidence": 0.85,
+        "aggregate": "median",
+        "fields": [
+          "accel_stats_x_p99",
+          "accel_stats_y_p99",
+          "accel_stats_z_p99",
+          "latitude"
+        ],
+        "predicate_ops": {},
+        "filter_values": {},
+        "intent_flags": {
+          "rank": false,
+          "group_by": false,
+          "difference": true,
+          "derived_magnitude": true,
+          "time_bin": false,
+          "correlation": false,
+          "last_event": false,
+          "predictive": false
+        },
+        "predictive": {
+          "model": null,
+          "target_column": null,
+          "train_fraction": null,
+          "holdout_row": null
+        },
+        "operator_skeleton_hint": null,
+        "output_shape": "scalar",
+        "operator_skeleton": [
+          "DERIVE_VECTOR_MAGNITUDE",
+          "SPLIT_BY_THRESHOLD",
+          "SPLIT_BY_THRESHOLD",
+          "AGGREGATE_PARTITIONS",
+          "COMPARE_PARTITIONS"
+        ]
+      },
+      "source": "offline_semantic_registry_build"
+    },
+    "bus:19:v1": {
+      "template_id": "bus:19:v1",
+      "dataset": "bus",
+      "status": "reusable",
+      "query_id": "19",
+      "query_text": "Derive the vertical shock range as accel_stats_z_p99 minus accel_stats_z_p1. Compute its mean separately for aggressive and calm behavior labels, then report the aggressive-minus-calm difference.",
+      "query_version": "v1",
+      "operator_skeleton": [
+        "DERIVE_BINARY",
+        "SPLIT_BY_VALUES",
+        "SPLIT_BY_VALUES",
+        "AGGREGATE_PARTITIONS",
+        "COMPARE_PARTITIONS"
+      ],
+      "operator_contract_hash": "2be2d0b165f22ee01479bee3042b9568475c1f3b99a8aa028e2d2f5b4c5d0240",
+      "schema_fingerprint": null,
+      "semantic_signature": {
+        "admissibility": "in_scope",
+        "confidence": 0.85,
+        "aggregate": "mean",
+        "fields": [
+          "accel_stats_z_p1",
+          "accel_stats_z_p99",
+          "behavior"
+        ],
+        "predicate_ops": {},
+        "filter_values": {},
+        "intent_flags": {
+          "rank": false,
+          "group_by": false,
+          "difference": true,
+          "derived_magnitude": false,
+          "time_bin": false,
+          "correlation": false,
+          "last_event": false,
+          "predictive": false
+        },
+        "predictive": {
+          "model": null,
+          "target_column": null,
+          "train_fraction": null,
+          "holdout_row": null
+        },
+        "operator_skeleton_hint": null,
+        "output_shape": "scalar",
+        "operator_skeleton": [
+          "DERIVE_BINARY",
+          "SPLIT_BY_VALUES",
+          "SPLIT_BY_VALUES",
+          "AGGREGATE_PARTITIONS",
+          "COMPARE_PARTITIONS"
+        ]
+      },
+      "source": "offline_semantic_registry_build"
+    },
+    "bus:20:v1": {
+      "template_id": "bus:20:v1",
+      "dataset": "bus",
+      "status": "reusable",
+      "query_id": "20",
+      "query_text": "Derive the vertical shock range as accel_stats_z_p99 minus accel_stats_z_p1. Filter to aggressive behavior, group rows into 5-minute timestamp windows, and return the window with the highest mean vertical shock range.",
+      "query_version": "v1",
+      "operator_skeleton": [
+        "DERIVE_BINARY",
+        "FILTER_COMPARE",
+        "DERIVE_BIN",
+        "GROUP_AGGREGATE",
+        "RANK_GROUPS"
+      ],
+      "operator_contract_hash": "2be2d0b165f22ee01479bee3042b9568475c1f3b99a8aa028e2d2f5b4c5d0240",
+      "schema_fingerprint": null,
+      "semantic_signature": {
+        "admissibility": "in_scope",
+        "confidence": 0.85,
+        "aggregate": "max",
+        "fields": [
+          "accel_stats_z_p1",
+          "accel_stats_z_p99",
+          "behavior",
+          "timestamp"
+        ],
+        "predicate_ops": {},
+        "filter_values": {},
+        "intent_flags": {
+          "rank": true,
+          "group_by": true,
+          "difference": false,
+          "derived_magnitude": false,
+          "time_bin": true,
+          "correlation": false,
+          "last_event": false,
+          "predictive": false
+        },
+        "predictive": {
+          "model": null,
+          "target_column": null,
+          "train_fraction": null,
+          "holdout_row": null
+        },
+        "operator_skeleton_hint": null,
+        "output_shape": "scalar",
+        "operator_skeleton": [
+          "DERIVE_BINARY",
+          "FILTER_COMPARE",
+          "DERIVE_BIN",
+          "GROUP_AGGREGATE",
+          "RANK_GROUPS"
         ]
       },
       "source": "offline_semantic_registry_build"

@@ -399,17 +399,22 @@ You are a strict intent-alignment judge for a data analytics pipeline.
 
 You receive:
   - The original user question
-  - The Python code the agent executed
-  - The result the agent produced
+  - The ground-truth answer
+  - The candidate's final answer
 
-Evaluate whether the result CORRECTLY and COMPLETELY answers the original question.
+Evaluate whether the candidate's final answer CORRECTLY and COMPLETELY matches
+the ground-truth answer in the context of the original question.
 
 Flag FAIL if ANY of the following are true:
-  - A column name in the code does not exist in the dataset schema.
-  - The aggregation or arithmetic logic is clearly wrong (e.g. summing when mean is needed).
-  - The result is empty, None, or NaN when real data should exist.
-  - The result answers a different question than what was originally asked.
-  - The result fabricates information not derivable from the DataFrame.
+  - The final numeric result differs materially from the ground truth.
+  - The final answer has a genuinely different semantic referent, such as a
+    different entity, aggregation level, time scope, statistic, or unit.
+  - The final answer is empty, None, or NaN when the ground truth has a result.
+
+Do NOT penalize equivalent mathematical formulations, intermediate code
+representations, variable naming, execution traces, or formatting differences.
+Treat numerically equivalent values, including trailing-zero differences and
+minor rounding differences below 0.01, as PASS.
 
 Output format — output ONLY the following structure, nothing else:
 VERDICT: PASS

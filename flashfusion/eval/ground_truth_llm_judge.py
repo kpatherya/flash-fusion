@@ -447,17 +447,8 @@ def judge_rows_with_llm(
     max_answer_chars: int = 1800,
     max_code_chars: int = 1400,
 ) -> pd.DataFrame:
-    """Run LLM-based per-row judgment against ground truth."""
+    """Judge final candidate answers against their ground-truth references."""
     q_lookup = _query_lookup(dataset)
-    sanity_by_id: dict[int, dict[str, Any]] = {}
-    if sanity_df is not None and not sanity_df.empty:
-        sanity_by_id = {
-            int(r["query_id"]): {
-                "sanity_flag": str(r.get("sanity_flag", "")),
-                "rebuilt_reference_answer": str(r.get("rebuilt_reference_answer", "")),
-            }
-            for r in sanity_df.to_dict(orient="records")
-        }
 
     client = None
     chain = None
@@ -472,7 +463,6 @@ def judge_rows_with_llm(
         )
 
         gt = ground_truth_by_id[qid]
-        sanity = sanity_by_id.get(qid, {})
         candidate_code = _resolve_candidate_code(row)
 
         candidate_answer = str(row.get("answer", ""))
@@ -483,10 +473,10 @@ def judge_rows_with_llm(
                 [
                     (
                         "system",
-                        "You evaluate benchmark answers against ground truth. "
-                        "Be strict, concise, and judge factual equivalence by the underlying referent rather than surface phrasing. "
+                        "You evaluate final benchmark answers against ground-truth answers. "
+                        "Judge factual and semantic equivalence by the final answers only; do not infer correctness from code, execution traces, variable names, or intermediate representations. "
+                        "Treat equivalent mathematical formulations as the same answer. "
                         "Treat numeric answers as equivalent if they differ by less than 0.01 or represent the same number with different trailing zeros. "
-                        "Ignore purely formatting-level differences such as trailing periods after numbers. "
                         "Return JSON only.",
                     ),
                     (
@@ -501,15 +491,12 @@ Return JSON with keys:
 - ground_truth_note: short note
 
 Rules:
-- Before deciding PASS/FAIL, identify the canonical referent of the expected answer: the actual quantity, entity set, aggregation level, time scope, statistic, and unit implied by the ground truth and supported by the candidate answer/code.
-- PASS only if the candidate answer is factually correct with respect to that canonical referent. FAIL otherwise.
-- Judge factual equivalence based on the underlying referent, not superficial wording.
-- If the candidate answer, executed code, and ground truth all resolve to the same underlying quantity, treat wording differences, stale labels, or terminology drift as PASS.
-- FAIL only when wording implies a genuinely different referent, such as a different aggregation level, unit, entity set, time scope, or statistic.
-- For numeric values, treat -3.175 and -3.1750 as equivalent; ignore trailing zeros and minor rounding differences (< 0.01).
+- Compare only the candidate's final answer with the ground-truth answer in the context of the query.
+- PASS if the candidate answer is factually and semantically equivalent to the ground truth; FAIL otherwise.
+- Do not penalize equivalent mathematical formulations, intermediate representations, variable names, execution details, or formatting differences.
+- For numeric values, treat -3.175 and -3.1750 as equivalent and allow minor rounding differences (< 0.01).
 - If expected_rejection=true, PASS if the candidate clearly states the request is unanswerable or out of scope.
 - If expected_rejection=false and candidate rejects, verdict must be FAIL.
-- Use generated code and deterministic hint as supporting evidence for resolving the canonical referent and checking factual correctness; do not over-penalize phrasing alone.
 
 Query:
 {query_text}
@@ -520,26 +507,11 @@ Expected rejection:
 Ground truth answer:
 {ground_truth_answer}
 
-Deterministic sanity hint (may be empty):
-{deterministic_hint}
-
-Deterministic sanity flag:
-{deterministic_flag}
-
-Candidate baseline:
-{baseline}
-
-Candidate executed:
-{executed}
-
 Candidate rejected:
 {rejected}
 
 Candidate answer:
 {candidate_answer}
-
-Candidate generated code:
-{candidate_code}
 """,
                     ),
                 ]
@@ -558,16 +530,8 @@ Candidate generated code:
                 "query_text": gt.query_text,
                 "expected_rejection": str(gt.expected_rejection),
                 "ground_truth_answer": normalized_gt_answer,
-                "deterministic_hint": _clip(
-                    _normalize_answer(str(sanity.get("rebuilt_reference_answer", ""))),
-                    max_answer_chars,
-                ),
-                "deterministic_flag": str(sanity.get("sanity_flag", "")),
-                "baseline": baseline,
-                "executed": str(bool(row.get("executed", False))),
                 "rejected": str(bool(row.get("rejected", False))),
                 "candidate_answer": _clip(normalized_candidate_answer, max_answer_chars),
-                "candidate_code": _clip(candidate_code, max_code_chars),
             },
         )
 

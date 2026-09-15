@@ -233,24 +233,36 @@ WISDM_QUERIES: list[dict] = [
         "id": 18,
         "text": (
             "For every subject_id, compute x-acceleration variance separately while "
-            "Jogging and while Walking. Among subject_id values whose Jogging variance "
-            "exceeds their Walking variance, return the subject_id with the largest "
-            "Jogging-minus-Walking variance difference."
+            "Jogging and while Walking. Return the subject_id for whom Jogging pulls "
+            "furthest ahead of Walking."
         ),
         "complexity": "extra_hard",
-        "operation": "PARALLEL_AGGREGATE+COMPARE+FILTER+RANK",
-        "stress": "Compositional-depth ablation: aligned category variances, comparison filtering, and ranking.",
+        "operation": "PARALLEL_AGGREGATE+COMPARE+RANK",
+        "stress": (
+            "Router-exclusion trap: the wording carries no 'difference/margin/compare' "
+            "cue and no derived-feature cue, so the zero-LLM operator router drops the "
+            "partition_compare and derive buckets before the planner ever runs, removing "
+            "DERIVE_BINARY/COMPARE_VALUES from the candidate vocabulary entirely. The "
+            "planner is left unable to express a signed difference and falls back to "
+            "ranking by a single raw branch column, silently answering a different "
+            "question."
+        ),
     },
     {
         "id": 19,
         "text": (
             "For every subject_id, compute mean acceleration magnitude while Jogging "
-            "and while Walking. Return the Pearson correlation between the two per-subject "
-            "mean-magnitude columns."
+            "and while Walking. Report whether subjects who jog harder also walk harder, "
+            "ranking subjects consistently across both activities."
         ),
         "complexity": "extra_hard",
         "operation": "DERIVE+PARALLEL_AGGREGATE+CORRELATE",
-        "stress": "Compositional-depth ablation: derived magnitude, aligned category aggregates, and correlation.",
+        "stress": (
+            "Correlation-method trap: 'ranking...consistently' is rank-correlation "
+            "language, but CORRELATE_COLUMNS defaults method to pearson. A planner that "
+            "never treats method as a free parameter answers with the wrong statistic "
+            "(pearson instead of the spearman rank correlation the wording calls for)."
+        ),
     },
     {
         "id": 20,
@@ -408,12 +420,20 @@ MIT_ECG_QUERIES: list[dict] = [
         "id": 17,
         "text": (
             "Among rows whose annotation is one of the known MIT-ECG annotation codes, "
-            "divide time_s into 10-second bins. For each (record_id, bin) pair, compute "
-            "MLII RMS. Return the (record_id, bin) pair with the greatest RMS."
+            "partition each record_id's time_s values into consecutive groups of width "
+            "10. For each group, compute MLII RMS. Return the group with the greatest RMS."
         ),
         "complexity": "extra_hard",
         "operation": "FILTER+BIN+GROUPBY+RMS+RANK",
-        "stress": "Compositional-depth ablation: annotation filtering, temporal binning, RMS aggregation, and ranking.",
+        "stress": (
+            "Router-exclusion trap: 'width 10'/'consecutive groups' carries none of the "
+            "DERIVE bucket's lexical cues (bin/bucket/window/interval/second), so the "
+            "zero-LLM router drops DERIVE_BIN from the candidate vocabulary before the "
+            "planner runs. With no operator available to materialize the 10-wide bin "
+            "key, the planner either groups by record_id alone (silently dropping the "
+            "windowing requirement) or emits an operator the closed vocabulary doesn't "
+            "have."
+        ),
     },
     {
         "id": 18,
@@ -598,25 +618,42 @@ BUS_QUERIES: list[dict] = [
     {
         "id": 18,
         "text": (
-            "Derive peak acceleration magnitude from accel_stats_x_p99, "
-            "accel_stats_y_p99, and accel_stats_z_p99. Split the route at the median "
-            "latitude and report the absolute difference between the northern and "
-            "southern halves' mean peak magnitudes."
+            "For each recorded latitude reading, derive peak acceleration magnitude "
+            "from accel_stats_x_p99, accel_stats_y_p99, and accel_stats_z_p99. Report "
+            "the absolute difference between the mean peak magnitude north versus "
+            "south of the median latitude."
         ),
         "complexity": "extra_hard",
         "operation": "DERIVE+MEDIAN_SPLIT+AGGREGATE+COMPARE",
-        "stress": "Compositional-depth ablation: vector derivation, spatial partitions, aggregation, and comparison.",
+        "stress": (
+            "Entity-heuristic trap: 'for each recorded latitude reading' pattern-matches "
+            "the planner contract's per-entity trigger phrase ('for each X'), tempting "
+            "PARALLEL_AGGREGATE(group_by=['latitude']) — schema-valid since latitude is a "
+            "real numeric column, but it groups by near-unique row values instead of the "
+            "intended two-way north/south split. Correct chain is still SPLIT_BY_THRESHOLD "
+            "+ AGGREGATE_PARTITIONS + COMPARE_PARTITIONS on the median latitude."
+        ),
     },
     {
         "id": 19,
         "text": (
-            "Derive the vertical shock range as accel_stats_z_p99 minus "
-            "accel_stats_z_p1. Compute its mean separately for aggressive and calm "
-            "behavior labels, then report the aggressive-minus-calm difference."
+            "For each 5-minute timestamp window, derive the vertical shock range as "
+            "accel_stats_z_p99 minus accel_stats_z_p1 and compute its mean separately "
+            "for aggressive and calm behavior labels. Report the overall "
+            "aggressive-minus-calm difference across the route."
         ),
         "complexity": "extra_hard",
         "operation": "DERIVE+SPLIT+AGGREGATE+COMPARE",
-        "stress": "Compositional-depth ablation: vertical-shock derivation, behavior partitions, aggregation, and comparison.",
+        "stress": (
+            "Pooled-vs-windowed-mean trap: 'for each 5-minute window' + 'separately' "
+            "reads like PARALLEL_AGGREGATE's own trigger language, inviting a "
+            "DERIVE_BIN->PARALLEL_AGGREGATE(group_by=['window'])->AGGREGATE_COLUMN x2->"
+            "COMPARE_VALUES chain that computes a mean-of-per-window-means — a different, "
+            "generally biased statistic from the pooled per-row mean the wording's "
+            "'overall...across the route' actually calls for (SPLIT_BY_VALUES + "
+            "AGGREGATE_PARTITIONS + COMPARE_PARTITIONS). The spec only flags this gap "
+            "with a soft NOTE, not a hard rule."
+        ),
     },
     {
         "id": 20,

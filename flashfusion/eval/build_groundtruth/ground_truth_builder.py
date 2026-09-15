@@ -327,9 +327,9 @@ def build_ground_truth_wisdm(df: pd.DataFrame) -> list[dict]:
     q18["jogging_minus_walking_variance"] = (
         q18["jogging_x_variance"] - q18["walking_x_variance"]
     )
-    q18_top = q18.loc[q18["jogging_minus_walking_variance"] > 0].loc[
-        lambda values: values["jogging_minus_walking_variance"].idxmax()
-    ]
+    # Most-negative signed gap (Walking variance exceeds Jogging by the largest margin) —
+    # not the largest-magnitude gap, so no positive-only filter and no abs() here.
+    q18_top = q18.loc[q18["jogging_minus_walking_variance"].idxmin()]
 
     q19_jogging = df.loc[df["activity_lower"] == "jogging"].groupby("subject_id")["magnitude"].mean()
     q19_walking = df.loc[df["activity_lower"] == "walking"].groupby("subject_id")["magnitude"].mean()
@@ -340,8 +340,9 @@ def build_ground_truth_wisdm(df: pd.DataFrame) -> list[dict]:
         ],
         axis=1,
     ).dropna()
+    # "ranking...consistently" is rank-correlation language, not linear-correlation language.
     q19_correlation = float(
-        q19["jogging_mean_magnitude"].corr(q19["walking_mean_magnitude"])
+        q19["jogging_mean_magnitude"].corr(q19["walking_mean_magnitude"], method="spearman")
     )
 
     q20_locomotion = df_sorted.loc[locomotion_mask].groupby("subject_id")["dt_s"].sum()
@@ -499,9 +500,9 @@ def build_ground_truth_wisdm(df: pd.DataFrame) -> list[dict]:
             "query_id": 18,
             "query_text": qmap[18],
             "reference_answer": (
-                f"subject_id {int(q18_top.name)} has the largest positive "
-                f"Jogging-minus-Walking x-variance difference: "
-                f"{float(q18_top['jogging_minus_walking_variance']):.12f}."
+                f"subject_id {int(q18_top.name)} has the most negative "
+                f"Jogging-minus-Walking x-variance difference (Walking exceeds Jogging "
+                f"by the largest margin): {float(q18_top['jogging_minus_walking_variance']):.12f}."
             ),
             "expected_rejection": False,
         },
@@ -509,8 +510,10 @@ def build_ground_truth_wisdm(df: pd.DataFrame) -> list[dict]:
             "query_id": 19,
             "query_text": qmap[19],
             "reference_answer": (
-                "The Pearson correlation between per-subject Jogging and Walking "
-                f"mean magnitudes is {q19_correlation:.12f}."
+                ("Yes" if q19_correlation > 0 else "No")
+                + " — subjects who jog harder also tend to walk harder: the Spearman "
+                "rank correlation between per-subject Jogging and Walking mean "
+                f"magnitudes is {q19_correlation:.12f}."
             ),
             "expected_rejection": False,
         },
