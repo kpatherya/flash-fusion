@@ -654,6 +654,8 @@ class BaselineRunner:
         "REACT_ONLY"  — ReAct: raw query → pandas agent (paper-faithful ReAct)
         "LLMSENSE_PAPER" — narration/summarization + reasoning over narrative text
         "FLASH_FUSION"  — B4: S1 + S2 + S3 + guardrail + agent + judge (+ retry)
+        "FF_NO_PRUNING" — Flash-Fusion without operator-route pruning
+        "FF_NO_PLANNING" — Flash-Fusion without pruning and without planning guidance
         "FLASH_FUSION_CACHE" — exact-query operator-skeleton cache; on a hit the
                         light model regrounds the cached skeleton and the plan is
                         revalidated/executed, otherwise it falls back to
@@ -670,6 +672,8 @@ class BaselineRunner:
             "REACT_ONLY",
             "AUTOIOT_PAPER",
             "FLASH_FUSION",
+            "FF_NO_PRUNING",
+            "FF_NO_PLANNING",
             "FLASH_FUSION_CACHE",
             "HARGPT_PAPER",
             "LLMSENSE_PAPER",
@@ -724,10 +728,20 @@ class BaselineRunner:
         self.dataset = dataset
         self.cache_path = cache_path
         self.semantic_cache_path = semantic_cache_path
-        if self.mode in ("FLASH_FUSION", "FLASH_FUSION_CACHE"):
+        if self.mode in (
+            "FLASH_FUSION",
+            "FF_NO_PRUNING",
+            "FF_NO_PLANNING",
+            "FLASH_FUSION_CACHE",
+        ):
             from flashfusion.baselines.flash_fusion import warm_flash_fusion_prefix
 
-            warm_flash_fusion_prefix(self.df, self.client)
+            planner_guidance = "none" if self.mode == "FF_NO_PLANNING" else "full"
+            warm_flash_fusion_prefix(
+                self.df,
+                self.client,
+                planner_guidance=planner_guidance,
+            )
 
     def run(self, query: str) -> RunResult:
         """
@@ -781,6 +795,26 @@ class BaselineRunner:
                 self.client,
                 r,
                 timeout_s=self.predictive_timeout_s,
+            )
+        elif self.mode == "FF_NO_PRUNING":
+            run_flash_fusion(
+                query,
+                self.df,
+                self.client,
+                r,
+                timeout_s=self.predictive_timeout_s,
+                route_mode="full",
+                planner_guidance="full",
+            )
+        elif self.mode == "FF_NO_PLANNING":
+            run_flash_fusion(
+                query,
+                self.df,
+                self.client,
+                r,
+                timeout_s=self.predictive_timeout_s,
+                route_mode="full",
+                planner_guidance="none",
             )
         elif self.mode == "FLASH_FUSION_CACHE":
             from flashfusion.baselines.flash_fusion_cache import (

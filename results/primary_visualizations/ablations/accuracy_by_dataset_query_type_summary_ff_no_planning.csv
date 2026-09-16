@@ -1,0 +1,16 @@
+baseline,dataset,query_type,mean,std,n_runs
+FF_NO_PLANNING,bus,Direct,100.0,0.0,3
+FF_NO_PLANNING,bus,Reasoning,100.0,0.0,3
+FF_NO_PLANNING,bus,Predictive,100.0,0.0,3
+FF_NO_PLANNING,bus,Out-of-Scope,100.0,0.0,3
+FF_NO_PLANNING,bus,Extra-Hard,25.0,0.0,3
+FF_NO_PLANNING,wisdm,Direct,100.0,0.0,3
+FF_NO_PLANNING,wisdm,Reasoning,100.0,0.0,3
+FF_NO_PLANNING,wisdm,Predictive,83.33333333333333,14.433756729740644,3
+FF_NO_PLANNING,wisdm,Out-of-Scope,100.0,0.0,3
+FF_NO_PLANNING,wisdm,Extra-Hard,50.0,0.0,3
+FF_NO_PLANNING,ecg,Direct,100.0,0.0,3
+FF_NO_PLANNING,ecg,Reasoning,66.66666666666667,14.433756729740644,3
+FF_NO_PLANNING,ecg,Predictive,100.0,0.0,3
+FF_NO_PLANNING,ecg,Out-of-Scope,100.0,0.0,3
+FF_NO_PLANNING,ecg,Extra-Hard,91.66666666666667,14.433756729740644,3

@@ -46,6 +46,8 @@ CACHE_MISS_BASELINE = "FLASH_FUSION_CACHE_MISS"
 CACHE_BASELINE_VARIANTS = [CACHE_HIT_BASELINE, CACHE_MISS_BASELINE]
 BASELINE_ORDER = [
     "FLASH_FUSION",
+    "FF_NO_PRUNING",
+    "FF_NO_PLANNING",
     CACHE_BASELINE,
     *CACHE_BASELINE_VARIANTS,
     "AUTOIOT_PAPER",
@@ -56,7 +58,9 @@ BASELINE_ORDER = [
 
 BASELINE_LABELS = {
     "FLASH_FUSION": "Flash-Fusion",
-    CACHE_BASELINE: "FF-cache",
+    "FF_NO_PRUNING": "FF no pruning",
+    "FF_NO_PLANNING": "FF no planning",
+    CACHE_BASELINE: "Flash-Fusion",
     CACHE_HIT_BASELINE: "FF-cache hit",
     CACHE_MISS_BASELINE: "FF-cache miss",
     "AUTOIOT_PAPER": "AutoIOT",
@@ -67,6 +71,8 @@ BASELINE_LABELS = {
 
 BASELINE_COLORS = {
     "FLASH_FUSION": "#1b9e77",
+    "FF_NO_PRUNING": "#2f855a",
+    "FF_NO_PLANNING": "#14532d",
     CACHE_BASELINE: "#0f4c81",
     CACHE_HIT_BASELINE: "#2563eb",
     CACHE_MISS_BASELINE: "#94a3b8",
@@ -227,11 +233,21 @@ def load_metrics_from_dataset_root(
     baseline: str,
     dataset: str,
 ) -> pd.DataFrame | None:
-    """Load ``<results_root>/<dataset>/metrics.csv`` for one baseline."""
+    """Load direct or one-level nested dataset metrics for one baseline."""
     dataset_dir = "mit_ecg" if dataset == "ecg" else dataset
-    path = results_root / dataset_dir / "metrics.csv"
-    if not path.exists():
+    dataset_root = results_root / dataset_dir
+    direct_path = dataset_root / "metrics.csv"
+    nested_paths = sorted(dataset_root.glob("*/metrics.csv"))
+    paths = [direct_path] if direct_path.exists() else nested_paths
+    if not paths:
         return None
+
+    if len(paths) > 1:
+        raise ValueError(
+            f"Multiple metrics files found under {dataset_root}: {paths}. "
+            "Specify a single run directory."
+        )
+    path = paths[0]
 
     df = pd.read_csv(path)
     df["baseline"] = df["baseline"].map(normalize_baseline)

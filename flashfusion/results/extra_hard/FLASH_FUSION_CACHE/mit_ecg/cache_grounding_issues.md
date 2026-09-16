@@ -4,7 +4,7 @@ Reported 12 FLASH_FUSION_CACHE grounding failure(s) where the cached skeleton co
 
 ## Query 17 (run 1)
 
-**Query text:** Among rows whose annotation is one of the known MIT-ECG annotation codes, divide time_s into 10-second bins. For each (record_id, bin) pair, compute MLII RMS. Return the (record_id, bin) pair with the greatest RMS.
+**Query text:** Among rows whose annotation is one of the known MIT-ECG annotation codes, partition each record_id's time_s values into consecutive groups of width 10. For each group, compute MLII RMS. Return the group with the greatest RMS.
 
 **Failure reason:** `cache: light model returned empty content`
 
@@ -28,13 +28,13 @@ Reported 12 FLASH_FUSION_CACHE grounding failure(s) where the cached skeleton co
       "width": 10.0,
       "freq": null,
       "epoch_unit": null,
-      "result": "time_bin_10s"
+      "result": "time_bin"
     },
     {
       "op": "GROUP_AGGREGATE",
       "group_by": [
         "record_id",
-        "time_bin_10s"
+        "time_bin"
       ],
       "aggregate": "rms",
       "column": "MLII",
@@ -64,15 +64,14 @@ Reported 12 FLASH_FUSION_CACHE grounding failure(s) where the cached skeleton co
       {
         "op": "DERIVE_BIN",
         "column": "time_s",
-        "kind": "numeric",
         "width": 10.0,
-        "result": "time_bin_10s"
+        "result": "time_bin"
       },
       {
         "op": "GROUP_AGGREGATE",
         "group_by": [
           "record_id",
-          "time_bin_10s"
+          "time_bin"
         ],
         "aggregate": "rms",
         "column": "MLII"
@@ -89,8 +88,8 @@ Reported 12 FLASH_FUSION_CACHE grounding failure(s) where the cached skeleton co
 **Final executed code:**
 ```python
 df = df[df['annotation'].notna() & df['annotation'].astype(str).str.strip().ne('')]
-df['time_bin_10s'] = (df['time_s'] // 10.0) * 10.0
-result = df.groupby(['record_id', 'time_bin_10s'])['MLII'].apply(rms)
+df['time_bin'] = (df['time_s'] // 10.0) * 10.0
+result = df.groupby(['record_id', 'time_bin'])['MLII'].apply(rms)
 result = result.idxmax()
 ```
 
@@ -107,21 +106,13 @@ plan.steps.1.DERIVE_BINARY.operation
   Input should be 'add', 'subtract', 'multiply', 'divide' or 'abs_difference' [type=literal_error, input_value='difference', input_type=str]
     For further information visit https://errors.pydantic.dev/2.13/v/literal_error`
 
-**Execution path after fallback:** `react_fallback`
+**Execution path after fallback:** `typed_plan_unavailable`
 
 **Plan source after fallback:** `llm`
 
 **Plan validation stage failed:** `structural`
 
-**Final executed code:**
-```python
-# Compute the MLII span for each record_id and find the record_id with the largest span
-mlii_span = df.groupby('record_id')['MLII'].agg(['max', 'min'])
-mlii_span['span'] = mlii_span['max'] - mlii_span['min']
-result = mlii_span['span'].idxmax()
-```
-
-**Stages run:** exact_cache_hit → cache_light_grounding → cache_miss_or_validation_failure → guardrail_plan → react_fallback → agent
+**Stages run:** exact_cache_hit → cache_light_grounding → cache_miss_or_validation_failure → guardrail_plan → typed_plan_unavailable
 
 ---
 
@@ -355,7 +346,7 @@ result = df['time_bin'].corr(df['annotated_rate'], method='pearson')
           ],
           "aggregate": "var",
           "column": "MLII",
-          "result_column": "ml_ii_var"
+          "result_column": "mlii_var"
         },
         {
           "filter_column": null,
@@ -371,7 +362,7 @@ result = df['time_bin'].corr(df['annotated_rate'], method='pearson')
     },
     {
       "op": "DERIVE_BINARY",
-      "left": "ml_ii_var",
+      "left": "mlii_var",
       "right": "v1_var",
       "operation": "add",
       "result": "total_lead_variability"
@@ -409,7 +400,7 @@ result = df['time_bin'].corr(df['annotated_rate'], method='pearson')
             ],
             "aggregate": "var",
             "column": "MLII",
-            "result_column": "ml_ii_var"
+            "result_column": "mlii_var"
           },
           {
             "filter_column": null,
@@ -425,7 +416,7 @@ result = df['time_bin'].corr(df['annotated_rate'], method='pearson')
       },
       {
         "op": "DERIVE_BINARY",
-        "left": "ml_ii_var",
+        "left": "mlii_var",
         "right": "v1_var",
         "operation": "add",
         "result": "total_lead_variability"
@@ -450,7 +441,7 @@ result = df['time_bin'].corr(df['annotated_rate'], method='pearson')
 branch_0 = df.groupby(['record_id'])['MLII'].var()
 branch_1 = df.groupby(['record_id'])['V1'].var()
 merged = branch_0.merge(branch_1, on=['record_id'], how='outer')
-df['total_lead_variability'] = df['ml_ii_var'] + df['v1_var']
+df['total_lead_variability'] = df['mlii_var'] + df['v1_var']
 idx = df['total_lead_variability'].idxmax(); result = df.loc[idx, ['record_id', 'total_lead_variability']].to_dict()
 ```
 
@@ -460,7 +451,7 @@ idx = df['total_lead_variability'].idxmax(); result = df.loc[idx, ['record_id', 
 
 ## Query 17 (run 2)
 
-**Query text:** Among rows whose annotation is one of the known MIT-ECG annotation codes, divide time_s into 10-second bins. For every (record_id, bin) pair, Calculate MLII RMS. Return the (record_id, bin) pair with the greatest RMS.
+**Query text:** Among rows whose annotation is one of the known MIT-ECG annotation codes, partition each record_id's time_s values into consecutive groups of width 10. For every group, Calculate MLII RMS. Return the group with the greatest RMS.
 
 **Failure reason:** `cache: light model returned empty content`
 
@@ -484,13 +475,13 @@ idx = df['total_lead_variability'].idxmax(); result = df.loc[idx, ['record_id', 
       "width": 10.0,
       "freq": null,
       "epoch_unit": null,
-      "result": "time_bin_10s"
+      "result": "time_bin"
     },
     {
       "op": "GROUP_AGGREGATE",
       "group_by": [
         "record_id",
-        "time_bin_10s"
+        "time_bin"
       ],
       "aggregate": "rms",
       "column": "MLII",
@@ -520,15 +511,14 @@ idx = df['total_lead_variability'].idxmax(); result = df.loc[idx, ['record_id', 
       {
         "op": "DERIVE_BIN",
         "column": "time_s",
-        "kind": "numeric",
         "width": 10.0,
-        "result": "time_bin_10s"
+        "result": "time_bin"
       },
       {
         "op": "GROUP_AGGREGATE",
         "group_by": [
           "record_id",
-          "time_bin_10s"
+          "time_bin"
         ],
         "aggregate": "rms",
         "column": "MLII"
@@ -545,8 +535,8 @@ idx = df['total_lead_variability'].idxmax(); result = df.loc[idx, ['record_id', 
 **Final executed code:**
 ```python
 df = df[df['annotation'].notna() & df['annotation'].astype(str).str.strip().ne('')]
-df['time_bin_10s'] = (df['time_s'] // 10.0) * 10.0
-result = df.groupby(['record_id', 'time_bin_10s'])['MLII'].apply(rms)
+df['time_bin'] = (df['time_s'] // 10.0) * 10.0
+result = df.groupby(['record_id', 'time_bin'])['MLII'].apply(rms)
 result = result.idxmax()
 ```
 
@@ -563,22 +553,13 @@ plan.steps.1.DERIVE_BINARY.operation
   Input should be 'add', 'subtract', 'multiply', 'divide' or 'abs_difference' [type=literal_error, input_value='difference', input_type=str]
     For further information visit https://errors.pydantic.dev/2.13/v/literal_error`
 
-**Execution path after fallback:** `react_fallback`
+**Execution path after fallback:** `typed_plan_unavailable`
 
 **Plan source after fallback:** `llm`
 
 **Plan validation stage failed:** `structural`
 
-**Final executed code:**
-```python
-# Calculate the MLII span (max - min) for each record_id
-mlII_span = df.groupby('record_id')['MLII'].agg(lambda x: x.max() - x.min())
-
-# Find the record_id with the largest MLII span
-result = mlII_span.idxmax()
-```
-
-**Stages run:** hybrid_cache_hit → cache_light_grounding → cache_miss_or_validation_failure → guardrail_plan → react_fallback → agent
+**Stages run:** hybrid_cache_hit → cache_light_grounding → cache_miss_or_validation_failure → guardrail_plan → typed_plan_unavailable
 
 ---
 
@@ -610,7 +591,7 @@ result = mlII_span.idxmax()
       "width": 10.0,
       "freq": null,
       "epoch_unit": null,
-      "result": "bin_10s"
+      "result": "time_bin"
     },
     {
       "op": "PARALLEL_AGGREGATE",
@@ -643,7 +624,7 @@ result = mlII_span.idxmax()
             "~"
           ],
           "group_by": [
-            "bin_10s"
+            "time_bin"
           ],
           "aggregate": "count",
           "column": null,
@@ -653,7 +634,7 @@ result = mlII_span.idxmax()
           "filter_column": null,
           "filter_values": null,
           "group_by": [
-            "bin_10s"
+            "time_bin"
           ],
           "aggregate": "count",
           "column": null,
@@ -670,7 +651,7 @@ result = mlII_span.idxmax()
     },
     {
       "op": "CORRELATE_COLUMNS",
-      "left": "bin_10s",
+      "left": "time_bin",
       "right": "annotated_rate",
       "method": "pearson"
     }
@@ -698,7 +679,7 @@ result = mlII_span.idxmax()
         "column": "time_s",
         "kind": "numeric",
         "width": 10.0,
-        "result": "bin_10s"
+        "result": "time_bin"
       },
       {
         "op": "PARALLEL_AGGREGATE",
@@ -731,7 +712,7 @@ result = mlII_span.idxmax()
               "e"
             ],
             "group_by": [
-              "bin_10s"
+              "time_bin"
             ],
             "aggregate": "count",
             "column": null,
@@ -741,7 +722,7 @@ result = mlII_span.idxmax()
             "filter_column": null,
             "filter_values": null,
             "group_by": [
-              "bin_10s"
+              "time_bin"
             ],
             "aggregate": "count",
             "column": null,
@@ -758,7 +739,7 @@ result = mlII_span.idxmax()
       },
       {
         "op": "CORRELATE_COLUMNS",
-        "left": "bin_10s",
+        "left": "time_bin",
         "right": "annotated_rate",
         "method": "pearson"
       }
@@ -770,17 +751,17 @@ result = mlII_span.idxmax()
 **Final executed code:**
 ```python
 df = df[df['record_id'] == 101]
-df['bin_10s'] = (df['time_s'] // 10.0) * 10.0
+df['time_bin'] = (df['time_s'] // 10.0) * 10.0
 # PARALLEL_AGGREGATE branches:
-branch_0 = df[df['annotation'].isin(['!', '"', '+', '/', 'A', 'E', 'F', 'J', 'L', 'N', 'Q', 'R', 'S', 'V', '[', ']', 'a', 'e', 'f', 'j', 'x', '|', '~'])].groupby(['bin_10s']).size()
-branch_1 = df.groupby(['bin_10s']).size()
-merged = branch_0.merge(branch_1, on=['bin_10s'], how='outer')
+branch_0 = df[df['annotation'].isin(['!', '"', '+', '/', 'A', 'E', 'F', 'J', 'L', 'N', 'Q', 'R', 'S', 'V', '[', ']', 'a', 'e', 'f', 'j', 'x', '|', '~'])].groupby(['time_bin']).size()
+branch_1 = df.groupby(['time_bin']).size()
+merged = branch_0.merge(branch_1, on=['time_bin'], how='outer')
 merged[['annotated_count', 'total_count']] = merged[['annotated_count', 'total_count']].fillna(0)
 df['annotated_rate'] = df['annotated_count'] / df['total_count']
-result = df['bin_10s'].corr(df['annotated_rate'], method='pearson')
+result = df['time_bin'].corr(df['annotated_rate'], method='pearson')
 ```
 
-**Stages run:** hybrid_cache_hit → cache_light_grounding → cache_miss_or_validation_failure → guardrail_plan → plan_validated → typed_exec
+**Stages run:** exact_cache_hit → cache_light_grounding → cache_miss_or_validation_failure → guardrail_plan → plan_validated → typed_exec
 
 ---
 
@@ -909,13 +890,13 @@ df['total_lead_variability'] = df['mlii_var'] + df['v1_var']
 idx = df['total_lead_variability'].idxmax(); result = df.loc[idx, ['record_id', 'total_lead_variability']].to_dict()
 ```
 
-**Stages run:** hybrid_cache_hit → cache_light_grounding → cache_miss_or_validation_failure → guardrail_plan → plan_validated → typed_exec
+**Stages run:** exact_cache_hit → cache_light_grounding → cache_miss_or_validation_failure → guardrail_plan → plan_validated → typed_exec
 
 ---
 
 ## Query 17 (run 3)
 
-**Query text:** Among rows whose annotation is one of the known MIT-ECG annotation codes, divide time_s into 10-second bins. For every (record_id, bin) pair, Determine MLII RMS. Return the (record_id, bin) pair with the greatest RMS.
+**Query text:** Among rows whose annotation is one of the known MIT-ECG annotation codes, partition each record_id's time_s values into consecutive groups of width 10. For every group, Determine MLII RMS. Return the group with the greatest RMS.
 
 **Failure reason:** `cache: semantic: semantic_ambiguous_candidates`
 
@@ -939,13 +920,13 @@ idx = df['total_lead_variability'].idxmax(); result = df.loc[idx, ['record_id', 
       "width": 10.0,
       "freq": null,
       "epoch_unit": null,
-      "result": "time_bin_10s"
+      "result": "time_bin"
     },
     {
       "op": "GROUP_AGGREGATE",
       "group_by": [
         "record_id",
-        "time_bin_10s"
+        "time_bin"
       ],
       "aggregate": "rms",
       "column": "MLII",
@@ -975,15 +956,14 @@ idx = df['total_lead_variability'].idxmax(); result = df.loc[idx, ['record_id', 
       {
         "op": "DERIVE_BIN",
         "column": "time_s",
-        "kind": "numeric",
         "width": 10.0,
-        "result": "time_bin_10s"
+        "result": "time_bin"
       },
       {
         "op": "GROUP_AGGREGATE",
         "group_by": [
           "record_id",
-          "time_bin_10s"
+          "time_bin"
         ],
         "aggregate": "rms",
         "column": "MLII"
@@ -1000,8 +980,8 @@ idx = df['total_lead_variability'].idxmax(); result = df.loc[idx, ['record_id', 
 **Final executed code:**
 ```python
 df = df[df['annotation'].notna() & df['annotation'].astype(str).str.strip().ne('')]
-df['time_bin_10s'] = (df['time_s'] // 10.0) * 10.0
-result = df.groupby(['record_id', 'time_bin_10s'])['MLII'].apply(rms)
+df['time_bin'] = (df['time_s'] // 10.0) * 10.0
+result = df.groupby(['record_id', 'time_bin'])['MLII'].apply(rms)
 result = result.idxmax()
 ```
 
@@ -1018,22 +998,13 @@ plan.steps.1.DERIVE_BINARY.operation
   Input should be 'add', 'subtract', 'multiply', 'divide' or 'abs_difference' [type=literal_error, input_value='difference', input_type=str]
     For further information visit https://errors.pydantic.dev/2.13/v/literal_error`
 
-**Execution path after fallback:** `react_fallback`
+**Execution path after fallback:** `typed_plan_unavailable`
 
 **Plan source after fallback:** `llm`
 
 **Plan validation stage failed:** `structural`
 
-**Final executed code:**
-```python
-# Group by record_id and compute the MLII span (max - min) for each group
-mlII_span = df.groupby('record_id')['MLII'].agg(lambda x: x.max() - x.min())
-
-# Find the record_id with the largest MLII span
-result = mlII_span.idxmax()
-```
-
-**Stages run:** hybrid_cache_hit → cache_light_grounding → cache_miss_or_validation_failure → guardrail_plan → react_fallback → agent
+**Stages run:** hybrid_cache_hit → cache_light_grounding → cache_miss_or_validation_failure → guardrail_plan → typed_plan_unavailable
 
 ---
 
@@ -1041,7 +1012,7 @@ result = mlII_span.idxmax()
 
 **Query text:** For record_id 101, divide time_s into 10-second bins. For every bin, Determine annotated-row rate as rows with an annotation in the known annotation-code list divided by all rows in the bin. Return the Pearson correlation between bin index and annotated-row rate.
 
-**Failure reason:** `cache: semantic: semantic_ambiguous_candidates`
+**Failure reason:** `cache: light model returned empty content`
 
 **Execution path after fallback:** `typed_operator`
 
@@ -1153,8 +1124,6 @@ result = mlII_span.idxmax()
         "column": "time_s",
         "kind": "numeric",
         "width": 10.0,
-        "freq": null,
-        "epoch_unit": null,
         "result": "time_bin"
       },
       {
@@ -1237,7 +1206,7 @@ df['annotated_rate'] = df['annotated_count'] / df['total_count']
 result = df['time_bin'].corr(df['annotated_rate'], method='pearson')
 ```
 
-**Stages run:** hybrid_semantic_ambiguous_candidates → cache_miss_or_validation_failure → guardrail_plan → plan_validated → typed_exec
+**Stages run:** exact_cache_hit → cache_light_grounding → cache_miss_or_validation_failure → guardrail_plan → plan_validated → typed_exec
 
 ---
 
@@ -1245,7 +1214,7 @@ result = df['time_bin'].corr(df['annotated_rate'], method='pearson')
 
 **Query text:** For every record_id, independently Determine MLII variance and V1 variance. Define total lead variability as their sum. Return the record_id with the largest total lead variability.
 
-**Failure reason:** `cache: semantic: semantic_ambiguous_candidates`
+**Failure reason:** `cache: light model returned empty content`
 
 **Execution path after fallback:** `typed_operator`
 
@@ -1366,7 +1335,7 @@ df['total_lead_variability'] = df['mlii_var'] + df['v1_var']
 idx = df['total_lead_variability'].idxmax(); result = df.loc[idx, ['record_id', 'total_lead_variability']].to_dict()
 ```
 
-**Stages run:** hybrid_semantic_ambiguous_candidates → cache_miss_or_validation_failure → guardrail_plan → plan_validated → typed_exec
+**Stages run:** exact_cache_hit → cache_light_grounding → cache_miss_or_validation_failure → guardrail_plan → plan_validated → typed_exec
 
 ---
 

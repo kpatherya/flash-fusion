@@ -107,8 +107,13 @@ _FULL_ROUTE = OperatorRoute(
 # These caches only prepare immutable, byte-identical message components. They
 # intentionally do not issue an LLM request: warming a provider prompt cache
 # would itself be a billable planning call and distort benchmark comparisons.
-_PLANNER_PREFIX_CACHE: dict[tuple[str, str], tuple[SystemMessage, str]] = {}
+_PLANNER_PREFIX_CACHE: dict[tuple[str, str, str], tuple[SystemMessage, str]] = {}
 _PLANNER_SUFFIX_PREFIX_CACHE: dict[tuple[str, str], str] = {}
+
+ROUTE_MODE_ROUTER = "router"
+ROUTE_MODE_FULL = "full"
+PLANNER_GUIDANCE_FULL = "full"
+PLANNER_GUIDANCE_NONE = "none"
 
 
 def _debug(message: str) -> None:
@@ -123,7 +128,9 @@ def _progress(message: str) -> None:
 
 
 def _planner_prefix_message(
-    client: LLMClient, route: OperatorRoute | None = None
+    client: LLMClient,
+    route: OperatorRoute | None = None,
+    planner_guidance: str = PLANNER_GUIDANCE_FULL,
 ) -> tuple[SystemMessage, str]:
     """Return the planner prefix message and its exact text for one route.
 
@@ -132,10 +139,14 @@ def _planner_prefix_message(
     accepted cost of dropping the full vocabulary from every planner call.
     """
     route = route or _FULL_ROUTE
-    key = (getattr(client, "session_key", ""), route.route_key)
+    key = (getattr(client, "session_key", ""), route.route_key, planner_guidance)
     cached = _PLANNER_PREFIX_CACHE.get(key)
     if cached is None:
-        text = build_planner_prefix(build_vocabulary_spec(route.candidate_ops))
+        include_planning_guidance = planner_guidance != PLANNER_GUIDANCE_NONE
+        text = build_planner_prefix(
+            build_vocabulary_spec(route.candidate_ops),
+            include_planning_guidance=include_planning_guidance,
+        )
         message = SystemMessage(
             content=[
                 {
@@ -166,19 +177,26 @@ def _planner_suffix_prefix(meta_str: str, client: LLMClient, dataset: str = "") 
     return suffix_prefix
 
 
-def warm_flash_fusion_prefix(df: pd.DataFrame, client: LLMClient) -> None:
+def warm_flash_fusion_prefix(
+    df: pd.DataFrame,
+    client: LLMClient,
+    planner_guidance: str = PLANNER_GUIDANCE_FULL,
+) -> None:
     """Prepare planner message components for a DataFrame without an LLM call.
 
     Only the full-vocabulary prefix is warmed: the narrowed prefixes depend on
     the query, so they are built lazily on first use of each route.
     """
     meta_str = meta_to_str(build_column_metadata(df))
-    _planner_prefix_message(client)
+    _planner_prefix_message(client, planner_guidance=planner_guidance)
     _planner_suffix_prefix(meta_str, client)
 
 
 def prewarm_flash_fusion_prompt_cache(
-    df: pd.DataFrame, client: LLMClient, queries: list[str]
+    df: pd.DataFrame,
+    client: LLMClient,
+    queries: list[str],
+    planner_guidance: str = PLANNER_GUIDANCE_FULL,
 ) -> int:
     """Populate provider caches for the static planner prefixes used by *queries*.
 
@@ -193,7 +211,11 @@ def prewarm_flash_fusion_prompt_cache(
         route = route_operator_bucket(query, list(df.columns))
         unique_routes[route.route_key] = route
     for route in unique_routes.values():
-        prefix_message, _ = _planner_prefix_message(client, route)
+        prefix_message, _ = _planner_prefix_message(
+            client,
+            route,
+            planner_guidance=planner_guidance,
+        )
         suffix = _planner_suffix_prefix(meta_str, client) + "Prompt-cache warmup."
         client.warm_prompt_cache(
             [prefix_message, HumanMessage(content=suffix)],
@@ -286,6 +308,7 @@ def request_guardrail_and_plan(
     client: LLMClient,
     dataset: str = "",
     route: OperatorRoute | None = None,
+    planner_guidance: str = PLANNER_GUIDANCE_FULL,
 ) -> tuple[ParsedGuardrail | None, str, str, str]:
     """Ask for the scope verdict and a candidate plan in one round-trip.
 
@@ -308,7 +331,11 @@ def request_guardrail_and_plan(
     # OPERATOR_VOCABULARY_SPEC's caching note) only get cache hits with this
     # marker present. OpenRouter translates/drops the field per-provider, so it
     # is safe to always send it.
-    prefix_message, prefix_text = _planner_prefix_message(client, route)
+    prefix_message, prefix_text = _planner_prefix_message(
+        client,
+        route,
+        planner_guidance=planner_guidance,
+    )
     messages = [prefix_message, HumanMessage(content=suffix)]
     
     # Diagnostic logging for stall investigation
@@ -397,6 +424,8 @@ def run_flash_fusion(
     client: LLMClient,
     r: RunResult,
     timeout_s: float | None = None,
+    route_mode: str = ROUTE_MODE_ROUTER,
+    planner_guidance: str = PLANNER_GUIDANCE_FULL,
 ) -> RunResult:
     """Execute the Flash-Fusion pipeline for one query."""
     effective_timeout = (
@@ -441,7 +470,10 @@ def run_flash_fusion(
         last_stage = "operator_route"
         _progress("Stage: operator_route (deterministic, no LLM)")
         started = time.time()
-        route = route_operator_bucket(query, list(df.columns))
+        if route_mode == ROUTE_MODE_FULL:
+            route = _FULL_ROUTE
+        else:
+            route = route_operator_bucket(query, list(df.columns))
         record("operator_route", started)
         r.operator_route_excluded_buckets = list(route.excluded_buckets)
         r.operator_route_matched_rules = list(route.matched_rules)
@@ -470,7 +502,13 @@ def run_flash_fusion(
             dynamic_suffix,
             structural_error,
             prefix_text,
-        ) = request_guardrail_and_plan(query, meta_str, client, route=route)
+        ) = request_guardrail_and_plan(
+            query,
+            meta_str,
+            client,
+            route=route,
+            planner_guidance=planner_guidance,
+        )
         r.ff_planner_latency_s = max(0.0, time.time() - started)
         _record_call_usage(r, client, planner_call_start, "ff_planner")
         record("guardrail+plan", started)

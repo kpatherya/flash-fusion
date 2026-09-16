@@ -1,0 +1,501 @@
+run_id,source_file,baseline,query_id,query_id_source,query_text,expected_rejection,gt_reference_answer,candidate_answer,candidate_rejected,candidate_executed,candidate_code,llm_verdict,llm_score,llm_reason,gt_sanity,gt_sanity_note,llm_parse_status,llm_attempts,llm_override_applied,llm_raw
+1,[in_memory_benchmark_run],FF_NO_PRUNING,1,explicit,What is the maximum accel_variance observed in this dataset?,False,Maximum accel_variance is 5.8690.,The result is 5.869,False,True,result = df['accel_variance'].max(),PASS,1.0,The candidate answer matches the ground truth,SOUND,Maximum accel_variance value is provided,json,1,False,"```json
+{
+  ""verdict"": ""PASS"",
+  ""reason"": ""The candidate answer matches the ground truth"",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Maximum accel_variance value is provided""
+}
+```"
+1,[in_memory_benchmark_run],FF_NO_PRUNING,2,explicit,What is the average accel_mean across all recorded samples?,False,Average accel_mean across all samples is 9.2834.,The result is 9.283388022969648,False,True,result = df['accel_mean'].mean(),PASS,1.0,The candidate answer matches the ground truth numerically.,SOUND,Average accel_mean is a reasonable value.,json,1,False,"```json
+{
+  ""verdict"": ""PASS"",
+  ""reason"": ""The candidate answer matches the ground truth numerically."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Average accel_mean is a reasonable value.""
+}
+```"
+1,[in_memory_benchmark_run],FF_NO_PRUNING,3,explicit,List all timestamps where accel_stats_z_p99 reaches its maximum value across the dataset.,False,"Maximum accel_stats_z_p99 is 16.7020. Timestamps with this value: ['2025-06-06 16:01:13', '2025-06-06 16:01:16', '2025-06-06 16:01:19', '2025-06-06 16:01:22', '2025-06-06 16:01:25', '2025-06-06 16:01:28', '2025-06-06 16:01:31', '2025-06-06 16:01:34', '2025-06-06 16:01:40', '2025-06-06 16:01:43', '2025-06-06 16:01:46', '2025-06-06 16:01:49', '2025-06-06 16:01:52', '2025-06-06 16:01:55', '2025-06-06 16:01:58', '2025-06-06 16:02:01'].","The result is ['2025-06-06T16:01:13', '2025-06-06T16:01:16', '2025-06-06T16:01:19', '2025-06-06T16:01:22', '2025-06-06T16:01:25', '2025-06-06T16:01:28', '2025-06-06T16:01:31', '2025-06-06T16:01:34', '2025-06-06T16:01:40', '2025-06-06T16:01:43', '2025-06-06T16:01:46', '2025-06-06T16:01:49', '2025-06-06T16:01:52', '2025-06-06T16:01:55', '2025-06-06T16:01:58', '2025-06-06T16:02:01']",False,True,"result = df['accel_stats_z_p99'].max()
+_v = df['accel_stats_z_p99'].max(); df = df[df['accel_stats_z_p99'] == _v]
+result = df['timestamp'].tolist()",PASS,1.0,The candidate answer is factually and semantically equivalent to the ground truth.,SOUND,The ground truth answer is a list of timestamps.,json,1,False,"```json
+{
+  ""verdict"": ""PASS"",
+  ""reason"": ""The candidate answer is factually and semantically equivalent to the ground truth."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""The ground truth answer is a list of timestamps.""
+}
+```"
+1,[in_memory_benchmark_run],FF_NO_PRUNING,4,explicit,How many data samples show an accel_variance strictly greater than 0.20?,False,Samples with accel_variance > 0.20: 352.,The result is 352,False,True,"df = df[df['accel_variance'] > 0.2]
+result = len(df)",PASS,1.0,The candidate answer matches the ground truth.,SOUND,Clear numeric answer provided.,json,1,False,"```json
+{
+  ""verdict"": ""PASS"",
+  ""reason"": ""The candidate answer matches the ground truth."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Clear numeric answer provided.""
+}
+```"
+1,[in_memory_benchmark_run],FF_NO_PRUNING,5,explicit,"Is the northern half of the route (latitude above median) rougher than the southern half, based on average acceleration variance?",False,"Median latitude split is 33.776676. North-half mean accel_variance is 0.3699, south-half mean is 0.1631; the northern half is rougher by 0.2068.","The result is {'higher': 'northern_half', 'lower': 'southern_half', 'metric': 'mean accel_variance', 'northern_half': 0.3703333333333333, 'southern_half': 0.16309016393442624, 'difference': 0.20724316939890705}",False,True,"northern_half = df[df['latitude'] gt df['latitude'].median()]
+southern_half = df[df['latitude'] lte df['latitude'].median()]
+result = {label: agg(partition) for label in partitions}
+result = compare(northern_half, southern_half, mode='difference')",PASS,1.0,Candidate answer is factually and semantically equivalent to the ground truth,SOUND,Ground truth answer provides a clear comparison of the northern and southern halves,json,1,False,"```json
+{
+  ""verdict"": ""PASS"",
+  ""reason"": ""Candidate answer is factually and semantically equivalent to the ground truth"",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Ground truth answer provides a clear comparison of the northern and southern halves""
+}
+```"
+1,[in_memory_benchmark_run],FF_NO_PRUNING,6,explicit,"Which location (latitude, longitude) recorded the largest difference between the 99th and 1st percentile of the z-axis acceleration?",False,"Largest vertical shock (z_p99 - z_p1) is 11.1860 at (33.776765, -84.389963), timestamp 2025-06-06 16:01:13.","The result is {'latitude': 33.776765, 'longitude': -84.389963, 'z_axis_range': 11.186000000000002}",False,True,"df['z_axis_range'] = df['accel_stats_z_p99'] - df['accel_stats_z_p1']
+idx = df['z_axis_range'].idxmax(); result = df.loc[idx, ['latitude', 'longitude', 'z_axis_range']].to_dict()",PASS,1.0,Candidate answer matches ground truth,SOUND,Answer provides correct location and z-axis range,json,1,False,"```json
+{
+  ""verdict"": ""PASS"",
+  ""reason"": ""Candidate answer matches ground truth"",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Answer provides correct location and z-axis range""
+}
+```"
+1,[in_memory_benchmark_run],FF_NO_PRUNING,7,explicit,"Calculate the average overall magnitude of peak acceleration using the 99th percentiles of the X, Y, and Z axes.",False,Average 3D peak acceleration magnitude [sqrt(x_p99^2 + y_p99^2 + z_p99^2)] across all samples is 11.4585.,The result is 11.458505525284506,False,True,"df['peak_accel_magnitude'] = (df['accel_stats_x_p99']**2 + df['accel_stats_y_p99']**2 + df['accel_stats_z_p99']**2)**0.5
+result = df['peak_accel_magnitude'].mean()",PASS,1.0,The candidate answer matches the ground truth answer.,SOUND,Average 3D peak acceleration magnitude is correctly calculated.,json,1,False,"```json
+{
+  ""verdict"": ""PASS"",
+  ""reason"": ""The candidate answer matches the ground truth answer."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Average 3D peak acceleration magnitude is correctly calculated.""
+}
+```"
+1,[in_memory_benchmark_run],FF_NO_PRUNING,8,explicit,"If we group the data into 1-minute intervals, which time window has the highest mean instability_score?",False,The 1-minute window starting at 2025-06-06 16:01:00 had the highest mean instability_score of 5.8690.,The time window starting at 2025-06-06T16:01:00 has mean instability score 5.8690.,False,True,"df['time_window'] = pd.to_datetime(df['timestamp'], errors='coerce').dt.floor('1min')
+result = df.groupby('time_window')['instability_score'].mean()
+result = result.idxmax()",PASS,1.0,The candidate answer is factually and semantically equivalent to the ground truth.,SOUND,The ground truth answer provides a specific time window and mean instability score.,json,1,False,"```json
+{
+  ""verdict"": ""PASS"",
+  ""reason"": ""The candidate answer is factually and semantically equivalent to the ground truth."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""The ground truth answer provides a specific time window and mean instability score.""
+}
+```"
+1,[in_memory_benchmark_run],FF_NO_PRUNING,13,explicit,Sort all bus rows by timestamp in ascending order. Use the first 80% of rows for training and the final 20% as the chronological holdout. Train a logistic regression model using the acceleration features. Predict the label in the behavior column for the first row in the holdout set.,False,Logistic regression predicts behavior 'moderate' for the first holdout row.,The result is Logistic regression predicts label 'moderate' for the first holdout row.,False,True,"# sort_by=['timestamp'] split=975/1219 model='logistic_regression' features=['accel_mean', 'accel_variance', 'accel_stats_x_p1', 'accel_stats_x_p10', 'accel_stats_x_p90', 'accel_stats_x_p99', 'accel_stats_y_p1', 'accel_stats_y_p10', 'accel_stats_y_p90', 'accel_stats_y_p99', 'accel_stats_z_p1', 'accel_stats_z_p10', 'accel_stats_z_p90', 'accel_stats_z_p99', 'extreme_event_magnitude', 'instability_score']
+result = ""Logistic regression predicts label 'moderate' for the first holdout row.""",PASS,1.0,Candidate answer is factually and semantically equivalent to the ground truth,SOUND,Prediction of 'moderate' behavior is a plausible outcome,json,1,False,"```json
+{
+  ""verdict"": ""PASS"",
+  ""reason"": ""Candidate answer is factually and semantically equivalent to the ground truth"",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Prediction of 'moderate' behavior is a plausible outcome""
+}
+```"
+1,[in_memory_benchmark_run],FF_NO_PRUNING,14,explicit,Sort all bus rows by timestamp in ascending order. Use the first 80% of rows for training and the final 20% as the chronological holdout. Train a random forest model using the acceleration features. Predict the label in the behavior column for the first row in the holdout set.,False,Random forest predicts behavior 'moderate' for the first holdout row.,The result is Random forest predicts label 'moderate' for the first holdout row.,False,True,"# sort_by=['timestamp'] split=975/1219 model='random_forest' features=['accel_mean', 'accel_variance', 'accel_stats_x_p1', 'accel_stats_x_p10', 'accel_stats_x_p90', 'accel_stats_x_p99', 'accel_stats_y_p1', 'accel_stats_y_p10', 'accel_stats_y_p90', 'accel_stats_y_p99', 'accel_stats_z_p1', 'accel_stats_z_p10', 'accel_stats_z_p90', 'accel_stats_z_p99', 'extreme_event_magnitude', 'instability_score']
+result = ""Random forest predicts label 'moderate' for the first holdout row.""",PASS,1.0,Candidate answer is factually and semantically equivalent to the ground truth.,SOUND,Prediction of 'moderate' behavior is a plausible outcome.,json,1,False,"```json
+{
+  ""verdict"": ""PASS"",
+  ""reason"": ""Candidate answer is factually and semantically equivalent to the ground truth."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Prediction of 'moderate' behavior is a plausible outcome.""
+}
+```"
+1,[in_memory_benchmark_run],FF_NO_PRUNING,15,explicit,Sort all bus rows by timestamp in ascending order. Use the first 80% of rows for training and the final 20% as the chronological holdout. Train a 1-nearest-neighbor model using the acceleration features. Predict the label in the behavior column for the first row in the holdout set.,False,1-nearest-neighbor predicts behavior 'moderate' for the first holdout row.,The result is 1-nearest-neighbor predicts behavior 'moderate' for the first holdout row.,False,True,"# sort_by=['timestamp'] split=975/1219 model='one_nearest_neighbor' features=['accel_mean', 'accel_variance', 'accel_stats_x_p1', 'accel_stats_x_p10', 'accel_stats_x_p90', 'accel_stats_x_p99', 'accel_stats_y_p1', 'accel_stats_y_p10', 'accel_stats_y_p90', 'accel_stats_y_p99', 'accel_stats_z_p1', 'accel_stats_z_p10', 'accel_stats_z_p90', 'accel_stats_z_p99']
+result = ""1-nearest-neighbor predicts behavior 'moderate' for the first holdout row.""",PASS,1.0,The candidate answer matches the ground truth.,SOUND,Prediction of 'moderate' behavior is a plausible outcome.,json,1,False,"```json
+{
+  ""verdict"": ""PASS"",
+  ""reason"": ""The candidate answer matches the ground truth."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Prediction of 'moderate' behavior is a plausible outcome.""
+}
+```"
+1,[in_memory_benchmark_run],FF_NO_PRUNING,16,explicit,Sort all bus rows by timestamp in ascending order. Use the first 80% of rows for training and the final 20% as the chronological holdout. Train a hist gradient boosting model using the acceleration features. Predict the label in the behavior column for the first row in the holdout set.,False,Hist gradient boosting predicts behavior 'moderate' for the first holdout row.,The result is Hist gradient boosting predicts behavior 'moderate' for the first holdout row.,False,True,"# sort_by=['timestamp'] split=975/1219 model='hist_gradient_boosting' features=['accel_mean', 'accel_variance', 'accel_stats_x_p1', 'accel_stats_x_p10', 'accel_stats_x_p90', 'accel_stats_x_p99', 'accel_stats_y_p1', 'accel_stats_y_p10', 'accel_stats_y_p90', 'accel_stats_y_p99', 'accel_stats_z_p1', 'accel_stats_z_p10', 'accel_stats_z_p90', 'accel_stats_z_p99', 'extreme_event_magnitude', 'instability_score']
+result = ""Hist gradient boosting predicts behavior 'moderate' for the first holdout row.""",PASS,1.0,The candidate answer matches the ground truth answer.,SOUND,Prediction of 'moderate' behavior is a plausible outcome.,json,1,False,"```json
+{
+  ""verdict"": ""PASS"",
+  ""reason"": ""The candidate answer matches the ground truth answer."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Prediction of 'moderate' behavior is a plausible outcome.""
+}
+```"
+1,[in_memory_benchmark_run],FF_NO_PRUNING,17,explicit,"Filter the route to rows labeled aggressive, group them into 5-minute timestamp windows, and return the window with the highest mean instability_score.",False,The aggressive-behavior 5-minute window beginning 2025-06-06 16:00:00 has the highest mean instability_score: 0.594000000000.,The timestamp window starting at 2025-06-06T16:00:00 has mean instability score 0.5940.,False,True,"df = df[df['behavior'].isin(['aggressive'])]
+df['timestamp_window'] = pd.to_datetime(df['timestamp'], errors='coerce').dt.floor('5min')
+result = df.groupby('timestamp_window')['instability_score'].mean()
+result = result.idxmax()",PASS,1.0,The candidate answer is factually and semantically equivalent to the ground truth.,SOUND,The ground truth answer is a clear and specific timestamp with a corresponding mean instability score.,json,1,False,"```json
+{
+  ""verdict"": ""PASS"",
+  ""reason"": ""The candidate answer is factually and semantically equivalent to the ground truth."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""The ground truth answer is a clear and specific timestamp with a corresponding mean instability score.""
+}
+```"
+1,[in_memory_benchmark_run],FF_NO_PRUNING,18,explicit,"For each recorded latitude reading, derive peak acceleration magnitude from accel_stats_x_p99, accel_stats_y_p99, and accel_stats_z_p99. Report the absolute difference between the mean peak magnitude north versus south of the median latitude.",False,Northern mean peak magnitude is 11.722590691853; southern mean peak magnitude is 11.194853285219; their absolute difference is 0.527737406634.,"The result is {'higher': 'north', 'lower': 'south', 'metric': 'mean peak_accel_magnitude', 'north': 11.722590691852952, 'south': 11.194853285218633, 'abs_difference': 0.5277374066343192}",False,True,"df['peak_accel_magnitude'] = (df['accel_stats_x_p99']**2 + df['accel_stats_y_p99']**2 + df['accel_stats_z_p99']**2)**0.5
+north = df[df['latitude'] gt df['latitude'].median()]
+south = df[df['latitude'] lte df['latitude'].median()]
+result = {label: agg(partition) for label in partitions}
+result = compare(north, south, mode='abs_difference')",PASS,1.0,Candidate answer matches ground truth,SOUND,Correct calculation of absolute difference,json,1,False,"```json
+{
+  ""verdict"": ""PASS"",
+  ""reason"": ""Candidate answer matches ground truth"",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Correct calculation of absolute difference""
+}
+```"
+1,[in_memory_benchmark_run],FF_NO_PRUNING,19,explicit,"For each 5-minute timestamp window, derive the vertical shock range as accel_stats_z_p99 minus accel_stats_z_p1 and compute its mean separately for aggressive and calm behavior labels. Report the overall aggressive-minus-calm difference across the route.",False,Aggressive mean vertical shock range is 4.869682926829; calm mean is 1.433177419355; aggressive-minus-calm is 3.436505507474.,The result is: 3.75425,False,True,"import pandas as pd
+
+# Ensure timestamp is datetime
+df['timestamp'] = pd.to_datetime(df['timestamp'])
+
+# Create 5-minute timestamp window
+df['window'] = df['timestamp'].dt.floor('5min')
+
+# Derive the vertical shock range
+df['vertical_shock_range'] = df['accel_stats_z_p99'] - df['accel_stats_z_p1']
+
+# Compute the mean of vertical shock range for each behavior label
+mean_vertical_shock_range = df.groupby(['window', 'behavior'])['vertical_shock_range'].mean().reset_index()
+
+# Pivot the data to have aggressive and calm behavior labels in separate columns
+pivoted_data = mean_vertical_shock_range.pivot(index='window', columns='behavior', values='vertical_shock_range')
+
+# Compute the aggressive-minus-calm difference
+pivoted_data['difference'] = pivoted_data['aggressive'] - pivoted_data['calm']
+
+# Compute the overall aggressive-minus-calm difference
+result = pivoted_data['difference'].mean()",FAIL,0.0,Candidate answer does not match ground truth difference,SOUND,Ground truth provides specific mean values and difference,json,1,False,"```json
+{
+  ""verdict"": ""FAIL"",
+  ""reason"": ""Candidate answer does not match ground truth difference"",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Ground truth provides specific mean values and difference""
+}
+```"
+1,[in_memory_benchmark_run],FF_NO_PRUNING,20,explicit,"Derive the vertical shock range as accel_stats_z_p99 minus accel_stats_z_p1. Filter to aggressive behavior, group rows into 5-minute timestamp windows, and return the window with the highest mean vertical shock range.",False,The aggressive-behavior 5-minute window beginning 2025-06-06 11:05:00 has the highest mean vertical shock range: 7.355000000000.,The timestamp window starting at 2025-06-06T11:05:00 has mean vertical shock range 7.3550.,False,True,"df = df[df['behavior'].isin(['aggressive'])]
+df['vertical_shock_range'] = df['accel_stats_z_p99'] - df['accel_stats_z_p1']
+df['timestamp_window'] = pd.to_datetime(df['timestamp'], errors='coerce').dt.floor('5min')
+result = df.groupby('timestamp_window')['vertical_shock_range'].mean()
+result = result.idxmax()",PASS,1.0,The candidate answer matches the ground truth answer.,SOUND,Answer provides a specific timestamp and mean vertical shock range value.,json,1,False,"```json
+{
+  ""verdict"": ""PASS"",
+  ""reason"": ""The candidate answer matches the ground truth answer."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Answer provides a specific timestamp and mean vertical shock range value.""
+}
+```"
+2,[in_memory_benchmark_run],FF_NO_PRUNING,1,explicit,What is the maximum accel_variance observed in this dataset?,False,Maximum accel_variance is 5.8690.,The result is 5.869,False,True,result = df['accel_variance'].max(),PASS,1.0,The candidate answer matches the ground truth,SOUND,Maximum accel_variance value is provided,json,1,False,"```json
+{
+  ""verdict"": ""PASS"",
+  ""reason"": ""The candidate answer matches the ground truth"",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Maximum accel_variance value is provided""
+}
+```"
+2,[in_memory_benchmark_run],FF_NO_PRUNING,2,explicit,What is the average accel_mean across all recorded samples?,False,Average accel_mean across all samples is 9.2834.,The result is 9.283388022969648,False,True,result = df['accel_mean'].mean(),PASS,1.0,The candidate answer matches the ground truth,SOUND,Average accel_mean value is provided,json,1,False,"```json
+{
+  ""verdict"": ""PASS"",
+  ""reason"": ""The candidate answer matches the ground truth"",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Average accel_mean value is provided""
+}
+```"
+2,[in_memory_benchmark_run],FF_NO_PRUNING,3,explicit,List all timestamps where accel_stats_z_p99 reaches its maximum value across the dataset.,False,"Maximum accel_stats_z_p99 is 16.7020. Timestamps with this value: ['2025-06-06 16:01:13', '2025-06-06 16:01:16', '2025-06-06 16:01:19', '2025-06-06 16:01:22', '2025-06-06 16:01:25', '2025-06-06 16:01:28', '2025-06-06 16:01:31', '2025-06-06 16:01:34', '2025-06-06 16:01:40', '2025-06-06 16:01:43', '2025-06-06 16:01:46', '2025-06-06 16:01:49', '2025-06-06 16:01:52', '2025-06-06 16:01:55', '2025-06-06 16:01:58', '2025-06-06 16:02:01'].","The result is ['2025-06-06T16:01:13', '2025-06-06T16:01:16', '2025-06-06T16:01:19', '2025-06-06T16:01:22', '2025-06-06T16:01:25', '2025-06-06T16:01:28', '2025-06-06T16:01:31', '2025-06-06T16:01:34', '2025-06-06T16:01:40', '2025-06-06T16:01:43', '2025-06-06T16:01:46', '2025-06-06T16:01:49', '2025-06-06T16:01:52', '2025-06-06T16:01:55', '2025-06-06T16:01:58', '2025-06-06T16:02:01']",False,True,"result = df['accel_stats_z_p99'].max()
+_v = df['accel_stats_z_p99'].max(); df = df[df['accel_stats_z_p99'] == _v]
+result = df['timestamp'].tolist()",PASS,1.0,Candidate answer is factually and semantically equivalent to the ground truth.,SOUND,Ground truth answer is a list of timestamps.,json,1,False,"```json
+{
+  ""verdict"": ""PASS"",
+  ""reason"": ""Candidate answer is factually and semantically equivalent to the ground truth."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Ground truth answer is a list of timestamps.""
+}
+```"
+2,[in_memory_benchmark_run],FF_NO_PRUNING,4,explicit,How many data samples show an accel_variance strictly greater than 0.20?,False,Samples with accel_variance > 0.20: 352.,The result is 352,False,True,"df = df[df['accel_variance'] > 0.2]
+result = len(df)",PASS,1.0,The candidate answer matches the ground truth answer.,SOUND,Clear numeric answer provided.,json,1,False,"```json
+{
+  ""verdict"": ""PASS"",
+  ""reason"": ""The candidate answer matches the ground truth answer."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Clear numeric answer provided.""
+}
+```"
+2,[in_memory_benchmark_run],FF_NO_PRUNING,5,explicit,"Is the northern half of the route (latitude above median) rougher than the southern half, based on average acceleration variance?",False,"Median latitude split is 33.776676. North-half mean accel_variance is 0.3699, south-half mean is 0.1631; the northern half is rougher by 0.2068.","The result is {'higher': 'northern_half', 'lower': 'southern_half', 'metric': 'mean accel_variance', 'northern_half': 0.3703333333333333, 'southern_half': 0.16309016393442624, 'difference': 0.20724316939890705}",False,True,"northern_half = df[df['latitude'] gt df['latitude'].median()]
+southern_half = df[df['latitude'] lte df['latitude'].median()]
+result = {label: agg(partition) for label in partitions}
+result = compare(northern_half, southern_half, mode='difference')",PASS,1.0,Candidate answer is factually and semantically equivalent to the ground truth,SOUND,Ground truth answer clearly states the northern half is rougher,json,1,False,"```json
+{
+  ""verdict"": ""PASS"",
+  ""reason"": ""Candidate answer is factually and semantically equivalent to the ground truth"",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Ground truth answer clearly states the northern half is rougher""
+}
+```"
+2,[in_memory_benchmark_run],FF_NO_PRUNING,6,explicit,"Which location (latitude, longitude) recorded the largest difference between the 99th and 1st percentile of the z-axis acceleration?",False,"Largest vertical shock (z_p99 - z_p1) is 11.1860 at (33.776765, -84.389963), timestamp 2025-06-06 16:01:13.","The result is {'latitude': 33.776765, 'longitude': -84.389963, 'z_axis_range': 11.186000000000002}",False,True,"df['z_axis_range'] = df['accel_stats_z_p99'] - df['accel_stats_z_p1']
+idx = df['z_axis_range'].idxmax(); result = df.loc[idx, ['latitude', 'longitude', 'z_axis_range']].to_dict()",PASS,1.0,Candidate answer matches ground truth,SOUND,Clear and specific location and value,json,1,False,"```json
+{
+  ""verdict"": ""PASS"",
+  ""reason"": ""Candidate answer matches ground truth"",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Clear and specific location and value""
+}
+```"
+2,[in_memory_benchmark_run],FF_NO_PRUNING,7,explicit,"Calculate the average overall magnitude of peak acceleration using the 99th percentiles of the X, Y, and Z axes.",False,Average 3D peak acceleration magnitude [sqrt(x_p99^2 + y_p99^2 + z_p99^2)] across all samples is 11.4585.,The result is 11.458505525284506,False,True,"df['peak_accel_magnitude'] = (df['accel_stats_x_p99']**2 + df['accel_stats_y_p99']**2 + df['accel_stats_z_p99']**2)**0.5
+result = df['peak_accel_magnitude'].mean()",PASS,1.0,The candidate answer matches the ground truth answer.,SOUND,The ground truth answer is a clear numerical value.,json,1,False,"```json
+{
+  ""verdict"": ""PASS"",
+  ""reason"": ""The candidate answer matches the ground truth answer."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""The ground truth answer is a clear numerical value.""
+}
+```"
+2,[in_memory_benchmark_run],FF_NO_PRUNING,8,explicit,"If we group the data into 1-minute intervals, which time window has the highest mean instability_score?",False,The 1-minute window starting at 2025-06-06 16:01:00 had the highest mean instability_score of 5.8690.,The time window starting at 2025-06-06T16:01:00 has mean instability score 5.8690.,False,True,"df['time_window'] = pd.to_datetime(df['timestamp'], errors='coerce').dt.floor('1min')
+result = df.groupby('time_window')['instability_score'].mean()
+result = result.idxmax()",PASS,1.0,The candidate answer is factually and semantically equivalent to the ground truth.,SOUND,The ground truth answer provides a specific time window and mean instability score.,json,1,False,"```json
+{
+  ""verdict"": ""PASS"",
+  ""reason"": ""The candidate answer is factually and semantically equivalent to the ground truth."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""The ground truth answer provides a specific time window and mean instability score.""
+}
+```"
+2,[in_memory_benchmark_run],FF_NO_PRUNING,13,explicit,Sort all bus rows by timestamp in ascending order. Use the first 80% of rows for training and the final 20% as the chronological holdout. Train a logistic regression model using the acceleration features. Predict the label in the behavior column for the first row in the holdout set.,False,Logistic regression predicts behavior 'moderate' for the first holdout row.,The result is Logistic regression predicts behavior 'moderate' for the first holdout row.,False,True,"# sort_by=['timestamp'] split=975/1219 model='logistic_regression' features=['accel_mean', 'accel_variance', 'accel_stats_x_p1', 'accel_stats_x_p10', 'accel_stats_x_p90', 'accel_stats_x_p99', 'accel_stats_y_p1', 'accel_stats_y_p10', 'accel_stats_y_p90', 'accel_stats_y_p99', 'accel_stats_z_p1', 'accel_stats_z_p10', 'accel_stats_z_p90', 'accel_stats_z_p99', 'extreme_event_magnitude', 'instability_score']
+result = ""Logistic regression predicts behavior 'moderate' for the first holdout row.""",PASS,1.0,The candidate answer matches the ground truth answer.,SOUND,Prediction of 'moderate' behavior is a plausible outcome.,json,1,False,"```json
+{
+  ""verdict"": ""PASS"",
+  ""reason"": ""The candidate answer matches the ground truth answer."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Prediction of 'moderate' behavior is a plausible outcome.""
+}
+```"
+2,[in_memory_benchmark_run],FF_NO_PRUNING,14,explicit,Sort all bus rows by timestamp in ascending order. Use the first 80% of rows for training and the final 20% as the chronological holdout. Train a random forest model using the acceleration features. Predict the label in the behavior column for the first row in the holdout set.,False,Random forest predicts behavior 'moderate' for the first holdout row.,The result is Random forest predicts label 'moderate' for the first holdout row.,False,True,"# sort_by=['timestamp'] split=975/1219 model='random_forest' features=['accel_mean', 'accel_variance', 'accel_stats_x_p1', 'accel_stats_x_p10', 'accel_stats_x_p90', 'accel_stats_x_p99', 'accel_stats_y_p1', 'accel_stats_y_p10', 'accel_stats_y_p90', 'accel_stats_y_p99', 'accel_stats_z_p1', 'accel_stats_z_p10', 'accel_stats_z_p90', 'accel_stats_z_p99', 'extreme_event_magnitude', 'instability_score']
+result = ""Random forest predicts label 'moderate' for the first holdout row.""",PASS,1.0,Candidate answer is factually and semantically equivalent to the ground truth.,SOUND,Ground truth answer is a clear prediction result.,json,1,False,"```json
+{
+  ""verdict"": ""PASS"",
+  ""reason"": ""Candidate answer is factually and semantically equivalent to the ground truth."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Ground truth answer is a clear prediction result.""
+}
+```"
+2,[in_memory_benchmark_run],FF_NO_PRUNING,15,explicit,Sort all bus rows by timestamp in ascending order. Use the first 80% of rows for training and the final 20% as the chronological holdout. Train a 1-nearest-neighbor model using the acceleration features. Predict the label in the behavior column for the first row in the holdout set.,False,1-nearest-neighbor predicts behavior 'moderate' for the first holdout row.,The result is 1-nearest-neighbor predicts behavior 'moderate' for the first holdout row.,False,True,"# sort_by=['timestamp'] split=975/1219 model='one_nearest_neighbor' features=['accel_mean', 'accel_variance', 'accel_stats_x_p1', 'accel_stats_x_p10', 'accel_stats_x_p90', 'accel_stats_x_p99', 'accel_stats_y_p1', 'accel_stats_y_p10', 'accel_stats_y_p90', 'accel_stats_y_p99', 'accel_stats_z_p1', 'accel_stats_z_p10', 'accel_stats_z_p90', 'accel_stats_z_p99']
+result = ""1-nearest-neighbor predicts behavior 'moderate' for the first holdout row.""",PASS,1.0,Candidate answer matches the ground truth,SOUND,Prediction is plausible,json,1,False,"```json
+{
+  ""verdict"": ""PASS"",
+  ""reason"": ""Candidate answer matches the ground truth"",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Prediction is plausible""
+}
+```"
+2,[in_memory_benchmark_run],FF_NO_PRUNING,16,explicit,Sort all bus rows by timestamp in ascending order. Use the first 80% of rows for training and the final 20% as the chronological holdout. Train a hist gradient boosting model using the acceleration features. Predict the label in the behavior column for the first row in the holdout set.,False,Hist gradient boosting predicts behavior 'moderate' for the first holdout row.,The result is Hist gradient boosting predicts behavior 'moderate' for the first holdout row.,False,True,"# sort_by=['timestamp'] split=975/1219 model='hist_gradient_boosting' features=['accel_mean', 'accel_variance', 'accel_stats_x_p1', 'accel_stats_x_p10', 'accel_stats_x_p90', 'accel_stats_x_p99', 'accel_stats_y_p1', 'accel_stats_y_p10', 'accel_stats_y_p90', 'accel_stats_y_p99', 'accel_stats_z_p1', 'accel_stats_z_p10', 'accel_stats_z_p90', 'accel_stats_z_p99', 'extreme_event_magnitude', 'instability_score']
+result = ""Hist gradient boosting predicts behavior 'moderate' for the first holdout row.""",PASS,1.0,The candidate answer matches the ground truth answer.,SOUND,Prediction of 'moderate' behavior is a plausible outcome.,json,1,False,"```json
+{
+  ""verdict"": ""PASS"",
+  ""reason"": ""The candidate answer matches the ground truth answer."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Prediction of 'moderate' behavior is a plausible outcome.""
+}
+```"
+2,[in_memory_benchmark_run],FF_NO_PRUNING,17,explicit,"Filter the route to rows labeled aggressive, group them into 5-minute timestamp windows, and return the window with the highest mean instability_score.",False,The aggressive-behavior 5-minute window beginning 2025-06-06 16:00:00 has the highest mean instability_score: 0.594000000000.,The timestamp window starting at 2025-06-06T16:00:00 has mean instability score 0.5940.,False,True,"df = df[df['behavior'].isin(['aggressive'])]
+df['timestamp_window'] = pd.to_datetime(df['timestamp'], errors='coerce').dt.floor('5min')
+result = df.groupby('timestamp_window')['instability_score'].mean()
+result = result.idxmax()",PASS,1.0,The candidate answer is factually and semantically equivalent to the ground truth.,SOUND,The ground truth answer is a clear and specific timestamp with a corresponding mean instability score.,json,1,False,"```json
+{
+  ""verdict"": ""PASS"",
+  ""reason"": ""The candidate answer is factually and semantically equivalent to the ground truth."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""The ground truth answer is a clear and specific timestamp with a corresponding mean instability score.""
+}
+```"
+2,[in_memory_benchmark_run],FF_NO_PRUNING,18,explicit,"For each recorded latitude reading, derive peak acceleration magnitude from accel_stats_x_p99, accel_stats_y_p99, and accel_stats_z_p99. Report the absolute difference between the mean peak magnitude north versus south of the median latitude.",False,Northern mean peak magnitude is 11.722590691853; southern mean peak magnitude is 11.194853285219; their absolute difference is 0.527737406634.,"The result is {'higher': 'north', 'lower': 'south', 'metric': 'mean peak_accel_magnitude', 'north': 11.722590691852952, 'south': 11.194853285218633, 'abs_difference': 0.5277374066343192}",False,True,"df['peak_accel_magnitude'] = (df['accel_stats_x_p99']**2 + df['accel_stats_y_p99']**2 + df['accel_stats_z_p99']**2)**0.5
+north = df[df['latitude'] gt df['latitude'].median()]
+south = df[df['latitude'] lte df['latitude'].median()]
+result = {label: agg(partition) for label in partitions}
+result = compare(north, south, mode='abs_difference')",PASS,1.0,Candidate answer matches ground truth,SOUND,Correct calculation of absolute difference,json,1,False,"```json
+{
+  ""verdict"": ""PASS"",
+  ""reason"": ""Candidate answer matches ground truth"",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Correct calculation of absolute difference""
+}
+```"
+2,[in_memory_benchmark_run],FF_NO_PRUNING,19,explicit,"For each 5-minute timestamp window, derive the vertical shock range as accel_stats_z_p99 minus accel_stats_z_p1 and compute its mean separately for aggressive and calm behavior labels. Report the overall aggressive-minus-calm difference across the route.",False,Aggressive mean vertical shock range is 4.869682926829; calm mean is 1.433177419355; aggressive-minus-calm is 3.436505507474.,The result is: 3.43650550747443,False,True,"import pandas as pd
+
+# Ensure timestamp is datetime
+df['timestamp'] = pd.to_datetime(df['timestamp'])
+
+# Set the timestamp as the index and resample by 5 minutes
+df_resampled = df.set_index('timestamp').resample('5min')
+
+# Calculate the vertical shock range
+df['vertical_shock_range'] = df['accel_stats_z_p99'] - df['accel_stats_z_p1']
+
+# Group by behavior and calculate the mean of the vertical shock range
+df_grouped = df.groupby('behavior')['vertical_shock_range'].mean()
+
+# Calculate the aggressive-minus-calm difference
+aggressive_minus_calm = df_grouped['aggressive'] - df_grouped['calm']
+
+result = aggressive_minus_calm",PASS,1.0,The candidate answer matches the ground truth difference.,SOUND,Ground truth provides specific mean values and difference.,json,1,False,"```json
+{
+  ""verdict"": ""PASS"",
+  ""reason"": ""The candidate answer matches the ground truth difference."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Ground truth provides specific mean values and difference.""
+}
+```"
+2,[in_memory_benchmark_run],FF_NO_PRUNING,20,explicit,"Derive the vertical shock range as accel_stats_z_p99 minus accel_stats_z_p1. Filter to aggressive behavior, group rows into 5-minute timestamp windows, and return the window with the highest mean vertical shock range.",False,The aggressive-behavior 5-minute window beginning 2025-06-06 11:05:00 has the highest mean vertical shock range: 7.355000000000.,The result is: 2025-06-06 11:05:00,False,True,"result = df[df['behavior'] == 'aggressive'].assign(
+    vertical_shock_range=lambda x: x['accel_stats_z_p99'] - x['accel_stats_z_p1']
+).set_index('timestamp').resample('5min')['vertical_shock_range'].mean().idxmax()",FAIL,0.0,Candidate answer lacks the mean vertical shock range value.,SOUND,"Ground truth answer provides a specific date, time, and mean vertical shock range value.",json,1,False,"```json
+{
+  ""verdict"": ""FAIL"",
+  ""reason"": ""Candidate answer lacks the mean vertical shock range value."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Ground truth answer provides a specific date, time, and mean vertical shock range value.""
+}
+```"
+3,[in_memory_benchmark_run],FF_NO_PRUNING,1,explicit,What is the maximum accel_variance observed in this dataset?,False,Maximum accel_variance is 5.8690.,The result is 5.869,False,True,result = df['accel_variance'].max(),PASS,1.0,The candidate answer matches the ground truth,SOUND,Maximum accel_variance value is provided,json,1,False,"```json
+{
+  ""verdict"": ""PASS"",
+  ""reason"": ""The candidate answer matches the ground truth"",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Maximum accel_variance value is provided""
+}
+```"
+3,[in_memory_benchmark_run],FF_NO_PRUNING,2,explicit,What is the average accel_mean across all recorded samples?,False,Average accel_mean across all samples is 9.2834.,The result is 9.283388022969648,False,True,result = df['accel_mean'].mean(),PASS,1.0,The candidate answer matches the ground truth,SOUND,Average accel_mean is a reasonable value,json,1,False,"```json
+{
+  ""verdict"": ""PASS"",
+  ""reason"": ""The candidate answer matches the ground truth"",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Average accel_mean is a reasonable value""
+}
+```"
+3,[in_memory_benchmark_run],FF_NO_PRUNING,3,explicit,List all timestamps where accel_stats_z_p99 reaches its maximum value across the dataset.,False,"Maximum accel_stats_z_p99 is 16.7020. Timestamps with this value: ['2025-06-06 16:01:13', '2025-06-06 16:01:16', '2025-06-06 16:01:19', '2025-06-06 16:01:22', '2025-06-06 16:01:25', '2025-06-06 16:01:28', '2025-06-06 16:01:31', '2025-06-06 16:01:34', '2025-06-06 16:01:40', '2025-06-06 16:01:43', '2025-06-06 16:01:46', '2025-06-06 16:01:49', '2025-06-06 16:01:52', '2025-06-06 16:01:55', '2025-06-06 16:01:58', '2025-06-06 16:02:01'].","The result is ['2025-06-06T16:01:13', '2025-06-06T16:01:16', '2025-06-06T16:01:19', '2025-06-06T16:01:22', '2025-06-06T16:01:25', '2025-06-06T16:01:28', '2025-06-06T16:01:31', '2025-06-06T16:01:34', '2025-06-06T16:01:40', '2025-06-06T16:01:43', '2025-06-06T16:01:46', '2025-06-06T16:01:49', '2025-06-06T16:01:52', '2025-06-06T16:01:55', '2025-06-06T16:01:58', '2025-06-06T16:02:01']",False,True,"result = df['accel_stats_z_p99'].max()
+_v = df['accel_stats_z_p99'].max(); df = df[df['accel_stats_z_p99'] == _v]
+result = df['timestamp'].tolist()",PASS,1.0,The candidate answer is factually and semantically equivalent to the ground truth.,SOUND,The ground truth answer is a list of timestamps with the maximum accel_stats_z_p99 value.,json,1,False,"```json
+{
+  ""verdict"": ""PASS"",
+  ""reason"": ""The candidate answer is factually and semantically equivalent to the ground truth."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""The ground truth answer is a list of timestamps with the maximum accel_stats_z_p99 value.""
+}
+```"
+3,[in_memory_benchmark_run],FF_NO_PRUNING,4,explicit,How many data samples show an accel_variance strictly greater than 0.20?,False,Samples with accel_variance > 0.20: 352.,The result is 352,False,True,"df = df[df['accel_variance'] > 0.2]
+result = len(df)",PASS,1.0,The candidate answer matches the ground truth.,SOUND,Clear numeric answer provided.,json,1,False,"```json
+{
+  ""verdict"": ""PASS"",
+  ""reason"": ""The candidate answer matches the ground truth."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Clear numeric answer provided.""
+}
+```"
+3,[in_memory_benchmark_run],FF_NO_PRUNING,5,explicit,"Is the northern half of the route (latitude above median) rougher than the southern half, based on average acceleration variance?",False,"Median latitude split is 33.776676. North-half mean accel_variance is 0.3699, south-half mean is 0.1631; the northern half is rougher by 0.2068.","The result is {'higher': 'northern_half', 'lower': 'southern_half', 'metric': 'mean accel_variance', 'northern_half': 0.3703333333333333, 'southern_half': 0.16309016393442624, 'difference': 0.20724316939890705}",False,True,"northern_half = df[df['latitude'] gt df['latitude'].median()]
+southern_half = df[df['latitude'] lte df['latitude'].median()]
+result = {label: agg(partition) for label in partitions}
+result = compare(northern_half, southern_half, mode='difference')",PASS,1.0,Candidate answer is factually and semantically equivalent to the ground truth,SOUND,Ground truth answer is clear and well-formatted,json,1,False,"```json
+{
+  ""verdict"": ""PASS"",
+  ""reason"": ""Candidate answer is factually and semantically equivalent to the ground truth"",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Ground truth answer is clear and well-formatted""
+}
+```"
+3,[in_memory_benchmark_run],FF_NO_PRUNING,6,explicit,"Which location (latitude, longitude) recorded the largest difference between the 99th and 1st percentile of the z-axis acceleration?",False,"Largest vertical shock (z_p99 - z_p1) is 11.1860 at (33.776765, -84.389963), timestamp 2025-06-06 16:01:13.","The result is {'latitude': 33.776765, 'longitude': -84.389963, 'z_axis_range': 11.186000000000002}",False,True,"df['z_axis_range'] = df['accel_stats_z_p99'] - df['accel_stats_z_p1']
+idx = df['z_axis_range'].idxmax(); result = df.loc[idx, ['latitude', 'longitude', 'z_axis_range']].to_dict()",PASS,1.0,Candidate answer matches ground truth,SOUND,Clear and specific location and value,json,1,False,"```json
+{
+  ""verdict"": ""PASS"",
+  ""reason"": ""Candidate answer matches ground truth"",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Clear and specific location and value""
+}
+```"
+3,[in_memory_benchmark_run],FF_NO_PRUNING,7,explicit,"Calculate the average overall magnitude of peak acceleration using the 99th percentiles of the X, Y, and Z axes.",False,Average 3D peak acceleration magnitude [sqrt(x_p99^2 + y_p99^2 + z_p99^2)] across all samples is 11.4585.,The result is 11.458505525284506,False,True,"df['peak_accel_magnitude'] = (df['accel_stats_x_p99']**2 + df['accel_stats_y_p99']**2 + df['accel_stats_z_p99']**2)**0.5
+result = df['peak_accel_magnitude'].mean()",PASS,1.0,The candidate answer matches the ground truth numerically.,SOUND,Ground truth answer is a clear numerical value.,json,1,False,"```json
+{
+  ""verdict"": ""PASS"",
+  ""reason"": ""The candidate answer matches the ground truth numerically."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Ground truth answer is a clear numerical value.""
+}
+```"
+3,[in_memory_benchmark_run],FF_NO_PRUNING,8,explicit,"If we group the data into 1-minute intervals, which time window has the highest mean instability_score?",False,The 1-minute window starting at 2025-06-06 16:01:00 had the highest mean instability_score of 5.8690.,The time window starting at 2025-06-06T16:01:00 has mean instability score 5.8690.,False,True,"df['time_window'] = pd.to_datetime(df['timestamp'], errors='coerce').dt.floor('1min')
+result = df.groupby('time_window')['instability_score'].mean()
+result = result.idxmax()",PASS,1.0,The candidate answer is factually and semantically equivalent to the ground truth.,SOUND,The ground truth answer is a specific time window with a corresponding mean instability score.,json,1,False,"```json
+{
+  ""verdict"": ""PASS"",
+  ""reason"": ""The candidate answer is factually and semantically equivalent to the ground truth."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""The ground truth answer is a specific time window with a corresponding mean instability score.""
+}
+```"
+3,[in_memory_benchmark_run],FF_NO_PRUNING,13,explicit,Sort all bus rows by timestamp in ascending order. Use the first 80% of rows for training and the final 20% as the chronological holdout. Train a logistic regression model using the acceleration features. Predict the label in the behavior column for the first row in the holdout set.,False,Logistic regression predicts behavior 'moderate' for the first holdout row.,The result is Logistic regression predicts label 'moderate' for the first holdout row.,False,True,"# sort_by=['timestamp'] split=975/1219 model='logistic_regression' features=['accel_mean', 'accel_variance', 'accel_stats_x_p1', 'accel_stats_x_p10', 'accel_stats_x_p90', 'accel_stats_x_p99', 'accel_stats_y_p1', 'accel_stats_y_p10', 'accel_stats_y_p90', 'accel_stats_y_p99', 'accel_stats_z_p1', 'accel_stats_z_p10', 'accel_stats_z_p90', 'accel_stats_z_p99', 'extreme_event_magnitude', 'instability_score']
+result = ""Logistic regression predicts label 'moderate' for the first holdout row.""",PASS,1.0,Candidate answer is factually and semantically equivalent to the ground truth,SOUND,Prediction of 'moderate' behavior is a plausible outcome,json,1,False,"```json
+{
+  ""verdict"": ""PASS"",
+  ""reason"": ""Candidate answer is factually and semantically equivalent to the ground truth"",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Prediction of 'moderate' behavior is a plausible outcome""
+}
+```"
+3,[in_memory_benchmark_run],FF_NO_PRUNING,14,explicit,Sort all bus rows by timestamp in ascending order. Use the first 80% of rows for training and the final 20% as the chronological holdout. Train a random forest model using the acceleration features. Predict the label in the behavior column for the first row in the holdout set.,False,Random forest predicts behavior 'moderate' for the first holdout row.,The result is Random forest predicts behavior 'moderate' for the first holdout row.,False,True,"# sort_by=['timestamp'] split=975/1219 model='random_forest' features=['accel_mean', 'accel_variance', 'accel_stats_x_p1', 'accel_stats_x_p10', 'accel_stats_x_p90', 'accel_stats_x_p99', 'accel_stats_y_p1', 'accel_stats_y_p10', 'accel_stats_y_p90', 'accel_stats_y_p99', 'accel_stats_z_p1', 'accel_stats_z_p10', 'accel_stats_z_p90', 'accel_stats_z_p99', 'extreme_event_magnitude', 'instability_score']
+result = ""Random forest predicts behavior 'moderate' for the first holdout row.""",PASS,1.0,Candidate answer matches ground truth,SOUND,Clear prediction result,json,1,False,"```json
+{
+  ""verdict"": ""PASS"",
+  ""reason"": ""Candidate answer matches ground truth"",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Clear prediction result""
+}
+```"
+3,[in_memory_benchmark_run],FF_NO_PRUNING,15,explicit,Sort all bus rows by timestamp in ascending order. Use the first 80% of rows for training and the final 20% as the chronological holdout. Train a 1-nearest-neighbor model using the acceleration features. Predict the label in the behavior column for the first row in the holdout set.,False,1-nearest-neighbor predicts behavior 'moderate' for the first holdout row.,The result is 1-nearest-neighbor predicts label 'moderate' for the first holdout row.,False,True,"# sort_by=['timestamp'] split=975/1219 model='one_nearest_neighbor' features=['accel_mean', 'accel_variance', 'accel_stats_x_p1', 'accel_stats_x_p10', 'accel_stats_x_p90', 'accel_stats_x_p99', 'accel_stats_y_p1', 'accel_stats_y_p10', 'accel_stats_y_p90', 'accel_stats_y_p99', 'accel_stats_z_p1', 'accel_stats_z_p10', 'accel_stats_z_p90', 'accel_stats_z_p99', 'extreme_event_magnitude', 'instability_score']
+result = ""1-nearest-neighbor predicts label 'moderate' for the first holdout row.""",PASS,1.0,Candidate answer is factually and semantically equivalent to the ground truth.,SOUND,Prediction of 'moderate' behavior is a plausible result.,json,1,False,"```json
+{
+  ""verdict"": ""PASS"",
+  ""reason"": ""Candidate answer is factually and semantically equivalent to the ground truth."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Prediction of 'moderate' behavior is a plausible result.""
+}
+```"
+3,[in_memory_benchmark_run],FF_NO_PRUNING,16,explicit,Sort all bus rows by timestamp in ascending order. Use the first 80% of rows for training and the final 20% as the chronological holdout. Train a hist gradient boosting model using the acceleration features. Predict the label in the behavior column for the first row in the holdout set.,False,Hist gradient boosting predicts behavior 'moderate' for the first holdout row.,The result is Hist gradient boosting predicts behavior 'moderate' for the first holdout row.,False,True,"# sort_by=['timestamp'] split=975/1219 model='hist_gradient_boosting' features=['accel_mean', 'accel_variance', 'accel_stats_x_p1', 'accel_stats_x_p10', 'accel_stats_x_p90', 'accel_stats_x_p99', 'accel_stats_y_p1', 'accel_stats_y_p10', 'accel_stats_y_p90', 'accel_stats_y_p99', 'accel_stats_z_p1', 'accel_stats_z_p10', 'accel_stats_z_p90', 'accel_stats_z_p99', 'extreme_event_magnitude', 'instability_score']
+result = ""Hist gradient boosting predicts behavior 'moderate' for the first holdout row.""",PASS,1.0,Candidate answer matches ground truth,SOUND,Prediction is plausible,json,1,False,"```json
+{
+  ""verdict"": ""PASS"",
+  ""reason"": ""Candidate answer matches ground truth"",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Prediction is plausible""
+}
+```"
+3,[in_memory_benchmark_run],FF_NO_PRUNING,17,explicit,"Filter the route to rows labeled aggressive, group them into 5-minute timestamp windows, and return the window with the highest mean instability_score.",False,The aggressive-behavior 5-minute window beginning 2025-06-06 16:00:00 has the highest mean instability_score: 0.594000000000.,The result is: 2025-06-06 16:00:00,False,True,result = df[df['behavior'] == 'aggressive'].set_index('timestamp').resample('5min')['instability_score'].mean().idxmax(),FAIL,0.0,Candidate answer lacks the mean instability score,SOUND,Provides a specific timestamp and mean instability score,json,1,False,"```json
+{
+  ""verdict"": ""FAIL"",
+  ""reason"": ""Candidate answer lacks the mean instability score"",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Provides a specific timestamp and mean instability score""
+}
+```"
+3,[in_memory_benchmark_run],FF_NO_PRUNING,18,explicit,"For each recorded latitude reading, derive peak acceleration magnitude from accel_stats_x_p99, accel_stats_y_p99, and accel_stats_z_p99. Report the absolute difference between the mean peak magnitude north versus south of the median latitude.",False,Northern mean peak magnitude is 11.722590691853; southern mean peak magnitude is 11.194853285219; their absolute difference is 0.527737406634.,"The result is {'higher': 'north', 'lower': 'south', 'metric': 'mean peak_accel_magnitude', 'north': 11.722590691852952, 'south': 11.194853285218633, 'abs_difference': 0.5277374066343192}",False,True,"df['peak_accel_magnitude'] = (df['accel_stats_x_p99']**2 + df['accel_stats_y_p99']**2 + df['accel_stats_z_p99']**2)**0.5
+north = df[df['latitude'] gt df['latitude'].median()]
+south = df[df['latitude'] lte df['latitude'].median()]
+result = {label: agg(partition) for label in partitions}
+result = compare(north, south, mode='abs_difference')",PASS,1.0,Candidate answer matches ground truth numerically and semantically.,SOUND,Ground truth provides clear numeric values for comparison.,json,1,False,"```json
+{
+  ""verdict"": ""PASS"",
+  ""reason"": ""Candidate answer matches ground truth numerically and semantically."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Ground truth provides clear numeric values for comparison.""
+}
+```"
+3,[in_memory_benchmark_run],FF_NO_PRUNING,19,explicit,"For each 5-minute timestamp window, derive the vertical shock range as accel_stats_z_p99 minus accel_stats_z_p1 and compute its mean separately for aggressive and calm behavior labels. Report the overall aggressive-minus-calm difference across the route.",False,Aggressive mean vertical shock range is 4.869682926829; calm mean is 1.433177419355; aggressive-minus-calm is 3.436505507474.,"The result is {'higher': 'aggressive', 'lower': 'calm', 'aggressive': 5.0055000000000005, 'calm': 1.2912857142857141, 'aggressive_metric': 'aggressive_mean_shock mean', 'calm_metric': 'calm_mean_shock mean', 'difference': 3.714214285714286}",False,True,"df['timestamp_window'] = pd.to_datetime(df['timestamp'], errors='coerce').dt.floor('5min')
+df['vertical_shock_range'] = df['accel_stats_z_p99'] - df['accel_stats_z_p1']
+# PARALLEL_AGGREGATE branches:
+branch_0 = df[df['behavior'].isin(['aggressive'])].groupby(['timestamp_window'])['vertical_shock_range'].mean()
+branch_1 = df[df['behavior'].isin(['calm'])].groupby(['timestamp_window'])['vertical_shock_range'].mean()
+merged = branch_0.merge(branch_1, on=['timestamp_window'], how='outer')
+result = df['aggressive_mean_shock'].mean()
+result = df['calm_mean_shock'].mean()
+result = compare(aggressive=5.0055000000000005, calm=1.2912857142857141, mode='difference')",FAIL,0.0,Candidate answer differs from ground truth by more than allowed margin.,SOUND,Ground truth answer seems plausible.,json,1,False,"```json
+{
+  ""verdict"": ""FAIL"",
+  ""reason"": ""Candidate answer differs from ground truth by more than allowed margin."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Ground truth answer seems plausible.""
+}
+```"
+3,[in_memory_benchmark_run],FF_NO_PRUNING,20,explicit,"Derive the vertical shock range as accel_stats_z_p99 minus accel_stats_z_p1. Filter to aggressive behavior, group rows into 5-minute timestamp windows, and return the window with the highest mean vertical shock range.",False,The aggressive-behavior 5-minute window beginning 2025-06-06 11:05:00 has the highest mean vertical shock range: 7.355000000000.,The result is: 2025-06-06 11:05:00,False,True,"result = df[df['behavior'] == 'aggressive'].assign(
+    vertical_shock_range=lambda x: x['accel_stats_z_p99'] - x['accel_stats_z_p1']
+).assign(
+    timestamp_window=lambda x: x['timestamp'].dt.floor('5min')
+).groupby('timestamp_window')['vertical_shock_range'].mean().idxmax()",FAIL,0.0,Candidate answer lacks the mean vertical shock range value.,SOUND,"Ground truth answer provides a specific date, time, and mean vertical shock range value.",json,1,False,"```json
+{
+  ""verdict"": ""FAIL"",
+  ""reason"": ""Candidate answer lacks the mean vertical shock range value."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Ground truth answer provides a specific date, time, and mean vertical shock range value.""
+}
+```"

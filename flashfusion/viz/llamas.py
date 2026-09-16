@@ -70,22 +70,24 @@ from measure import (
 
 from typing import Any
 
-TOP3_BASELINES = ["FLASH_FUSION", CACHE_BASELINE, "REACT_ONLY"]
+TOP3_BASELINES = [CACHE_BASELINE, "REACT_ONLY", "AUTOIOT_PAPER"]
 COST_DATASET_BASELINES = [
-    "FLASH_FUSION",
     CACHE_BASELINE,
     "REACT_ONLY",
     "AUTOIOT_PAPER",
 ]
 COST_QUERY_TYPE_BASELINES = [
-    "FLASH_FUSION",
     CACHE_BASELINE,
     *CACHE_BASELINE_VARIANTS,
     "REACT_ONLY",
 ]
+EXTRA_HARD_MERGE_BASELINES = {
+    "FLASH_FUSION",
+    CACHE_BASELINE,
+    "REACT_ONLY",
+}
 DATASET_FIG_BASELINES = TOP3_BASELINES
 FULL_BASELINES = [
-    "FLASH_FUSION",
     CACHE_BASELINE,
     "REACT_ONLY",
     "AUTOIOT_PAPER",
@@ -119,10 +121,30 @@ RC: dict[str, Any] = {
 
 def display_baseline(code: str) -> str:
     labels = {
-        "FLASH_FUSION": "Flash-Fusion\n(w/o cache)",
+        "FLASH_FUSION": "− cache",
+        "FF_NO_PRUNING": "− cache, pruning",
+        "FF_NO_PLANNING": "− cache, pruning, planning",
         CACHE_BASELINE: "Flash-Fusion",
     }
     return labels.get(code, _display_baseline(code))
+
+
+FLASH_FUSION_ABLATION_BASELINES = {
+    "FLASH_FUSION",
+    "FF_NO_PRUNING",
+    "FF_NO_PLANNING",
+}
+
+
+def _add_ablation_context(ax, baselines: list[str]) -> None:
+    if set(baselines).issubset(FLASH_FUSION_ABLATION_BASELINES):
+        ax.set_title(
+            "Flash-Fusion ablation (components removed)",
+            loc="left",
+            fontsize=13,
+            fontweight="normal",
+            pad=8,
+        )
 
 
 SEMANTIC_STAGE_COLORS = {
@@ -153,7 +175,8 @@ GROUNDING_MODEL_SPECS = [
         "is_granite": False,
     },
     {
-        "model": "ibm-granite/granite-4.2-8b",
+        "model": "ibm-granite/granite-4.1-8b",
+        "aliases": ["ibm-granite/granite-4.2-8b"],
         "label": "granite-4.1",
         "params": "8B",
         "is_granite": True,
@@ -511,19 +534,6 @@ def plot_latency_and_cost_horizontal(
     baselines = [baseline for baseline in TOP3_BASELINES if baseline in present]
     semantic = aggregate_semantic_stage_latency_overall(df, baselines=baselines)
 
-    # Visualization-only cookie-cut: align FF-cache execution stage to FF.
-    ff_exec = semantic[
-        (semantic["baseline"] == "FLASH_FUSION")
-        & (semantic["stage"].astype(str) == "Execution")
-    ]
-    cache_exec_mask = (
-        (semantic["baseline"] == CACHE_BASELINE)
-        & (semantic["stage"].astype(str) == "Execution")
-    )
-    if not ff_exec.empty and cache_exec_mask.any():
-        semantic.loc[cache_exec_mask, "mean"] = float(ff_exec["mean"].iloc[0])
-        semantic.loc[cache_exec_mask, "std"] = float(ff_exec["std"].iloc[0])
-
     per_run = (
         df[df["baseline"].isin(baselines)]
         .groupby(["baseline", "dataset", "run_id"], as_index=False, observed=True)
@@ -788,6 +798,7 @@ def plot_accuracy_across_datasets(
     ax.yaxis.grid(linestyle="--", alpha=0.35, linewidth=1.0)
     ax.set_axisbelow(True)
     _clean_axes(ax)
+    _add_ablation_context(ax, baselines)
 
     ax.legend(
         ncol=min(3, max(1, len(baselines))),
@@ -851,6 +862,7 @@ def plot_accuracy_across_query_types(
     ax.yaxis.grid(linestyle="--", alpha=0.35, linewidth=1.0)
     ax.set_axisbelow(True)
     _clean_axes(ax)
+    _add_ablation_context(ax, baselines)
 
     ax.legend(
         ncol=min(3, max(1, len(baselines))),
@@ -953,6 +965,7 @@ def plot_query_accuracy_across_baselines(
     ax.yaxis.grid(linestyle="--", alpha=0.35, linewidth=1.0)
     ax.set_axisbelow(True)
     _clean_axes(ax)
+    _add_ablation_context(ax, selected)
 
     fig.patch.set_facecolor("white")
     ax.set_facecolor("white")
@@ -1008,6 +1021,8 @@ def _plot_grounding_loss_vs_model_size_from_summaries(
 
     for spec in GROUNDING_MODEL_SPECS:
         model_id = spec["model"]
+        model_aliases = [str(value) for value in spec.get("aliases", [])]
+        model_keys = [model_id, *model_aliases]
         labels.append(f"{spec['label']}\n$\\mathbf{{{spec['params']}}}$")
         colors.append("#ef8b2c" if bool(spec["is_granite"]) else "#5b8def")
 
@@ -1019,14 +1034,15 @@ def _plot_grounding_loss_vs_model_size_from_summaries(
             per_model = summary.get("per_model") if isinstance(summary, dict) else None
             if not isinstance(per_model, dict):
                 continue
-            row = per_model.get(model_id)
-            if not isinstance(row, dict):
-                continue
-            total_queries += int(row.get("n_queries_total", 0) or 0)
-            total_failures += int(row.get("n_failures", 0) or 0)
-            losses = row.get("per_run_loss_pct")
-            if isinstance(losses, list):
-                pooled_run_losses.extend([float(v) for v in losses])
+            for key in model_keys:
+                row = per_model.get(key)
+                if not isinstance(row, dict):
+                    continue
+                total_queries += int(row.get("n_queries_total", 0) or 0)
+                total_failures += int(row.get("n_failures", 0) or 0)
+                losses = row.get("per_run_loss_pct")
+                if isinstance(losses, list):
+                    pooled_run_losses.extend([float(v) for v in losses])
 
         mean_value = (100.0 * total_failures / total_queries) if total_queries > 0 else 0.0
         std_value = _sample_std(pooled_run_losses)
@@ -1128,6 +1144,8 @@ def _prompt_for_baseline_roots(defaults: dict[str, str | None]) -> dict[str, str
     """
     labels = {
         "flash_fusion": "Flash-Fusion",
+        "ff_no_pruning": "FF no pruning",
+        "ff_no_planning": "FF no planning",
         "flash_fusion_cache": "FF Cache",
         "react": "ReAct",
         "autoiot": "AutoIOT",
@@ -1215,6 +1233,12 @@ def _query_type_from_complexity(value: object) -> str:
         return "Predictive"
 
     if normalized in {
+        "extra hard",
+        "extrahard",
+    }:
+        return "Extra-Hard"
+
+    if normalized in {
         "oos",
         "out of scope",
         "outofscope",
@@ -1231,16 +1255,38 @@ def _query_type_from_complexity(value: object) -> str:
 
 
 def _query_type_from_id(query_id: int) -> str:
-    """Fallback mapping for the current 16-query benchmark suite."""
+    """Fallback mapping for the current 20-query benchmark suite."""
     if 1 <= query_id <= 4:
         return "Direct"
     if 5 <= query_id <= 8:
         return "Reasoning"
     if 9 <= query_id <= 12:
-        return "OOS"
+        return "Out-of-Scope"
     if 13 <= query_id <= 16:
         return "Predictive"
-    return "OOS"
+    if 17 <= query_id <= 20:
+        return "Extra-Hard"
+    return "Out-of-Scope"
+
+
+def _roots_for_baseline_load(
+    source_baseline: str,
+    primary_root_raw: str | None,
+    extra_hard_root: Path | None,
+    repo_root: Path,
+) -> list[Path]:
+    roots: list[Path] = []
+
+    primary_root = _resolve_user_path(primary_root_raw, repo_root)
+    if primary_root is not None:
+        roots.append(primary_root)
+
+    if extra_hard_root is not None and source_baseline in EXTRA_HARD_MERGE_BASELINES:
+        extra_root = (extra_hard_root / source_baseline).resolve()
+        if extra_root.exists() and extra_root not in roots:
+            roots.append(extra_root)
+
+    return roots
 
 
 def _infer_dataset_from_metrics_path(metrics_path: Path) -> str | None:
@@ -1398,6 +1444,16 @@ def _build_parser() -> argparse.ArgumentParser:
         help="Optional override root for FLASH_FUSION baseline data.",
     )
     parser.add_argument(
+        "--ff-no-pruning-root",
+        default=str(script_dir.parent / "results" / "ablations" / "FF_NO_PRUNING"),
+        help="Optional override root for FF_NO_PRUNING baseline data.",
+    )
+    parser.add_argument(
+        "--ff-no-planning-root",
+        default=str(script_dir.parent / "results" / "ablations" / "FF_NO_PLANNING"),
+        help="Optional override root for FF_NO_PLANNING baseline data.",
+    )
+    parser.add_argument(
         "--flash-fusion-cache-root",
         default=None,
         help="Optional override root for FLASH_FUSION_CACHE baseline data.",
@@ -1411,6 +1467,14 @@ def _build_parser() -> argparse.ArgumentParser:
         "--autoiot-root",
         default=str(script_dir.parent / "results" / "with_slm_predictive"),
         help="Optional override root for AUTOIOT_PAPER baseline data.",
+    )
+    parser.add_argument(
+        "--extra-hard-root",
+        default=str(script_dir.parent / "results" / "extra_hard"),
+        help=(
+            "Root directory containing extra-hard results subfolders "
+            "(FLASH_FUSION, FLASH_FUSION_CACHE, REACT_ONLY)."
+        ),
     )
     parser.add_argument(
         "--output-dir",
@@ -1494,6 +1558,7 @@ def main() -> None:
     output_dir = _resolve_user_path(args.output_dir, repo_root)
     assert output_dir is not None
     output_dir.mkdir(parents=True, exist_ok=True)
+    extra_hard_root = _resolve_user_path(args.extra_hard_root, repo_root)
     paper_dir = (
         _resolve_user_path(args.paper_dir, repo_root)
         if args.paper_dir
@@ -1531,6 +1596,8 @@ def main() -> None:
         roots = _prompt_for_baseline_roots(
             {
                 "flash_fusion": args.flash_fusion_root,
+                "ff_no_pruning": args.ff_no_pruning_root,
+                "ff_no_planning": args.ff_no_planning_root,
                 "flash_fusion_cache": args.flash_fusion_cache_root,
                 "react": args.react_root,
                 "autoiot": args.autoiot_root,
@@ -1539,6 +1606,8 @@ def main() -> None:
             }
         )
         args.flash_fusion_root = roots["flash_fusion"]
+        args.ff_no_pruning_root = roots["ff_no_pruning"]
+        args.ff_no_planning_root = roots["ff_no_planning"]
         args.flash_fusion_cache_root = roots["flash_fusion_cache"]
         args.react_root = roots["react"]
         args.autoiot_root = roots["autoiot"]
@@ -1582,6 +1651,8 @@ def main() -> None:
 
     configured_roots = {
         "FLASH_FUSION": args.flash_fusion_root,
+        "FF_NO_PRUNING": args.ff_no_pruning_root,
+        "FF_NO_PLANNING": args.ff_no_planning_root,
         "FLASH_FUSION_CACHE": args.flash_fusion_cache_root,
         "REACT_ONLY": args.react_root,
         "AUTOIOT_PAPER": args.autoiot_root,
@@ -1597,26 +1668,34 @@ def main() -> None:
         if source_baseline in loaded_sources:
             continue
         loaded_sources.add(source_baseline)
-        raw_root = configured_roots.get(source_baseline)
+        roots = _roots_for_baseline_load(
+            source_baseline,
+            configured_roots.get(source_baseline),
+            extra_hard_root,
+            repo_root,
+        )
 
-        if raw_root is None:
+        if not roots:
             print(f"[INFO] Skipping {baseline}: no results root provided.")
             continue
 
-        root = _resolve_user_path(raw_root, repo_root)
-        assert root is not None
+        loaded_any = False
+        for root in roots:
+            try:
+                baseline_df = _load_baseline_root(source_baseline, root)
+            except (FileNotFoundError, ValueError) as exc:
+                print(f"[WARN] Could not load {baseline} from {root}: {exc}")
+                continue
 
-        try:
-            baseline_df = _load_baseline_root(source_baseline, root)
-        except (FileNotFoundError, ValueError) as exc:
-            print(f"[WARN] Could not load {baseline} from {root}: {exc}")
-            continue
+            print(
+                f"[INFO] Loaded {len(baseline_df)} rows for {source_baseline} "
+                f"from {root}"
+            )
+            frames.append(baseline_df)
+            loaded_any = True
 
-        print(
-            f"[INFO] Loaded {len(baseline_df)} rows for {source_baseline} "
-            f"from {root}"
-        )
-        frames.append(baseline_df)
+        if not loaded_any:
+            print(f"[WARN] No rows loaded for {source_baseline} from configured roots.")
 
     if not frames:
         raise SystemExit(
@@ -1728,6 +1807,7 @@ def main() -> None:
     plot_query_accuracy_across_baselines(
         by_dataset,
         fig10,
+        baselines=query_type_baselines,
         paper_dir=paper_dir,
     )
 

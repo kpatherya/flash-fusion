@@ -2,16 +2,20 @@
 # =============================================================================
 # run_react_flashfusion_qwen_all_datasets.sh
 #
-# Run REACT_ONLY and FLASH_FUSION benchmarks sequentially across bus, WISDM,
-# and MIT ECG for a head-to-head comparison.
+# Run Flash-Fusion ablation benchmarks sequentially across bus, WISDM,
+# and MIT ECG.
 #
 # Output layout:
-#   flashfusion/results/ff_and_react_qwen/
-#     REACT_ONLY/
+#   flashfusion/results/ablations/
+#     FLASH_FUSION/
 #       bus/
 #       wisdm/
 #       mit_ecg/
-#     FLASH_FUSION/
+#     FF_NO_PRUNING/
+#       bus/
+#       wisdm/
+#       mit_ecg/
+#     FF_NO_PLANNING/
 #       bus/
 #       wisdm/
 #       mit_ecg/
@@ -52,7 +56,7 @@ if [[ -z "${OPENROUTER_API_KEY:-}" && -z "${GROQ_API_KEY:-}" ]]; then
     exit 1
 fi
 
-OUTPUT_ROOT="${OUTPUT_ROOT:-flashfusion/results/ff_and_react_qwen}"
+OUTPUT_ROOT="${OUTPUT_ROOT:-flashfusion/results/ablations}"
 RUNS="${RUNS:-3}"
 
 ts() {
@@ -84,11 +88,11 @@ run_one() {
     log "[Done] baseline=${baseline} dataset=${dataset}"
 }
 
-log "Running REACT_ONLY and FLASH_FUSION across all three datasets"
+log "Running FLASH_FUSION, FF_NO_PRUNING, and FF_NO_PLANNING across all three datasets"
 log "Output root: ${OUTPUT_ROOT}"
 log "Runs per benchmark: ${RUNS}"
 
-for baseline in REACT_ONLY FLASH_FUSION; do
+for baseline in FLASH_FUSION FF_NO_PRUNING FF_NO_PLANNING; do
     run_one \
       "${baseline}" \
       bus \

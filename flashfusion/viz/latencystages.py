@@ -43,16 +43,14 @@ from measure import (
     split_cache_baseline_rows,
 )
 
-FF_AND_CACHE_BASELINES = ["FLASH_FUSION", *CACHE_BASELINE_VARIANTS]
+FF_AND_CACHE_BASELINES = [CACHE_BASELINE, *CACHE_BASELINE_VARIANTS]
 TWO_WAY_BASELINES = FF_AND_CACHE_BASELINES
-THREE_WAY_BASELINES = ["FLASH_FUSION", *CACHE_BASELINE_VARIANTS, "REACT_ONLY"]
+THREE_WAY_BASELINES = [CACHE_BASELINE, *CACHE_BASELINE_VARIANTS, "REACT_ONLY"]
 CACHE_STAGE_COMPARE_BASELINES = [
-    "FLASH_FUSION",
     CACHE_BASELINE,
     *CACHE_BASELINE_VARIANTS,
 ]
 CUMULATIVE_LATENCY_BASELINES = [
-    "FLASH_FUSION",
     CACHE_BASELINE,
     "REACT_ONLY",
     "AUTOIOT_PAPER",
@@ -62,7 +60,12 @@ CUMULATIVE_LATENCY_THREE_BASELINES = [
     "REACT_ONLY",
     "AUTOIOT_PAPER",
 ]
-CUMULATIVE_LATENCY_FF_CACHE_BASELINES = ["FLASH_FUSION", CACHE_BASELINE]
+CUMULATIVE_LATENCY_FF_CACHE_BASELINES = [CACHE_BASELINE]
+EXTRA_HARD_MERGE_BASELINES = {
+    "FLASH_FUSION",
+    CACHE_BASELINE,
+    "REACT_ONLY",
+}
 
 RC: dict[str, Any] = {
     "font.family": "DejaVu Sans",
@@ -83,10 +86,30 @@ RC: dict[str, Any] = {
 
 def display_baseline(code: str) -> str:
     labels = {
-        "FLASH_FUSION": "Flash-Fusion\n(w/o cache)",
+        "FLASH_FUSION": "− cache",
+        "FF_NO_PRUNING": "− cache, pruning",
+        "FF_NO_PLANNING": "− cache, pruning, planning",
         CACHE_BASELINE: "Flash-Fusion",
     }
     return labels.get(code, _display_baseline(code))
+
+
+FLASH_FUSION_ABLATION_BASELINES = {
+    "FLASH_FUSION",
+    "FF_NO_PRUNING",
+    "FF_NO_PLANNING",
+}
+
+
+def _add_ablation_context(ax, baselines: list[str]) -> None:
+    if set(baselines).issubset(FLASH_FUSION_ABLATION_BASELINES):
+        ax.set_title(
+            "Flash-Fusion ablation (components removed)",
+            loc="left",
+            fontsize=13,
+            fontweight="normal",
+            pad=8,
+        )
 
 
 def _apply_rc() -> None:
@@ -107,7 +130,6 @@ SEMANTIC_STAGE_COLORS = {
 }
 
 SEMANTIC_BASELINES = [
-    "FLASH_FUSION",
     CACHE_BASELINE,
     *CACHE_BASELINE_VARIANTS,
     "REACT_ONLY",
@@ -415,6 +437,8 @@ def _prompt_for_baseline_roots(defaults: dict[str, str | None]) -> dict[str, str
     """
     labels = {
         "flash_fusion": "Flash-Fusion",
+        "ff_no_pruning": "FF no pruning",
+        "ff_no_planning": "FF no planning",
         "flash_fusion_cache": "FF-cache",
         "react": "ReAct",
         "autoiot": "AutoIOT",
@@ -500,6 +524,12 @@ def _query_type_from_complexity(value: object) -> str:
         return "Predictive"
 
     if normalized in {
+        "extra hard",
+        "extrahard",
+    }:
+        return "Extra-Hard"
+
+    if normalized in {
         "oos",
         "out of scope",
         "outofscope",
@@ -515,16 +545,38 @@ def _query_type_from_complexity(value: object) -> str:
 
 
 def _query_type_from_id(query_id: int) -> str:
-    """Fallback mapping for the current 16-query benchmark suite."""
+    """Fallback mapping for the current 20-query benchmark suite."""
     if 1 <= query_id <= 4:
         return "Direct"
     if 5 <= query_id <= 8:
         return "Reasoning"
     if 9 <= query_id <= 12:
-        return "OOS"
+        return "Out-of-Scope"
     if 13 <= query_id <= 16:
         return "Predictive"
-    return "OOS"
+    if 17 <= query_id <= 20:
+        return "Extra-Hard"
+    return "Out-of-Scope"
+
+
+def _roots_for_baseline_load(
+    source_baseline: str,
+    primary_root_raw: str | None,
+    extra_hard_root: Path | None,
+    repo_root: Path,
+) -> list[Path]:
+    roots: list[Path] = []
+
+    primary_root = _resolve_user_path(primary_root_raw, repo_root)
+    if primary_root is not None:
+        roots.append(primary_root)
+
+    if extra_hard_root is not None and source_baseline in EXTRA_HARD_MERGE_BASELINES:
+        extra_root = (extra_hard_root / source_baseline).resolve()
+        if extra_root.exists() and extra_root not in roots:
+            roots.append(extra_root)
+
+    return roots
 
 
 def _infer_dataset_from_metrics_path(metrics_path: Path) -> str | None:
@@ -997,6 +1049,7 @@ def plot_semantic_stage_comparison_overall_two(summary, out_path: Path, baseline
     ax.xaxis.grid(linestyle="--", alpha=0.30, linewidth=0.9)
     ax.set_axisbelow(True)
     _clean_axes(ax)
+    _add_ablation_context(ax, baselines)
 
     ax.legend(ncol=4, loc="upper left", bbox_to_anchor=(-0.05, -0.28), frameon=False, columnspacing=0.8)
     fig.patch.set_facecolor("white")
@@ -1102,6 +1155,7 @@ def plot_semantic_stage_comparison(
     ax.xaxis.grid(linestyle="--", alpha=0.30, linewidth=0.9)
     ax.set_axisbelow(True)
     _clean_axes(ax)
+    _add_ablation_context(ax, baselines)
 
     uses_estimate = bool(summary["uses_estimate"].any()) if "uses_estimate" in summary.columns else False
     # if uses_estimate:
@@ -1197,6 +1251,7 @@ def plot_cumulative_latency_comparison(
     ax.xaxis.grid(linestyle="--", alpha=0.30, linewidth=0.9)
     ax.set_axisbelow(True)
     _clean_axes(ax)
+    _add_ablation_context(ax, baselines)
 
     for baseline, vals in baseline_bar_values.items():
         for bar, value in zip(baseline_bars[baseline], vals):
@@ -1303,6 +1358,16 @@ def _build_parser() -> argparse.ArgumentParser:
         help="Optional override root for FLASH_FUSION baseline data.",
     )
     parser.add_argument(
+        "--ff-no-pruning-root",
+        default=str(script_dir.parent / "results" / "ablations" / "FF_NO_PRUNING"),
+        help="Optional override root for FF_NO_PRUNING baseline data.",
+    )
+    parser.add_argument(
+        "--ff-no-planning-root",
+        default=str(script_dir.parent / "results" / "ablations" / "FF_NO_PLANNING"),
+        help="Optional override root for FF_NO_PLANNING baseline data.",
+    )
+    parser.add_argument(
         "--flash-fusion-cache-root",
         default=None,
         help="Optional override root for FLASH_FUSION_CACHE baseline data.",
@@ -1316,6 +1381,14 @@ def _build_parser() -> argparse.ArgumentParser:
         "--autoiot-root",
         default=str(script_dir.parent / "results" / "with_slm_predictive"),
         help="Optional override root for AUTOIOT_PAPER baseline data.",
+    )
+    parser.add_argument(
+        "--extra-hard-root",
+        default=str(script_dir.parent / "results" / "extra_hard"),
+        help=(
+            "Root directory containing extra-hard results subfolders "
+            "(FLASH_FUSION, FLASH_FUSION_CACHE, REACT_ONLY)."
+        ),
     )
     parser.add_argument(
         "--baseline-set",
@@ -1350,12 +1423,16 @@ def main() -> None:
         roots = _prompt_for_baseline_roots(
             {
                 "flash_fusion": args.flash_fusion_root,
+                "ff_no_pruning": args.ff_no_pruning_root,
+                "ff_no_planning": args.ff_no_planning_root,
                 "flash_fusion_cache": args.flash_fusion_cache_root,
                 "react": args.react_root,
                 "autoiot": args.autoiot_root,
             }
         )
         args.flash_fusion_root = roots["flash_fusion"]
+        args.ff_no_pruning_root = roots["ff_no_pruning"]
+        args.ff_no_planning_root = roots["ff_no_planning"]
         args.flash_fusion_cache_root = roots["flash_fusion_cache"]
         args.react_root = roots["react"]
         args.autoiot_root = roots["autoiot"]
@@ -1363,6 +1440,7 @@ def main() -> None:
     output_dir = _resolve_user_path(args.output_dir, repo_root)
     assert output_dir is not None
     output_dir.mkdir(parents=True, exist_ok=True)
+    extra_hard_root = _resolve_user_path(args.extra_hard_root, repo_root)
     paper_dir = (
         _resolve_user_path(args.paper_dir, repo_root)
         if args.paper_dir
@@ -1383,6 +1461,8 @@ def main() -> None:
 
     configured_roots = {
         "FLASH_FUSION": args.flash_fusion_root,
+        "FF_NO_PRUNING": args.ff_no_pruning_root,
+        "FF_NO_PLANNING": args.ff_no_planning_root,
         "FLASH_FUSION_CACHE": args.flash_fusion_cache_root,
         "REACT_ONLY": args.react_root,
         "AUTOIOT_PAPER": args.autoiot_root,
@@ -1396,26 +1476,34 @@ def main() -> None:
         if source_baseline in loaded_sources:
             continue
         loaded_sources.add(source_baseline)
-        raw_root = configured_roots.get(source_baseline)
+        roots = _roots_for_baseline_load(
+            source_baseline,
+            configured_roots.get(source_baseline),
+            extra_hard_root,
+            repo_root,
+        )
 
-        if raw_root is None:
+        if not roots:
             print(f"[INFO] Skipping {baseline}: no results root provided.")
             continue
 
-        root = _resolve_user_path(raw_root, repo_root)
-        assert root is not None
+        loaded_any = False
+        for root in roots:
+            try:
+                baseline_df = _load_baseline_root(source_baseline, root)
+            except (FileNotFoundError, ValueError) as exc:
+                print(f"[WARN] Could not load {baseline} from {root}: {exc}")
+                continue
 
-        try:
-            baseline_df = _load_baseline_root(source_baseline, root)
-        except (FileNotFoundError, ValueError) as exc:
-            print(f"[WARN] Could not load {baseline} from {root}: {exc}")
-            continue
+            print(
+                f"[INFO] Loaded {len(baseline_df)} rows for {source_baseline} "
+                f"from {root}"
+            )
+            frames.append(baseline_df)
+            loaded_any = True
 
-        print(
-            f"[INFO] Loaded {len(baseline_df)} rows for {source_baseline} "
-            f"from {root}"
-        )
-        frames.append(baseline_df)
+        if not loaded_any:
+            print(f"[WARN] No rows loaded for {source_baseline} from configured roots.")
 
     if not frames:
         raise SystemExit(
@@ -1442,7 +1530,15 @@ def main() -> None:
     )
 
     df = _filter_metrics(df, selected_baselines, selected_query_types)
-    df = _apply_ff_cache_execution_cookie_cut(df)
+    use_cookie_cut = bool(
+        "FLASH_FUSION" in selected_baselines
+        and set([CACHE_BASELINE, *CACHE_BASELINE_VARIANTS])
+        & set(selected_baselines)
+    )
+    if use_cookie_cut:
+        df = _apply_ff_cache_execution_cookie_cut(df)
+    else:
+        print("[INFO] Cookie-cut disabled: no FF-cache baselines selected.")
 
     if df.empty:
         raise SystemExit(
@@ -1451,10 +1547,85 @@ def main() -> None:
             "--baseline-set / --query-types arguments."
         )
 
-    ff_summary = aggregate_flash_fusion_stage_latency_by_query_type(df)
-    ff_out = output_dir / "per_stage_latency_breakdown_across_query_types_n3.png"
-    plot_flash_fusion_native_latency(ff_summary, ff_out, query_types=selected_query_types)
-    ff_summary.to_csv(output_dir / "per_stage_latency_breakdown_across_query_types_n3_summary.csv", index=False)
+    if not use_cookie_cut:
+        ff_summary = aggregate_flash_fusion_stage_latency_by_query_type(df)
+        ff_out = output_dir / "per_stage_latency_breakdown_across_query_types_n3.png"
+        plot_flash_fusion_native_latency(ff_summary, ff_out, query_types=selected_query_types)
+        ff_summary.to_csv(
+            output_dir / "per_stage_latency_breakdown_across_query_types_n3_summary.csv",
+            index=False,
+        )
+
+        semantic = aggregate_semantic_stage_latency_by_query_type(
+            df,
+            baselines=selected_baselines,
+        )
+        semantic_total = aggregate_semantic_stage_total_latency_by_query_type(
+            df,
+            baselines=selected_baselines,
+        )
+        semantic_out = output_dir / "semantic_stage_latency_comparison_by_baseline_n3.png"
+        plot_semantic_stage_comparison(
+            semantic,
+            semantic_out,
+            baselines=selected_baselines,
+            query_types=selected_query_types,
+            total_summary=semantic_total,
+            log_scale=False,
+        )
+        semantic.to_csv(
+            output_dir / "semantic_stage_latency_comparison_by_baseline_n3_summary.csv",
+            index=False,
+        )
+
+        semantic_overall = aggregate_semantic_stage_latency_overall(
+            df,
+            baselines=selected_baselines,
+        )
+        semantic_overall_out = output_dir / "semantic_stage_comparison_overall_n3.png"
+        plot_semantic_stage_comparison_overall_two(
+            semantic_overall,
+            semantic_overall_out,
+            baselines=selected_baselines,
+        )
+        semantic_overall.to_csv(
+            output_dir / "semantic_stage_comparison_overall_n3_summary.csv",
+            index=False,
+        )
+
+        latency_compare_out = output_dir / "cumulative_latency_comparison_log_by_baseline_n3.png"
+        plot_cumulative_latency_comparison(
+            semantic_total,
+            latency_compare_out,
+            baselines=selected_baselines,
+            query_types=selected_query_types,
+            log_scale=False,
+            paper_dir=paper_dir,
+        )
+        semantic_total.to_csv(
+            output_dir / "cumulative_latency_comparison_log_by_baseline_n3_summary.csv",
+            index=False,
+        )
+
+        print(f"Wrote {ff_out}")
+        print(f"Wrote {semantic_out}")
+        print(f"Wrote {semantic_overall_out}")
+        print(f"Wrote {latency_compare_out}")
+        return
+
+    ff_out: Path | None = None
+    if "FLASH_FUSION" in selected_baselines:
+        ff_summary = aggregate_flash_fusion_stage_latency_by_query_type(df)
+        ff_out = output_dir / "per_stage_latency_breakdown_across_query_types_n3.png"
+        plot_flash_fusion_native_latency(
+            ff_summary,
+            ff_out,
+            query_types=selected_query_types,
+        )
+        ff_summary.to_csv(
+            output_dir / "per_stage_latency_breakdown_across_query_types_n3_summary.csv",
+            index=False,
+        )
 
     semantic_raw = aggregate_semantic_stage_latency_by_query_type(df, baselines=selected_baselines)
     semantic = _cookie_cut_execution_stage_means(semantic_raw)
@@ -1576,7 +1747,8 @@ def main() -> None:
     )
     latency_compare_ff_cache.to_csv(output_dir / "cumulative_latency_comparison_ff_cache_n3_summary.csv", index=False)
 
-    print(f"Wrote {ff_out}")
+    if ff_out is not None:
+        print(f"Wrote {ff_out}")
     print(f"Wrote {semantic_out}")
     print(f"Wrote {semantic_two_out}")
     print(f"Wrote {semantic_three_out}")

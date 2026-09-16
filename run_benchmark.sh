@@ -2,8 +2,8 @@
 # =============================================================================
 # run_benchmark.sh  —  Flash-Fusion consolidated benchmark
 #
-# Runs all 5 baselines (FLASH_FUSION, HARGPT_PAPER, LLMSENSE_PAPER, REACT_ONLY,
-# AUTOIOT_PAPER) across wisdm / mit_ecg / bus with per-baseline latency budgets,
+# Runs selected baselines across wisdm / mit_ecg / bus with per-baseline latency
+# budgets,
 # optional smoke test, stage-latency export, and cross-dataset aggregation.
 #
 # Output layout (nested by baseline -> dataset -> run tag):
@@ -23,15 +23,18 @@
 #   ./run_benchmark.sh --help
 #
 # Key env overrides:
-#   OUTPUT_ROOT              (default: flashfusion/results/july26)
+#   OUTPUT_ROOT              (default: flashfusion/results/ablations)
 #   RUN_TAG                  (default: run_YYYYMMDD_HHMMSS)
 #   MODEL                    (default: meta-llama/llama-3.3-70b-instruct)
-#   BASELINES                comma-separated (default: all 5)
+#   BASELINES                comma-separated
+#                            (default: FLASH_FUSION,FF_NO_PRUNING,FF_NO_PLANNING)
 #   DATASETS                 comma-separated: wisdm,mit_ecg,bus (default: all 3)
 #   QUERIES                  comma-separated IDs or "all" (default: all)
 #   RUNS                     integer (default: 1)
 #   MAX_LATENCY              if set, overrides all per-baseline budgets
 #   MAX_LATENCY_FLASH_FUSION        (default: 60s)
+#   MAX_LATENCY_FF_NO_PRUNING       (default: 60s)
+#   MAX_LATENCY_FF_NO_PLANNING      (default: 60s)
 #   MAX_LATENCY_REACT_ONLY          (default: 60s)
 #   MAX_LATENCY_HARGPT_PAPER        (default: 300s)
 #   MAX_LATENCY_LLMSENSE_PAPER      (default: 300s)
@@ -76,15 +79,17 @@ else
 fi
 
 # ── Default configuration ─────────────────────────────────────────────────────
-OUTPUT_ROOT="${OUTPUT_ROOT:-flashfusion/results/july26}"
+OUTPUT_ROOT="${OUTPUT_ROOT:-flashfusion/results/ablations}"
 RUN_TAG="${RUN_TAG:-run_$(date +%Y%m%d_%H%M%S)}"
 MODEL="${MODEL:-meta-llama/llama-3.3-70b-instruct}"
-BASELINES="${BASELINES:-FLASH_FUSION,HARGPT_PAPER,LLMSENSE_PAPER,REACT_ONLY,AUTOIOT_PAPER}"
+BASELINES="${BASELINES:-FLASH_FUSION,FF_NO_PRUNING,FF_NO_PLANNING}"
 DATASETS="${DATASETS:-wisdm,mit_ecg,bus}"
 QUERIES="${QUERIES:-all}"
 RUNS="${RUNS:-1}"
 
 MAX_LATENCY_FLASH_FUSION="${MAX_LATENCY_FLASH_FUSION:-60.0}"
+MAX_LATENCY_FF_NO_PRUNING="${MAX_LATENCY_FF_NO_PRUNING:-60.0}"
+MAX_LATENCY_FF_NO_PLANNING="${MAX_LATENCY_FF_NO_PLANNING:-60.0}"
 MAX_LATENCY_REACT_ONLY="${MAX_LATENCY_REACT_ONLY:-60.0}"
 MAX_LATENCY_HARGPT_PAPER="${MAX_LATENCY_HARGPT_PAPER:-300.0}"
 MAX_LATENCY_LLMSENSE_PAPER="${MAX_LATENCY_LLMSENSE_PAPER:-300.0}"
@@ -103,7 +108,7 @@ DEBUG_BENCHMARK="${DEBUG_BENCHMARK:-0}"
 
 WISDM_DATA="${WISDM_DATA:-data/AutoIOT_dataset/IMU/WISDM_ar_v1.1_raw.txt}"
 MIT_ECG_DATA="${MIT_ECG_DATA:-data/AutoIOT_dataset/ECG.0/MIT_arrythmia_v1.txt}"
-BUS_DATA="${BUS_DATA:-data/bus/bus_data.csv}"
+BUS_DATA="${BUS_DATA:-data/bus/bus_data_enriched_behavior.csv}"
 GT_WISDM="${GT_WISDM:-flashfusion/eval/ground_truth/ground_truth_wisdm.json}"
 GT_MIT_ECG="${GT_MIT_ECG:-flashfusion/eval/ground_truth/ground_truth_mit_ecg.json}"
 GT_BUS="${GT_BUS:-flashfusion/eval/ground_truth/ground_truth_bus.json}"
@@ -122,7 +127,7 @@ Dataset selection (default: all three):
 
 Options:
   --baselines <csv>      Comma-separated baselines
-                           (default: FLASH_FUSION,HARGPT_PAPER,LLMSENSE_PAPER,REACT_ONLY,AUTOIOT_PAPER)
+                           (default: FLASH_FUSION,FF_NO_PRUNING,FF_NO_PLANNING)
   --queries <csv|all>    Query IDs e.g. 1,5,9 or all (default: all)
   --runs <n>             Number of repeated runs (default: 1)
   --max-latency <s>      Single timeout for all baselines (overrides per-baseline)
@@ -132,7 +137,7 @@ Options:
   -h, --help             Show this help
 
 Output: OUTPUT_ROOT/<BASELINE>/<dataset>/<RUN_TAG>/
-Default OUTPUT_ROOT: flashfusion/results/july26
+Default OUTPUT_ROOT: flashfusion/results/ablations
 
 Debug env vars: AUTOIOT_DEBUG=1, DEBUG_BENCHMARK=1
 EOF

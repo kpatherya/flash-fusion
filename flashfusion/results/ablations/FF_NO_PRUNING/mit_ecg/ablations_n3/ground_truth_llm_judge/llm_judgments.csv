@@ -1,0 +1,595 @@
+run_id,source_file,baseline,query_id,query_id_source,query_text,expected_rejection,gt_reference_answer,candidate_answer,candidate_rejected,candidate_executed,candidate_code,llm_verdict,llm_score,llm_reason,gt_sanity,gt_sanity_note,llm_parse_status,llm_attempts,llm_override_applied,llm_raw
+1,[in_memory_benchmark_run],FF_NO_PRUNING,1,explicit,What is the minimum MLII value recorded for record_id 101?,False,Minimum MLII for record_id 101 is -3.1750.,The result is -3.175,False,True,"df = df[df['record_id'].isin([101])]
+result = df['MLII'].min()",PASS,1.0,Candidate answer matches ground truth,SOUND,Clear minimum MLII value provided,json,1,False,"```json
+{
+  ""verdict"": ""PASS"",
+  ""reason"": ""Candidate answer matches ground truth"",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Clear minimum MLII value provided""
+}
+```"
+1,[in_memory_benchmark_run],FF_NO_PRUNING,2,explicit,What is the total recording duration in seconds (maximum time_s) for record_id 234?,False,Total recording duration for record_id 234 is 1805.5528 seconds.,The result is 1805.5527777777777,False,True,"df = df[df['record_id'].isin([234])]
+result = df['time_s'].max()",PASS,1.0,Candidate answer matches ground truth,SOUND,Ground truth answer is a valid number,json,1,False,"```json
+{
+  ""verdict"": ""PASS"",
+  ""reason"": ""Candidate answer matches ground truth"",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Ground truth answer is a valid number""
+}
+```"
+1,[in_memory_benchmark_run],FF_NO_PRUNING,3,explicit,"For record_id 106, how many samples have MLII > 0?",False,record_id 106 has 111769 samples with MLII > 0.,The result is 111769,False,True,"df = df[df['record_id'].isin([106])]
+df = df[df['MLII'] > 0]
+result = len(df)",PASS,1.0,The candidate answer matches the ground truth numerically.,SOUND,Clear and specific count provided.,json,1,False,"```json
+{
+  ""verdict"": ""PASS"",
+  ""reason"": ""The candidate answer matches the ground truth numerically."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Clear and specific count provided.""
+}
+```"
+1,[in_memory_benchmark_run],FF_NO_PRUNING,4,explicit,What is the timestamp (time_s) of the last annotated beat for record_id 221?,False,The last annotated beat in record_id 221 occurs at time_s = 1805.027778.,The result is: 1805.0277777777776,False,True,"result = df[(df['record_id'] == 221) & (df['annotation'] != '')].sort_values(by='time_s', ascending=False).iloc[0]['time_s']",PASS,1.0,The candidate answer matches the ground truth exactly.,SOUND,The ground truth answer is a specific timestamp.,json,1,False,"```json
+{
+  ""verdict"": ""PASS"",
+  ""reason"": ""The candidate answer matches the ground truth exactly."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""The ground truth answer is a specific timestamp.""
+}
+```"
+1,[in_memory_benchmark_run],FF_NO_PRUNING,5,explicit,"For record_id 208, what is the average count of rows with a non-empty annotation in each 60-second time_s bin?",False,"For record_id 208, the average annotation count per 60-s time_s is 98.064516.",The result is 98.06451612903226,False,True,"df = df[df['record_id'].isin([208])]
+df = df[df['annotation'].notna() & df['annotation'].astype(str).str.strip().ne('')]
+df['time_bin'] = (df['time_s'] // 60.0) * 60.0
+result = df.groupby('time_bin').size()
+result = result.mean()",PASS,1.0,The candidate answer matches the ground truth,SOUND,Average annotation count is provided,json,1,False,"```json
+{
+  ""verdict"": ""PASS"",
+  ""reason"": ""The candidate answer matches the ground truth"",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Average annotation count is provided""
+}
+```"
+1,[in_memory_benchmark_run],FF_NO_PRUNING,6,explicit,Which record_id exhibits the largest difference between maximum and minimum MLII?,False,record_id 116 has the largest peak-to-peak MLII amplitude at 10.2350.,"The result is {'record_id': 116, 'MLII_range': 10.235}",False,True,"# PARALLEL_AGGREGATE branches:
+branch_0 = df.groupby(['record_id'])['MLII'].max()
+branch_1 = df.groupby(['record_id'])['MLII'].min()
+merged = branch_0.merge(branch_1, on=['record_id'], how='outer')
+df['MLII_range'] = (df['max_MLII'] - df['min_MLII']).abs()
+idx = df['MLII_range'].idxmax(); result = df.loc[idx, ['record_id', 'MLII_range']].to_dict()",PASS,1.0,Candidate answer is factually and semantically equivalent to the ground truth,SOUND,Ground truth answer is clear and specific,json,1,False,"```json
+{
+  ""verdict"": ""PASS"",
+  ""reason"": ""Candidate answer is factually and semantically equivalent to the ground truth"",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Ground truth answer is clear and specific""
+}
+```"
+1,[in_memory_benchmark_run],FF_NO_PRUNING,7,explicit,"For record_id 101, which 10-second interval contains the highest number of annotated beats?",False,"The 10-second interval [110s, 120s) contains the highest number of annotated beats for record_id 101 with 15 beats.","The result is {'time_bin': 110.0, 'count_annotation': 15}",False,True,"df = df[df['record_id'].isin([101])]
+df = df[df['annotation'].notna() & df['annotation'].astype(str).str.strip().ne('')]
+df['time_bin'] = (df['time_s'] // 10.0) * 10.0
+result = df.groupby('time_bin')['annotation'].count()
+result = result.idxmax()",PASS,1.0,Candidate answer is factually and semantically equivalent to the ground truth.,SOUND,Ground truth answer is clear and well-defined.,json,1,False,"```json
+{
+  ""verdict"": ""PASS"",
+  ""reason"": ""Candidate answer is factually and semantically equivalent to the ground truth."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Ground truth answer is clear and well-defined.""
+}
+```"
+1,[in_memory_benchmark_run],FF_NO_PRUNING,8,explicit,Calculate the root mean square (RMS) of the MLII signal for record_id 106.,False,The RMS of the MLII signal for record_id 106 is 0.4088.,The result is 0.40876962488762447,False,True,"df = df[df['record_id'].isin([106])]
+result = df['MLII'].rms()",PASS,1.0,The candidate answer matches the ground truth,SOUND,RMS value is provided,json,1,False,"```json
+{
+  ""verdict"": ""PASS"",
+  ""reason"": ""The candidate answer matches the ground truth"",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""RMS value is provided""
+}
+```"
+1,[in_memory_benchmark_run],FF_NO_PRUNING,13,explicit,Filter to record_id 101 and sort its rows by time_s in ascending order. Use the first 80% of rows for training and the final 20% as the chronological holdout. Train a logistic regression model using the features MLII and V1. Predict whether an annotation is present for the first row in the holdout set.,False,Logistic regression predicts annotation '0' for the first holdout row.,The result is Logistic regression predicts annotation_present '0' for the first holdout row.,False,True,"df = df[df['record_id'].isin([101])]
+# sort_by=['time_s'] split=520000/650000 model='logistic_regression' features=['MLII', 'V1']
+result = ""Logistic regression predicts annotation_present '0' for the first holdout row.""",PASS,1.0,Candidate answer is semantically equivalent to ground truth,SOUND,Clear prediction result,json,1,False,"```json
+{
+  ""verdict"": ""PASS"",
+  ""reason"": ""Candidate answer is semantically equivalent to ground truth"",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Clear prediction result""
+}
+```"
+1,[in_memory_benchmark_run],FF_NO_PRUNING,14,explicit,Filter to record_id 101 and sort its rows by time_s in ascending order. Use the first 80% of rows for training and the final 20% as the chronological holdout. Train a random forest model using the features MLII and V1. Predict whether an annotation is present for the first row in the holdout set.,False,Random forest predicts annotation '0' for the first holdout row.,The result is Random forest predicts annotation_present '0' for the first holdout row.,False,True,"df = df[df['record_id'].isin([101])]
+# sort_by=['time_s'] split=520000/650000 model='random_forest' features=['MLII', 'V1']
+result = ""Random forest predicts annotation_present '0' for the first holdout row.""",PASS,1.0,Candidate answer is semantically equivalent to ground truth.,SOUND,Clear prediction result.,json,1,False,"```json
+{
+  ""verdict"": ""PASS"",
+  ""reason"": ""Candidate answer is semantically equivalent to ground truth."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Clear prediction result.""
+}
+```"
+1,[in_memory_benchmark_run],FF_NO_PRUNING,15,explicit,Filter to record_id 101 and sort its rows by time_s in ascending order. Use the first 80% of rows for training and the final 20% as the chronological holdout. Train a 1-nearest-neighbor model using the features MLII and V1. Predict whether an annotation is present for the first row in the holdout set.,False,1-nearest-neighbor predicts annotation '0' for the first holdout row.,The result is 1-nearest-neighbor predicts annotation_present '0' for the first holdout row.,False,True,"df = df[df['record_id'].isin([101])]
+# sort_by=['time_s'] split=520000/650000 model='one_nearest_neighbor' features=['MLII', 'V1']
+result = ""1-nearest-neighbor predicts annotation_present '0' for the first holdout row.""",PASS,1.0,Candidate answer is factually and semantically equivalent to the ground truth.,SOUND,Clear prediction result.,json,1,False,"```json
+{
+  ""verdict"": ""PASS"",
+  ""reason"": ""Candidate answer is factually and semantically equivalent to the ground truth."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Clear prediction result.""
+}
+```"
+1,[in_memory_benchmark_run],FF_NO_PRUNING,16,explicit,Filter to record_id 101 and sort its rows by time_s in ascending order. Use the first 80% of rows for training and the final 20% as the chronological holdout. Train a hist gradient boosting model using the features MLII and V1. Predict whether an annotation is present for the first row in the holdout set.,False,Hist gradient boosting predicts annotation '0' for the first holdout row.,The result is Hist gradient boosting predicts annotation_present '0' for the first holdout row.,False,True,"df = df[df['record_id'].isin([101])]
+# sort_by=['time_s'] split=520000/650000 model='hist_gradient_boosting' features=['MLII', 'V1']
+result = ""Hist gradient boosting predicts annotation_present '0' for the first holdout row.""",PASS,1.0,Candidate answer is semantically equivalent to ground truth,SOUND,Clear prediction result,json,1,False,"```json
+{
+  ""verdict"": ""PASS"",
+  ""reason"": ""Candidate answer is semantically equivalent to ground truth"",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Clear prediction result""
+}
+```"
+1,[in_memory_benchmark_run],FF_NO_PRUNING,17,explicit,"Among rows whose annotation is one of the known MIT-ECG annotation codes, partition each record_id's time_s values into consecutive groups of width 10. For each group, compute MLII RMS. Return the group with the greatest RMS.",False,The greatest MLII RMS is 3.075804772738 for record_id 116 in the 1400.0-second bin.,"The result is {'record_id': 116, 'time_bin': 1400.0, 'rms_MLII': 3.075804772738348}",False,True,"df = df[df['annotation'].isin(['!', '""', '+', '/', 'A', 'E', 'F', 'J', 'L', 'N', 'Q', 'R', 'S', 'V', '[', ']', 'a', 'e', 'f', 'j', 'x', '|', '~'])]
+df['time_bin'] = (df['time_s'] // 10.0) * 10.0
+result = df.groupby(['record_id', 'time_bin'])['MLII'].apply(rms)
+result = result.idxmax()",PASS,1.0,The candidate answer matches the ground truth,SOUND,The ground truth answer is a specific RMS value for a record_id and time bin,json,1,False,"```json
+{
+  ""verdict"": ""PASS"",
+  ""reason"": ""The candidate answer matches the ground truth"",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""The ground truth answer is a specific RMS value for a record_id and time bin""
+}
+```"
+1,[in_memory_benchmark_run],FF_NO_PRUNING,18,explicit,"For every record_id, independently compute maximum and minimum MLII. Define MLII span as maximum minus minimum. Return the record_id with the largest MLII span.",False,record_id 116 has the largest MLII span: 10.235000000000.,"The result is {'record_id': 116, 'MLII_span': 10.235}",False,True,"# PARALLEL_AGGREGATE branches:
+branch_0 = df.groupby(['record_id'])['MLII'].max()
+branch_1 = df.groupby(['record_id'])['MLII'].min()
+merged = branch_0.merge(branch_1, on=['record_id'], how='outer')
+df['MLII_span'] = df['max_MLII'] - df['min_MLII']
+idx = df['MLII_span'].idxmax(); result = df.loc[idx, ['record_id', 'MLII_span']].to_dict()",PASS,1.0,Candidate answer matches ground truth,SOUND,Correct record_id with largest MLII span,json,1,False,"```json
+{
+  ""verdict"": ""PASS"",
+  ""reason"": ""Candidate answer matches ground truth"",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Correct record_id with largest MLII span""
+}
+```"
+1,[in_memory_benchmark_run],FF_NO_PRUNING,19,explicit,"For record_id 101, divide time_s into 10-second bins. For each bin, compute annotated-row rate as rows with an annotation in the known annotation-code list divided by all rows in the bin. Return the Pearson correlation between bin index and annotated-row rate.",False,The Pearson correlation between 10-second bin index and annotated-row rate for record_id 101 is -0.460485689017.,The result is: -0.4604856890166274,False,True,"import pandas as pd
+import numpy as np
+
+# Filter the DataFrame for record_id 101
+df_101 = df[df['record_id'] == 101]
+
+# Define the known annotation-code list
+known_annotations = ['+', 'N', '~', '|', 'Q', 'A', 'V', '/', 'x', 'F', 'j', 'L', 'a', 'R', 'J', '[', '!', ']', 'E', 'S', '""', 'f', 'e']
+
+# Create 10-second bins
+bins = np.arange(df_101['time_s'].min(), df_101['time_s'].max() + 10, 10)
+
+# Initialize lists to store bin indices and annotated-row rates
+bin_indices = []
+annotated_row_rates = []
+
+# Iterate over the bins
+for i in range(len(bins) - 1):
+    # Filter the DataFrame for the current bin
+    bin_df = df_101[(df_101['time_s'] >= bins[i]) & (df_101['time_s'] < bins[i + 1])]
+    
+    # Check if the bin is not empty
+    if not bin_df.empty:
+        # Compute the annotated-row rate for the current bin
+        annotated_rows = bin_df[bin_df['annotation'].isin(known_annotations)]
+        annotated_row_rate = len(annotated_rows) / len(bin_df)
+        
+        # Append the bin index and annotated-row rate to the lists
+        bin_indices.append(i)
+        annotated_row_rates.append(annotated_row_rate)
+
+# Compute the Pearson correlation between bin index and annotated-row rate
+correlation = np.corrcoef(bin_indices, annotated_row_rates)[0, 1]
+
+result = correlation",PASS,1.0,The candidate answer matches the ground truth numerically.,SOUND,The ground truth answer provides a clear correlation value.,json,1,False,"```json
+{
+  ""verdict"": ""PASS"",
+  ""reason"": ""The candidate answer matches the ground truth numerically."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""The ground truth answer provides a clear correlation value.""
+}
+```"
+1,[in_memory_benchmark_run],FF_NO_PRUNING,20,explicit,"For every record_id, independently compute MLII variance and V1 variance. Define total lead variability as their sum. Return the record_id with the largest total lead variability.",False,record_id 107 has the largest total lead variability: 1.110180227701.,"The result is {'record_id': 107, 'total_lead_variability': 1.1101802277013384}",False,True,"# PARALLEL_AGGREGATE branches:
+branch_0 = df.groupby(['record_id'])['MLII'].var()
+branch_1 = df.groupby(['record_id'])['V1'].var()
+merged = branch_0.merge(branch_1, on=['record_id'], how='outer')
+df['total_lead_variability'] = df['MLII_var'] + df['V1_var']
+idx = df['total_lead_variability'].idxmax(); result = df.loc[idx, ['record_id', 'total_lead_variability']].to_dict()",PASS,1.0,The candidate answer matches the ground truth answer.,SOUND,Correct record_id with largest total lead variability.,json,1,False,"```json
+{
+  ""verdict"": ""PASS"",
+  ""reason"": ""The candidate answer matches the ground truth answer."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Correct record_id with largest total lead variability.""
+}
+```"
+2,[in_memory_benchmark_run],FF_NO_PRUNING,1,explicit,What is the minimum MLII value recorded for record_id 101?,False,Minimum MLII for record_id 101 is -3.1750.,The result is -3.175,False,True,"df = df[df['record_id'].isin([101])]
+result = df['MLII'].min()",PASS,1.0,Candidate answer matches ground truth,SOUND,Clear minimum MLII value provided,json,1,False,"```json
+{
+  ""verdict"": ""PASS"",
+  ""reason"": ""Candidate answer matches ground truth"",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Clear minimum MLII value provided""
+}
+```"
+2,[in_memory_benchmark_run],FF_NO_PRUNING,2,explicit,What is the total recording duration in seconds (maximum time_s) for record_id 234?,False,Total recording duration for record_id 234 is 1805.5528 seconds.,The result is 1805.5527777777777,False,True,"df = df[df['record_id'].isin([234])]
+result = df['time_s'].max()",PASS,1.0,Candidate answer matches ground truth,SOUND,Ground truth answer is a valid number,json,1,False,"```json
+{
+  ""verdict"": ""PASS"",
+  ""reason"": ""Candidate answer matches ground truth"",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Ground truth answer is a valid number""
+}
+```"
+2,[in_memory_benchmark_run],FF_NO_PRUNING,3,explicit,"For record_id 106, how many samples have MLII > 0?",False,record_id 106 has 111769 samples with MLII > 0.,The result is 111769,False,True,"df = df[df['record_id'].isin([106])]
+df = df[df['MLII'] > 0]
+result = len(df)",PASS,1.0,The candidate answer matches the ground truth,SOUND,Clear and specific count,json,1,False,"```json
+{
+  ""verdict"": ""PASS"",
+  ""reason"": ""The candidate answer matches the ground truth"",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Clear and specific count""
+}
+```"
+2,[in_memory_benchmark_run],FF_NO_PRUNING,4,explicit,What is the timestamp (time_s) of the last annotated beat for record_id 221?,False,The last annotated beat in record_id 221 occurs at time_s = 1805.027778.,The result is {'time_s': 1805.0277777777776},False,True,"df = df[df['record_id'].isin([221])]
+df = df[df['annotation'].notna() & df['annotation'].astype(str).str.strip().ne('')]
+idx = df['time_s'].idxmax(); result = df.loc[idx, ['time_s']].to_dict()",PASS,1.0,The candidate answer matches the ground truth,SOUND,Timestamp value is provided,json,1,False,"```json
+{
+  ""verdict"": ""PASS"",
+  ""reason"": ""The candidate answer matches the ground truth"",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Timestamp value is provided""
+}
+```"
+2,[in_memory_benchmark_run],FF_NO_PRUNING,5,explicit,"For record_id 208, what is the average count of rows with a non-empty annotation in each 60-second time_s bin?",False,"For record_id 208, the average annotation count per 60-s time_s is 98.064516.",The result is 98.06451612903226,False,True,"df = df[df['record_id'].isin([208])]
+df = df[df['annotation'].notna() & df['annotation'].astype(str).str.strip().ne('')]
+df['time_bin'] = (df['time_s'] // 60.0) * 60.0
+result = df.groupby('time_bin').size()
+result = result.mean()",PASS,1.0,The candidate answer matches the ground truth,SOUND,Average annotation count is provided,json,1,False,"```json
+{
+  ""verdict"": ""PASS"",
+  ""reason"": ""The candidate answer matches the ground truth"",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Average annotation count is provided""
+}
+```"
+2,[in_memory_benchmark_run],FF_NO_PRUNING,6,explicit,Which record_id exhibits the largest difference between maximum and minimum MLII?,False,record_id 116 has the largest peak-to-peak MLII amplitude at 10.2350.,"The result is {'record_id': 116, 'MLII_range': 10.235}",False,True,"# PARALLEL_AGGREGATE branches:
+branch_0 = df.groupby(['record_id'])['MLII'].max()
+branch_1 = df.groupby(['record_id'])['MLII'].min()
+merged = branch_0.merge(branch_1, on=['record_id'], how='outer')
+df['MLII_range'] = (df['max_MLII'] - df['min_MLII']).abs()
+idx = df['MLII_range'].idxmax(); result = df.loc[idx, ['record_id', 'MLII_range']].to_dict()",PASS,1.0,Candidate answer is factually and semantically equivalent to the ground truth,SOUND,Ground truth answer is a clear statement of the record_id with the largest difference,json,1,False,"```json
+{
+  ""verdict"": ""PASS"",
+  ""reason"": ""Candidate answer is factually and semantically equivalent to the ground truth"",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Ground truth answer is a clear statement of the record_id with the largest difference""
+}
+```"
+2,[in_memory_benchmark_run],FF_NO_PRUNING,7,explicit,"For record_id 101, which 10-second interval contains the highest number of annotated beats?",False,"The 10-second interval [110s, 120s) contains the highest number of annotated beats for record_id 101 with 15 beats.","The result is {'ten_second_interval': 110.0, 'count': 15}",False,True,"df = df[df['record_id'].isin([101])]
+df = df[df['annotation'].notna() & df['annotation'].astype(str).str.strip().ne('')]
+df['ten_second_interval'] = (df['time_s'] // 10.0) * 10.0
+result = df.groupby('ten_second_interval').size()
+result = result.idxmax()",PASS,1.0,Candidate answer is factually and semantically equivalent to the ground truth,SOUND,Clearly states the interval and count,json,1,False,"```json
+{
+  ""verdict"": ""PASS"",
+  ""reason"": ""Candidate answer is factually and semantically equivalent to the ground truth"",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Clearly states the interval and count""
+}
+```"
+2,[in_memory_benchmark_run],FF_NO_PRUNING,8,explicit,Calculate the root mean square (RMS) of the MLII signal for record_id 106.,False,The RMS of the MLII signal for record_id 106 is 0.4088.,The result is 0.40876962488762447,False,True,"df = df[df['record_id'].isin([106])]
+result = df['MLII'].rms()",PASS,1.0,The candidate answer matches the ground truth,SOUND,The ground truth answer is a valid RMS value,json,1,False,"```json
+{
+  ""verdict"": ""PASS"",
+  ""reason"": ""The candidate answer matches the ground truth"",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""The ground truth answer is a valid RMS value""
+}
+```"
+2,[in_memory_benchmark_run],FF_NO_PRUNING,13,explicit,Filter to record_id 101 and sort its rows by time_s in ascending order. Use the first 80% of rows for training and the final 20% as the chronological holdout. Train a logistic regression model using the features MLII and V1. Predict whether an annotation is present for the first row in the holdout set.,False,Logistic regression predicts annotation '0' for the first holdout row.,The result is Logistic regression predicts annotation_present '0' for the first holdout row.,False,True,"df = df[df['record_id'].isin([101])]
+# sort_by=['time_s'] split=518500/648126 model='logistic_regression' features=['MLII', 'V1']
+result = ""Logistic regression predicts annotation_present '0' for the first holdout row.""",PASS,1.0,Candidate answer is factually and semantically equivalent to the ground truth.,SOUND,Ground truth answer is a clear logistic regression prediction.,json,1,False,"```json
+{
+  ""verdict"": ""PASS"",
+  ""reason"": ""Candidate answer is factually and semantically equivalent to the ground truth."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Ground truth answer is a clear logistic regression prediction.""
+}
+```"
+2,[in_memory_benchmark_run],FF_NO_PRUNING,14,explicit,Filter to record_id 101 and sort its rows by time_s in ascending order. Use the first 80% of rows for training and the final 20% as the chronological holdout. Train a random forest model using the features MLII and V1. Predict whether an annotation is present for the first row in the holdout set.,False,Random forest predicts annotation '0' for the first holdout row.,The result is Random forest predicts annotation_present '0' for the first holdout row.,False,True,"df = df[df['record_id'].isin([101])]
+# sort_by=['time_s'] split=520000/650000 model='random_forest' features=['MLII', 'V1']
+result = ""Random forest predicts annotation_present '0' for the first holdout row.""",PASS,1.0,Candidate answer is semantically equivalent to ground truth,SOUND,Clear prediction result,json,1,False,"```json
+{
+  ""verdict"": ""PASS"",
+  ""reason"": ""Candidate answer is semantically equivalent to ground truth"",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Clear prediction result""
+}
+```"
+2,[in_memory_benchmark_run],FF_NO_PRUNING,15,explicit,Filter to record_id 101 and sort its rows by time_s in ascending order. Use the first 80% of rows for training and the final 20% as the chronological holdout. Train a 1-nearest-neighbor model using the features MLII and V1. Predict whether an annotation is present for the first row in the holdout set.,False,1-nearest-neighbor predicts annotation '0' for the first holdout row.,The result is 1-nearest-neighbor predicts annotation_present '0' for the first holdout row.,False,True,"df = df[df['record_id'].isin([101])]
+# sort_by=['time_s'] split=520000/650000 model='one_nearest_neighbor' features=['MLII', 'V1']
+result = ""1-nearest-neighbor predicts annotation_present '0' for the first holdout row.""",PASS,1.0,Candidate answer is factually and semantically equivalent to the ground truth.,SOUND,Ground truth answer is a clear prediction result.,json,1,False,"```json
+{
+  ""verdict"": ""PASS"",
+  ""reason"": ""Candidate answer is factually and semantically equivalent to the ground truth."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Ground truth answer is a clear prediction result.""
+}
+```"
+2,[in_memory_benchmark_run],FF_NO_PRUNING,16,explicit,Filter to record_id 101 and sort its rows by time_s in ascending order. Use the first 80% of rows for training and the final 20% as the chronological holdout. Train a hist gradient boosting model using the features MLII and V1. Predict whether an annotation is present for the first row in the holdout set.,False,Hist gradient boosting predicts annotation '0' for the first holdout row.,The result is Hist gradient boosting predicts annotation_present '0' for the first holdout row.,False,True,"df = df[df['record_id'].isin([101])]
+# sort_by=['time_s'] split=520000/650000 model='hist_gradient_boosting' features=['MLII', 'V1']
+result = ""Hist gradient boosting predicts annotation_present '0' for the first holdout row.""",PASS,1.0,Candidate answer is semantically equivalent to ground truth,SOUND,Clear prediction result,json,1,False,"```json
+{
+  ""verdict"": ""PASS"",
+  ""reason"": ""Candidate answer is semantically equivalent to ground truth"",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Clear prediction result""
+}
+```"
+2,[in_memory_benchmark_run],FF_NO_PRUNING,17,explicit,"Among rows whose annotation is one of the known MIT-ECG annotation codes, partition each record_id's time_s values into consecutive groups of width 10. For each group, compute MLII RMS. Return the group with the greatest RMS.",False,The greatest MLII RMS is 3.075804772738 for record_id 116 in the 1400.0-second bin.,"The result is {'record_id': 116, 'time_bin': 1400.0, 'rms_MLII': 3.075804772738348}",False,True,"df = df[df['annotation'].isin(['!', '""', '+', '/', 'A', 'E', 'F', 'J', 'L', 'N', 'Q', 'R', 'S', 'V', '[', ']', 'a', 'e', 'f', 'j', 'x', '|', '~'])]
+df['time_bin'] = (df['time_s'] // 10.0) * 10.0
+result = df.groupby(['record_id', 'time_bin'])['MLII'].apply(rms)
+result = result.idxmax()",PASS,1.0,The candidate answer matches the ground truth,SOUND,The ground truth provides a clear and specific answer,json,1,False,"```json
+{
+  ""verdict"": ""PASS"",
+  ""reason"": ""The candidate answer matches the ground truth"",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""The ground truth provides a clear and specific answer""
+}
+```"
+2,[in_memory_benchmark_run],FF_NO_PRUNING,18,explicit,"For every record_id, independently compute maximum and minimum MLII. Define MLII span as maximum minus minimum. Return the record_id with the largest MLII span.",False,record_id 116 has the largest MLII span: 10.235000000000.,"The result is {'record_id': 116, 'MLII_span': 10.235}",False,True,"# PARALLEL_AGGREGATE branches:
+branch_0 = df.groupby(['record_id'])['MLII'].max()
+branch_1 = df.groupby(['record_id'])['MLII'].min()
+merged = branch_0.merge(branch_1, on=['record_id'], how='outer')
+df['MLII_span'] = df['max_MLII'] - df['min_MLII']
+idx = df['MLII_span'].idxmax(); result = df.loc[idx, ['record_id', 'MLII_span']].to_dict()",PASS,1.0,The candidate answer matches the ground truth,SOUND,Correct record_id with largest MLII span,json,1,False,"```json
+{
+  ""verdict"": ""PASS"",
+  ""reason"": ""The candidate answer matches the ground truth"",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Correct record_id with largest MLII span""
+}
+```"
+2,[in_memory_benchmark_run],FF_NO_PRUNING,19,explicit,"For record_id 101, divide time_s into 10-second bins. For each bin, compute annotated-row rate as rows with an annotation in the known annotation-code list divided by all rows in the bin. Return the Pearson correlation between bin index and annotated-row rate.",False,The Pearson correlation between 10-second bin index and annotated-row rate for record_id 101 is -0.460485689017.,The result is: -0.4604856890166274,False,True,"import pandas as pd
+import numpy as np
+
+# Filter the DataFrame for record_id 101
+df_101 = df[df['record_id'] == 101]
+
+# Define the known annotation-code list
+known_annotations = ['+', 'N', '~', '|', 'Q', 'A', 'V', '/', 'x', 'F', 'j', 'L', 'a', 'R', 'J', '[', '!', ']', 'E', 'S', '""', 'f', 'e']
+
+# Create a new column to indicate if a row has an annotation in the known list
+df_101['has_annotation'] = df_101['annotation'].isin(known_annotations)
+
+# Divide time_s into 10-second bins
+df_101['bin'] = np.floor(df_101['time_s'] / 10).astype(int)
+
+# Compute annotated-row rate for each bin
+bin_rates = df_101.groupby('bin')['has_annotation'].mean().reset_index()
+
+# Compute the Pearson correlation between bin index and annotated-row rate
+correlation = bin_rates['bin'].corr(bin_rates['has_annotation'])
+
+result = correlation",PASS,1.0,The candidate answer matches the ground truth numerically.,SOUND,Ground truth answer is a valid Pearson correlation coefficient.,json,1,False,"```json
+{
+  ""verdict"": ""PASS"",
+  ""reason"": ""The candidate answer matches the ground truth numerically."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Ground truth answer is a valid Pearson correlation coefficient.""
+}
+```"
+2,[in_memory_benchmark_run],FF_NO_PRUNING,20,explicit,"For every record_id, independently compute MLII variance and V1 variance. Define total lead variability as their sum. Return the record_id with the largest total lead variability.",False,record_id 107 has the largest total lead variability: 1.110180227701.,"The result is {'record_id': 107, 'total_lead_variability': 1.1101802277013384}",False,True,"# PARALLEL_AGGREGATE branches:
+branch_0 = df.groupby(['record_id'])['MLII'].var()
+branch_1 = df.groupby(['record_id'])['V1'].var()
+merged = branch_0.merge(branch_1, on=['record_id'], how='outer')
+df['total_lead_variability'] = df['MLII_var'] + df['V1_var']
+idx = df['total_lead_variability'].idxmax(); result = df.loc[idx, ['record_id', 'total_lead_variability']].to_dict()",PASS,1.0,The candidate answer matches the ground truth answer.,SOUND,The ground truth answer is a specific record_id with a total lead variability value.,json,1,False,"```json
+{
+  ""verdict"": ""PASS"",
+  ""reason"": ""The candidate answer matches the ground truth answer."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""The ground truth answer is a specific record_id with a total lead variability value.""
+}
+```"
+3,[in_memory_benchmark_run],FF_NO_PRUNING,1,explicit,What is the minimum MLII value recorded for record_id 101?,False,Minimum MLII for record_id 101 is -3.1750.,The result is -3.175,False,True,"df = df[df['record_id'].isin([101])]
+result = df['MLII'].min()",PASS,1.0,Candidate answer matches ground truth,SOUND,Minimum MLII value provided,json,1,False,"```json
+{
+  ""verdict"": ""PASS"",
+  ""reason"": ""Candidate answer matches ground truth"",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Minimum MLII value provided""
+}
+```"
+3,[in_memory_benchmark_run],FF_NO_PRUNING,2,explicit,What is the total recording duration in seconds (maximum time_s) for record_id 234?,False,Total recording duration for record_id 234 is 1805.5528 seconds.,The result is 1805.5527777777777,False,True,"df = df[df['record_id'].isin([234])]
+result = df['time_s'].max()",PASS,1.0,Candidate answer matches ground truth,SOUND,Ground truth is a specific numeric value,json,1,False,"```json
+{
+  ""verdict"": ""PASS"",
+  ""reason"": ""Candidate answer matches ground truth"",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Ground truth is a specific numeric value""
+}
+```"
+3,[in_memory_benchmark_run],FF_NO_PRUNING,3,explicit,"For record_id 106, how many samples have MLII > 0?",False,record_id 106 has 111769 samples with MLII > 0.,The result is 111769,False,True,"df = df[df['record_id'].isin([106])]
+df = df[df['MLII'] > 0]
+result = len(df)",PASS,1.0,The candidate answer matches the ground truth,SOUND,Correct sample count provided,json,1,False,"```json
+{
+  ""verdict"": ""PASS"",
+  ""reason"": ""The candidate answer matches the ground truth"",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Correct sample count provided""
+}
+```"
+3,[in_memory_benchmark_run],FF_NO_PRUNING,4,explicit,What is the timestamp (time_s) of the last annotated beat for record_id 221?,False,The last annotated beat in record_id 221 occurs at time_s = 1805.027778.,The result is {'time_s': 1805.0277777777776},False,True,"df = df[df['record_id'].isin([221])]
+df = df[df['annotation'].notna() & df['annotation'].astype(str).str.strip().ne('')]
+idx = df['time_s'].idxmax(); result = df.loc[idx, ['time_s']].to_dict()",PASS,1.0,The candidate answer matches the ground truth,SOUND,Timestamp value is provided,json,1,False,"```json
+{
+  ""verdict"": ""PASS"",
+  ""reason"": ""The candidate answer matches the ground truth"",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Timestamp value is provided""
+}
+```"
+3,[in_memory_benchmark_run],FF_NO_PRUNING,5,explicit,"For record_id 208, what is the average count of rows with a non-empty annotation in each 60-second time_s bin?",False,"For record_id 208, the average annotation count per 60-s time_s is 98.064516.",The result is 98.06451612903226,False,True,"df = df[df['record_id'].isin([208])]
+df = df[df['annotation'].notna() & df['annotation'].astype(str).str.strip().ne('')]
+df['time_bin'] = (df['time_s'] // 60.0) * 60.0
+result = df.groupby('time_bin').size()
+result = result.mean()",PASS,1.0,The candidate answer matches the ground truth,SOUND,Average annotation count is provided,json,1,False,"```json
+{
+  ""verdict"": ""PASS"",
+  ""reason"": ""The candidate answer matches the ground truth"",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Average annotation count is provided""
+}
+```"
+3,[in_memory_benchmark_run],FF_NO_PRUNING,6,explicit,Which record_id exhibits the largest difference between maximum and minimum MLII?,False,record_id 116 has the largest peak-to-peak MLII amplitude at 10.2350.,"The result is {'record_id': 116, 'MLII_range': 10.235}",False,True,"# PARALLEL_AGGREGATE branches:
+branch_0 = df.groupby(['record_id'])['MLII'].max()
+branch_1 = df.groupby(['record_id'])['MLII'].min()
+merged = branch_0.merge(branch_1, on=['record_id'], how='outer')
+df['MLII_range'] = (df['max_MLII'] - df['min_MLII']).abs()
+idx = df['MLII_range'].idxmax(); result = df.loc[idx, ['record_id', 'MLII_range']].to_dict()",PASS,1.0,Candidate answer is factually and semantically equivalent to the ground truth,SOUND,Ground truth answer is a clear statement of the record_id with the largest difference,json,1,False,"```json
+{
+  ""verdict"": ""PASS"",
+  ""reason"": ""Candidate answer is factually and semantically equivalent to the ground truth"",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Ground truth answer is a clear statement of the record_id with the largest difference""
+}
+```"
+3,[in_memory_benchmark_run],FF_NO_PRUNING,7,explicit,"For record_id 101, which 10-second interval contains the highest number of annotated beats?",False,"The 10-second interval [110s, 120s) contains the highest number of annotated beats for record_id 101 with 15 beats.","The result is {'ten_second_interval': 110.0, 'count': 15}",False,True,"df = df[df['record_id'].isin([101])]
+df = df[df['annotation'].notna() & df['annotation'].astype(str).str.strip().ne('')]
+df['ten_second_interval'] = (df['time_s'] // 10.0) * 10.0
+result = df.groupby('ten_second_interval').size()
+result = result.idxmax()",PASS,1.0,Candidate answer is factually and semantically equivalent to the ground truth.,SOUND,Ground truth answer is clear and specific.,json,1,False,"```json
+{
+  ""verdict"": ""PASS"",
+  ""reason"": ""Candidate answer is factually and semantically equivalent to the ground truth."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Ground truth answer is clear and specific.""
+}
+```"
+3,[in_memory_benchmark_run],FF_NO_PRUNING,8,explicit,Calculate the root mean square (RMS) of the MLII signal for record_id 106.,False,The RMS of the MLII signal for record_id 106 is 0.4088.,The result is 0.40876962488762447,False,True,"df = df[df['record_id'].isin([106])]
+result = df['MLII'].rms()",PASS,1.0,The candidate answer matches the ground truth,SOUND,The ground truth answer is a valid RMS value,json,1,False,"```json
+{
+  ""verdict"": ""PASS"",
+  ""reason"": ""The candidate answer matches the ground truth"",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""The ground truth answer is a valid RMS value""
+}
+```"
+3,[in_memory_benchmark_run],FF_NO_PRUNING,13,explicit,Filter to record_id 101 and sort its rows by time_s in ascending order. Use the first 80% of rows for training and the final 20% as the chronological holdout. Train a logistic regression model using the features MLII and V1. Predict whether an annotation is present for the first row in the holdout set.,False,Logistic regression predicts annotation '0' for the first holdout row.,The result is Logistic regression predicts annotation_present '0' for the first holdout row.,False,True,"df = df[df['record_id'].isin([101])]
+# sort_by=['time_s'] split=520000/650000 model='logistic_regression' features=['MLII', 'V1']
+result = ""Logistic regression predicts annotation_present '0' for the first holdout row.""",PASS,1.0,Candidate answer is semantically equivalent to ground truth,SOUND,Clear prediction result,json,1,False,"```json
+{
+  ""verdict"": ""PASS"",
+  ""reason"": ""Candidate answer is semantically equivalent to ground truth"",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Clear prediction result""
+}
+```"
+3,[in_memory_benchmark_run],FF_NO_PRUNING,14,explicit,Filter to record_id 101 and sort its rows by time_s in ascending order. Use the first 80% of rows for training and the final 20% as the chronological holdout. Train a random forest model using the features MLII and V1. Predict whether an annotation is present for the first row in the holdout set.,False,Random forest predicts annotation '0' for the first holdout row.,The result is Random forest predicts annotation_present '0' for the first holdout row.,False,True,"df = df[df['record_id'].isin([101])]
+# sort_by=['time_s'] split=520000/650000 model='random_forest' features=['MLII', 'V1']
+result = ""Random forest predicts annotation_present '0' for the first holdout row.""",PASS,1.0,Candidate answer is factually and semantically equivalent to the ground truth.,SOUND,Clear prediction result.,json,1,False,"```json
+{
+  ""verdict"": ""PASS"",
+  ""reason"": ""Candidate answer is factually and semantically equivalent to the ground truth."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Clear prediction result.""
+}
+```"
+3,[in_memory_benchmark_run],FF_NO_PRUNING,15,explicit,Filter to record_id 101 and sort its rows by time_s in ascending order. Use the first 80% of rows for training and the final 20% as the chronological holdout. Train a 1-nearest-neighbor model using the features MLII and V1. Predict whether an annotation is present for the first row in the holdout set.,False,1-nearest-neighbor predicts annotation '0' for the first holdout row.,The result is 1-nearest-neighbor predicts annotation_present '0' for the first holdout row.,False,True,"df = df[df['record_id'].isin([101])]
+# sort_by=['time_s'] split=520000/650000 model='one_nearest_neighbor' features=['MLII', 'V1']
+result = ""1-nearest-neighbor predicts annotation_present '0' for the first holdout row.""",PASS,1.0,Candidate answer is factually and semantically equivalent to the ground truth.,SOUND,Ground truth answer is a clear prediction result.,json,1,False,"```json
+{
+  ""verdict"": ""PASS"",
+  ""reason"": ""Candidate answer is factually and semantically equivalent to the ground truth."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Ground truth answer is a clear prediction result.""
+}
+```"
+3,[in_memory_benchmark_run],FF_NO_PRUNING,16,explicit,Filter to record_id 101 and sort its rows by time_s in ascending order. Use the first 80% of rows for training and the final 20% as the chronological holdout. Train a hist gradient boosting model using the features MLII and V1. Predict whether an annotation is present for the first row in the holdout set.,False,Hist gradient boosting predicts annotation '0' for the first holdout row.,The result is Hist gradient boosting predicts annotation_present '0' for the first holdout row.,False,True,"df = df[df['record_id'].isin([101])]
+# sort_by=['time_s'] split=520000/650000 model='hist_gradient_boosting' features=['MLII', 'V1']
+result = ""Hist gradient boosting predicts annotation_present '0' for the first holdout row.""",PASS,1.0,Candidate answer is semantically equivalent to ground truth,SOUND,Clear prediction result,json,1,False,"```json
+{
+  ""verdict"": ""PASS"",
+  ""reason"": ""Candidate answer is semantically equivalent to ground truth"",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Clear prediction result""
+}
+```"
+3,[in_memory_benchmark_run],FF_NO_PRUNING,17,explicit,"Among rows whose annotation is one of the known MIT-ECG annotation codes, partition each record_id's time_s values into consecutive groups of width 10. For each group, compute MLII RMS. Return the group with the greatest RMS.",False,The greatest MLII RMS is 3.075804772738 for record_id 116 in the 1400.0-second bin.,"The result is {'record_id': 116, 'time_bin': 1400.0, 'rms_MLII': 3.075804772738348}",False,True,"df = df[df['annotation'].isin(['!', '/', 'A', 'E', 'F', 'J', 'L', 'N', 'Q', 'R', 'S', 'V', '[', ']', 'a', 'e', 'f', 'j', 'x', '|', '~'])]
+df['time_bin'] = (df['time_s'] // 10.0) * 10.0
+result = df.groupby(['record_id', 'time_bin'])['MLII'].apply(rms)
+result = result.idxmax()",PASS,1.0,The candidate answer matches the ground truth,SOUND,The ground truth answer is a specific RMS value for a record_id and time bin,json,1,False,"```json
+{
+  ""verdict"": ""PASS"",
+  ""reason"": ""The candidate answer matches the ground truth"",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""The ground truth answer is a specific RMS value for a record_id and time bin""
+}
+```"
+3,[in_memory_benchmark_run],FF_NO_PRUNING,18,explicit,"For every record_id, independently compute maximum and minimum MLII. Define MLII span as maximum minus minimum. Return the record_id with the largest MLII span.",False,record_id 116 has the largest MLII span: 10.235000000000.,"The result is {'record_id': 116, 'MLII_span': 10.235}",False,True,"# PARALLEL_AGGREGATE branches:
+branch_0 = df.groupby(['record_id'])['MLII'].max()
+branch_1 = df.groupby(['record_id'])['MLII'].min()
+merged = branch_0.merge(branch_1, on=['record_id'], how='outer')
+df['MLII_span'] = df['max_MLII'] - df['min_MLII']
+idx = df['MLII_span'].idxmax(); result = df.loc[idx, ['record_id', 'MLII_span']].to_dict()",PASS,1.0,The candidate answer matches the ground truth,SOUND,Correct record_id with largest MLII span,json,1,False,"```json
+{
+  ""verdict"": ""PASS"",
+  ""reason"": ""The candidate answer matches the ground truth"",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Correct record_id with largest MLII span""
+}
+```"
+3,[in_memory_benchmark_run],FF_NO_PRUNING,19,explicit,"For record_id 101, divide time_s into 10-second bins. For each bin, compute annotated-row rate as rows with an annotation in the known annotation-code list divided by all rows in the bin. Return the Pearson correlation between bin index and annotated-row rate.",False,The Pearson correlation between 10-second bin index and annotated-row rate for record_id 101 is -0.460485689017.,The result is: -0.4604856890166274,False,True,"import pandas as pd
+import numpy as np
+
+# Filter the DataFrame for record_id 101
+df_101 = df[df['record_id'] == 101]
+
+# Define the known annotation-code list
+known_annotations = ['+', 'N', '~', '|', 'Q', 'A', 'V', '/', 'x', 'F', 'j', 'L', 'a', 'R', 'J', '[', '!', ']', 'E', 'S', '""', 'f', 'e']
+
+# Create 10-second bins
+bins = np.arange(0, df_101['time_s'].max() + 10, 10)
+
+# Initialize lists to store bin indices and annotated-row rates
+bin_indices = []
+annotated_row_rates = []
+
+# Iterate over the bins
+for i in range(len(bins) - 1):
+    # Filter the DataFrame for the current bin
+    bin_df = df_101[(df_101['time_s'] >= bins[i]) & (df_101['time_s'] < bins[i + 1])]
+    
+    # Check if the bin is not empty
+    if not bin_df.empty:
+        # Compute the annotated-row rate for the current bin
+        annotated_rows = bin_df[bin_df['annotation'].isin(known_annotations)]
+        annotated_row_rate = len(annotated_rows) / len(bin_df)
+        
+        # Append the bin index and annotated-row rate to the lists
+        bin_indices.append(i)
+        annotated_row_rates.append(annotated_row_rate)
+
+# Compute the Pearson correlation between bin index and annotated-row rate
+correlation = np.corrcoef(bin_indices, annotated_row_rates)[0, 1]
+
+result = correlation",PASS,1.0,The candidate answer matches the ground truth numerically.,SOUND,Ground truth answer is a valid Pearson correlation coefficient.,json,1,False,"```json
+{
+  ""verdict"": ""PASS"",
+  ""reason"": ""The candidate answer matches the ground truth numerically."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Ground truth answer is a valid Pearson correlation coefficient.""
+}
+```"
+3,[in_memory_benchmark_run],FF_NO_PRUNING,20,explicit,"For every record_id, independently compute MLII variance and V1 variance. Define total lead variability as their sum. Return the record_id with the largest total lead variability.",False,record_id 107 has the largest total lead variability: 1.110180227701.,"The result is {'record_id': 107, 'total_lead_variability': 1.1101802277013384}",False,True,"# PARALLEL_AGGREGATE branches:
+branch_0 = df.groupby(['record_id'])['MLII'].var()
+branch_1 = df.groupby(['record_id'])['V1'].var()
+merged = branch_0.merge(branch_1, on=['record_id'], how='outer')
+df['total_lead_variability'] = df['MLII_var'] + df['V1_var']
+idx = df['total_lead_variability'].idxmax(); result = df.loc[idx, ['record_id', 'total_lead_variability']].to_dict()",PASS,1.0,The candidate answer matches the ground truth answer.,SOUND,The ground truth answer is a specific record_id with a total lead variability value.,json,1,False,"```json
+{
+  ""verdict"": ""PASS"",
+  ""reason"": ""The candidate answer matches the ground truth answer."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""The ground truth answer is a specific record_id with a total lead variability value.""
+}
+```"

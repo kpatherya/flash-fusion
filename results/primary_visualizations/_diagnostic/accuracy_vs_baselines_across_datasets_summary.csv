@@ -1,0 +1,4 @@
+baseline,dataset,mean,std,n_runs
+FLASH_FUSION,bus,94.16666666666667,5.204164998665333,3
+FLASH_FUSION,wisdm,90.0,0.0,3
+FLASH_FUSION,ecg,95.0,0.0,3

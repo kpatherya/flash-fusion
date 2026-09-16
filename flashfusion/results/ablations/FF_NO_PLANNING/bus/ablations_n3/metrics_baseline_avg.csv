@@ -1,0 +1,2 @@
+baseline,gt_score,latency_s,cost_usd,input_tokens,output_tokens,runs
+FF_NO_PLANNING,0.85,5.180574309825897,0.0012210969166666667,9469.566666666666,194.01666666666665,3

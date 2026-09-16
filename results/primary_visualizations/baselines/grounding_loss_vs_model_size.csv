@@ -1,0 +1,6 @@
+model,label,params,n_datasets,n_queries_total,n_failures,grounding_error_rate_pct,grounding_error_std_pct,grounding_error_ci95_pct
+meta-llama/llama-3.2-1b-instruct,llama-3.2,1B,3,48,48,100.0,0.0,0.0
+meta-llama/llama-3.2-3b-instruct,llama-3.2,3B,3,48,38,79.16666666666667,23.27373340628157,18.622865276619255
+qwen/qwen-2.5-7b-instruct,qwen-2.5,7B,3,48,15,31.25,17.23006094011278,13.786920129842876
+ibm-granite/granite-4.1-8b,granite-4.1,8B,3,72,6,8.333333333333334,10.825317547305483,7.072540797572915
+google/gemma-3-12b-it,gemma-3,12B,3,48,4,8.333333333333334,10.206207261596575,8.166666666666666

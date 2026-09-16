@@ -136,3 +136,20 @@ def test_narrowed_slice_is_byte_stable_and_distinctly_keyed() -> None:
 
     assert first == second
     assert planner_prefix_digest(first) != PLANNER_PREFIX_SHA256
+
+
+def test_no_planning_prefix_excludes_planning_guidance() -> None:
+    """No-planning variant keeps contract/output but drops planning guidance."""
+    prefix = build_planner_prefix(include_planning_guidance=False)
+    assert "PLANNING\n  Resolve every concept" not in prefix
+    assert "SCOPE CHECK" in prefix
+    assert "NO INVENTION" in prefix
+    assert "Respond with a single JSON object and nothing else:" in prefix
+
+
+def test_no_planning_prefix_is_stable_and_distinct() -> None:
+    first = build_planner_prefix(include_planning_guidance=False)
+    second = build_planner_prefix(include_planning_guidance=False)
+
+    assert first == second
+    assert planner_prefix_digest(first) != PLANNER_PREFIX_SHA256

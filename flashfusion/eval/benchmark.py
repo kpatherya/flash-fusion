@@ -138,6 +138,8 @@ ALL_BASELINES = [
     "REACT_ONLY",
     "AUTOIOT_PAPER",
     "FLASH_FUSION",
+    "FF_NO_PRUNING",
+    "FF_NO_PLANNING",
     "FLASH_FUSION_CACHE",
     "HARGPT_PAPER",
     "LLMSENSE_PAPER",
@@ -424,7 +426,8 @@ def _prewarm_provider_prompt_caches(
     cache_path: str | None,
 ) -> None:
     """Populate static provider prompt caches outside benchmark query timing."""
-    if not ({"FLASH_FUSION", "FLASH_FUSION_CACHE"} & set(baselines)):
+    ff_like = {"FLASH_FUSION", "FF_NO_PRUNING", "FF_NO_PLANNING"}
+    if not ((ff_like | {"FLASH_FUSION_CACHE"}) & set(baselines)):
         return
 
     setup_client = LLMClient(
@@ -435,14 +438,27 @@ def _prewarm_provider_prompt_caches(
     )
     warmed: list[str] = []
     try:
-        if "FLASH_FUSION" in baselines:
+        if ff_like & set(baselines):
             from flashfusion.baselines.flash_fusion import prewarm_flash_fusion_prompt_cache
 
             selected_queries = [
                 query["text"] for query in query_defs if int(query["id"]) in set(query_ids)
             ]
-            count = prewarm_flash_fusion_prompt_cache(df, setup_client, selected_queries)
+            count = prewarm_flash_fusion_prompt_cache(
+                df,
+                setup_client,
+                selected_queries,
+                planner_guidance="full",
+            )
             warmed.append(f"planner_prefixes={count}")
+            if "FF_NO_PLANNING" in baselines:
+                count_no_planning = prewarm_flash_fusion_prompt_cache(
+                    df,
+                    setup_client,
+                    selected_queries,
+                    planner_guidance="none",
+                )
+                warmed.append(f"planner_prefixes_no_planning={count_no_planning}")
         if "FLASH_FUSION_CACHE" in baselines:
             from flashfusion.baselines.flash_fusion_cache import (
                 DEFAULT_CACHE_PATH,
@@ -1110,10 +1126,10 @@ def _build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument(
         "--baselines",
-        default="REACT_ONLY,LLMSENSE_PAPER,FLASH_FUSION",
+        default="FLASH_FUSION,FF_NO_PRUNING,FF_NO_PLANNING",
         help=(
             'Comma-separated baseline names or "all". '
-            "Default focuses on Agent-Only, LLMSENSE_PAPER, and FLASH_FUSION. "
+            "Default focuses on Flash-Fusion ablations. "
             f"Options: {', '.join(ALL_BASELINES)}"
         ),
     )

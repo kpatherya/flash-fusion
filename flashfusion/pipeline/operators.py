@@ -2850,6 +2850,20 @@ NO INVENTION
   question asks about is absent, that is a rejection, not a substitution.\
 """
 
+
+def _planner_scope_rules(*, include_planning_guidance: bool) -> str:
+    """Return scope/planning contract text for one planner policy variant."""
+    if include_planning_guidance:
+        return _PLANNER_SCOPE_RULES
+
+    start_marker = "\nPLANNING\n"
+    end_marker = "\nNO INVENTION\n"
+    if start_marker not in _PLANNER_SCOPE_RULES or end_marker not in _PLANNER_SCOPE_RULES:
+        return _PLANNER_SCOPE_RULES
+    prefix, tail = _PLANNER_SCOPE_RULES.split(start_marker, 1)
+    _, suffix = tail.split(end_marker, 1)
+    return f"{prefix}\nNO INVENTION\n{suffix}"
+
 _PLANNER_OUTPUT_CONTRACT: str = """\
 Respond with a single JSON object and nothing else:
 {"in_scope": bool,
@@ -2858,7 +2872,11 @@ Respond with a single JSON object and nothing else:
   "plan": {"version": "1", "steps": [ ...operators... ]} or null}\
 """
 
-def build_planner_prefix(vocabulary_spec: str = OPERATOR_VOCABULARY_SPEC) -> str:
+def build_planner_prefix(
+    vocabulary_spec: str = OPERATOR_VOCABULARY_SPEC,
+    *,
+    include_planning_guidance: bool = True,
+) -> str:
     """Assemble the planner prefix around a (possibly narrowed) vocabulary spec.
 
     The prefix stays byte-stable *for a given spec*, so prompt caching still
@@ -2872,7 +2890,9 @@ def build_planner_prefix(vocabulary_spec: str = OPERATOR_VOCABULARY_SPEC) -> str
             f"OPERATOR_VOCABULARY_VERSION: {OPERATOR_VOCABULARY_VERSION}",
             "Operator vocabulary (this is the COMPLETE set — nothing else exists):\n"
             + vocabulary_spec,
-            _PLANNER_SCOPE_RULES,
+            _planner_scope_rules(
+                include_planning_guidance=include_planning_guidance,
+            ),
             _PLANNER_OUTPUT_CONTRACT,
         ]
     )

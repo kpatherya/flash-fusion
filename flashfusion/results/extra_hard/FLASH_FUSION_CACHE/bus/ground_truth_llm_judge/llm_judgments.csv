@@ -1,118 +1,128 @@
 run_id,source_file,baseline,query_id,query_id_source,query_text,expected_rejection,gt_reference_answer,candidate_answer,candidate_rejected,candidate_executed,candidate_code,llm_verdict,llm_score,llm_reason,gt_sanity,gt_sanity_note,llm_parse_status,llm_attempts,llm_override_applied,llm_raw
-1,[in_memory_benchmark_run],FLASH_FUSION_CACHE,17,explicit,"Filter the route to rows labeled aggressive, group them into 5-minute timestamp windows, and return the window with the highest mean instability_score.",False,The aggressive-behavior 5-minute window beginning 2025-06-06 16:00:00 has the highest mean instability_score: 0.594000000000.,"The result is {'timestamp_5min': '2025-06-06T16:00:00', 'mean_instability_score': 0.594}",False,True,"df = df[df['behavior'].isin(['aggressive'])]
-df['timestamp_5min'] = pd.to_datetime(df['timestamp'], errors='coerce').dt.floor('5min')
-result = df.groupby('timestamp_5min')['instability_score'].mean()
-result = result.idxmax()",PASS,1.0,"The candidate answer correctly identifies the 5-minute window starting at 2025-6-6 16:0:0 with a mean instability_score of 0.594, matching the ground truth referent.",SOUND,Matches deterministic sanity hint and is factually consistent.,json,1,False,"{
+1,[in_memory_benchmark_run],FLASH_FUSION_CACHE,17,explicit,"Filter the route to rows labeled aggressive, group them into 5-minute timestamp windows, and return the window with the highest mean instability_score.",False,The aggressive-behavior 5-minute window beginning 2025-06-06 16:00:00 has the highest mean instability_score: 0.594000000000.,"The result is {'timestamp_bin': '2025-06-06T16:00:00', 'mean_instability_score': 0.594}",False,True,"df = df[df['behavior'].isin(['aggressive'])]
+df['timestamp_bin'] = pd.to_datetime(df['timestamp'], errors='coerce').dt.floor('5min')
+result = df.groupby('timestamp_bin')['instability_score'].mean()
+result = result.idxmax()",PASS,1.0,"The candidate answer provides the same timestamp and mean instability score as the ground truth, just in a different format.",SOUND,Clear and consistent with the query.,json,1,False,"{
   ""verdict"": ""PASS"",
-  ""reason"": ""The candidate answer correctly identifies the 5-minute window starting at 2025-6-6 16:0:0 with a mean instability_score of 0.594, matching the ground truth referent."",
+  ""reason"": ""The candidate answer provides the same timestamp and mean instability score as the ground truth, just in a different format."",
   ""ground_truth_sanity"": ""SOUND"",
-  ""ground_truth_note"": ""Matches deterministic sanity hint and is factually consistent.""
+  ""ground_truth_note"": ""Clear and consistent with the query.""
 }"
-1,[in_memory_benchmark_run],FLASH_FUSION_CACHE,18,explicit,"Derive peak acceleration magnitude from accel_stats_x_p99, accel_stats_y_p99, and accel_stats_z_p99. Split the route at the median latitude and report the absolute difference between the northern and southern halves' mean peak magnitudes.",False,Northern mean peak magnitude is 11.722590691853; southern mean peak magnitude is 11.194853285219; their absolute difference is 0.527737406634.,"The result is {'higher': 'northern', 'lower': 'southern', 'metric': 'mean peak_accel_magnitude', 'northern': 11.722590691852952, 'southern': 11.194853285218633, 'abs_difference': 0.5277374066343192}",False,True,"df['peak_accel_magnitude'] = (df['accel_stats_x_p99']**2 + df['accel_stats_y_p99']**2 + df['accel_stats_z_p99']**2)**0.5
-northern = df[df['latitude'] gt df['latitude'].median()]
-southern = df[df['latitude'] lte df['latitude'].median()]
+1,[in_memory_benchmark_run],FLASH_FUSION_CACHE,18,explicit,"For each recorded latitude reading, derive peak acceleration magnitude from accel_stats_x_p99, accel_stats_y_p99, and accel_stats_z_p99. Report the absolute difference between the mean peak magnitude north versus south of the median latitude.",False,Northern mean peak magnitude is 11.722590691853; southern mean peak magnitude is 11.194853285219; their absolute difference is 0.527737406634.,"The result is {'higher': 'north', 'lower': 'south', 'metric': 'mean peak_accel_magnitude', 'north': 11.722590691852952, 'south': 11.194853285218633, 'abs_difference': 0.5277374066343192}",False,True,"df['peak_accel_magnitude'] = (df['accel_stats_x_p99']**2 + df['accel_stats_y_p99']**2 + df['accel_stats_z_p99']**2)**0.5
+north = df[df['latitude'] gt df['latitude'].median()]
+south = df[df['latitude'] lte df['latitude'].median()]
 result = {label: agg(partition) for label in partitions}
-result = compare(northern, southern, mode='abs_difference')",PASS,1.0,Candidate answer matches the ground truth values and correctly computes the absolute difference between northern and southern mean peak magnitudes.,SOUND,Values are consistent with deterministic hint and query requirements.,json,1,False,"{
+result = compare(north, south, mode='abs_difference')",PASS,1.0,The candidate answer provides the same numerical values and absolute difference as the ground truth.,SOUND,Values are consistent and correctly computed.,json,1,False,"{
   ""verdict"": ""PASS"",
-  ""reason"": ""Candidate answer matches the ground truth values and correctly computes the absolute difference between northern and southern mean peak magnitudes."",
+  ""reason"": ""The candidate answer provides the same numerical values and absolute difference as the ground truth."",
   ""ground_truth_sanity"": ""SOUND"",
-  ""ground_truth_note"": ""Values are consistent with deterministic hint and query requirements.""
+  ""ground_truth_note"": ""Values are consistent and correctly computed.""
 }"
-1,[in_memory_benchmark_run],FLASH_FUSION_CACHE,19,explicit,"Derive the vertical shock range as accel_stats_z_p99 minus accel_stats_z_p1. Compute its mean separately for aggressive and calm behavior labels, then report the aggressive-minus-calm difference.",False,Aggressive mean vertical shock range is 4.869682926829; calm mean is 1.433177419355; aggressive-minus-calm is 3.436505507474.,"The result is {'higher': 'aggressive', 'lower': 'calm', 'metric': 'mean vertical_shock_range', 'aggressive': 4.869682926829269, 'calm': 1.4331774193548388, 'difference': 3.436505507474431}",False,True,"df['vertical_shock_range'] = df['accel_stats_z_p99'] - df['accel_stats_z_p1']
-aggressive = df[df['behavior'].isin(['aggressive'])]
-calm = df[df['behavior'].isin(['calm'])]
-result = {label: agg(partition) for label in partitions}
-result = compare(aggressive, calm, mode='difference')",PASS,1.0,Candidate answer matches the ground truth values and correctly computes the aggressive-minus-calm difference for the mean vertical shock range.,SOUND,Values are consistent with the query's requirements and sanity hint.,json,1,False,"{
-  ""verdict"": ""PASS"",
-  ""reason"": ""Candidate answer matches the ground truth values and correctly computes the aggressive-minus-calm difference for the mean vertical shock range."",
+1,[in_memory_benchmark_run],FLASH_FUSION_CACHE,19,explicit,"For each 5-minute timestamp window, derive the vertical shock range as accel_stats_z_p99 minus accel_stats_z_p1 and compute its mean separately for aggressive and calm behavior labels. Report the overall aggressive-minus-calm difference across the route.",False,Aggressive mean vertical shock range is 4.869682926829; calm mean is 1.433177419355; aggressive-minus-calm is 3.436505507474.,"The result is {'higher': 'aggressive', 'lower': 'calm', 'aggressive': 5.0055000000000005, 'calm': 1.291285714285714, 'aggressive_metric': 'aggressive_range mean', 'calm_metric': 'calm_range mean', 'difference': 3.7142142857142866}",False,True,"df['time_bin'] = pd.to_datetime(df['timestamp'], errors='coerce').dt.floor('5min')
+# PARALLEL_AGGREGATE branches:
+branch_0 = df[df['behavior'].isin(['aggressive'])].groupby(['time_bin'])['accel_stats_z_p99'].mean()
+branch_1 = df[df['behavior'].isin(['aggressive'])].groupby(['time_bin'])['accel_stats_z_p1'].mean()
+branch_2 = df[df['behavior'].isin(['calm'])].groupby(['time_bin'])['accel_stats_z_p99'].mean()
+branch_3 = df[df['behavior'].isin(['calm'])].groupby(['time_bin'])['accel_stats_z_p1'].mean()
+merged = branch_0.merge(branch_1, on=['time_bin'], how='outer')
+df['aggressive_range'] = df['aggressive_p99'] - df['aggressive_p1']
+df['calm_range'] = df['calm_p99'] - df['calm_p1']
+result = df['aggressive_range'].mean()
+result = df['calm_range'].mean()
+result = compare(aggressive=5.0055000000000005, calm=1.291285714285714, mode='difference')",FAIL,0.0,The candidate's aggressive-minus-calm difference (3.714) differs from the ground truth (3.437) by more than 0.01.,SOUND,Values appear consistent with a plausible calculation of percentile-based shock ranges.,json,1,False,"{
+  ""verdict"": ""FAIL"",
+  ""reason"": ""The candidate's aggressive-minus-calm difference (3.714) differs from the ground truth (3.437) by more than 0.01."",
   ""ground_truth_sanity"": ""SOUND"",
-  ""ground_truth_note"": ""Values are consistent with the query's requirements and sanity hint.""
+  ""ground_truth_note"": ""Values appear consistent with a plausible calculation of percentile-based shock ranges.""
 }"
 1,[in_memory_benchmark_run],FLASH_FUSION_CACHE,20,explicit,"Derive the vertical shock range as accel_stats_z_p99 minus accel_stats_z_p1. Filter to aggressive behavior, group rows into 5-minute timestamp windows, and return the window with the highest mean vertical shock range.",False,The aggressive-behavior 5-minute window beginning 2025-06-06 11:05:00 has the highest mean vertical shock range: 7.355000000000.,"The result is {'timestamp_5min_bin': '2025-06-06T11:05:00', 'mean_vertical_shock_range': 7.355}",False,True,"df['vertical_shock_range'] = df['accel_stats_z_p99'] - df['accel_stats_z_p1']
 df = df[df['behavior'].isin(['aggressive'])]
 df['timestamp_5min_bin'] = pd.to_datetime(df['timestamp'], errors='coerce').dt.floor('5min')
 result = df.groupby('timestamp_5min_bin')['vertical_shock_range'].mean()
-result = result.idxmax()",PASS,1.0,The candidate answer matches the ground truth in both timestamp and mean vertical shock range value.,SOUND,Matches deterministic sanity hint exactly.,json,1,False,"{
+result = result.idxmax()",PASS,1.0,"The candidate answer provides the same timestamp and mean vertical shock range as the ground truth, with only minor formatting differences in the timestamp.",SOUND,"Answer is specific, consistent with the query, and includes correct numeric value.",json,1,False,"{
   ""verdict"": ""PASS"",
-  ""reason"": ""The candidate answer matches the ground truth in both timestamp and mean vertical shock range value."",
+  ""reason"": ""The candidate answer provides the same timestamp and mean vertical shock range as the ground truth, with only minor formatting differences in the timestamp."",
   ""ground_truth_sanity"": ""SOUND"",
-  ""ground_truth_note"": ""Matches deterministic sanity hint exactly.""
+  ""ground_truth_note"": ""Answer is specific, consistent with the query, and includes correct numeric value.""
 }"
 2,[in_memory_benchmark_run],FLASH_FUSION_CACHE,17,explicit,"Filter the route to rows labeled aggressive, group them into 5-minute timestamp windows, and return the window with the highest mean instability_score.",False,The aggressive-behavior 5-minute window beginning 2025-06-06 16:00:00 has the highest mean instability_score: 0.594000000000.,"The result is {'timestamp_bin': '2025-06-06T16:00:00', 'mean_instability_score': 0.594}",False,True,"df = df[df['behavior'].isin(['aggressive'])]
 df['timestamp_bin'] = pd.to_datetime(df['timestamp'], errors='coerce').dt.floor('5min')
 result = df.groupby('timestamp_bin')['instability_score'].mean()
-result = result.idxmax()",PASS,1.0,"The candidate answer correctly identifies the 5-minute window starting at 2025-6-6 16:0:0 with a mean instability_score of 0.594, matching the ground truth referent.",SOUND,Matches deterministic sanity hint and is consistent with the query.,json,1,False,"{
+result = result.idxmax()",PASS,1.0,"The candidate answer provides the same timestamp and mean instability score as the ground truth, just in a different format.",SOUND,Clear and consistent with the query.,json,1,False,"{
   ""verdict"": ""PASS"",
-  ""reason"": ""The candidate answer correctly identifies the 5-minute window starting at 2025-6-6 16:0:0 with a mean instability_score of 0.594, matching the ground truth referent."",
+  ""reason"": ""The candidate answer provides the same timestamp and mean instability score as the ground truth, just in a different format."",
   ""ground_truth_sanity"": ""SOUND"",
-  ""ground_truth_note"": ""Matches deterministic sanity hint and is consistent with the query.""
+  ""ground_truth_note"": ""Clear and consistent with the query.""
 }"
-2,[in_memory_benchmark_run],FLASH_FUSION_CACHE,18,explicit,"Derive peak acceleration magnitude from accel_stats_x_p99, accel_stats_y_p99, and accel_stats_z_p99. Split the route at the median latitude and report the absolute difference between the northern and southern halves' mean peak magnitudes.",False,Northern mean peak magnitude is 11.722590691853; southern mean peak magnitude is 11.194853285219; their absolute difference is 0.527737406634.,"The result is {'higher': 'northern', 'lower': 'southern', 'metric': 'mean peak_accel_magnitude', 'northern': 11.722590691852952, 'southern': 11.194853285218633, 'abs_difference': 0.5277374066343192}",False,True,"df['peak_accel_magnitude'] = (df['accel_stats_x_p99']**2 + df['accel_stats_y_p99']**2 + df['accel_stats_z_p99']**2)**0.5
-northern = df[df['latitude'] gt df['latitude'].median()]
-southern = df[df['latitude'] lte df['latitude'].median()]
+2,[in_memory_benchmark_run],FLASH_FUSION_CACHE,18,explicit,"For each recorded latitude reading, derive peak acceleration magnitude from accel_stats_x_p99, accel_stats_y_p99, and accel_stats_z_p99. Report the absolute difference between the mean peak magnitude north versus south of the median latitude.",False,Northern mean peak magnitude is 11.722590691853; southern mean peak magnitude is 11.194853285219; their absolute difference is 0.527737406634.,"The result is {'higher': 'north', 'lower': 'south', 'metric': 'mean peak_accel_magnitude', 'north': 11.722590691852952, 'south': 11.194853285218633, 'abs_difference': 0.5277374066343192}",False,True,"df['peak_accel_magnitude'] = (df['accel_stats_x_p99']**2 + df['accel_stats_y_p99']**2 + df['accel_stats_z_p99']**2)**0.5
+north = df[df['latitude'] gt df['latitude'].median()]
+south = df[df['latitude'] lte df['latitude'].median()]
 result = {label: agg(partition) for label in partitions}
-result = compare(northern, southern, mode='abs_difference')",PASS,1.0,Candidate answer matches the ground truth values and correctly computes the absolute difference between northern and southern mean peak magnitudes.,SOUND,Values are consistent with deterministic hint and query requirements.,json,1,False,"{
+result = compare(north, south, mode='abs_difference')",PASS,1.0,The candidate answer provides the same numerical values and absolute difference as the ground truth.,SOUND,Values are consistent and properly contextualized.,json,1,False,"{
   ""verdict"": ""PASS"",
-  ""reason"": ""Candidate answer matches the ground truth values and correctly computes the absolute difference between northern and southern mean peak magnitudes."",
+  ""reason"": ""The candidate answer provides the same numerical values and absolute difference as the ground truth."",
   ""ground_truth_sanity"": ""SOUND"",
-  ""ground_truth_note"": ""Values are consistent with deterministic hint and query requirements.""
+  ""ground_truth_note"": ""Values are consistent and properly contextualized.""
 }"
-2,[in_memory_benchmark_run],FLASH_FUSION_CACHE,19,explicit,"Derive the vertical shock range as accel_stats_z_p99 minus accel_stats_z_p1. Compute its mean separately for aggressive and calm behavior labels, then report the aggressive-minus-calm difference.",False,Aggressive mean vertical shock range is 4.869682926829; calm mean is 1.433177419355; aggressive-minus-calm is 3.436505507474.,"The result is {'higher': 'aggressive', 'lower': 'calm', 'metric': 'mean vertical_shock_range', 'aggressive': 4.869682926829269, 'calm': 1.4331774193548388, 'difference': 3.436505507474431}",False,True,"df['vertical_shock_range'] = df['accel_stats_z_p99'] - df['accel_stats_z_p1']
-aggressive = df[df['behavior'].isin(['aggressive'])]
-calm = df[df['behavior'].isin(['calm'])]
-result = {label: agg(partition) for label in partitions}
-result = compare(aggressive, calm, mode='difference')",PASS,1.0,Candidate answer matches the ground truth values and correctly identifies the aggressive-minus-calm difference in mean vertical shock range.,SOUND,Values are consistent and align with the query's requirements.,json,1,False,"{
-  ""verdict"": ""PASS"",
-  ""reason"": ""Candidate answer matches the ground truth values and correctly identifies the aggressive-minus-calm difference in mean vertical shock range."",
+2,[in_memory_benchmark_run],FLASH_FUSION_CACHE,19,explicit,"For each 5-minute timestamp window, derive the vertical shock range as accel_stats_z_p99 minus accel_stats_z_p1 and compute its mean separately for aggressive and calm behavior labels. Report the overall aggressive-minus-calm difference across the route.",False,Aggressive mean vertical shock range is 4.869682926829; calm mean is 1.433177419355; aggressive-minus-calm is 3.436505507474.,,False,False,,FAIL,0.0,Candidate answer is missing; no final answer provided to compare with ground truth.,SOUND,Ground truth provides clear numeric values consistent with the query.,json,1,False,"{
+  ""verdict"": ""FAIL"",
+  ""reason"": ""Candidate answer is missing; no final answer provided to compare with ground truth."",
   ""ground_truth_sanity"": ""SOUND"",
-  ""ground_truth_note"": ""Values are consistent and align with the query's requirements.""
+  ""ground_truth_note"": ""Ground truth provides clear numeric values consistent with the query.""
 }"
 2,[in_memory_benchmark_run],FLASH_FUSION_CACHE,20,explicit,"Derive the vertical shock range as accel_stats_z_p99 minus accel_stats_z_p1. Filter to aggressive behavior, group rows into 5-minute timestamp windows, and return the window with the highest mean vertical shock range.",False,The aggressive-behavior 5-minute window beginning 2025-06-06 11:05:00 has the highest mean vertical shock range: 7.355000000000.,"The result is {'timestamp_5min': '2025-06-06T11:05:00', 'mean_vertical_shock_range': 7.355}",False,True,"df = df[df['behavior'].isin(['aggressive'])]
 df['vertical_shock_range'] = df['accel_stats_z_p99'] - df['accel_stats_z_p1']
 df['timestamp_5min'] = pd.to_datetime(df['timestamp'], errors='coerce').dt.floor('5min')
 result = df.groupby('timestamp_5min')['vertical_shock_range'].mean()
-result = result.idxmax()",PASS,1.0,The candidate answer matches the ground truth in both timestamp and mean vertical shock range value.,SOUND,Matches deterministic sanity hint exactly.,json,1,False,"{
+result = result.idxmax()",PASS,1.0,"The candidate answer provides the same timestamp and mean vertical shock range as the ground truth, with only a formatting difference in the timestamp.",SOUND,"Answer is specific, consistent with the query, and includes correct numeric value and time.",json,1,False,"{
   ""verdict"": ""PASS"",
-  ""reason"": ""The candidate answer matches the ground truth in both timestamp and mean vertical shock range value."",
+  ""reason"": ""The candidate answer provides the same timestamp and mean vertical shock range as the ground truth, with only a formatting difference in the timestamp."",
   ""ground_truth_sanity"": ""SOUND"",
-  ""ground_truth_note"": ""Matches deterministic sanity hint exactly.""
+  ""ground_truth_note"": ""Answer is specific, consistent with the query, and includes correct numeric value and time.""
 }"
 3,[in_memory_benchmark_run],FLASH_FUSION_CACHE,17,explicit,"Filter the route to rows labeled aggressive, group them into 5-minute timestamp windows, and return the window with the highest mean instability_score.",False,The aggressive-behavior 5-minute window beginning 2025-06-06 16:00:00 has the highest mean instability_score: 0.594000000000.,"The result is {'timestamp_bin': '2025-06-06T16:00:00', 'mean_instability_score': 0.594}",False,True,"df = df[df['behavior'].isin(['aggressive'])]
 df['timestamp_bin'] = pd.to_datetime(df['timestamp'], errors='coerce').dt.floor('5min')
 result = df.groupby('timestamp_bin')['instability_score'].mean()
-result = result.idxmax()",PASS,1.0,"The candidate answer correctly identifies the 5-minute window starting at 2025-6-6 16:0:0 with mean instability_score 0.594, matching the ground truth referent.",SOUND,Matches deterministic hint and is consistent with query requirements.,json,1,False,"{
+result = result.idxmax()",PASS,1.0,"The candidate answer provides the same timestamp and mean instability score as the ground truth, just in a different format.",SOUND,Clear and consistent with the query.,json,1,False,"{
   ""verdict"": ""PASS"",
-  ""reason"": ""The candidate answer correctly identifies the 5-minute window starting at 2025-6-6 16:0:0 with mean instability_score 0.594, matching the ground truth referent."",
+  ""reason"": ""The candidate answer provides the same timestamp and mean instability score as the ground truth, just in a different format."",
   ""ground_truth_sanity"": ""SOUND"",
-  ""ground_truth_note"": ""Matches deterministic hint and is consistent with query requirements.""
+  ""ground_truth_note"": ""Clear and consistent with the query.""
 }"
-3,[in_memory_benchmark_run],FLASH_FUSION_CACHE,18,explicit,"Derive peak acceleration magnitude from accel_stats_x_p99, accel_stats_y_p99, and accel_stats_z_p99. Split the route at the median latitude and report the absolute difference between the northern and southern halves' mean peak magnitudes.",False,Northern mean peak magnitude is 11.722590691853; southern mean peak magnitude is 11.194853285219; their absolute difference is 0.527737406634.,"The result is {'higher': 'northern', 'lower': 'southern', 'metric': 'mean peak_accel_magnitude', 'northern': 11.722590691852952, 'southern': 11.194853285218633, 'abs_difference': 0.5277374066343192}",False,True,"df['peak_accel_magnitude'] = (df['accel_stats_x_p99']**2 + df['accel_stats_y_p99']**2 + df['accel_stats_z_p99']**2)**0.5
-northern = df[df['latitude'] gt df['latitude'].median()]
-southern = df[df['latitude'] lte df['latitude'].median()]
+3,[in_memory_benchmark_run],FLASH_FUSION_CACHE,18,explicit,"For each recorded latitude reading, derive peak acceleration magnitude from accel_stats_x_p99, accel_stats_y_p99, and accel_stats_z_p99. Report the absolute difference between the mean peak magnitude north versus south of the median latitude.",False,Northern mean peak magnitude is 11.722590691853; southern mean peak magnitude is 11.194853285219; their absolute difference is 0.527737406634.,"The result is {'higher': 'north', 'lower': 'south', 'metric': 'mean peak_accel_magnitude', 'north': 11.722590691852952, 'south': 11.194853285218633, 'abs_difference': 0.5277374066343192}",False,True,"df['peak_accel_magnitude'] = (df['accel_stats_x_p99']**2 + df['accel_stats_y_p99']**2 + df['accel_stats_z_p99']**2)**0.5
+north = df[df['latitude'] gt df['latitude'].median()]
+south = df[df['latitude'] lte df['latitude'].median()]
 result = {label: agg(partition) for label in partitions}
-result = compare(northern, southern, mode='abs_difference')",PASS,1.0,Candidate answer matches the ground truth values and correctly computes the absolute difference between northern and southern mean peak magnitudes.,SOUND,Values are consistent with deterministic hint and query requirements.,json,1,False,"{
+result = compare(north, south, mode='abs_difference')",PASS,1.0,"The candidate answer provides the same numerical values and absolute difference as the ground truth, just in a structured format.",SOUND,Values are consistent and plausible for the described computation.,json,1,False,"{
   ""verdict"": ""PASS"",
-  ""reason"": ""Candidate answer matches the ground truth values and correctly computes the absolute difference between northern and southern mean peak magnitudes."",
+  ""reason"": ""The candidate answer provides the same numerical values and absolute difference as the ground truth, just in a structured format."",
   ""ground_truth_sanity"": ""SOUND"",
-  ""ground_truth_note"": ""Values are consistent with deterministic hint and query requirements.""
+  ""ground_truth_note"": ""Values are consistent and plausible for the described computation.""
 }"
-3,[in_memory_benchmark_run],FLASH_FUSION_CACHE,19,explicit,"Derive the vertical shock range as accel_stats_z_p99 minus accel_stats_z_p1. Compute its mean separately for aggressive and calm behavior labels, then report the aggressive-minus-calm difference.",False,Aggressive mean vertical shock range is 4.869682926829; calm mean is 1.433177419355; aggressive-minus-calm is 3.436505507474.,"The result is {'higher': 'aggressive_group', 'lower': 'calm_group', 'metric': 'mean vertical_shock_range', 'aggressive_group': 4.869682926829269, 'calm_group': 1.4331774193548388, 'difference': 3.436505507474431}",False,True,"df['vertical_shock_range'] = df['accel_stats_z_p99'] - df['accel_stats_z_p1']
-aggressive_group = df[df['behavior'].isin(['aggressive'])]
-calm_group = df[df['behavior'].isin(['calm'])]
-result = {label: agg(partition) for label in partitions}
-result = compare(aggressive_group, calm_group, mode='difference')",PASS,1.0,Candidate answer matches the ground truth values and correctly identifies the aggressive-minus-calm difference in mean vertical shock range.,SOUND,Values are consistent with deterministic hint and query requirements.,json,1,False,"{
-  ""verdict"": ""PASS"",
-  ""reason"": ""Candidate answer matches the ground truth values and correctly identifies the aggressive-minus-calm difference in mean vertical shock range."",
+3,[in_memory_benchmark_run],FLASH_FUSION_CACHE,19,explicit,"For each 5-minute timestamp window, derive the vertical shock range as accel_stats_z_p99 minus accel_stats_z_p1 and compute its mean separately for aggressive and calm behavior labels. Report the overall aggressive-minus-calm difference across the route.",False,Aggressive mean vertical shock range is 4.869682926829; calm mean is 1.433177419355; aggressive-minus-calm is 3.436505507474.,"The result is {'higher': 'aggressive', 'lower': 'calm', 'aggressive': 5.0055000000000005, 'calm': 1.291285714285714, 'aggressive_metric': 'aggressive_shock_range mean', 'calm_metric': 'calm_shock_range mean', 'difference': 3.7142142857142866}",False,True,"df['timestamp_5min'] = pd.to_datetime(df['timestamp'], errors='coerce').dt.floor('5min')
+# PARALLEL_AGGREGATE branches:
+branch_0 = df[df['behavior'].isin(['aggressive'])].groupby(['timestamp_5min'])['accel_stats_z_p99'].mean()
+branch_1 = df[df['behavior'].isin(['aggressive'])].groupby(['timestamp_5min'])['accel_stats_z_p1'].mean()
+branch_2 = df[df['behavior'].isin(['calm'])].groupby(['timestamp_5min'])['accel_stats_z_p99'].mean()
+branch_3 = df[df['behavior'].isin(['calm'])].groupby(['timestamp_5min'])['accel_stats_z_p1'].mean()
+merged = branch_0.merge(branch_1, on=['timestamp_5min'], how='outer')
+df['aggressive_shock_range'] = df['aggressive_p99'] - df['aggressive_p1']
+df['calm_shock_range'] = df['calm_p99'] - df['calm_p1']
+result = df['aggressive_shock_range'].mean()
+result = df['calm_shock_range'].mean()
+result = compare(aggressive=5.0055000000000005, calm=1.291285714285714, mode='difference')",FAIL,0.0,Candidate's aggressive-minus-calm difference (3.714) differs from ground truth (3.437) by more than 0.01.,SOUND,Ground truth provides consistent and plausible numeric values.,json,1,False,"{
+  ""verdict"": ""FAIL"",
+  ""reason"": ""Candidate's aggressive-minus-calm difference (3.714) differs from ground truth (3.437) by more than 0.01."",
   ""ground_truth_sanity"": ""SOUND"",
-  ""ground_truth_note"": ""Values are consistent with deterministic hint and query requirements.""
+  ""ground_truth_note"": ""Ground truth provides consistent and plausible numeric values.""
 }"
-3,[in_memory_benchmark_run],FLASH_FUSION_CACHE,20,explicit,"Derive the vertical shock range as accel_stats_z_p99 minus accel_stats_z_p1. Filter to aggressive behavior, group rows into 5-minute timestamp windows, and return the window with the highest mean vertical shock range.",False,The aggressive-behavior 5-minute window beginning 2025-06-06 11:05:00 has the highest mean vertical shock range: 7.355000000000.,"The result is {'timestamp_5min_bin': '2025-06-06T11:05:00', 'mean_vertical_shock_range': 7.355}",False,True,"df = df[df['behavior'].isin(['aggressive'])]
+3,[in_memory_benchmark_run],FLASH_FUSION_CACHE,20,explicit,"Derive the vertical shock range as accel_stats_z_p99 minus accel_stats_z_p1. Filter to aggressive behavior, group rows into 5-minute timestamp windows, and return the window with the highest mean vertical shock range.",False,The aggressive-behavior 5-minute window beginning 2025-06-06 11:05:00 has the highest mean vertical shock range: 7.355000000000.,"The result is {'timestamp_bin': '2025-06-06T11:05:00', 'mean_vertical_shock_range': 7.355}",False,True,"df = df[df['behavior'].isin(['aggressive'])]
 df['vertical_shock_range'] = df['accel_stats_z_p99'] - df['accel_stats_z_p1']
-df['timestamp_5min_bin'] = pd.to_datetime(df['timestamp'], errors='coerce').dt.floor('5min')
-result = df.groupby('timestamp_5min_bin')['vertical_shock_range'].mean()
-result = result.idxmax()",PASS,1.0,The candidate answer matches the ground truth in both the identified 5-minute window and the mean vertical shock range value.,SOUND,Matches deterministic sanity hint and is consistent with query requirements.,json,1,False,"{
+df['timestamp_bin'] = pd.to_datetime(df['timestamp'], errors='coerce').dt.floor('5min')
+result = df.groupby('timestamp_bin')['vertical_shock_range'].mean()
+result = result.idxmax()",PASS,1.0,"The candidate answer provides the same timestamp and mean vertical shock range as the ground truth, just in a different format.",SOUND,"Answer is specific, consistent with the query, and includes correct numeric value and timestamp.",json,1,False,"{
   ""verdict"": ""PASS"",
-  ""reason"": ""The candidate answer matches the ground truth in both the identified 5-minute window and the mean vertical shock range value."",
+  ""reason"": ""The candidate answer provides the same timestamp and mean vertical shock range as the ground truth, just in a different format."",
   ""ground_truth_sanity"": ""SOUND"",
-  ""ground_truth_note"": ""Matches deterministic sanity hint and is consistent with query requirements.""
+  ""ground_truth_note"": ""Answer is specific, consistent with the query, and includes correct numeric value and timestamp.""
 }"
