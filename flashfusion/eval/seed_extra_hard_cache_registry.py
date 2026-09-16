@@ -32,7 +32,7 @@ SEMANTIC_OUTPUTS = {
     DATASET_MIT_ECG: CACHE_DIR / "semantic_registry_mit_ecg_v1.json",
 }
 
-EXTRA_HARD_SKELETONS: dict[str, dict[int, list[str]]] = {
+EXTRA_HARD_SKELETONS: dict[str, dict[int, list[str] | None]] = {
     DATASET_BUS: {
         17: ["FILTER_COMPARE", "DERIVE_BIN", "GROUP_AGGREGATE", "RANK_GROUPS"],
         18: [
@@ -42,13 +42,15 @@ EXTRA_HARD_SKELETONS: dict[str, dict[int, list[str]]] = {
             "AGGREGATE_PARTITIONS",
             "COMPARE_PARTITIONS",
         ],
-        19: ["DERIVE_BINARY", "SPLIT_BY_VALUES", "SPLIT_BY_VALUES", "AGGREGATE_PARTITIONS", "COMPARE_PARTITIONS"],
+        19: ["DERIVE_BIN", "DERIVE_BINARY", "PARALLEL_AGGREGATE", "AGGREGATE_COLUMN", "AGGREGATE_COLUMN", "COMPARE_VALUES"],
         20: ["DERIVE_BINARY", "FILTER_COMPARE", "DERIVE_BIN", "GROUP_AGGREGATE", "RANK_GROUPS"],
     },
     DATASET_WISDM: {
         17: ["DERIVE_VECTOR_MAGNITUDE", "PARALLEL_AGGREGATE", "DERIVE_BINARY", "RANK_ROWS"],
-        18: ["PARALLEL_AGGREGATE", "DERIVE_BINARY", "FILTER_COMPARE", "RANK_ROWS"],
-        19: ["DERIVE_VECTOR_MAGNITUDE", "PARALLEL_AGGREGATE", "CORRELATE_COLUMNS"],
+        # No stable typed skeleton: this query exposes premature router pruning.
+        # Omit it from the cache so a cache miss delegates to the full FF planner.
+        18: None,
+        19: ["FILTER_NOT_EMPTY", "DERIVE_VECTOR_MAGNITUDE", "PARALLEL_AGGREGATE", "RANK_ROWS"],
         20: ["DERIVE_DURATION_SECONDS", "PARALLEL_AGGREGATE", "DERIVE_BINARY", "FILTER_COMPARE", "RANK_ROWS"],
     },
     DATASET_MIT_ECG: {
@@ -119,10 +121,21 @@ def seed_exact_registry(path: Path = EXACT_CACHE_PATH) -> int:
         if (str(entry.get("dataset")), str(entry.get("query_id"))) not in target_keys
     ]
     slots_by_name = _operator_slots_by_name()
+    for dataset, by_id in EXTRA_HARD_SKELETONS.items():
+        for query_id, skeleton in by_id.items():
+            if skeleton is None:
+                continue
+            for operator_name in skeleton:
+                if not isinstance(operator_name, str) or not operator_name.strip() or operator_name not in slots_by_name:
+                    raise ValueError(
+                        "Invalid operator skeleton: "
+                        f"dataset={dataset!r}, query_id={query_id}, operator={operator_name!r}"
+                    )
     seeded = [
         _seed_entry(dataset, query_id, skeleton, slots_by_name)
         for dataset, by_id in EXTRA_HARD_SKELETONS.items()
         for query_id, skeleton in sorted(by_id.items())
+        if skeleton is not None
     ]
     retained.extend(seeded)
     path.write_text(json.dumps({"entries": retained}, indent=2) + "\n", encoding="utf-8")

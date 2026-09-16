@@ -589,7 +589,7 @@ class RunResult:
     # Typed-operator instrumentation (Flash-Fusion). These are the primary
     # signals for the typed-vs-ReAct comparison; stages_run remains a coarse
     # human-readable audit trail only.
-    execution_path: str = ""                         # "guardrail_reject" | "typed_operator" | "react_fallback" | "scope_reject" | "react_agent" | "react_reject"
+    execution_path: str = ""                         # "guardrail_reject" | "typed_operator" | "typed_plan_unavailable" | "react_fallback" | "scope_reject" | "react_agent" | "react_reject"
     plan_validation_stage_failed: str = ""           # "" | "structural" | "schema" | "scope" | "execution" | "no_plan"
     typed_plan: dict = field(default_factory=dict)   # the validated DeterministicPlan, as JSON
     typed_execution_certificate: dict = field(default_factory=dict)  # canonical executed typed provenance

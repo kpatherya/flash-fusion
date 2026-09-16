@@ -104,7 +104,7 @@ result = result.idxmax()
 
 ## Query 18 (run 1)
 
-**Query text:** Derive peak acceleration magnitude from accel_stats_x_p99, accel_stats_y_p99, and accel_stats_z_p99. Split the route at the median latitude and report the absolute difference between the northern and southern halves' mean peak magnitudes.
+**Query text:** For each recorded latitude reading, derive peak acceleration magnitude from accel_stats_x_p99, accel_stats_y_p99, and accel_stats_z_p99. Report the absolute difference between the mean peak magnitude north versus south of the median latitude.
 
 **Failure reason:** `cache: light model returned empty content`
 
@@ -131,20 +131,20 @@ result = result.idxmax()
       "column": "latitude",
       "comparator": "gt",
       "threshold": "median",
-      "label": "northern"
+      "label": "north"
     },
     {
       "op": "SPLIT_BY_THRESHOLD",
       "column": "latitude",
       "comparator": "lte",
       "threshold": "median",
-      "label": "southern"
+      "label": "south"
     },
     {
       "op": "AGGREGATE_PARTITIONS",
       "partitions": [
-        "northern",
-        "southern"
+        "north",
+        "south"
       ],
       "aggregate": "mean",
       "column": "peak_accel_magnitude"
@@ -180,20 +180,20 @@ result = result.idxmax()
         "column": "latitude",
         "comparator": "gt",
         "threshold": "median",
-        "label": "northern"
+        "label": "north"
       },
       {
         "op": "SPLIT_BY_THRESHOLD",
         "column": "latitude",
         "comparator": "lte",
         "threshold": "median",
-        "label": "southern"
+        "label": "south"
       },
       {
         "op": "AGGREGATE_PARTITIONS",
         "partitions": [
-          "northern",
-          "southern"
+          "north",
+          "south"
         ],
         "aggregate": "mean",
         "column": "peak_accel_magnitude"
@@ -210,10 +210,10 @@ result = result.idxmax()
 **Final executed code:**
 ```python
 df['peak_accel_magnitude'] = (df['accel_stats_x_p99']**2 + df['accel_stats_y_p99']**2 + df['accel_stats_z_p99']**2)**0.5
-northern = df[df['latitude'] gt df['latitude'].median()]
-southern = df[df['latitude'] lte df['latitude'].median()]
+north = df[df['latitude'] gt df['latitude'].median()]
+south = df[df['latitude'] lte df['latitude'].median()]
 result = {label: agg(partition) for label in partitions}
-result = compare(northern, southern, mode='abs_difference')
+result = compare(north, south, mode='abs_difference')
 ```
 
 **Stages run:** exact_cache_hit → cache_light_grounding → cache_miss_or_validation_failure → guardrail_plan → plan_validated → typed_exec
@@ -222,7 +222,7 @@ result = compare(northern, southern, mode='abs_difference')
 
 ## Query 19 (run 1)
 
-**Query text:** Derive the vertical shock range as accel_stats_z_p99 minus accel_stats_z_p1. Compute its mean separately for aggressive and calm behavior labels, then report the aggressive-minus-calm difference.
+**Query text:** For each 5-minute timestamp window, derive the vertical shock range as accel_stats_z_p99 minus accel_stats_z_p1 and compute its mean separately for aggressive and calm behavior labels. Report the overall aggressive-minus-calm difference across the route.
 
 **Failure reason:** `cache: light model returned empty content`
 
@@ -236,40 +236,96 @@ result = compare(northern, southern, mode='abs_difference')
   "version": "1",
   "steps": [
     {
+      "op": "DERIVE_BIN",
+      "column": "timestamp",
+      "kind": "temporal",
+      "width": null,
+      "freq": "5min",
+      "epoch_unit": null,
+      "result": "time_bin"
+    },
+    {
+      "op": "PARALLEL_AGGREGATE",
+      "branches": [
+        {
+          "filter_column": "behavior",
+          "filter_values": [
+            "aggressive"
+          ],
+          "group_by": [
+            "time_bin"
+          ],
+          "aggregate": "mean",
+          "column": "accel_stats_z_p99",
+          "result_column": "aggressive_p99"
+        },
+        {
+          "filter_column": "behavior",
+          "filter_values": [
+            "aggressive"
+          ],
+          "group_by": [
+            "time_bin"
+          ],
+          "aggregate": "mean",
+          "column": "accel_stats_z_p1",
+          "result_column": "aggressive_p1"
+        },
+        {
+          "filter_column": "behavior",
+          "filter_values": [
+            "calm"
+          ],
+          "group_by": [
+            "time_bin"
+          ],
+          "aggregate": "mean",
+          "column": "accel_stats_z_p99",
+          "result_column": "calm_p99"
+        },
+        {
+          "filter_column": "behavior",
+          "filter_values": [
+            "calm"
+          ],
+          "group_by": [
+            "time_bin"
+          ],
+          "aggregate": "mean",
+          "column": "accel_stats_z_p1",
+          "result_column": "calm_p1"
+        }
+      ]
+    },
+    {
       "op": "DERIVE_BINARY",
-      "left": "accel_stats_z_p99",
-      "right": "accel_stats_z_p1",
+      "left": "aggressive_p99",
+      "right": "aggressive_p1",
       "operation": "subtract",
-      "result": "vertical_shock_range"
+      "result": "aggressive_range"
     },
     {
-      "op": "SPLIT_BY_VALUES",
-      "column": "behavior",
-      "values": [
-        "aggressive"
-      ],
-      "label": "aggressive"
+      "op": "DERIVE_BINARY",
+      "left": "calm_p99",
+      "right": "calm_p1",
+      "operation": "subtract",
+      "result": "calm_range"
     },
     {
-      "op": "SPLIT_BY_VALUES",
-      "column": "behavior",
-      "values": [
-        "calm"
-      ],
-      "label": "calm"
+      "op": "AGGREGATE_COLUMN",
+      "column": "aggressive_range",
+      "aggregate": "mean"
     },
     {
-      "op": "AGGREGATE_PARTITIONS",
-      "partitions": [
-        "aggressive",
-        "calm"
-      ],
-      "aggregate": "mean",
-      "column": "vertical_shock_range"
+      "op": "AGGREGATE_COLUMN",
+      "column": "calm_range",
+      "aggregate": "mean"
     },
     {
-      "op": "COMPARE_PARTITIONS",
-      "mode": "difference"
+      "op": "COMPARE_VALUES",
+      "mode": "difference",
+      "label_a": "aggressive",
+      "label_b": "calm"
     }
   ]
 }
@@ -285,40 +341,94 @@ result = compare(northern, southern, mode='abs_difference')
     "version": "1",
     "steps": [
       {
+        "op": "DERIVE_BIN",
+        "column": "timestamp",
+        "kind": "temporal",
+        "freq": "5min",
+        "result": "time_bin"
+      },
+      {
+        "op": "PARALLEL_AGGREGATE",
+        "branches": [
+          {
+            "filter_column": "behavior",
+            "filter_values": [
+              "aggressive"
+            ],
+            "group_by": [
+              "time_bin"
+            ],
+            "aggregate": "mean",
+            "column": "accel_stats_z_p99",
+            "result_column": "aggressive_p99"
+          },
+          {
+            "filter_column": "behavior",
+            "filter_values": [
+              "aggressive"
+            ],
+            "group_by": [
+              "time_bin"
+            ],
+            "aggregate": "mean",
+            "column": "accel_stats_z_p1",
+            "result_column": "aggressive_p1"
+          },
+          {
+            "filter_column": "behavior",
+            "filter_values": [
+              "calm"
+            ],
+            "group_by": [
+              "time_bin"
+            ],
+            "aggregate": "mean",
+            "column": "accel_stats_z_p99",
+            "result_column": "calm_p99"
+          },
+          {
+            "filter_column": "behavior",
+            "filter_values": [
+              "calm"
+            ],
+            "group_by": [
+              "time_bin"
+            ],
+            "aggregate": "mean",
+            "column": "accel_stats_z_p1",
+            "result_column": "calm_p1"
+          }
+        ]
+      },
+      {
         "op": "DERIVE_BINARY",
-        "left": "accel_stats_z_p99",
-        "right": "accel_stats_z_p1",
+        "left": "aggressive_p99",
+        "right": "aggressive_p1",
         "operation": "subtract",
-        "result": "vertical_shock_range"
+        "result": "aggressive_range"
       },
       {
-        "op": "SPLIT_BY_VALUES",
-        "column": "behavior",
-        "values": [
-          "aggressive"
-        ],
-        "label": "aggressive"
+        "op": "DERIVE_BINARY",
+        "left": "calm_p99",
+        "right": "calm_p1",
+        "operation": "subtract",
+        "result": "calm_range"
       },
       {
-        "op": "SPLIT_BY_VALUES",
-        "column": "behavior",
-        "values": [
-          "calm"
-        ],
-        "label": "calm"
+        "op": "AGGREGATE_COLUMN",
+        "column": "aggressive_range",
+        "aggregate": "mean"
       },
       {
-        "op": "AGGREGATE_PARTITIONS",
-        "partitions": [
-          "aggressive",
-          "calm"
-        ],
-        "aggregate": "mean",
-        "column": "vertical_shock_range"
+        "op": "AGGREGATE_COLUMN",
+        "column": "calm_range",
+        "aggregate": "mean"
       },
       {
-        "op": "COMPARE_PARTITIONS",
-        "mode": "difference"
+        "op": "COMPARE_VALUES",
+        "mode": "difference",
+        "label_a": "aggressive",
+        "label_b": "calm"
       }
     ]
   }
@@ -327,11 +437,18 @@ result = compare(northern, southern, mode='abs_difference')
 
 **Final executed code:**
 ```python
-df['vertical_shock_range'] = df['accel_stats_z_p99'] - df['accel_stats_z_p1']
-aggressive = df[df['behavior'].isin(['aggressive'])]
-calm = df[df['behavior'].isin(['calm'])]
-result = {label: agg(partition) for label in partitions}
-result = compare(aggressive, calm, mode='difference')
+df['time_bin'] = pd.to_datetime(df['timestamp'], errors='coerce').dt.floor('5min')
+# PARALLEL_AGGREGATE branches:
+branch_0 = df[df['behavior'].isin(['aggressive'])].groupby(['time_bin'])['accel_stats_z_p99'].mean()
+branch_1 = df[df['behavior'].isin(['aggressive'])].groupby(['time_bin'])['accel_stats_z_p1'].mean()
+branch_2 = df[df['behavior'].isin(['calm'])].groupby(['time_bin'])['accel_stats_z_p99'].mean()
+branch_3 = df[df['behavior'].isin(['calm'])].groupby(['time_bin'])['accel_stats_z_p1'].mean()
+merged = branch_0.merge(branch_1, on=['time_bin'], how='outer')
+df['aggressive_range'] = df['aggressive_p99'] - df['aggressive_p1']
+df['calm_range'] = df['calm_p99'] - df['calm_p1']
+result = df['aggressive_range'].mean()
+result = df['calm_range'].mean()
+result = compare(aggressive=5.0055000000000005, calm=1.291285714285714, mode='difference')
 ```
 
 **Stages run:** exact_cache_hit → cache_light_grounding → cache_miss_or_validation_failure → guardrail_plan → plan_validated → typed_exec
@@ -374,12 +491,12 @@ result = compare(aggressive, calm, mode='difference')
       "width": null,
       "freq": "5min",
       "epoch_unit": null,
-      "result": "timestamp_5min"
+      "result": "timestamp_5min_bin"
     },
     {
       "op": "GROUP_AGGREGATE",
       "group_by": [
-        "timestamp_5min"
+        "timestamp_5min_bin"
       ],
       "aggregate": "mean",
       "column": "vertical_shock_range",
@@ -421,12 +538,12 @@ result = compare(aggressive, calm, mode='difference')
         "column": "timestamp",
         "kind": "temporal",
         "freq": "5min",
-        "result": "timestamp_5min"
+        "result": "timestamp_5min_bin"
       },
       {
         "op": "GROUP_AGGREGATE",
         "group_by": [
-          "timestamp_5min"
+          "timestamp_5min_bin"
         ],
         "aggregate": "mean",
         "column": "vertical_shock_range"
@@ -444,8 +561,8 @@ result = compare(aggressive, calm, mode='difference')
 ```python
 df['vertical_shock_range'] = df['accel_stats_z_p99'] - df['accel_stats_z_p1']
 df = df[df['behavior'].isin(['aggressive'])]
-df['timestamp_5min'] = pd.to_datetime(df['timestamp'], errors='coerce').dt.floor('5min')
-result = df.groupby('timestamp_5min')['vertical_shock_range'].mean()
+df['timestamp_5min_bin'] = pd.to_datetime(df['timestamp'], errors='coerce').dt.floor('5min')
+result = df.groupby('timestamp_5min_bin')['vertical_shock_range'].mean()
 result = result.idxmax()
 ```
 
@@ -555,9 +672,9 @@ result = result.idxmax()
 
 ## Query 18 (run 2)
 
-**Query text:** Derive peak acceleration magnitude from accel_stats_x_p99, accel_stats_y_p99, and accel_stats_z_p99. Partition the route at the median latitude and report the absolute difference between the northern and southern halves' mean peak magnitudes.
+**Query text:** For every recorded latitude reading, derive peak acceleration magnitude from accel_stats_x_p99, accel_stats_y_p99, and accel_stats_z_p99. Report the absolute difference between the mean peak magnitude north versus south of the median latitude.
 
-**Failure reason:** `cache: light model returned empty content`
+**Failure reason:** `cache: semantic: semantic_low_confidence_winner`
 
 **Execution path after fallback:** `typed_operator`
 
@@ -582,20 +699,20 @@ result = result.idxmax()
       "column": "latitude",
       "comparator": "gt",
       "threshold": "median",
-      "label": "northern"
+      "label": "north"
     },
     {
       "op": "SPLIT_BY_THRESHOLD",
       "column": "latitude",
       "comparator": "lte",
       "threshold": "median",
-      "label": "southern"
+      "label": "south"
     },
     {
       "op": "AGGREGATE_PARTITIONS",
       "partitions": [
-        "northern",
-        "southern"
+        "north",
+        "south"
       ],
       "aggregate": "mean",
       "column": "peak_accel_magnitude"
@@ -631,20 +748,20 @@ result = result.idxmax()
         "column": "latitude",
         "comparator": "gt",
         "threshold": "median",
-        "label": "northern"
+        "label": "north"
       },
       {
         "op": "SPLIT_BY_THRESHOLD",
         "column": "latitude",
         "comparator": "lte",
         "threshold": "median",
-        "label": "southern"
+        "label": "south"
       },
       {
         "op": "AGGREGATE_PARTITIONS",
         "partitions": [
-          "northern",
-          "southern"
+          "north",
+          "south"
         ],
         "aggregate": "mean",
         "column": "peak_accel_magnitude"
@@ -661,25 +778,27 @@ result = result.idxmax()
 **Final executed code:**
 ```python
 df['peak_accel_magnitude'] = (df['accel_stats_x_p99']**2 + df['accel_stats_y_p99']**2 + df['accel_stats_z_p99']**2)**0.5
-northern = df[df['latitude'] gt df['latitude'].median()]
-southern = df[df['latitude'] lte df['latitude'].median()]
+north = df[df['latitude'] gt df['latitude'].median()]
+south = df[df['latitude'] lte df['latitude'].median()]
 result = {label: agg(partition) for label in partitions}
-result = compare(northern, southern, mode='abs_difference')
+result = compare(north, south, mode='abs_difference')
 ```
 
-**Stages run:** exact_cache_hit → cache_light_grounding → cache_miss_or_validation_failure → guardrail_plan → plan_validated → typed_exec
+**Stages run:** hybrid_semantic_low_confidence_winner → cache_miss_or_validation_failure → guardrail_plan → plan_validated → typed_exec
 
 ---
 
 ## Query 19 (run 2)
 
-**Query text:** Derive the vertical shock range as accel_stats_z_p99 minus accel_stats_z_p1. Calculate its mean separately for aggressive and calm behavior labels, then report the aggressive-minus-calm difference.
+**Query text:** For every 5-minute timestamp window, derive the vertical shock range as accel_stats_z_p99 minus accel_stats_z_p1 and Calculate its mean separately for aggressive and calm behavior labels. Report the overall aggressive-minus-calm difference across the route.
 
-**Failure reason:** `cache: light model returned empty content`
+**Failure reason:** `execution: DERIVE_BIN: ValueError: Invalid frequency: 5T. Failed to parse with error message: ValueError("Invalid frequency: T. Failed to parse with error message: KeyError('T'). Did you mean min?")`
 
-**Execution path after fallback:** `typed_operator`
+**Execution path after fallback:** `typed_plan_unavailable`
 
 **Plan source after fallback:** `llm`
+
+**Plan validation stage failed:** `execution`
 
 **Typed plan executed after fallback:**
 ```json
@@ -687,40 +806,96 @@ result = compare(northern, southern, mode='abs_difference')
   "version": "1",
   "steps": [
     {
+      "op": "DERIVE_BIN",
+      "column": "timestamp",
+      "kind": "temporal",
+      "width": null,
+      "freq": "5T",
+      "epoch_unit": null,
+      "result": "timestamp_5min"
+    },
+    {
+      "op": "PARALLEL_AGGREGATE",
+      "branches": [
+        {
+          "filter_column": "behavior",
+          "filter_values": [
+            "aggressive"
+          ],
+          "group_by": [
+            "timestamp_5min"
+          ],
+          "aggregate": "mean",
+          "column": "accel_stats_z_p99",
+          "result_column": "aggressive_p99"
+        },
+        {
+          "filter_column": "behavior",
+          "filter_values": [
+            "aggressive"
+          ],
+          "group_by": [
+            "timestamp_5min"
+          ],
+          "aggregate": "mean",
+          "column": "accel_stats_z_p1",
+          "result_column": "aggressive_p1"
+        },
+        {
+          "filter_column": "behavior",
+          "filter_values": [
+            "calm"
+          ],
+          "group_by": [
+            "timestamp_5min"
+          ],
+          "aggregate": "mean",
+          "column": "accel_stats_z_p99",
+          "result_column": "calm_p99"
+        },
+        {
+          "filter_column": "behavior",
+          "filter_values": [
+            "calm"
+          ],
+          "group_by": [
+            "timestamp_5min"
+          ],
+          "aggregate": "mean",
+          "column": "accel_stats_z_p1",
+          "result_column": "calm_p1"
+        }
+      ]
+    },
+    {
       "op": "DERIVE_BINARY",
-      "left": "accel_stats_z_p99",
-      "right": "accel_stats_z_p1",
+      "left": "aggressive_p99",
+      "right": "aggressive_p1",
       "operation": "subtract",
-      "result": "vertical_shock_range"
+      "result": "aggressive_shock_range"
     },
     {
-      "op": "SPLIT_BY_VALUES",
-      "column": "behavior",
-      "values": [
-        "aggressive"
-      ],
-      "label": "aggressive_group"
+      "op": "DERIVE_BINARY",
+      "left": "calm_p99",
+      "right": "calm_p1",
+      "operation": "subtract",
+      "result": "calm_shock_range"
     },
     {
-      "op": "SPLIT_BY_VALUES",
-      "column": "behavior",
-      "values": [
-        "calm"
-      ],
-      "label": "calm_group"
+      "op": "AGGREGATE_COLUMN",
+      "column": "aggressive_shock_range",
+      "aggregate": "mean"
     },
     {
-      "op": "AGGREGATE_PARTITIONS",
-      "partitions": [
-        "aggressive_group",
-        "calm_group"
-      ],
-      "aggregate": "mean",
-      "column": "vertical_shock_range"
+      "op": "AGGREGATE_COLUMN",
+      "column": "calm_shock_range",
+      "aggregate": "mean"
     },
     {
-      "op": "COMPARE_PARTITIONS",
-      "mode": "difference"
+      "op": "COMPARE_VALUES",
+      "mode": "difference",
+      "label_a": "aggressive",
+      "label_b": "calm"
     }
   ]
 }
@@ -736,56 +911,101 @@ result = compare(northern, southern, mode='abs_difference')
     "version": "1",
     "steps": [
       {
+        "op": "DERIVE_BIN",
+        "column": "timestamp",
+        "kind": "temporal",
+        "freq": "5T",
+        "result": "timestamp_5min"
+      },
+      {
+        "op": "PARALLEL_AGGREGATE",
+        "branches": [
+          {
+            "filter_column": "behavior",
+            "filter_values": [
+              "aggressive"
+            ],
+            "group_by": [
+              "timestamp_5min"
+            ],
+            "aggregate": "mean",
+            "column": "accel_stats_z_p99",
+            "result_column": "aggressive_p99"
+          },
+          {
+            "filter_column": "behavior",
+            "filter_values": [
+              "aggressive"
+            ],
+            "group_by": [
+              "timestamp_5min"
+            ],
+            "aggregate": "mean",
+            "column": "accel_stats_z_p1",
+            "result_column": "aggressive_p1"
+          },
+          {
+            "filter_column": "behavior",
+            "filter_values": [
+              "calm"
+            ],
+            "group_by": [
+              "timestamp_5min"
+            ],
+            "aggregate": "mean",
+            "column": "accel_stats_z_p99",
+            "result_column": "calm_p99"
+          },
+          {
+            "filter_column": "behavior",
+            "filter_values": [
+              "calm"
+            ],
+            "group_by": [
+              "timestamp_5min"
+            ],
+            "aggregate": "mean",
+            "column": "accel_stats_z_p1",
+            "result_column": "calm_p1"
+          }
+        ]
+      },
+      {
         "op": "DERIVE_BINARY",
-        "left": "accel_stats_z_p99",
-        "right": "accel_stats_z_p1",
+        "left": "aggressive_p99",
+        "right": "aggressive_p1",
         "operation": "subtract",
-        "result": "vertical_shock_range"
+        "result": "aggressive_shock_range"
       },
       {
-        "op": "SPLIT_BY_VALUES",
-        "column": "behavior",
-        "values": [
-          "aggressive"
-        ],
-        "label": "aggressive_group"
+        "op": "DERIVE_BINARY",
+        "left": "calm_p99",
+        "right": "calm_p1",
+        "operation": "subtract",
+        "result": "calm_shock_range"
       },
       {
-        "op": "SPLIT_BY_VALUES",
-        "column": "behavior",
-        "values": [
-          "calm"
-        ],
-        "label": "calm_group"
+        "op": "AGGREGATE_COLUMN",
+        "column": "aggressive_shock_range",
+        "aggregate": "mean"
       },
       {
-        "op": "AGGREGATE_PARTITIONS",
-        "partitions": [
-          "aggressive_group",
-          "calm_group"
-        ],
-        "aggregate": "mean",
-        "column": "vertical_shock_range"
+        "op": "AGGREGATE_COLUMN",
+        "column": "calm_shock_range",
+        "aggregate": "mean"
       },
       {
-        "op": "COMPARE_PARTITIONS",
-        "mode": "difference"
+        "op": "COMPARE_VALUES",
+        "mode": "difference",
+        "label_a": "aggressive",
+        "label_b": "calm"
       }
     ]
   }
 }
 ```
 
-**Final executed code:**
-```python
-df['vertical_shock_range'] = df['accel_stats_z_p99'] - df['accel_stats_z_p1']
-aggressive_group = df[df['behavior'].isin(['aggressive'])]
-calm_group = df[df['behavior'].isin(['calm'])]
-result = {label: agg(partition) for label in partitions}
-result = compare(aggressive_group, calm_group, mode='difference')
-```
-
-**Stages run:** exact_cache_hit → cache_light_grounding → cache_miss_or_validation_failure → guardrail_plan → plan_validated → typed_exec
+**Stages run:** hybrid_cache_hit → cache_light_grounding → cache_miss_or_validation_failure → guardrail_plan → plan_validated → typed_plan_unavailable
 
 ---
 
@@ -1006,7 +1226,7 @@ result = result.idxmax()
 
 ## Query 18 (run 3)
 
-**Query text:** Derive peak acceleration magnitude from accel_stats_x_p99, accel_stats_y_p99, and accel_stats_z_p99. Divide the route at the median latitude and report the absolute difference between the northern and southern halves' mean peak magnitudes.
+**Query text:** For every recorded latitude reading, derive peak acceleration magnitude from accel_stats_x_p99, accel_stats_y_p99, and accel_stats_z_p99. Report the absolute difference between the mean peak magnitude north versus south of the median latitude.
 
 **Failure reason:** `cache: light model returned empty content`
 
@@ -1033,20 +1253,20 @@ result = result.idxmax()
       "column": "latitude",
       "comparator": "gt",
       "threshold": "median",
-      "label": "northern"
+      "label": "north"
     },
     {
       "op": "SPLIT_BY_THRESHOLD",
       "column": "latitude",
       "comparator": "lte",
       "threshold": "median",
-      "label": "southern"
+      "label": "south"
     },
     {
       "op": "AGGREGATE_PARTITIONS",
       "partitions": [
-        "northern",
-        "southern"
+        "north",
+        "south"
       ],
       "aggregate": "mean",
       "column": "peak_accel_magnitude"
@@ -1082,20 +1302,20 @@ result = result.idxmax()
         "column": "latitude",
         "comparator": "gt",
         "threshold": "median",
-        "label": "northern"
+        "label": "north"
       },
       {
         "op": "SPLIT_BY_THRESHOLD",
         "column": "latitude",
         "comparator": "lte",
         "threshold": "median",
-        "label": "southern"
+        "label": "south"
       },
       {
         "op": "AGGREGATE_PARTITIONS",
         "partitions": [
-          "northern",
-          "southern"
+          "north",
+          "south"
         ],
         "aggregate": "mean",
         "column": "peak_accel_magnitude"
@@ -1112,10 +1332,10 @@ result = result.idxmax()
 **Final executed code:**
 ```python
 df['peak_accel_magnitude'] = (df['accel_stats_x_p99']**2 + df['accel_stats_y_p99']**2 + df['accel_stats_z_p99']**2)**0.5
-northern = df[df['latitude'] gt df['latitude'].median()]
-southern = df[df['latitude'] lte df['latitude'].median()]
+north = df[df['latitude'] gt df['latitude'].median()]
+south = df[df['latitude'] lte df['latitude'].median()]
 result = {label: agg(partition) for label in partitions}
-result = compare(northern, southern, mode='abs_difference')
+result = compare(north, south, mode='abs_difference')
 ```
 
 **Stages run:** exact_cache_hit → cache_light_grounding → cache_miss_or_validation_failure → guardrail_plan → plan_validated → typed_exec
@@ -1124,7 +1344,7 @@ result = compare(northern, southern, mode='abs_difference')
 
 ## Query 19 (run 3)
 
-**Query text:** Derive the vertical shock range as accel_stats_z_p99 minus accel_stats_z_p1. Determine its mean separately for aggressive and calm behavior labels, then report the aggressive-minus-calm difference.
+**Query text:** For every 5-minute timestamp window, derive the vertical shock range as accel_stats_z_p99 minus accel_stats_z_p1 and Determine its mean separately for aggressive and calm behavior labels. Report the overall aggressive-minus-calm difference across the route.
 
 **Failure reason:** `cache: light model returned empty content`
 
@@ -1138,40 +1358,96 @@ result = compare(northern, southern, mode='abs_difference')
   "version": "1",
   "steps": [
     {
+      "op": "DERIVE_BIN",
+      "column": "timestamp",
+      "kind": "temporal",
+      "width": null,
+      "freq": "5min",
+      "epoch_unit": null,
+      "result": "timestamp_5min"
+    },
+    {
+      "op": "PARALLEL_AGGREGATE",
+      "branches": [
+        {
+          "filter_column": "behavior",
+          "filter_values": [
+            "aggressive"
+          ],
+          "group_by": [
+            "timestamp_5min"
+          ],
+          "aggregate": "mean",
+          "column": "accel_stats_z_p99",
+          "result_column": "aggressive_p99"
+        },
+        {
+          "filter_column": "behavior",
+          "filter_values": [
+            "aggressive"
+          ],
+          "group_by": [
+            "timestamp_5min"
+          ],
+          "aggregate": "mean",
+          "column": "accel_stats_z_p1",
+          "result_column": "aggressive_p1"
+        },
+        {
+          "filter_column": "behavior",
+          "filter_values": [
+            "calm"
+          ],
+          "group_by": [
+            "timestamp_5min"
+          ],
+          "aggregate": "mean",
+          "column": "accel_stats_z_p99",
+          "result_column": "calm_p99"
+        },
+        {
+          "filter_column": "behavior",
+          "filter_values": [
+            "calm"
+          ],
+          "group_by": [
+            "timestamp_5min"
+          ],
+          "aggregate": "mean",
+          "column": "accel_stats_z_p1",
+          "result_column": "calm_p1"
+        }
+      ]
+    },
+    {
       "op": "DERIVE_BINARY",
-      "left": "accel_stats_z_p99",
-      "right": "accel_stats_z_p1",
+      "left": "aggressive_p99",
+      "right": "aggressive_p1",
       "operation": "subtract",
-      "result": "vertical_shock_range"
+      "result": "aggressive_shock_range"
     },
     {
-      "op": "SPLIT_BY_VALUES",
-      "column": "behavior",
-      "values": [
-        "aggressive"
-      ],
-      "label": "aggressive"
+      "op": "DERIVE_BINARY",
+      "left": "calm_p99",
+      "right": "calm_p1",
+      "operation": "subtract",
+      "result": "calm_shock_range"
     },
     {
-      "op": "SPLIT_BY_VALUES",
-      "column": "behavior",
-      "values": [
-        "calm"
-      ],
-      "label": "calm"
+      "op": "AGGREGATE_COLUMN",
+      "column": "aggressive_shock_range",
+      "aggregate": "mean"
     },
     {
-      "op": "AGGREGATE_PARTITIONS",
-      "partitions": [
-        "aggressive",
-        "calm"
-      ],
-      "aggregate": "mean",
-      "column": "vertical_shock_range"
+      "op": "AGGREGATE_COLUMN",
+      "column": "calm_shock_range",
+      "aggregate": "mean"
     },
     {
-      "op": "COMPARE_PARTITIONS",
-      "mode": "difference"
+      "op": "COMPARE_VALUES",
+      "mode": "difference",
+      "label_a": "aggressive",
+      "label_b": "calm"
     }
   ]
 }
@@ -1187,40 +1463,94 @@ result = compare(northern, southern, mode='abs_difference')
     "version": "1",
     "steps": [
       {
+        "op": "DERIVE_BIN",
+        "column": "timestamp",
+        "kind": "temporal",
+        "freq": "5min",
+        "result": "timestamp_5min"
+      },
+      {
+        "op": "PARALLEL_AGGREGATE",
+        "branches": [
+          {
+            "filter_column": "behavior",
+            "filter_values": [
+              "aggressive"
+            ],
+            "group_by": [
+              "timestamp_5min"
+            ],
+            "aggregate": "mean",
+            "column": "accel_stats_z_p99",
+            "result_column": "aggressive_p99"
+          },
+          {
+            "filter_column": "behavior",
+            "filter_values": [
+              "aggressive"
+            ],
+            "group_by": [
+              "timestamp_5min"
+            ],
+            "aggregate": "mean",
+            "column": "accel_stats_z_p1",
+            "result_column": "aggressive_p1"
+          },
+          {
+            "filter_column": "behavior",
+            "filter_values": [
+              "calm"
+            ],
+            "group_by": [
+              "timestamp_5min"
+            ],
+            "aggregate": "mean",
+            "column": "accel_stats_z_p99",
+            "result_column": "calm_p99"
+          },
+          {
+            "filter_column": "behavior",
+            "filter_values": [
+              "calm"
+            ],
+            "group_by": [
+              "timestamp_5min"
+            ],
+            "aggregate": "mean",
+            "column": "accel_stats_z_p1",
+            "result_column": "calm_p1"
+          }
+        ]
+      },
+      {
         "op": "DERIVE_BINARY",
-        "left": "accel_stats_z_p99",
-        "right": "accel_stats_z_p1",
+        "left": "aggressive_p99",
+        "right": "aggressive_p1",
         "operation": "subtract",
-        "result": "vertical_shock_range"
+        "result": "aggressive_shock_range"
       },
       {
-        "op": "SPLIT_BY_VALUES",
-        "column": "behavior",
-        "values": [
-          "aggressive"
-        ],
-        "label": "aggressive"
+        "op": "DERIVE_BINARY",
+        "left": "calm_p99",
+        "right": "calm_p1",
+        "operation": "subtract",
+        "result": "calm_shock_range"
       },
       {
-        "op": "SPLIT_BY_VALUES",
-        "column": "behavior",
-        "values": [
-          "calm"
-        ],
-        "label": "calm"
+        "op": "AGGREGATE_COLUMN",
+        "column": "aggressive_shock_range",
+        "aggregate": "mean"
       },
       {
-        "op": "AGGREGATE_PARTITIONS",
-        "partitions": [
-          "aggressive",
-          "calm"
-        ],
-        "aggregate": "mean",
-        "column": "vertical_shock_range"
+        "op": "AGGREGATE_COLUMN",
+        "column": "calm_shock_range",
+        "aggregate": "mean"
       },
       {
-        "op": "COMPARE_PARTITIONS",
-        "mode": "difference"
+        "op": "COMPARE_VALUES",
+        "mode": "difference",
+        "label_a": "aggressive",
+        "label_b": "calm"
       }
     ]
   }
@@ -1229,14 +1559,21 @@ result = compare(northern, southern, mode='abs_difference')
 
 **Final executed code:**
 ```python
-df['vertical_shock_range'] = df['accel_stats_z_p99'] - df['accel_stats_z_p1']
-aggressive = df[df['behavior'].isin(['aggressive'])]
-calm = df[df['behavior'].isin(['calm'])]
-result = {label: agg(partition) for label in partitions}
-result = compare(aggressive, calm, mode='difference')
+df['timestamp_5min'] = pd.to_datetime(df['timestamp'], errors='coerce').dt.floor('5min')
+# PARALLEL_AGGREGATE branches:
+branch_0 = df[df['behavior'].isin(['aggressive'])].groupby(['timestamp_5min'])['accel_stats_z_p99'].mean()
+branch_1 = df[df['behavior'].isin(['aggressive'])].groupby(['timestamp_5min'])['accel_stats_z_p1'].mean()
+branch_2 = df[df['behavior'].isin(['calm'])].groupby(['timestamp_5min'])['accel_stats_z_p99'].mean()
+branch_3 = df[df['behavior'].isin(['calm'])].groupby(['timestamp_5min'])['accel_stats_z_p1'].mean()
+merged = branch_0.merge(branch_1, on=['timestamp_5min'], how='outer')
+df['aggressive_shock_range'] = df['aggressive_p99'] - df['aggressive_p1']
+df['calm_shock_range'] = df['calm_p99'] - df['calm_p1']
+result = df['aggressive_shock_range'].mean()
+result = df['calm_shock_range'].mean()
+result = compare(aggressive=5.0055000000000005, calm=1.291285714285714, mode='difference')
 ```
 
-**Stages run:** exact_cache_hit → cache_light_grounding → cache_miss_or_validation_failure → guardrail_plan → plan_validated → typed_exec
+**Stages run:** hybrid_cache_hit → cache_light_grounding → cache_miss_or_validation_failure → guardrail_plan → plan_validated → typed_exec
 
 ---
 
@@ -1276,12 +1613,12 @@ result = compare(aggressive, calm, mode='difference')
       "width": null,
       "freq": "5min",
       "epoch_unit": null,
-      "result": "timestamp_5min"
+      "result": "timestamp_bin"
     },
     {
       "op": "GROUP_AGGREGATE",
       "group_by": [
-        "timestamp_5min"
+        "timestamp_bin"
       ],
       "aggregate": "mean",
       "column": "vertical_shock_range",
@@ -1323,12 +1660,12 @@ result = compare(aggressive, calm, mode='difference')
         "column": "timestamp",
         "kind": "temporal",
         "freq": "5min",
-        "result": "timestamp_5min"
+        "result": "timestamp_bin"
       },
       {
         "op": "GROUP_AGGREGATE",
         "group_by": [
-          "timestamp_5min"
+          "timestamp_bin"
         ],
         "aggregate": "mean",
         "column": "vertical_shock_range"
@@ -1346,8 +1683,8 @@ result = compare(aggressive, calm, mode='difference')
 ```python
 df = df[df['behavior'].isin(['aggressive'])]
 df['vertical_shock_range'] = df['accel_stats_z_p99'] - df['accel_stats_z_p1']
-df['timestamp_5min'] = pd.to_datetime(df['timestamp'], errors='coerce').dt.floor('5min')
-result = df.groupby('timestamp_5min')['vertical_shock_range'].mean()
+df['timestamp_bin'] = pd.to_datetime(df['timestamp'], errors='coerce').dt.floor('5min')
+result = df.groupby('timestamp_bin')['vertical_shock_range'].mean()
 result = result.idxmax()
 ```
 

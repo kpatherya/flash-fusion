@@ -2,7 +2,7 @@
   "version": 1,
   "dataset": "wisdm",
   "query_version": "v1",
-  "count": 29,
+  "count": 36,
   "entries": {
     "wisdm:15:v1": {
       "template_id": "wisdm:15:v1",
@@ -1271,6 +1271,434 @@
       },
       "source": "offline_semantic_registry_build"
     },
+    "wisdm:93:v1": {
+      "template_id": "wisdm:93:v1",
+      "dataset": "wisdm",
+      "status": "reusable",
+      "query_id": "",
+      "query_text": "For every subject_id, Calculate x-acceleration variance separately while Jogging and while Walking. Among subject_id values whose Jogging variance exceeds their Walking variance, return the subject_id with the largest Jogging-minus-Walking variance difference.",
+      "query_version": "v1",
+      "operator_skeleton": [
+        "FILTER_NOT_EMPTY",
+        "PARALLEL_AGGREGATE",
+        "DERIVE_BINARY",
+        "FILTER_COMPARE",
+        "RANK_ROWS"
+      ],
+      "operator_contract_hash": null,
+      "schema_fingerprint": "7ad69ccf7f729a4d",
+      "semantic_signature": {
+        "admissibility": "in_scope",
+        "confidence": 0.85,
+        "aggregate": "max",
+        "fields": [
+          "subject_id",
+          "x"
+        ],
+        "predicate_ops": {},
+        "filter_values": {},
+        "intent_flags": {
+          "rank": true,
+          "group_by": false,
+          "difference": true,
+          "derived_magnitude": false,
+          "time_bin": false,
+          "correlation": false,
+          "last_event": false,
+          "predictive": false
+        },
+        "predictive": {
+          "model": null,
+          "target_column": null,
+          "train_fraction": null,
+          "holdout_row": null
+        },
+        "operator_skeleton_hint": null,
+        "output_shape": "scalar",
+        "operator_skeleton": [
+          "FILTER_NOT_EMPTY",
+          "PARALLEL_AGGREGATE",
+          "DERIVE_BINARY",
+          "FILTER_COMPARE",
+          "RANK_ROWS"
+        ]
+      },
+      "source": "offline_semantic_registry_build"
+    },
+    "wisdm:94:v1": {
+      "template_id": "wisdm:94:v1",
+      "dataset": "wisdm",
+      "status": "reusable",
+      "query_id": "",
+      "query_text": "For every subject_id, Calculate mean acceleration magnitude while Jogging and while Walking. Return the Pearson correlation between the two per-subject mean-magnitude columns.",
+      "query_version": "v1",
+      "operator_skeleton": [
+        "FILTER_NOT_EMPTY",
+        "DERIVE_VECTOR_MAGNITUDE",
+        "PARALLEL_AGGREGATE",
+        "CORRELATE_COLUMNS"
+      ],
+      "operator_contract_hash": null,
+      "schema_fingerprint": "7ad69ccf7f729a4d",
+      "semantic_signature": {
+        "admissibility": "in_scope",
+        "confidence": 0.85,
+        "aggregate": "mean",
+        "fields": [
+          "subject_id"
+        ],
+        "predicate_ops": {},
+        "filter_values": {},
+        "intent_flags": {
+          "rank": false,
+          "group_by": true,
+          "difference": false,
+          "derived_magnitude": true,
+          "time_bin": false,
+          "correlation": true,
+          "last_event": false,
+          "predictive": false
+        },
+        "predictive": {
+          "model": null,
+          "target_column": null,
+          "train_fraction": null,
+          "holdout_row": null
+        },
+        "operator_skeleton_hint": null,
+        "output_shape": "scalar",
+        "operator_skeleton": [
+          "FILTER_NOT_EMPTY",
+          "DERIVE_VECTOR_MAGNITUDE",
+          "PARALLEL_AGGREGATE",
+          "CORRELATE_COLUMNS"
+        ]
+      },
+      "source": "offline_semantic_registry_build"
+    },
+    "wisdm:95:v1": {
+      "template_id": "wisdm:95:v1",
+      "dataset": "wisdm",
+      "status": "reusable",
+      "query_id": "",
+      "query_text": "For every subject_id, derive elapsed seconds from timestamp, then Calculate total locomotion duration (Walking, Jogging, Upstairs, Downstairs) and total resting duration (Sitting, Standing). Among subjects with more locomotion than resting time, return the subject_id with the largest locomotion-minus-resting duration.",
+      "query_version": "v1",
+      "operator_skeleton": [
+        "FILTER_NOT_EMPTY",
+        "DERIVE_DURATION_SECONDS",
+        "PARALLEL_AGGREGATE",
+        "DERIVE_BINARY",
+        "FILTER_COMPARE",
+        "RANK_ROWS"
+      ],
+      "operator_contract_hash": null,
+      "schema_fingerprint": "7ad69ccf7f729a4d",
+      "semantic_signature": {
+        "admissibility": "in_scope",
+        "confidence": 0.85,
+        "aggregate": "max",
+        "fields": [
+          "subject_id",
+          "timestamp"
+        ],
+        "predicate_ops": {},
+        "filter_values": {},
+        "intent_flags": {
+          "rank": true,
+          "group_by": false,
+          "difference": false,
+          "derived_magnitude": false,
+          "time_bin": false,
+          "correlation": false,
+          "last_event": false,
+          "predictive": false
+        },
+        "predictive": {
+          "model": null,
+          "target_column": null,
+          "train_fraction": null,
+          "holdout_row": null
+        },
+        "operator_skeleton_hint": null,
+        "output_shape": "scalar",
+        "operator_skeleton": [
+          "FILTER_NOT_EMPTY",
+          "DERIVE_DURATION_SECONDS",
+          "PARALLEL_AGGREGATE",
+          "DERIVE_BINARY",
+          "FILTER_COMPARE",
+          "RANK_ROWS"
+        ]
+      },
+      "source": "offline_semantic_registry_build"
+    },
+    "wisdm:96:v1": {
+      "template_id": "wisdm:96:v1",
+      "dataset": "wisdm",
+      "status": "reusable",
+      "query_id": "",
+      "query_text": "For every subject_id, Calculate mean acceleration magnitude separately for dynamic activities (Walking, Jogging, Upstairs, Downstairs) and resting activities (Sitting, Standing). Return the subject_id with the largest dynamic-minus-resting mean magnitude.",
+      "query_version": "v1",
+      "operator_skeleton": [
+        "FILTER_NOT_EMPTY",
+        "DERIVE_VECTOR_MAGNITUDE",
+        "PARALLEL_AGGREGATE",
+        "DERIVE_BINARY",
+        "RANK_ROWS"
+      ],
+      "operator_contract_hash": null,
+      "schema_fingerprint": "7ad69ccf7f729a4d",
+      "semantic_signature": {
+        "admissibility": "in_scope",
+        "confidence": 0.85,
+        "aggregate": "max",
+        "fields": [
+          "subject_id"
+        ],
+        "predicate_ops": {},
+        "filter_values": {},
+        "intent_flags": {
+          "rank": true,
+          "group_by": false,
+          "difference": false,
+          "derived_magnitude": true,
+          "time_bin": false,
+          "correlation": false,
+          "last_event": false,
+          "predictive": false
+        },
+        "predictive": {
+          "model": null,
+          "target_column": null,
+          "train_fraction": null,
+          "holdout_row": null
+        },
+        "operator_skeleton_hint": null,
+        "output_shape": "scalar",
+        "operator_skeleton": [
+          "FILTER_NOT_EMPTY",
+          "DERIVE_VECTOR_MAGNITUDE",
+          "PARALLEL_AGGREGATE",
+          "DERIVE_BINARY",
+          "RANK_ROWS"
+        ]
+      },
+      "source": "offline_semantic_registry_build"
+    },
+    "wisdm:97:v1": {
+      "template_id": "wisdm:97:v1",
+      "dataset": "wisdm",
+      "status": "reusable",
+      "query_id": "",
+      "query_text": "For every subject_id, Determine mean acceleration magnitude while Jogging and while Walking. Return the Pearson correlation between the two per-subject mean-magnitude columns.",
+      "query_version": "v1",
+      "operator_skeleton": [
+        "FILTER_NOT_EMPTY",
+        "DERIVE_VECTOR_MAGNITUDE",
+        "PARALLEL_AGGREGATE",
+        "CORRELATE_COLUMNS"
+      ],
+      "operator_contract_hash": null,
+      "schema_fingerprint": "7ad69ccf7f729a4d",
+      "semantic_signature": {
+        "admissibility": "in_scope",
+        "confidence": 0.85,
+        "aggregate": "mean",
+        "fields": [
+          "subject_id"
+        ],
+        "predicate_ops": {},
+        "filter_values": {},
+        "intent_flags": {
+          "rank": false,
+          "group_by": true,
+          "difference": false,
+          "derived_magnitude": true,
+          "time_bin": false,
+          "correlation": true,
+          "last_event": false,
+          "predictive": false
+        },
+        "predictive": {
+          "model": null,
+          "target_column": null,
+          "train_fraction": null,
+          "holdout_row": null
+        },
+        "operator_skeleton_hint": null,
+        "output_shape": "scalar",
+        "operator_skeleton": [
+          "FILTER_NOT_EMPTY",
+          "DERIVE_VECTOR_MAGNITUDE",
+          "PARALLEL_AGGREGATE",
+          "CORRELATE_COLUMNS"
+        ]
+      },
+      "source": "offline_semantic_registry_build"
+    },
+    "wisdm:98:v1": {
+      "template_id": "wisdm:98:v1",
+      "dataset": "wisdm",
+      "status": "reusable",
+      "query_id": "",
+      "query_text": "For every subject_id, Determine x-acceleration variance separately while Jogging and while Walking. Among subject_id values whose Jogging variance exceeds their Walking variance, return the subject_id with the largest Jogging-minus-Walking variance difference.",
+      "query_version": "v1",
+      "operator_skeleton": [
+        "FILTER_NOT_EMPTY",
+        "PARALLEL_AGGREGATE",
+        "DERIVE_BINARY",
+        "FILTER_COMPARE",
+        "RANK_ROWS"
+      ],
+      "operator_contract_hash": null,
+      "schema_fingerprint": "7ad69ccf7f729a4d",
+      "semantic_signature": {
+        "admissibility": "in_scope",
+        "confidence": 0.85,
+        "aggregate": "max",
+        "fields": [
+          "subject_id",
+          "x"
+        ],
+        "predicate_ops": {},
+        "filter_values": {},
+        "intent_flags": {
+          "rank": true,
+          "group_by": false,
+          "difference": true,
+          "derived_magnitude": false,
+          "time_bin": false,
+          "correlation": false,
+          "last_event": false,
+          "predictive": false
+        },
+        "predictive": {
+          "model": null,
+          "target_column": null,
+          "train_fraction": null,
+          "holdout_row": null
+        },
+        "operator_skeleton_hint": null,
+        "output_shape": "scalar",
+        "operator_skeleton": [
+          "FILTER_NOT_EMPTY",
+          "PARALLEL_AGGREGATE",
+          "DERIVE_BINARY",
+          "FILTER_COMPARE",
+          "RANK_ROWS"
+        ]
+      },
+      "source": "offline_semantic_registry_build"
+    },
+    "wisdm:99:v1": {
+      "template_id": "wisdm:99:v1",
+      "dataset": "wisdm",
+      "status": "reusable",
+      "query_id": "",
+      "query_text": "For every subject_id, Determine mean acceleration magnitude separately for dynamic activities (Walking, Jogging, Upstairs, Downstairs) and resting activities (Sitting, Standing). Return the subject_id with the largest dynamic-minus-resting mean magnitude.",
+      "query_version": "v1",
+      "operator_skeleton": [
+        "FILTER_NOT_EMPTY",
+        "DERIVE_VECTOR_MAGNITUDE",
+        "PARALLEL_AGGREGATE",
+        "DERIVE_BINARY",
+        "RANK_ROWS"
+      ],
+      "operator_contract_hash": null,
+      "schema_fingerprint": "7ad69ccf7f729a4d",
+      "semantic_signature": {
+        "admissibility": "in_scope",
+        "confidence": 0.85,
+        "aggregate": "max",
+        "fields": [
+          "subject_id"
+        ],
+        "predicate_ops": {},
+        "filter_values": {},
+        "intent_flags": {
+          "rank": true,
+          "group_by": false,
+          "difference": false,
+          "derived_magnitude": true,
+          "time_bin": false,
+          "correlation": false,
+          "last_event": false,
+          "predictive": false
+        },
+        "predictive": {
+          "model": null,
+          "target_column": null,
+          "train_fraction": null,
+          "holdout_row": null
+        },
+        "operator_skeleton_hint": null,
+        "output_shape": "scalar",
+        "operator_skeleton": [
+          "FILTER_NOT_EMPTY",
+          "DERIVE_VECTOR_MAGNITUDE",
+          "PARALLEL_AGGREGATE",
+          "DERIVE_BINARY",
+          "RANK_ROWS"
+        ]
+      },
+      "source": "offline_semantic_registry_build"
+    },
+    "wisdm:100:v1": {
+      "template_id": "wisdm:100:v1",
+      "dataset": "wisdm",
+      "status": "reusable",
+      "query_id": "",
+      "query_text": "For every subject_id, derive elapsed seconds from timestamp, then Determine total locomotion duration (Walking, Jogging, Upstairs, Downstairs) and total resting duration (Sitting, Standing). Among subjects with more locomotion than resting time, return the subject_id with the largest locomotion-minus-resting duration.",
+      "query_version": "v1",
+      "operator_skeleton": [
+        "FILTER_NOT_EMPTY",
+        "DERIVE_DURATION_SECONDS",
+        "PARALLEL_AGGREGATE",
+        "DERIVE_BINARY",
+        "FILTER_COMPARE",
+        "RANK_ROWS"
+      ],
+      "operator_contract_hash": null,
+      "schema_fingerprint": "7ad69ccf7f729a4d",
+      "semantic_signature": {
+        "admissibility": "in_scope",
+        "confidence": 0.85,
+        "aggregate": "max",
+        "fields": [
+          "subject_id",
+          "timestamp"
+        ],
+        "predicate_ops": {},
+        "filter_values": {},
+        "intent_flags": {
+          "rank": true,
+          "group_by": false,
+          "difference": false,
+          "derived_magnitude": false,
+          "time_bin": false,
+          "correlation": false,
+          "last_event": false,
+          "predictive": false
+        },
+        "predictive": {
+          "model": null,
+          "target_column": null,
+          "train_fraction": null,
+          "holdout_row": null
+        },
+        "operator_skeleton_hint": null,
+        "output_shape": "scalar",
+        "operator_skeleton": [
+          "FILTER_NOT_EMPTY",
+          "DERIVE_DURATION_SECONDS",
+          "PARALLEL_AGGREGATE",
+          "DERIVE_BINARY",
+          "FILTER_COMPARE",
+          "RANK_ROWS"
+        ]
+      },
+      "source": "offline_semantic_registry_build"
+    },
     "wisdm:17:v1": {
       "template_id": "wisdm:17:v1",
       "dataset": "wisdm",
@@ -1322,69 +1750,18 @@
       },
       "source": "offline_semantic_registry_build"
     },
-    "wisdm:18:v1": {
-      "template_id": "wisdm:18:v1",
-      "dataset": "wisdm",
-      "status": "reusable",
-      "query_id": "18",
-      "query_text": "For every subject_id, compute x-acceleration variance separately while Jogging and while Walking. Among subject_id values whose Jogging variance exceeds their Walking variance, return the subject_id with the largest Jogging-minus-Walking variance difference.",
-      "query_version": "v1",
-      "operator_skeleton": [
-        "PARALLEL_AGGREGATE",
-        "DERIVE_BINARY",
-        "FILTER_COMPARE",
-        "RANK_ROWS"
-      ],
-      "operator_contract_hash": "2be2d0b165f22ee01479bee3042b9568475c1f3b99a8aa028e2d2f5b4c5d0240",
-      "schema_fingerprint": null,
-      "semantic_signature": {
-        "admissibility": "in_scope",
-        "confidence": 0.85,
-        "aggregate": "max",
-        "fields": [
-          "subject_id",
-          "x"
-        ],
-        "predicate_ops": {},
-        "filter_values": {},
-        "intent_flags": {
-          "rank": true,
-          "group_by": false,
-          "difference": true,
-          "derived_magnitude": false,
-          "time_bin": false,
-          "correlation": false,
-          "last_event": false,
-          "predictive": false
-        },
-        "predictive": {
-          "model": null,
-          "target_column": null,
-          "train_fraction": null,
-          "holdout_row": null
-        },
-        "operator_skeleton_hint": null,
-        "output_shape": "scalar",
-        "operator_skeleton": [
-          "PARALLEL_AGGREGATE",
-          "DERIVE_BINARY",
-          "FILTER_COMPARE",
-          "RANK_ROWS"
-        ]
-      },
-      "source": "offline_semantic_registry_build"
-    },
     "wisdm:19:v1": {
       "template_id": "wisdm:19:v1",
       "dataset": "wisdm",
       "status": "reusable",
       "query_id": "19",
-      "query_text": "For every subject_id, compute mean acceleration magnitude while Jogging and while Walking. Return the Pearson correlation between the two per-subject mean-magnitude columns.",
+      "query_text": "For every subject_id, compute mean acceleration magnitude while Jogging and while Walking. Report whether subjects who jog harder also walk harder, ranking subjects consistently across both activities.",
       "query_version": "v1",
       "operator_skeleton": [
+        "FILTER_NOT_EMPTY",
         "DERIVE_VECTOR_MAGNITUDE",
         "PARALLEL_AGGREGATE",
-        "CORRELATE_COLUMNS"
+        "RANK_ROWS"
       ],
       "operator_contract_hash": "2be2d0b165f22ee01479bee3042b9568475c1f3b99a8aa028e2d2f5b4c5d0240",
       "schema_fingerprint": null,
@@ -1399,11 +1776,11 @@
         "filter_values": {},
         "intent_flags": {
           "rank": false,
-          "group_by": true,
+          "group_by": false,
           "difference": false,
           "derived_magnitude": true,
           "time_bin": false,
-          "correlation": true,
+          "correlation": false,
           "last_event": false,
           "predictive": false
         },
@@ -1416,9 +1793,10 @@
         "operator_skeleton_hint": null,
         "output_shape": "scalar",
         "operator_skeleton": [
+          "FILTER_NOT_EMPTY",
           "DERIVE_VECTOR_MAGNITUDE",
           "PARALLEL_AGGREGATE",
-          "CORRELATE_COLUMNS"
+          "RANK_ROWS"
         ]
       },
       "source": "offline_semantic_registry_build"

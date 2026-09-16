@@ -2,7 +2,7 @@
   "version": 1,
   "dataset": "ecg",
   "query_version": "v1",
-  "count": 28,
+  "count": 34,
   "entries": {
     "ecg:13:v1": {
       "template_id": "ecg:13:v1",
@@ -1332,12 +1332,340 @@
       },
       "source": "offline_semantic_registry_build"
     },
+    "ecg:101:v1": {
+      "template_id": "ecg:101:v1",
+      "dataset": "ecg",
+      "status": "reusable",
+      "query_id": "",
+      "query_text": "For record_id 101, divide time_s into 10-second bins. For every bin, Calculate annotated-row rate as rows with an annotation in the known annotation-code list divided by all rows in the bin. Return the Pearson correlation between bin index and annotated-row rate.",
+      "query_version": "v1",
+      "operator_skeleton": [
+        "FILTER_COMPARE",
+        "DERIVE_BIN",
+        "PARALLEL_AGGREGATE",
+        "DERIVE_BINARY",
+        "CORRELATE_COLUMNS"
+      ],
+      "operator_contract_hash": null,
+      "schema_fingerprint": "3e2dc640c05be9c3",
+      "semantic_signature": {
+        "admissibility": "in_scope",
+        "confidence": 0.85,
+        "aggregate": null,
+        "fields": [
+          "annotation",
+          "record_id",
+          "time_s"
+        ],
+        "predicate_ops": {
+          "record_id": "eq"
+        },
+        "filter_values": {
+          "record_id": 101
+        },
+        "intent_flags": {
+          "rank": false,
+          "group_by": true,
+          "difference": false,
+          "derived_magnitude": false,
+          "time_bin": true,
+          "correlation": true,
+          "last_event": false,
+          "predictive": false
+        },
+        "predictive": {
+          "model": null,
+          "target_column": null,
+          "train_fraction": null,
+          "holdout_row": null
+        },
+        "operator_skeleton_hint": null,
+        "output_shape": "list",
+        "operator_skeleton": [
+          "FILTER_COMPARE",
+          "DERIVE_BIN",
+          "PARALLEL_AGGREGATE",
+          "DERIVE_BINARY",
+          "CORRELATE_COLUMNS"
+        ]
+      },
+      "source": "offline_semantic_registry_build"
+    },
+    "ecg:102:v1": {
+      "template_id": "ecg:102:v1",
+      "dataset": "ecg",
+      "status": "reusable",
+      "query_id": "",
+      "query_text": "For every record_id, independently Calculate MLII variance and V1 variance. Define total lead variability as their sum. Return the record_id with the largest total lead variability.",
+      "query_version": "v1",
+      "operator_skeleton": [
+        "PARALLEL_AGGREGATE",
+        "DERIVE_BINARY",
+        "RANK_ROWS"
+      ],
+      "operator_contract_hash": null,
+      "schema_fingerprint": "3e2dc640c05be9c3",
+      "semantic_signature": {
+        "admissibility": "in_scope",
+        "confidence": 0.85,
+        "aggregate": "max",
+        "fields": [
+          "MLII",
+          "V1",
+          "record_id"
+        ],
+        "predicate_ops": {},
+        "filter_values": {},
+        "intent_flags": {
+          "rank": true,
+          "group_by": false,
+          "difference": false,
+          "derived_magnitude": false,
+          "time_bin": false,
+          "correlation": false,
+          "last_event": false,
+          "predictive": false
+        },
+        "predictive": {
+          "model": null,
+          "target_column": null,
+          "train_fraction": null,
+          "holdout_row": null
+        },
+        "operator_skeleton_hint": null,
+        "output_shape": "scalar",
+        "operator_skeleton": [
+          "PARALLEL_AGGREGATE",
+          "DERIVE_BINARY",
+          "RANK_ROWS"
+        ]
+      },
+      "source": "offline_semantic_registry_build"
+    },
+    "ecg:103:v1": {
+      "template_id": "ecg:103:v1",
+      "dataset": "ecg",
+      "status": "reusable",
+      "query_id": "",
+      "query_text": "Among rows whose annotation is one of the known MIT-ECG annotation codes, divide time_s into 10-second bins. For every (record_id, bin) pair, Calculate MLII RMS. Return the (record_id, bin) pair with the greatest RMS.",
+      "query_version": "v1",
+      "operator_skeleton": [
+        "FILTER_NOT_EMPTY",
+        "DERIVE_BIN",
+        "GROUP_AGGREGATE",
+        "RANK_GROUPS"
+      ],
+      "operator_contract_hash": null,
+      "schema_fingerprint": "3e2dc640c05be9c3",
+      "semantic_signature": {
+        "admissibility": "in_scope",
+        "confidence": 0.85,
+        "aggregate": "max",
+        "fields": [
+          "MLII",
+          "annotation",
+          "record_id",
+          "time_s"
+        ],
+        "predicate_ops": {},
+        "filter_values": {},
+        "intent_flags": {
+          "rank": false,
+          "group_by": false,
+          "difference": false,
+          "derived_magnitude": true,
+          "time_bin": true,
+          "correlation": false,
+          "last_event": false,
+          "predictive": false
+        },
+        "predictive": {
+          "model": null,
+          "target_column": null,
+          "train_fraction": null,
+          "holdout_row": null
+        },
+        "operator_skeleton_hint": null,
+        "output_shape": "scalar",
+        "operator_skeleton": [
+          "FILTER_NOT_EMPTY",
+          "DERIVE_BIN",
+          "GROUP_AGGREGATE",
+          "RANK_GROUPS"
+        ]
+      },
+      "source": "offline_semantic_registry_build"
+    },
+    "ecg:104:v1": {
+      "template_id": "ecg:104:v1",
+      "dataset": "ecg",
+      "status": "reusable",
+      "query_id": "",
+      "query_text": "For record_id 101, divide time_s into 10-second bins. For every bin, Determine annotated-row rate as rows with an annotation in the known annotation-code list divided by all rows in the bin. Return the Pearson correlation between bin index and annotated-row rate.",
+      "query_version": "v1",
+      "operator_skeleton": [
+        "FILTER_COMPARE",
+        "DERIVE_BIN",
+        "PARALLEL_AGGREGATE",
+        "DERIVE_BINARY",
+        "CORRELATE_COLUMNS"
+      ],
+      "operator_contract_hash": null,
+      "schema_fingerprint": "3e2dc640c05be9c3",
+      "semantic_signature": {
+        "admissibility": "in_scope",
+        "confidence": 0.85,
+        "aggregate": null,
+        "fields": [
+          "annotation",
+          "record_id",
+          "time_s"
+        ],
+        "predicate_ops": {
+          "record_id": "eq"
+        },
+        "filter_values": {
+          "record_id": 101
+        },
+        "intent_flags": {
+          "rank": false,
+          "group_by": true,
+          "difference": false,
+          "derived_magnitude": false,
+          "time_bin": true,
+          "correlation": true,
+          "last_event": false,
+          "predictive": false
+        },
+        "predictive": {
+          "model": null,
+          "target_column": null,
+          "train_fraction": null,
+          "holdout_row": null
+        },
+        "operator_skeleton_hint": null,
+        "output_shape": "list",
+        "operator_skeleton": [
+          "FILTER_COMPARE",
+          "DERIVE_BIN",
+          "PARALLEL_AGGREGATE",
+          "DERIVE_BINARY",
+          "CORRELATE_COLUMNS"
+        ]
+      },
+      "source": "offline_semantic_registry_build"
+    },
+    "ecg:105:v1": {
+      "template_id": "ecg:105:v1",
+      "dataset": "ecg",
+      "status": "reusable",
+      "query_id": "",
+      "query_text": "Among rows whose annotation is one of the known MIT-ECG annotation codes, divide time_s into 10-second bins. For every (record_id, bin) pair, Determine MLII RMS. Return the (record_id, bin) pair with the greatest RMS.",
+      "query_version": "v1",
+      "operator_skeleton": [
+        "FILTER_NOT_EMPTY",
+        "DERIVE_BIN",
+        "GROUP_AGGREGATE",
+        "RANK_GROUPS"
+      ],
+      "operator_contract_hash": null,
+      "schema_fingerprint": "3e2dc640c05be9c3",
+      "semantic_signature": {
+        "admissibility": "in_scope",
+        "confidence": 0.85,
+        "aggregate": "max",
+        "fields": [
+          "MLII",
+          "annotation",
+          "record_id",
+          "time_s"
+        ],
+        "predicate_ops": {},
+        "filter_values": {},
+        "intent_flags": {
+          "rank": false,
+          "group_by": false,
+          "difference": false,
+          "derived_magnitude": true,
+          "time_bin": true,
+          "correlation": false,
+          "last_event": false,
+          "predictive": false
+        },
+        "predictive": {
+          "model": null,
+          "target_column": null,
+          "train_fraction": null,
+          "holdout_row": null
+        },
+        "operator_skeleton_hint": null,
+        "output_shape": "scalar",
+        "operator_skeleton": [
+          "FILTER_NOT_EMPTY",
+          "DERIVE_BIN",
+          "GROUP_AGGREGATE",
+          "RANK_GROUPS"
+        ]
+      },
+      "source": "offline_semantic_registry_build"
+    },
+    "ecg:106:v1": {
+      "template_id": "ecg:106:v1",
+      "dataset": "ecg",
+      "status": "reusable",
+      "query_id": "",
+      "query_text": "For every record_id, independently Determine MLII variance and V1 variance. Define total lead variability as their sum. Return the record_id with the largest total lead variability.",
+      "query_version": "v1",
+      "operator_skeleton": [
+        "PARALLEL_AGGREGATE",
+        "DERIVE_BINARY",
+        "RANK_ROWS"
+      ],
+      "operator_contract_hash": null,
+      "schema_fingerprint": "3e2dc640c05be9c3",
+      "semantic_signature": {
+        "admissibility": "in_scope",
+        "confidence": 0.85,
+        "aggregate": "max",
+        "fields": [
+          "MLII",
+          "V1",
+          "record_id"
+        ],
+        "predicate_ops": {},
+        "filter_values": {},
+        "intent_flags": {
+          "rank": true,
+          "group_by": false,
+          "difference": false,
+          "derived_magnitude": false,
+          "time_bin": false,
+          "correlation": false,
+          "last_event": false,
+          "predictive": false
+        },
+        "predictive": {
+          "model": null,
+          "target_column": null,
+          "train_fraction": null,
+          "holdout_row": null
+        },
+        "operator_skeleton_hint": null,
+        "output_shape": "scalar",
+        "operator_skeleton": [
+          "PARALLEL_AGGREGATE",
+          "DERIVE_BINARY",
+          "RANK_ROWS"
+        ]
+      },
+      "source": "offline_semantic_registry_build"
+    },
     "ecg:17:v1": {
       "template_id": "ecg:17:v1",
       "dataset": "ecg",
       "status": "reusable",
       "query_id": "17",
-      "query_text": "Among rows whose annotation is one of the known MIT-ECG annotation codes, divide time_s into 10-second bins. For each (record_id, bin) pair, compute MLII RMS. Return the (record_id, bin) pair with the greatest RMS.",
+      "query_text": "Among rows whose annotation is one of the known MIT-ECG annotation codes, partition each record_id's time_s values into consecutive groups of width 10. For each group, compute MLII RMS. Return the group with the greatest RMS.",
       "query_version": "v1",
       "operator_skeleton": [
         "FILTER_NOT_EMPTY",
@@ -1364,7 +1692,7 @@
           "group_by": true,
           "difference": false,
           "derived_magnitude": true,
-          "time_bin": true,
+          "time_bin": false,
           "correlation": false,
           "last_event": false,
           "predictive": false

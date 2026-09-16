@@ -1016,7 +1016,40 @@ def test_flash_fusion_falls_back_to_react_when_vocabulary_cannot_express_query()
     assert out.execution_path == "react_fallback"
     assert out.plan_validation_stage_failed == "no_plan"
     assert out.executed is True
-    assert "resting duration margin" in executor.execute_single.call_args.args[0]
+    assert executor.execute_single.call_args.args[0] == query
+
+
+def test_flash_fusion_can_disable_react_fallback_for_typed_plan_gaps(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from flashfusion.baselines import flash_fusion
+    from flashfusion.pipeline.operators import GuardrailAndPlan
+
+    query = "Which user's resting duration exceeds their dynamic duration most?"
+    r = _result("FLASH_FUSION", query)
+    verdict = GuardrailAndPlan(
+        in_scope=True, plan=None, ambiguous_concepts=["resting duration margin"]
+    )
+    monkeypatch.setattr(flash_fusion, "FF_REACT_FALLBACK", False)
+
+    with patch(
+        "flashfusion.baselines.flash_fusion.request_guardrail_and_plan",
+        return_value=_guardrail_return(verdict),
+    ), patch(
+        "flashfusion.baselines.flash_fusion.log_operator_gap"
+    ) as gap_log, patch(
+        "flashfusion.baselines.flash_fusion.ExecutionLayer"
+    ) as execution_layer_cls:
+        out = flash_fusion.run_flash_fusion(query, _df(), _client(), r)
+
+    gap_log.assert_called_once()
+    execution_layer_cls.assert_not_called()
+    assert out.execution_path == "typed_plan_unavailable"
+    assert out.plan_validation_stage_failed == "no_plan"
+    assert out.executed is False
+    assert out.rejected is False
+    assert out.answer == ""
+    assert out.stages_run == ["guardrail_plan", "typed_plan_unavailable"]
 
 
 def test_flash_fusion_rejects_when_plan_names_a_column_the_dataset_lacks() -> None:

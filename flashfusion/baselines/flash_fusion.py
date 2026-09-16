@@ -78,9 +78,18 @@ FF_FALLBACK_GROUNDING = os.getenv("FF_FALLBACK_GROUNDING", "1").lower() in (
     "yes",
 )
 
+# Set FF_REACT_FALLBACK=0 for strict typed-operator ablations. Planner and
+# validation failures remain observable but do not delegate to the ReAct agent.
+FF_REACT_FALLBACK = os.getenv("FF_REACT_FALLBACK", "1").lower() in (
+    "1",
+    "true",
+    "yes",
+)
+
 PATH_GUARDRAIL_REJECT = "guardrail_reject"
 PATH_TYPED_OPERATOR = "typed_operator"
 PATH_REACT_FALLBACK = "react_fallback"
+PATH_TYPED_PLAN_UNAVAILABLE = "typed_plan_unavailable"
 #: Gate 2 found the plan referencing a field this dataset does not have. That is a
 #: verdict about the question, not a gap in the vocabulary, so it is terminal — the
 #: ReAct fallback cannot conjure a column either, it can only hallucinate one.
@@ -630,16 +639,29 @@ def run_flash_fusion(
 
         # --- ReAct fallback --------------------------------------------------
         if plan is None:
-            _progress(f"Stage: react_fallback (reason: {gap_stage})")
             log_operator_gap(
                 query=query,
                 stage=gap_stage or "no_plan",
                 error=gap_error,
                 raw_plan=raw_plan_payload,
             )
-            r.execution_path = PATH_REACT_FALLBACK
             r.plan_validation_stage_failed = gap_stage or "no_plan"
             r.deterministic_fallback_reason = f"{gap_stage}: {gap_error}"
+            if not FF_REACT_FALLBACK:
+                _progress(f"Stage: typed_plan_unavailable (reason: {gap_stage})")
+                r.execution_path = PATH_TYPED_PLAN_UNAVAILABLE
+                r.alignment_explanation = (
+                    "Flash-Fusion could not produce a valid typed plan and "
+                    "ReAct fallback is disabled. "
+                    f"Reason: {r.deterministic_fallback_reason}"
+                )
+                r.answer = ""
+                r.executed = False
+                r.stages_run.append("typed_plan_unavailable")
+                return r
+
+            _progress(f"Stage: react_fallback (reason: {gap_stage})")
+            r.execution_path = PATH_REACT_FALLBACK
             r.stages_run.append("react_fallback")
 
             last_stage = "fallback_grounding"

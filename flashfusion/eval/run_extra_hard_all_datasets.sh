@@ -18,6 +18,7 @@
 
 set -euo pipefail
 
+FF_REACT_FALLBACK=0
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 cd "${REPO_ROOT}"
@@ -118,7 +119,7 @@ log "Output root: ${OUTPUT_ROOT}"
 log "Runs per benchmark: ${RUNS}"
 log "Query IDs: ${QUERY_IDS}"
 
-for baseline in REACT_ONLY; do
+for baseline in FLASH_FUSION FLASH_FUSION_CACHE; do
     run_one \
       "${baseline}" \
       bus \

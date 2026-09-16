@@ -1,0 +1,51 @@
+source_file,baseline,query_id,query_id_source,query_text,expected_rejection,gt_reference_answer,candidate_answer,candidate_rejected,candidate_executed,candidate_code,llm_verdict,llm_score,llm_reason,gt_sanity,gt_sanity_note,llm_parse_status,llm_attempts,llm_override_applied,llm_raw
+[in_memory_benchmark_run],REACT_ONLY,17,explicit,"Among rows whose annotation is one of the known MIT-ECG annotation codes, partition each record_id's time_s values into consecutive groups of width 10. For each group, compute MLII RMS. Return the group with the greatest RMS.",False,The greatest MLII RMS is 3.075804772738 for record_id 116 in the 1400.0-second bin.,"The result is: record_id      116.000000
+time_group    1400.000000
+MLII_RMS         3.075805
+Name: 1950, dtype: float64",False,True,"# Identify known MIT-ECG annotation codes (excluding empty string)
+mit_ecg_codes = {'+', 'N', '~', '|', 'Q', 'A', 'V', '/', 'x', 'F', 'j', 'L', 'a', 'R', 'J', '[', '!', ']', 'E', 'S', '""', 'f', 'e'}
+
+# Filter rows with valid MIT-ECG annotations
+filtered_df = df[df['annotation'].isin(mit_ecg_codes)]
+
+# Create group identifier for each record_id based on time_s bins of width 10
+filtered_df = filtered_df.copy()
+filtered_df['time_group'] = (filtered_df['time_s'] // 10).astype(int) * 10
+
+# Calculate RMS for MLII in each (record_id, time_group) combination
+def calculate_rms(series):
+    return (series ** 2).mean() ** 0.5
+
+rms_by_group = filtered_df.groupby(['record_id', 'time_group'])['MLII'].apply(calculate_rms).reset_index(name='MLII_RMS')
+
+# Find the group with the maximum RMS
+max_rms_row = rms_by_group.loc[rms_by_group['MLII_RMS'].idxmax()]
+
+result = max_rms_row",PASS,1.0,"The candidate answer provides the same record_id (116), time group (1400), and MLII RMS value (3.076) as the ground truth.",SOUND,Answer is specific and consistent with the query.,json,1,False,"{
+  ""verdict"": ""PASS"",
+  ""reason"": ""The candidate answer provides the same record_id (116), time group (1400), and MLII RMS value (3.076) as the ground truth."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Answer is specific and consistent with the query.""
+}"
+[in_memory_benchmark_run],REACT_ONLY,18,explicit,"For every record_id, independently compute maximum and minimum MLII. Define MLII span as maximum minus minimum. Return the record_id with the largest MLII span.",False,record_id 116 has the largest MLII span: 10.235000000000.,The result is: 116,False,True,"mlii_span = df.groupby('record_id')['MLII'].agg(lambda x: x.max() - x.min())
+result = mlii_span.idxmax()",PASS,1.0,"The candidate correctly identifies record_id 116 as having the largest MLII span, which matches the ground truth.",SOUND,The ground truth provides a clear and plausible answer consistent with the query.,json,1,False,"{
+  ""verdict"": ""PASS"",
+  ""reason"": ""The candidate correctly identifies record_id 116 as having the largest MLII span, which matches the ground truth."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""The ground truth provides a clear and plausible answer consistent with the query.""
+}"
+[in_memory_benchmark_run],REACT_ONLY,20,explicit,"For every record_id, independently compute MLII variance and V1 variance. Define total lead variability as their sum. Return the record_id with the largest total lead variability.",False,record_id 107 has the largest total lead variability: 1.110180227701.,The result is: 107,False,True,"# Compute variance of MLII and V1 for each record_id
+grouped = df.groupby('record_id')
+ml2_var = grouped['MLII'].var()
+v1_var = grouped['V1'].var()
+
+# Calculate total lead variability as sum of variances
+total_variability = ml2_var + v1_var
+
+# Find record_id with largest total lead variability
+result = total_variability.idxmax()",PASS,1.0,"The candidate correctly identifies record_id 107 as having the largest total lead variability, matching the ground truth.",SOUND,Ground truth provides a clear and plausible answer consistent with the query.,json,1,False,"{
+  ""verdict"": ""PASS"",
+  ""reason"": ""The candidate correctly identifies record_id 107 as having the largest total lead variability, matching the ground truth."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Ground truth provides a clear and plausible answer consistent with the query.""
+}"

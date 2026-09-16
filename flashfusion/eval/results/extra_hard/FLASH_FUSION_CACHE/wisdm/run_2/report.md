@@ -1,88 +1,58 @@
 # Flash-Fusion Benchmark Report
 
-Generated: 2026-09-15T20:43:04+00:00
+Generated: 2026-09-15T23:11:25+00:00
 
 ## Summary Table
 
 | Baseline           |   Avg LLM Accuracy |   Avg Latency (s) |   Avg Cost (USD) |
 |:-------------------|-------------------:|------------------:|-----------------:|
-| FLASH_FUSION_CACHE |             1.0000 |            9.5892 |           0.0044 |
+| FLASH_FUSION_CACHE |             0.5000 |            9.8662 |           0.0042 |
 
 ## Typed-Operator Coverage
 
 | Baseline           |   Queries |   Typed | Coverage   |   ReAct fallback |   Guardrail reject |   Typed avg latency (s) | Fallback avg latency (s)   |
 |:-------------------|----------:|--------:|:-----------|-----------------:|-------------------:|------------------------:|:---------------------------|
-| FLASH_FUSION_CACHE |         4 |       4 | 100%       |                0 |                  0 |                    9.59 | -                          |
+| FLASH_FUSION_CACHE |         4 |       3 | 75%        |                0 |                  0 |                   10.87 | -                          |
+
+Fallback causes: structural=1
 
 ## Per-Query Results
 
-### Q18: For every subject_id, Calculate x-acceleration variance separately while Jogging and while Walking. Among subject_id values whose Jogging variance exceeds their Walking variance, return the subject_id with the largest Jogging-minus-Walking variance difference.
+### Q18: For every subject_id, Calculate x-acceleration variance separately while Jogging and while Walking. Return the subject_id for whom Jogging pulls furthest ahead of Walking.
 
 #### FLASH_FUSION_CACHE
 
-**Answer:** The result is {'subject_id': 31, 'jogging_var': 109.50167848631395, 'walking_var': 7.69762219970115, 'var_diff': 101.8040562866128}
+**Answer:** 
 
-- Executed: True | Rejected: False | Judge: N/A
-- Stages: exact_cache_hit,cache_light_grounding,cache_miss_or_validation_failure,guardrail_plan,plan_validated,typed_exec
-- Path: typed_operator
-- Operators: FILTER_NOT_EMPTY,PARALLEL_AGGREGATE,DERIVE_BINARY,FILTER_COMPARE,RANK_ROWS
-- Latency: 8.14s | Cost: $0.01026
+- Executed: False | Rejected: False | Judge: N/A
+- Stages: hybrid_semantic_ambiguous_candidates,cache_miss_or_validation_failure,guardrail_plan,typed_plan_unavailable
+- Path: typed_plan_unavailable
+- Fallback (structural): structural: 1 validation error for GuardrailAndPlan
+plan.steps.2.DERIVE_BINARY.operation
+  Input should be 'add', 'subtract', 'multiply', 'divide' or 'abs_difference' [type=literal_error, input_value='difference', input_type=str]
+    For further information visit https://errors.pydantic.dev/2.13/v/literal_error
+- Latency: 6.86s | Cost: $0.00184
 
-**Agent Trace**
+**Alignment Explanation**
 
-```
-Thought: typed operator step 1 (FILTER_NOT_EMPTY)
-Action: typed_operator_exec
-Action Input: df = df[df['activity_label'].notna() & df['activity_label'].astype(str).str.strip().ne('')]
-Observation: rows=1098198
-Thought: typed operator step 2 (PARALLEL_AGGREGATE)
-Action: typed_operator_exec
-Action Input: # PARALLEL_AGGREGATE branches:
-branch_0 = df[df['activity_label'].isin(['Jogging'])].groupby(['subject_id'])['x'].var()
-branch_1 = df[df['activity_label'].isin(['Walking'])].groupby(['subject_id'])['x'].var()
-merged = branch_0.merge(branch_1, on=['subject_id'], how='outer')
-Observation: {'groups': 36, 'columns': ['subject_id', 'jogging_var', 'walking_var']}
-Thought: typed operator step 3 (DERIVE_BINARY)
-Action: typed_operator_exec
-Action Input: df['var_diff'] = df['jogging_var'] - df['walking_var']
-Observation: derived 'var_diff' (rows=36)
-Thought: typed operator step 4 (FILTER_COMPARE)
-Action: typed_operator_exec
-Action Input: df = df[df['var_diff'] > 0]
-Observation: rows=30
-Thought: typed operator step 5 (RANK_ROWS)
-Action: typed_operator_exec
-Action Input: idx = df['var_diff'].idxmax(); result = df.loc[idx, ['subject_id', 'jogging_var', 'walking_var', 'var_diff']].to_dict()
-Observation: {'subject_id': 31, 'jogging_var': 109.50167848631395, 'walking_var': 7.69762219970115, 'var_diff': 101.8040562866128}
-Final Answer: {'subject_id': 31, 'jogging_var': 109.50167848631395, 'walking_var': 7.69762219970115, 'var_diff': 101.8040562866128}
-```
-
-**Final Code Executed**
-
-```python
-df = df[df['activity_label'].notna() & df['activity_label'].astype(str).str.strip().ne('')]
-# PARALLEL_AGGREGATE branches:
-branch_0 = df[df['activity_label'].isin(['Jogging'])].groupby(['subject_id'])['x'].var()
-branch_1 = df[df['activity_label'].isin(['Walking'])].groupby(['subject_id'])['x'].var()
-merged = branch_0.merge(branch_1, on=['subject_id'], how='outer')
-df['var_diff'] = df['jogging_var'] - df['walking_var']
-df = df[df['var_diff'] > 0]
-idx = df['var_diff'].idxmax(); result = df.loc[idx, ['subject_id', 'jogging_var', 'walking_var', 'var_diff']].to_dict()
-```
+Flash-Fusion could not produce a valid typed plan and ReAct fallback is disabled. Reason: structural: 1 validation error for GuardrailAndPlan
+plan.steps.2.DERIVE_BINARY.operation
+  Input should be 'add', 'subtract', 'multiply', 'divide' or 'abs_difference' [type=literal_error, input_value='difference', input_type=str]
+    For further information visit https://errors.pydantic.dev/2.13/v/literal_error
 
 ---
 
-### Q19: For every subject_id, Calculate mean acceleration magnitude while Jogging and while Walking. Return the Pearson correlation between the two per-subject mean-magnitude columns.
+### Q19: For every subject_id, Calculate mean acceleration magnitude while Jogging and while Walking. Report whether subjects who jog harder also walk harder, ranking subjects consistently across both activities.
 
 #### FLASH_FUSION_CACHE
 
 **Answer:** The result is 0.7491948405475501
 
 - Executed: True | Rejected: False | Judge: N/A
-- Stages: exact_cache_hit,cache_light_grounding,cache_miss_or_validation_failure,guardrail_plan,plan_validated,typed_exec
+- Stages: hybrid_cache_hit,cache_light_grounding,cache_miss_or_validation_failure,guardrail_plan,plan_validated,typed_exec
 - Path: typed_operator
 - Operators: FILTER_NOT_EMPTY,DERIVE_VECTOR_MAGNITUDE,PARALLEL_AGGREGATE,CORRELATE_COLUMNS
-- Latency: 9.58s | Cost: $0.00224
+- Latency: 7.98s | Cost: $0.01006
 
 **Agent Trace**
 
@@ -101,10 +71,10 @@ Action Input: # PARALLEL_AGGREGATE branches:
 branch_0 = df[df['activity_label'].isin(['Jogging'])].groupby(['subject_id'])['acceleration_magnitude'].mean()
 branch_1 = df[df['activity_label'].isin(['Walking'])].groupby(['subject_id'])['acceleration_magnitude'].mean()
 merged = branch_0.merge(branch_1, on=['subject_id'], how='outer')
-Observation: {'groups': 36, 'columns': ['subject_id', 'mean_jogging_magnitude', 'mean_walking_magnitude']}
+Observation: {'groups': 36, 'columns': ['subject_id', 'mean_jogging_mag', 'mean_walking_mag']}
 Thought: typed operator step 4 (CORRELATE_COLUMNS)
 Action: typed_operator_exec
-Action Input: result = df['mean_jogging_magnitude'].corr(df['mean_walking_magnitude'], method='pearson')
+Action Input: result = df['mean_jogging_mag'].corr(df['mean_walking_mag'], method='pearson')
 Observation: 0.7491948405475501
 Final Answer: 0.7491948405475501
 ```
@@ -118,7 +88,7 @@ df['acceleration_magnitude'] = (df['x']**2 + df['y']**2 + df['z']**2)**0.5
 branch_0 = df[df['activity_label'].isin(['Jogging'])].groupby(['subject_id'])['acceleration_magnitude'].mean()
 branch_1 = df[df['activity_label'].isin(['Walking'])].groupby(['subject_id'])['acceleration_magnitude'].mean()
 merged = branch_0.merge(branch_1, on=['subject_id'], how='outer')
-result = df['mean_jogging_magnitude'].corr(df['mean_walking_magnitude'], method='pearson')
+result = df['mean_jogging_mag'].corr(df['mean_walking_mag'], method='pearson')
 ```
 
 ---
@@ -133,7 +103,7 @@ result = df['mean_jogging_magnitude'].corr(df['mean_walking_magnitude'], method=
 - Stages: exact_cache_hit,cache_light_grounding,cache_miss_or_validation_failure,guardrail_plan,plan_validated,typed_exec
 - Path: typed_operator
 - Operators: FILTER_NOT_EMPTY,DERIVE_DURATION_SECONDS,PARALLEL_AGGREGATE,DERIVE_BINARY,FILTER_COMPARE,RANK_ROWS
-- Latency: 10.34s | Cost: $0.00272
+- Latency: 13.98s | Cost: $0.00266
 
 **Agent Trace**
 
@@ -196,7 +166,7 @@ idx = df['duration_delta'].idxmax(); result = df.loc[idx, ['subject_id', 'locomo
 - Stages: exact_cache_hit,cache_light_grounding,cache_miss_or_validation_failure,guardrail_plan,plan_validated,typed_exec
 - Path: typed_operator
 - Operators: FILTER_NOT_EMPTY,DERIVE_VECTOR_MAGNITUDE,PARALLEL_AGGREGATE,DERIVE_BINARY,RANK_ROWS
-- Latency: 10.30s | Cost: $0.00235
+- Latency: 10.65s | Cost: $0.00231
 
 **Agent Trace**
 

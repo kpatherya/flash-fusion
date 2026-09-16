@@ -6,36 +6,29 @@ branch_0 = df[df['activity_label'].isin(['Downstairs', 'Jogging', 'Upstairs', 'W
 branch_1 = df[df['activity_label'].isin(['Sitting', 'Standing'])].groupby(['subject_id'])['acceleration_magnitude'].mean()
 merged = branch_0.merge(branch_1, on=['subject_id'], how='outer')
 df['magnitude_difference'] = df['dynamic_mean_magnitude'] - df['resting_mean_magnitude']
-idx = df['magnitude_difference'].idxmax(); result = df.loc[idx, ['subject_id', 'dynamic_mean_magnitude', 'resting_mean_magnitude', 'magnitude_difference']].to_dict()",PASS,1.0,"The candidate answer identifies subject_id 24 with a dynamic-minus-resting mean magnitude of 4.739, matching the ground truth.",SOUND,The ground truth is consistent with the candidate's detailed breakdown.,json,1,False,"{
+idx = df['magnitude_difference'].idxmax(); result = df.loc[idx, ['subject_id', 'dynamic_mean_magnitude', 'resting_mean_magnitude', 'magnitude_difference']].to_dict()",PASS,1.0,"The candidate answer identifies subject_id 24 with a dynamic-minus-resting mean magnitude of 4.739, matching the ground truth.",SOUND,The ground truth is consistent with the computed result.,json,1,False,"{
   ""verdict"": ""PASS"",
   ""reason"": ""The candidate answer identifies subject_id 24 with a dynamic-minus-resting mean magnitude of 4.739, matching the ground truth."",
   ""ground_truth_sanity"": ""SOUND"",
-  ""ground_truth_note"": ""The ground truth is consistent with the candidate's detailed breakdown.""
+  ""ground_truth_note"": ""The ground truth is consistent with the computed result.""
 }"
-[in_memory_benchmark_run],FLASH_FUSION,18,explicit,"For every subject_id, compute x-acceleration variance separately while Jogging and while Walking. Among subject_id values whose Jogging variance exceeds their Walking variance, return the subject_id with the largest Jogging-minus-Walking variance difference.",False,subject_id 31 has the largest positive Jogging-minus-Walking x-variance difference: 101.804056286613.,"The result is {'subject_id': 31, 'jogging_var': 109.50167848631395, 'walking_var': 7.69762219970115, 'var_diff': 101.8040562866128}",False,True,"df = df[df['activity_label'].notna() & df['activity_label'].astype(str).str.strip().ne('')]
-# PARALLEL_AGGREGATE branches:
-branch_0 = df[df['activity_label'].isin(['Jogging'])].groupby(['subject_id'])['x'].var()
-branch_1 = df[df['activity_label'].isin(['Walking'])].groupby(['subject_id'])['x'].var()
-merged = branch_0.merge(branch_1, on=['subject_id'], how='outer')
-df['var_diff'] = df['jogging_var'] - df['walking_var']
-df = df[df['var_diff'] > 0]
-idx = df['var_diff'].idxmax(); result = df.loc[idx, ['subject_id', 'jogging_var', 'walking_var', 'var_diff']].to_dict()",PASS,1.0,"The candidate answer identifies subject_id 31 with a Jogging-minus-Walking variance difference of 101.804, matching the ground truth.",SOUND,The ground truth is consistent with the candidate's detailed breakdown.,json,1,False,"{
-  ""verdict"": ""PASS"",
-  ""reason"": ""The candidate answer identifies subject_id 31 with a Jogging-minus-Walking variance difference of 101.804, matching the ground truth."",
+[in_memory_benchmark_run],FLASH_FUSION,18,explicit,"For every subject_id, compute x-acceleration variance separately while Jogging and while Walking. Return the subject_id for whom Jogging pulls furthest ahead of Walking.",False,subject_id 12 has the most negative Jogging-minus-Walking x-variance difference (Walking exceeds Jogging by the largest margin): -16.746789937351.,,False,False,,FAIL,0.0,The candidate answer is missing and cannot be compared to the ground truth.,SOUND,"The ground truth provides a clear, specific answer with a numeric difference.",json,1,False,"{
+  ""verdict"": ""FAIL"",
+  ""reason"": ""The candidate answer is missing and cannot be compared to the ground truth."",
   ""ground_truth_sanity"": ""SOUND"",
-  ""ground_truth_note"": ""The ground truth is consistent with the candidate's detailed breakdown.""
+  ""ground_truth_note"": ""The ground truth provides a clear, specific answer with a numeric difference.""
 }"
-[in_memory_benchmark_run],FLASH_FUSION,19,explicit,"For every subject_id, compute mean acceleration magnitude while Jogging and while Walking. Return the Pearson correlation between the two per-subject mean-magnitude columns.",False,The Pearson correlation between per-subject Jogging and Walking mean magnitudes is 0.749194840548.,The result is 0.7491948405475501,False,True,"df = df[df['activity_label'].notna() & df['activity_label'].astype(str).str.strip().ne('')]
+[in_memory_benchmark_run],FLASH_FUSION,19,explicit,"For every subject_id, compute mean acceleration magnitude while Jogging and while Walking. Report whether subjects who jog harder also walk harder, ranking subjects consistently across both activities.",False,Yes — subjects who jog harder also tend to walk harder: the Spearman rank correlation between per-subject Jogging and Walking mean magnitudes is 0.703812316716.,"The result is {'subject_id': 23, 'mean_jogging_mag': 17.04236300315029, 'mean_walking_mag': 12.89231971710706}",False,True,"df = df[df['activity_label'].notna() & df['activity_label'].astype(str).str.strip().ne('')]
 df['acceleration_magnitude'] = (df['x']**2 + df['y']**2 + df['z']**2)**0.5
 # PARALLEL_AGGREGATE branches:
 branch_0 = df[df['activity_label'].isin(['Jogging'])].groupby(['subject_id'])['acceleration_magnitude'].mean()
 branch_1 = df[df['activity_label'].isin(['Walking'])].groupby(['subject_id'])['acceleration_magnitude'].mean()
 merged = branch_0.merge(branch_1, on=['subject_id'], how='outer')
-result = df['mean_jogging_magnitude'].corr(df['mean_walking_magnitude'], method='pearson')",PASS,1.0,The candidate answer matches the ground truth value exactly.,SOUND,The value 0.749 is a plausible Pearson correlation coefficient.,json,1,False,"{
-  ""verdict"": ""PASS"",
-  ""reason"": ""The candidate answer matches the ground truth value exactly."",
+idx = df['mean_jogging_mag'].idxmax(); result = df.loc[idx, ['subject_id', 'mean_jogging_mag', 'mean_walking_mag']].to_dict()",FAIL,0.0,Candidate provides data for only one subject instead of computing means for all subjects and evaluating the correlation as required.,SOUND,Ground truth correctly interprets the query by computing per-subject means and assessing rank correlation.,json,1,False,"{
+  ""verdict"": ""FAIL"",
+  ""reason"": ""Candidate provides data for only one subject instead of computing means for all subjects and evaluating the correlation as required."",
   ""ground_truth_sanity"": ""SOUND"",
-  ""ground_truth_note"": ""The value 0.749 is a plausible Pearson correlation coefficient.""
+  ""ground_truth_note"": ""Ground truth correctly interprets the query by computing per-subject means and assessing rank correlation.""
 }"
 [in_memory_benchmark_run],FLASH_FUSION,20,explicit,"For every subject_id, derive elapsed seconds from timestamp, then compute total locomotion duration (Walking, Jogging, Upstairs, Downstairs) and total resting duration (Sitting, Standing). Among subjects with more locomotion than resting time, return the subject_id with the largest locomotion-minus-resting duration.",False,subject_id 19 has the largest positive locomotion-minus-resting duration: 131091.171906999982 seconds.,"The result is {'subject_id': 19, 'locomotion_duration': 131357.35168599998, 'resting_duration': 266.179779, 'duration_delta': 131091.17190699998}",False,True,"df = df[df['activity_label'].notna() & df['activity_label'].astype(str).str.strip().ne('')]
 df = df.sort_values(['subject_id', 'timestamp']); df['dt_s'] = df.groupby(['subject_id'])['timestamp'].diff().dt.total_seconds().clip(lower=0).fillna(0.0)
@@ -46,9 +39,9 @@ merged = branch_0.merge(branch_1, on=['subject_id'], how='outer')
 merged[['locomotion_duration', 'resting_duration']] = merged[['locomotion_duration', 'resting_duration']].fillna(0)
 df['duration_delta'] = df['locomotion_duration'] - df['resting_duration']
 df = df[df['duration_delta'] > 0]
-idx = df['duration_delta'].idxmax(); result = df.loc[idx, ['subject_id', 'locomotion_duration', 'resting_duration', 'duration_delta']].to_dict()",PASS,1.0,"The candidate answer identifies subject_id 19 with a locomotion-minus-resting duration of 131091.172 seconds, matching the ground truth.",SOUND,The ground truth is consistent with the computed result.,json,1,False,"{
+idx = df['duration_delta'].idxmax(); result = df.loc[idx, ['subject_id', 'locomotion_duration', 'resting_duration', 'duration_delta']].to_dict()",PASS,1.0,"The candidate answer identifies subject_id 19 with a locomotion-minus-resting duration of 131091.172 seconds, matching the ground truth.",SOUND,The ground truth is consistent with the computed result in the candidate answer.,json,1,False,"{
   ""verdict"": ""PASS"",
   ""reason"": ""The candidate answer identifies subject_id 19 with a locomotion-minus-resting duration of 131091.172 seconds, matching the ground truth."",
   ""ground_truth_sanity"": ""SOUND"",
-  ""ground_truth_note"": ""The ground truth is consistent with the computed result.""
+  ""ground_truth_note"": ""The ground truth is consistent with the computed result in the candidate answer.""
 }"

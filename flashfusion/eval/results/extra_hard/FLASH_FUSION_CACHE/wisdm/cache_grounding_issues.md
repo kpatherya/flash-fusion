@@ -6,7 +6,7 @@ Reported 12 FLASH_FUSION_CACHE grounding failure(s) where the cached skeleton co
 
 **Query text:** For every subject_id, compute mean acceleration magnitude separately for dynamic activities (Walking, Jogging, Upstairs, Downstairs) and resting activities (Sitting, Standing). Return the subject_id with the largest dynamic-minus-resting mean magnitude.
 
-**Failure reason:** `cache: light model JSON repair failed: Unterminated string starting at`
+**Failure reason:** `cache: light model returned empty content`
 
 **Execution path after fallback:** `typed_operator`
 
@@ -46,7 +46,7 @@ Reported 12 FLASH_FUSION_CACHE grounding failure(s) where the cached skeleton co
           ],
           "aggregate": "mean",
           "column": "acceleration_magnitude",
-          "result_column": "dynamic_mean_magnitude"
+          "result_column": "dynamic_mean_mag"
         },
         {
           "filter_column": "activity_label",
@@ -59,26 +59,26 @@ Reported 12 FLASH_FUSION_CACHE grounding failure(s) where the cached skeleton co
           ],
           "aggregate": "mean",
           "column": "acceleration_magnitude",
-          "result_column": "resting_mean_magnitude"
+          "result_column": "resting_mean_mag"
         }
       ]
     },
     {
       "op": "DERIVE_BINARY",
-      "left": "dynamic_mean_magnitude",
-      "right": "resting_mean_magnitude",
+      "left": "dynamic_mean_mag",
+      "right": "resting_mean_mag",
       "operation": "subtract",
-      "result": "magnitude_difference"
+      "result": "mean_mag_difference"
     },
     {
       "op": "RANK_ROWS",
-      "column": "magnitude_difference",
+      "column": "mean_mag_difference",
       "direction": "max",
       "return_columns": [
         "subject_id",
-        "dynamic_mean_magnitude",
-        "resting_mean_magnitude",
-        "magnitude_difference"
+        "dynamic_mean_mag",
+        "resting_mean_mag",
+        "mean_mag_difference"
       ]
     }
   ]
@@ -123,7 +123,7 @@ Reported 12 FLASH_FUSION_CACHE grounding failure(s) where the cached skeleton co
             ],
             "aggregate": "mean",
             "column": "acceleration_magnitude",
-            "result_column": "dynamic_mean_magnitude"
+            "result_column": "dynamic_mean_mag"
           },
           {
             "filter_column": "activity_label",
@@ -136,26 +136,26 @@ Reported 12 FLASH_FUSION_CACHE grounding failure(s) where the cached skeleton co
             ],
             "aggregate": "mean",
             "column": "acceleration_magnitude",
-            "result_column": "resting_mean_magnitude"
+            "result_column": "resting_mean_mag"
           }
         ]
       },
       {
         "op": "DERIVE_BINARY",
-        "left": "dynamic_mean_magnitude",
-        "right": "resting_mean_magnitude",
+        "left": "dynamic_mean_mag",
+        "right": "resting_mean_mag",
         "operation": "subtract",
-        "result": "magnitude_difference"
+        "result": "mean_mag_difference"
       },
       {
         "op": "RANK_ROWS",
-        "column": "magnitude_difference",
+        "column": "mean_mag_difference",
         "direction": "max",
         "return_columns": [
           "subject_id",
-          "dynamic_mean_magnitude",
-          "resting_mean_magnitude",
-          "magnitude_difference"
+          "dynamic_mean_mag",
+          "resting_mean_mag",
+          "mean_mag_difference"
         ]
       }
     ]
@@ -171,8 +171,8 @@ df['acceleration_magnitude'] = (df['x']**2 + df['y']**2 + df['z']**2)**0.5
 branch_0 = df[df['activity_label'].isin(['Downstairs', 'Jogging', 'Upstairs', 'Walking'])].groupby(['subject_id'])['acceleration_magnitude'].mean()
 branch_1 = df[df['activity_label'].isin(['Sitting', 'Standing'])].groupby(['subject_id'])['acceleration_magnitude'].mean()
 merged = branch_0.merge(branch_1, on=['subject_id'], how='outer')
-df['magnitude_difference'] = df['dynamic_mean_magnitude'] - df['resting_mean_magnitude']
-idx = df['magnitude_difference'].idxmax(); result = df.loc[idx, ['subject_id', 'dynamic_mean_magnitude', 'resting_mean_magnitude', 'magnitude_difference']].to_dict()
+df['mean_mag_difference'] = df['dynamic_mean_mag'] - df['resting_mean_mag']
+idx = df['mean_mag_difference'].idxmax(); result = df.loc[idx, ['subject_id', 'dynamic_mean_mag', 'resting_mean_mag', 'mean_mag_difference']].to_dict()
 ```
 
 **Stages run:** exact_cache_hit → cache_light_grounding → cache_miss_or_validation_failure → guardrail_plan → plan_validated → typed_exec
@@ -181,172 +181,28 @@ idx = df['magnitude_difference'].idxmax(); result = df.loc[idx, ['subject_id', '
 
 ## Query 18 (run 1)
 
-**Query text:** For every subject_id, compute x-acceleration variance separately while Jogging and while Walking. Among subject_id values whose Jogging variance exceeds their Walking variance, return the subject_id with the largest Jogging-minus-Walking variance difference.
+**Query text:** For every subject_id, compute x-acceleration variance separately while Jogging and while Walking. Return the subject_id for whom Jogging pulls furthest ahead of Walking.
 
-**Failure reason:** `cache: light model JSON repair failed: Unterminated string starting at`
+**Failure reason:** `structural: 1 validation error for GuardrailAndPlan
+plan.steps.2.DERIVE_BINARY.operation
+  Input should be 'add', 'subtract', 'multiply', 'divide' or 'abs_difference' [type=literal_error, input_value='difference', input_type=str]
+    For further information visit https://errors.pydantic.dev/2.13/v/literal_error`
 
-**Execution path after fallback:** `typed_operator`
+**Execution path after fallback:** `typed_plan_unavailable`
 
 **Plan source after fallback:** `llm`
 
-**Typed plan executed after fallback:**
-```json
-{
-  "version": "1",
-  "steps": [
-    {
-      "op": "FILTER_NOT_EMPTY",
-      "column": "activity_label"
-    },
-    {
-      "op": "PARALLEL_AGGREGATE",
-      "branches": [
-        {
-          "filter_column": "activity_label",
-          "filter_values": [
-            "Jogging"
-          ],
-          "group_by": [
-            "subject_id"
-          ],
-          "aggregate": "var",
-          "column": "x",
-          "result_column": "jogging_var"
-        },
-        {
-          "filter_column": "activity_label",
-          "filter_values": [
-            "Walking"
-          ],
-          "group_by": [
-            "subject_id"
-          ],
-          "aggregate": "var",
-          "column": "x",
-          "result_column": "walking_var"
-        }
-      ]
-    },
-    {
-      "op": "DERIVE_BINARY",
-      "left": "jogging_var",
-      "right": "walking_var",
-      "operation": "subtract",
-      "result": "var_diff"
-    },
-    {
-      "op": "FILTER_COMPARE",
-      "column": "var_diff",
-      "comparator": "gt",
-      "value": 0
-    },
-    {
-      "op": "RANK_ROWS",
-      "column": "var_diff",
-      "direction": "max",
-      "return_columns": [
-        "subject_id",
-        "jogging_var",
-        "walking_var",
-        "var_diff"
-      ]
-    }
-  ]
-}
-```
+**Plan validation stage failed:** `structural`
 
-**Raw planner output (before normalization):**
-```json
-{
-  "in_scope": true,
-  "rejection_reason": null,
-  "ambiguous_concepts": [],
-  "plan": {
-    "version": "1",
-    "steps": [
-      {
-        "op": "FILTER_NOT_EMPTY",
-        "column": "activity_label"
-      },
-      {
-        "op": "PARALLEL_AGGREGATE",
-        "branches": [
-          {
-            "filter_column": "activity_label",
-            "filter_values": [
-              "Jogging"
-            ],
-            "group_by": [
-              "subject_id"
-            ],
-            "aggregate": "var",
-            "column": "x",
-            "result_column": "jogging_var"
-          },
-          {
-            "filter_column": "activity_label",
-            "filter_values": [
-              "Walking"
-            ],
-            "group_by": [
-              "subject_id"
-            ],
-            "aggregate": "var",
-            "column": "x",
-            "result_column": "walking_var"
-          }
-        ]
-      },
-      {
-        "op": "DERIVE_BINARY",
-        "left": "jogging_var",
-        "right": "walking_var",
-        "operation": "subtract",
-        "result": "var_diff"
-      },
-      {
-        "op": "FILTER_COMPARE",
-        "column": "var_diff",
-        "comparator": "gt",
-        "value": 0
-      },
-      {
-        "op": "RANK_ROWS",
-        "column": "var_diff",
-        "direction": "max",
-        "return_columns": [
-          "subject_id",
-          "jogging_var",
-          "walking_var",
-          "var_diff"
-        ]
-      }
-    ]
-  }
-}
-```
-
-**Final executed code:**
-```python
-df = df[df['activity_label'].notna() & df['activity_label'].astype(str).str.strip().ne('')]
-# PARALLEL_AGGREGATE branches:
-branch_0 = df[df['activity_label'].isin(['Jogging'])].groupby(['subject_id'])['x'].var()
-branch_1 = df[df['activity_label'].isin(['Walking'])].groupby(['subject_id'])['x'].var()
-merged = branch_0.merge(branch_1, on=['subject_id'], how='outer')
-df['var_diff'] = df['jogging_var'] - df['walking_var']
-df = df[df['var_diff'] > 0]
-idx = df['var_diff'].idxmax(); result = df.loc[idx, ['subject_id', 'jogging_var', 'walking_var', 'var_diff']].to_dict()
-```
-
-**Stages run:** exact_cache_hit → cache_light_grounding → cache_miss_or_validation_failure → guardrail_plan → plan_validated → typed_exec
+**Stages run:** hybrid_semantic_ambiguous_candidates → cache_miss_or_validation_failure → guardrail_plan → typed_plan_unavailable
 
 ---
 
 ## Query 19 (run 1)
 
-**Query text:** For every subject_id, compute mean acceleration magnitude while Jogging and while Walking. Return the Pearson correlation between the two per-subject mean-magnitude columns.
+**Query text:** For every subject_id, compute mean acceleration magnitude while Jogging and while Walking. Report whether subjects who jog harder also walk harder, ranking subjects consistently across both activities.
 
-**Failure reason:** `cache: light model JSON repair failed: Unterminated string starting at`
+**Failure reason:** `cache: light model returned empty content`
 
 **Execution path after fallback:** `typed_operator`
 
@@ -400,10 +256,14 @@ idx = df['var_diff'].idxmax(); result = df.loc[idx, ['subject_id', 'jogging_var'
       ]
     },
     {
-      "op": "CORRELATE_COLUMNS",
-      "left": "mean_jogging_magnitude",
-      "right": "mean_walking_magnitude",
-      "method": "pearson"
+      "op": "RANK_ROWS",
+      "column": "mean_jogging_magnitude",
+      "direction": "max",
+      "return_columns": [
+        "subject_id",
+        "mean_jogging_magnitude",
+        "mean_walking_magnitude"
+      ]
     }
   ]
 }
@@ -414,7 +274,10 @@ idx = df['var_diff'].idxmax(); result = df.loc[idx, ['subject_id', 'jogging_var'
 {
   "in_scope": true,
   "rejection_reason": null,
-  "ambiguous_concepts": [],
+  "ambiguous_concepts": [
+    "jog harder",
+    "walk harder"
+  ],
   "plan": {
     "version": "1",
     "steps": [
@@ -461,10 +324,14 @@ idx = df['var_diff'].idxmax(); result = df.loc[idx, ['subject_id', 'jogging_var'
         ]
       },
       {
-        "op": "CORRELATE_COLUMNS",
-        "left": "mean_jogging_magnitude",
-        "right": "mean_walking_magnitude",
-        "method": "pearson"
+        "op": "RANK_ROWS",
+        "column": "mean_jogging_magnitude",
+        "direction": "max",
+        "return_columns": [
+          "subject_id",
+          "mean_jogging_magnitude",
+          "mean_walking_magnitude"
+        ]
       }
     ]
   }
@@ -479,7 +346,7 @@ df['acceleration_magnitude'] = (df['x']**2 + df['y']**2 + df['z']**2)**0.5
 branch_0 = df[df['activity_label'].isin(['Jogging'])].groupby(['subject_id'])['acceleration_magnitude'].mean()
 branch_1 = df[df['activity_label'].isin(['Walking'])].groupby(['subject_id'])['acceleration_magnitude'].mean()
 merged = branch_0.merge(branch_1, on=['subject_id'], how='outer')
-result = df['mean_jogging_magnitude'].corr(df['mean_walking_magnitude'], method='pearson')
+idx = df['mean_jogging_magnitude'].idxmax(); result = df.loc[idx, ['subject_id', 'mean_jogging_magnitude', 'mean_walking_magnitude']].to_dict()
 ```
 
 **Stages run:** exact_cache_hit → cache_light_grounding → cache_miss_or_validation_failure → guardrail_plan → plan_validated → typed_exec
@@ -490,7 +357,7 @@ result = df['mean_jogging_magnitude'].corr(df['mean_walking_magnitude'], method=
 
 **Query text:** For every subject_id, derive elapsed seconds from timestamp, then compute total locomotion duration (Walking, Jogging, Upstairs, Downstairs) and total resting duration (Sitting, Standing). Among subjects with more locomotion than resting time, return the subject_id with the largest locomotion-minus-resting duration.
 
-**Failure reason:** `cache: light model JSON repair failed: Unterminated string starting at`
+**Failure reason:** `cache: light model returned empty content`
 
 **Execution path after fallback:** `typed_operator`
 
@@ -683,7 +550,7 @@ idx = df['duration_delta'].idxmax(); result = df.loc[idx, ['subject_id', 'locomo
 
 **Query text:** For every subject_id, Calculate mean acceleration magnitude separately for dynamic activities (Walking, Jogging, Upstairs, Downstairs) and resting activities (Sitting, Standing). Return the subject_id with the largest dynamic-minus-resting mean magnitude.
 
-**Failure reason:** `cache: light model JSON repair failed: Unterminated string starting at`
+**Failure reason:** `cache: light model returned empty content`
 
 **Execution path after fallback:** `typed_operator`
 
@@ -858,172 +725,28 @@ idx = df['magnitude_difference'].idxmax(); result = df.loc[idx, ['subject_id', '
 
 ## Query 18 (run 2)
 
-**Query text:** For every subject_id, Calculate x-acceleration variance separately while Jogging and while Walking. Among subject_id values whose Jogging variance exceeds their Walking variance, return the subject_id with the largest Jogging-minus-Walking variance difference.
+**Query text:** For every subject_id, Calculate x-acceleration variance separately while Jogging and while Walking. Return the subject_id for whom Jogging pulls furthest ahead of Walking.
 
-**Failure reason:** `cache: light model JSON repair failed: Unterminated string starting at`
+**Failure reason:** `structural: 1 validation error for GuardrailAndPlan
+plan.steps.2.DERIVE_BINARY.operation
+  Input should be 'add', 'subtract', 'multiply', 'divide' or 'abs_difference' [type=literal_error, input_value='difference', input_type=str]
+    For further information visit https://errors.pydantic.dev/2.13/v/literal_error`
 
-**Execution path after fallback:** `typed_operator`
+**Execution path after fallback:** `typed_plan_unavailable`
 
 **Plan source after fallback:** `llm`
 
-**Typed plan executed after fallback:**
-```json
-{
-  "version": "1",
-  "steps": [
-    {
-      "op": "FILTER_NOT_EMPTY",
-      "column": "activity_label"
-    },
-    {
-      "op": "PARALLEL_AGGREGATE",
-      "branches": [
-        {
-          "filter_column": "activity_label",
-          "filter_values": [
-            "Jogging"
-          ],
-          "group_by": [
-            "subject_id"
-          ],
-          "aggregate": "var",
-          "column": "x",
-          "result_column": "jogging_var"
-        },
-        {
-          "filter_column": "activity_label",
-          "filter_values": [
-            "Walking"
-          ],
-          "group_by": [
-            "subject_id"
-          ],
-          "aggregate": "var",
-          "column": "x",
-          "result_column": "walking_var"
-        }
-      ]
-    },
-    {
-      "op": "DERIVE_BINARY",
-      "left": "jogging_var",
-      "right": "walking_var",
-      "operation": "subtract",
-      "result": "var_diff"
-    },
-    {
-      "op": "FILTER_COMPARE",
-      "column": "var_diff",
-      "comparator": "gt",
-      "value": 0
-    },
-    {
-      "op": "RANK_ROWS",
-      "column": "var_diff",
-      "direction": "max",
-      "return_columns": [
-        "subject_id",
-        "jogging_var",
-        "walking_var",
-        "var_diff"
-      ]
-    }
-  ]
-}
-```
+**Plan validation stage failed:** `structural`
 
-**Raw planner output (before normalization):**
-```json
-{
-  "in_scope": true,
-  "rejection_reason": null,
-  "ambiguous_concepts": [],
-  "plan": {
-    "version": "1",
-    "steps": [
-      {
-        "op": "FILTER_NOT_EMPTY",
-        "column": "activity_label"
-      },
-      {
-        "op": "PARALLEL_AGGREGATE",
-        "branches": [
-          {
-            "filter_column": "activity_label",
-            "filter_values": [
-              "Jogging"
-            ],
-            "group_by": [
-              "subject_id"
-            ],
-            "aggregate": "var",
-            "column": "x",
-            "result_column": "jogging_var"
-          },
-          {
-            "filter_column": "activity_label",
-            "filter_values": [
-              "Walking"
-            ],
-            "group_by": [
-              "subject_id"
-            ],
-            "aggregate": "var",
-            "column": "x",
-            "result_column": "walking_var"
-          }
-        ]
-      },
-      {
-        "op": "DERIVE_BINARY",
-        "left": "jogging_var",
-        "right": "walking_var",
-        "operation": "subtract",
-        "result": "var_diff"
-      },
-      {
-        "op": "FILTER_COMPARE",
-        "column": "var_diff",
-        "comparator": "gt",
-        "value": 0
-      },
-      {
-        "op": "RANK_ROWS",
-        "column": "var_diff",
-        "direction": "max",
-        "return_columns": [
-          "subject_id",
-          "jogging_var",
-          "walking_var",
-          "var_diff"
-        ]
-      }
-    ]
-  }
-}
-```
-
-**Final executed code:**
-```python
-df = df[df['activity_label'].notna() & df['activity_label'].astype(str).str.strip().ne('')]
-# PARALLEL_AGGREGATE branches:
-branch_0 = df[df['activity_label'].isin(['Jogging'])].groupby(['subject_id'])['x'].var()
-branch_1 = df[df['activity_label'].isin(['Walking'])].groupby(['subject_id'])['x'].var()
-merged = branch_0.merge(branch_1, on=['subject_id'], how='outer')
-df['var_diff'] = df['jogging_var'] - df['walking_var']
-df = df[df['var_diff'] > 0]
-idx = df['var_diff'].idxmax(); result = df.loc[idx, ['subject_id', 'jogging_var', 'walking_var', 'var_diff']].to_dict()
-```
-
-**Stages run:** exact_cache_hit → cache_light_grounding → cache_miss_or_validation_failure → guardrail_plan → plan_validated → typed_exec
+**Stages run:** hybrid_semantic_ambiguous_candidates → cache_miss_or_validation_failure → guardrail_plan → typed_plan_unavailable
 
 ---
 
 ## Query 19 (run 2)
 
-**Query text:** For every subject_id, Calculate mean acceleration magnitude while Jogging and while Walking. Return the Pearson correlation between the two per-subject mean-magnitude columns.
+**Query text:** For every subject_id, Calculate mean acceleration magnitude while Jogging and while Walking. Report whether subjects who jog harder also walk harder, ranking subjects consistently across both activities.
 
-**Failure reason:** `cache: light model JSON repair failed: Unterminated string starting at`
+**Failure reason:** `cache: light model returned empty content`
 
 **Execution path after fallback:** `typed_operator`
 
@@ -1060,7 +783,7 @@ idx = df['var_diff'].idxmax(); result = df.loc[idx, ['subject_id', 'jogging_var'
           ],
           "aggregate": "mean",
           "column": "acceleration_magnitude",
-          "result_column": "mean_jogging_magnitude"
+          "result_column": "mean_jogging_mag"
         },
         {
           "filter_column": "activity_label",
@@ -1072,14 +795,14 @@ idx = df['var_diff'].idxmax(); result = df.loc[idx, ['subject_id', 'jogging_var'
           ],
           "aggregate": "mean",
           "column": "acceleration_magnitude",
-          "result_column": "mean_walking_magnitude"
+          "result_column": "mean_walking_mag"
         }
       ]
     },
     {
       "op": "CORRELATE_COLUMNS",
-      "left": "mean_jogging_magnitude",
-      "right": "mean_walking_magnitude",
+      "left": "mean_jogging_mag",
+      "right": "mean_walking_mag",
       "method": "pearson"
     }
   ]
@@ -1091,7 +814,10 @@ idx = df['var_diff'].idxmax(); result = df.loc[idx, ['subject_id', 'jogging_var'
 {
   "in_scope": true,
   "rejection_reason": null,
-  "ambiguous_concepts": [],
+  "ambiguous_concepts": [
+    "jog harder",
+    "walk harder"
+  ],
   "plan": {
     "version": "1",
     "steps": [
@@ -1121,7 +847,7 @@ idx = df['var_diff'].idxmax(); result = df.loc[idx, ['subject_id', 'jogging_var'
             ],
             "aggregate": "mean",
             "column": "acceleration_magnitude",
-            "result_column": "mean_jogging_magnitude"
+            "result_column": "mean_jogging_mag"
           },
           {
             "filter_column": "activity_label",
@@ -1133,14 +859,14 @@ idx = df['var_diff'].idxmax(); result = df.loc[idx, ['subject_id', 'jogging_var'
             ],
             "aggregate": "mean",
             "column": "acceleration_magnitude",
-            "result_column": "mean_walking_magnitude"
+            "result_column": "mean_walking_mag"
           }
         ]
       },
       {
         "op": "CORRELATE_COLUMNS",
-        "left": "mean_jogging_magnitude",
-        "right": "mean_walking_magnitude",
+        "left": "mean_jogging_mag",
+        "right": "mean_walking_mag",
         "method": "pearson"
       }
     ]
@@ -1156,10 +882,10 @@ df['acceleration_magnitude'] = (df['x']**2 + df['y']**2 + df['z']**2)**0.5
 branch_0 = df[df['activity_label'].isin(['Jogging'])].groupby(['subject_id'])['acceleration_magnitude'].mean()
 branch_1 = df[df['activity_label'].isin(['Walking'])].groupby(['subject_id'])['acceleration_magnitude'].mean()
 merged = branch_0.merge(branch_1, on=['subject_id'], how='outer')
-result = df['mean_jogging_magnitude'].corr(df['mean_walking_magnitude'], method='pearson')
+result = df['mean_jogging_mag'].corr(df['mean_walking_mag'], method='pearson')
 ```
 
-**Stages run:** exact_cache_hit → cache_light_grounding → cache_miss_or_validation_failure → guardrail_plan → plan_validated → typed_exec
+**Stages run:** hybrid_cache_hit → cache_light_grounding → cache_miss_or_validation_failure → guardrail_plan → plan_validated → typed_exec
 
 ---
 
@@ -1167,7 +893,7 @@ result = df['mean_jogging_magnitude'].corr(df['mean_walking_magnitude'], method=
 
 **Query text:** For every subject_id, derive elapsed seconds from timestamp, then Calculate total locomotion duration (Walking, Jogging, Upstairs, Downstairs) and total resting duration (Sitting, Standing). Among subjects with more locomotion than resting time, return the subject_id with the largest locomotion-minus-resting duration.
 
-**Failure reason:** `cache: light model JSON repair failed: Unterminated string starting at`
+**Failure reason:** `cache: light model returned empty content`
 
 **Execution path after fallback:** `typed_operator`
 
@@ -1360,7 +1086,7 @@ idx = df['duration_delta'].idxmax(); result = df.loc[idx, ['subject_id', 'locomo
 
 **Query text:** For every subject_id, Determine mean acceleration magnitude separately for dynamic activities (Walking, Jogging, Upstairs, Downstairs) and resting activities (Sitting, Standing). Return the subject_id with the largest dynamic-minus-resting mean magnitude.
 
-**Failure reason:** `cache: light model JSON repair failed: Unterminated string starting at`
+**Failure reason:** `cache: light model returned empty content`
 
 **Execution path after fallback:** `typed_operator`
 
@@ -1535,172 +1261,28 @@ idx = df['magnitude_difference'].idxmax(); result = df.loc[idx, ['subject_id', '
 
 ## Query 18 (run 3)
 
-**Query text:** For every subject_id, Determine x-acceleration variance separately while Jogging and while Walking. Among subject_id values whose Jogging variance exceeds their Walking variance, return the subject_id with the largest Jogging-minus-Walking variance difference.
+**Query text:** For every subject_id, Determine x-acceleration variance separately while Jogging and while Walking. Return the subject_id for whom Jogging pulls furthest ahead of Walking.
 
-**Failure reason:** `cache: light model JSON repair failed: Unterminated string starting at`
+**Failure reason:** `structural: 1 validation error for GuardrailAndPlan
+plan.steps.2.DERIVE_BINARY.operation
+  Input should be 'add', 'subtract', 'multiply', 'divide' or 'abs_difference' [type=literal_error, input_value='difference', input_type=str]
+    For further information visit https://errors.pydantic.dev/2.13/v/literal_error`
 
-**Execution path after fallback:** `typed_operator`
+**Execution path after fallback:** `typed_plan_unavailable`
 
 **Plan source after fallback:** `llm`
 
-**Typed plan executed after fallback:**
-```json
-{
-  "version": "1",
-  "steps": [
-    {
-      "op": "FILTER_NOT_EMPTY",
-      "column": "activity_label"
-    },
-    {
-      "op": "PARALLEL_AGGREGATE",
-      "branches": [
-        {
-          "filter_column": "activity_label",
-          "filter_values": [
-            "Jogging"
-          ],
-          "group_by": [
-            "subject_id"
-          ],
-          "aggregate": "var",
-          "column": "x",
-          "result_column": "jogging_var"
-        },
-        {
-          "filter_column": "activity_label",
-          "filter_values": [
-            "Walking"
-          ],
-          "group_by": [
-            "subject_id"
-          ],
-          "aggregate": "var",
-          "column": "x",
-          "result_column": "walking_var"
-        }
-      ]
-    },
-    {
-      "op": "DERIVE_BINARY",
-      "left": "jogging_var",
-      "right": "walking_var",
-      "operation": "subtract",
-      "result": "var_diff"
-    },
-    {
-      "op": "FILTER_COMPARE",
-      "column": "var_diff",
-      "comparator": "gt",
-      "value": 0
-    },
-    {
-      "op": "RANK_ROWS",
-      "column": "var_diff",
-      "direction": "max",
-      "return_columns": [
-        "subject_id",
-        "jogging_var",
-        "walking_var",
-        "var_diff"
-      ]
-    }
-  ]
-}
-```
+**Plan validation stage failed:** `structural`
 
-**Raw planner output (before normalization):**
-```json
-{
-  "in_scope": true,
-  "rejection_reason": null,
-  "ambiguous_concepts": [],
-  "plan": {
-    "version": "1",
-    "steps": [
-      {
-        "op": "FILTER_NOT_EMPTY",
-        "column": "activity_label"
-      },
-      {
-        "op": "PARALLEL_AGGREGATE",
-        "branches": [
-          {
-            "filter_column": "activity_label",
-            "filter_values": [
-              "Jogging"
-            ],
-            "group_by": [
-              "subject_id"
-            ],
-            "aggregate": "var",
-            "column": "x",
-            "result_column": "jogging_var"
-          },
-          {
-            "filter_column": "activity_label",
-            "filter_values": [
-              "Walking"
-            ],
-            "group_by": [
-              "subject_id"
-            ],
-            "aggregate": "var",
-            "column": "x",
-            "result_column": "walking_var"
-          }
-        ]
-      },
-      {
-        "op": "DERIVE_BINARY",
-        "left": "jogging_var",
-        "right": "walking_var",
-        "operation": "subtract",
-        "result": "var_diff"
-      },
-      {
-        "op": "FILTER_COMPARE",
-        "column": "var_diff",
-        "comparator": "gt",
-        "value": 0
-      },
-      {
-        "op": "RANK_ROWS",
-        "column": "var_diff",
-        "direction": "max",
-        "return_columns": [
-          "subject_id",
-          "jogging_var",
-          "walking_var",
-          "var_diff"
-        ]
-      }
-    ]
-  }
-}
-```
-
-**Final executed code:**
-```python
-df = df[df['activity_label'].notna() & df['activity_label'].astype(str).str.strip().ne('')]
-# PARALLEL_AGGREGATE branches:
-branch_0 = df[df['activity_label'].isin(['Jogging'])].groupby(['subject_id'])['x'].var()
-branch_1 = df[df['activity_label'].isin(['Walking'])].groupby(['subject_id'])['x'].var()
-merged = branch_0.merge(branch_1, on=['subject_id'], how='outer')
-df['var_diff'] = df['jogging_var'] - df['walking_var']
-df = df[df['var_diff'] > 0]
-idx = df['var_diff'].idxmax(); result = df.loc[idx, ['subject_id', 'jogging_var', 'walking_var', 'var_diff']].to_dict()
-```
-
-**Stages run:** exact_cache_hit → cache_light_grounding → cache_miss_or_validation_failure → guardrail_plan → plan_validated → typed_exec
+**Stages run:** hybrid_semantic_ambiguous_candidates → cache_miss_or_validation_failure → guardrail_plan → typed_plan_unavailable
 
 ---
 
 ## Query 19 (run 3)
 
-**Query text:** For every subject_id, Determine mean acceleration magnitude while Jogging and while Walking. Return the Pearson correlation between the two per-subject mean-magnitude columns.
+**Query text:** For every subject_id, Determine mean acceleration magnitude while Jogging and while Walking. Report whether subjects who jog harder also walk harder, ranking subjects consistently across both activities.
 
-**Failure reason:** `cache: light model JSON repair failed: Unterminated string starting at`
+**Failure reason:** `cache: semantic: semantic_ambiguous_candidates`
 
 **Execution path after fallback:** `typed_operator`
 
@@ -1737,7 +1319,7 @@ idx = df['var_diff'].idxmax(); result = df.loc[idx, ['subject_id', 'jogging_var'
           ],
           "aggregate": "mean",
           "column": "acceleration_magnitude",
-          "result_column": "mean_jogging_magnitude"
+          "result_column": "mean_jogging_mag"
         },
         {
           "filter_column": "activity_label",
@@ -1749,15 +1331,19 @@ idx = df['var_diff'].idxmax(); result = df.loc[idx, ['subject_id', 'jogging_var'
           ],
           "aggregate": "mean",
           "column": "acceleration_magnitude",
-          "result_column": "mean_walking_magnitude"
+          "result_column": "mean_walking_mag"
         }
       ]
     },
     {
-      "op": "CORRELATE_COLUMNS",
-      "left": "mean_jogging_magnitude",
-      "right": "mean_walking_magnitude",
-      "method": "pearson"
+      "op": "RANK_ROWS",
+      "column": "mean_jogging_mag",
+      "direction": "max",
+      "return_columns": [
+        "subject_id",
+        "mean_jogging_mag",
+        "mean_walking_mag"
+      ]
     }
   ]
 }
@@ -1798,7 +1384,7 @@ idx = df['var_diff'].idxmax(); result = df.loc[idx, ['subject_id', 'jogging_var'
             ],
             "aggregate": "mean",
             "column": "acceleration_magnitude",
-            "result_column": "mean_jogging_magnitude"
+            "result_column": "mean_jogging_mag"
           },
           {
             "filter_column": "activity_label",
@@ -1810,15 +1396,19 @@ idx = df['var_diff'].idxmax(); result = df.loc[idx, ['subject_id', 'jogging_var'
             ],
             "aggregate": "mean",
             "column": "acceleration_magnitude",
-            "result_column": "mean_walking_magnitude"
+            "result_column": "mean_walking_mag"
           }
         ]
       },
       {
-        "op": "CORRELATE_COLUMNS",
-        "left": "mean_jogging_magnitude",
-        "right": "mean_walking_magnitude",
-        "method": "pearson"
+        "op": "RANK_ROWS",
+        "column": "mean_jogging_mag",
+        "direction": "max",
+        "return_columns": [
+          "subject_id",
+          "mean_jogging_mag",
+          "mean_walking_mag"
+        ]
       }
     ]
   }
@@ -1833,10 +1423,10 @@ df['acceleration_magnitude'] = (df['x']**2 + df['y']**2 + df['z']**2)**0.5
 branch_0 = df[df['activity_label'].isin(['Jogging'])].groupby(['subject_id'])['acceleration_magnitude'].mean()
 branch_1 = df[df['activity_label'].isin(['Walking'])].groupby(['subject_id'])['acceleration_magnitude'].mean()
 merged = branch_0.merge(branch_1, on=['subject_id'], how='outer')
-result = df['mean_jogging_magnitude'].corr(df['mean_walking_magnitude'], method='pearson')
+idx = df['mean_jogging_mag'].idxmax(); result = df.loc[idx, ['subject_id', 'mean_jogging_mag', 'mean_walking_mag']].to_dict()
 ```
 
-**Stages run:** exact_cache_hit → cache_light_grounding → cache_miss_or_validation_failure → guardrail_plan → plan_validated → typed_exec
+**Stages run:** hybrid_semantic_ambiguous_candidates → cache_miss_or_validation_failure → guardrail_plan → plan_validated → typed_exec
 
 ---
 
@@ -1844,7 +1434,7 @@ result = df['mean_jogging_magnitude'].corr(df['mean_walking_magnitude'], method=
 
 **Query text:** For every subject_id, derive elapsed seconds from timestamp, then Determine total locomotion duration (Walking, Jogging, Upstairs, Downstairs) and total resting duration (Sitting, Standing). Among subjects with more locomotion than resting time, return the subject_id with the largest locomotion-minus-resting duration.
 
-**Failure reason:** `cache: light model JSON repair failed: Unterminated string starting at`
+**Failure reason:** `cache: light model returned empty content`
 
 **Execution path after fallback:** `typed_operator`
 

@@ -1,32 +1,34 @@
 # Flash-Fusion Benchmark Report
 
-Generated: 2026-09-15T20:40:33+00:00
+Generated: 2026-09-15T23:08:28+00:00
 
 ## Summary Table
 
 | Baseline           |   Avg LLM Accuracy |   Avg Latency (s) |   Avg Cost (USD) |
 |:-------------------|-------------------:|------------------:|-----------------:|
-| FLASH_FUSION_CACHE |             1.0000 |            7.6252 |           0.0024 |
+| FLASH_FUSION_CACHE |             0.7500 |            7.8350 |           0.0027 |
 
 ## Typed-Operator Coverage
 
 | Baseline           |   Queries |   Typed | Coverage   |   ReAct fallback |   Guardrail reject |   Typed avg latency (s) | Fallback avg latency (s)   |
 |:-------------------|----------:|--------:|:-----------|-----------------:|-------------------:|------------------------:|:---------------------------|
-| FLASH_FUSION_CACHE |         4 |       4 | 100%       |                0 |                  0 |                    7.63 | -                          |
+| FLASH_FUSION_CACHE |         4 |       3 | 75%        |                0 |                  0 |                    6.11 | -                          |
+
+Fallback causes: execution=1
 
 ## Per-Query Results
 
-### Q18: Derive peak acceleration magnitude from accel_stats_x_p99, accel_stats_y_p99, and accel_stats_z_p99. Partition the route at the median latitude and report the absolute difference between the northern and southern halves' mean peak magnitudes.
+### Q18: For every recorded latitude reading, derive peak acceleration magnitude from accel_stats_x_p99, accel_stats_y_p99, and accel_stats_z_p99. Report the absolute difference between the mean peak magnitude north versus south of the median latitude.
 
 #### FLASH_FUSION_CACHE
 
-**Answer:** The result is {'higher': 'northern', 'lower': 'southern', 'metric': 'mean peak_accel_magnitude', 'northern': 11.722590691852952, 'southern': 11.194853285218633, 'abs_difference': 0.5277374066343192}
+**Answer:** The result is {'higher': 'north', 'lower': 'south', 'metric': 'mean peak_accel_magnitude', 'north': 11.722590691852952, 'south': 11.194853285218633, 'abs_difference': 0.5277374066343192}
 
 - Executed: True | Rejected: False | Judge: N/A
-- Stages: exact_cache_hit,cache_light_grounding,cache_miss_or_validation_failure,guardrail_plan,plan_validated,typed_exec
+- Stages: hybrid_semantic_low_confidence_winner,cache_miss_or_validation_failure,guardrail_plan,plan_validated,typed_exec
 - Path: typed_operator
 - Operators: DERIVE_VECTOR_MAGNITUDE,SPLIT_BY_THRESHOLD,SPLIT_BY_THRESHOLD,AGGREGATE_PARTITIONS,COMPARE_PARTITIONS
-- Latency: 6.31s | Cost: $0.00260
+- Latency: 4.89s | Cost: $0.00248
 
 **Agent Trace**
 
@@ -37,82 +39,51 @@ Action Input: df['peak_accel_magnitude'] = (df['accel_stats_x_p99']**2 + df['acc
 Observation: derived 'peak_accel_magnitude' (rows=1219)
 Thought: typed operator step 2 (SPLIT_BY_THRESHOLD)
 Action: typed_operator_exec
-Action Input: northern = df[df['latitude'] gt df['latitude'].median()]
-Observation: northern: rows=609 (latitude gt median=33.776676)
+Action Input: north = df[df['latitude'] gt df['latitude'].median()]
+Observation: north: rows=609 (latitude gt median=33.776676)
 Thought: typed operator step 3 (SPLIT_BY_THRESHOLD)
 Action: typed_operator_exec
-Action Input: southern = df[df['latitude'] lte df['latitude'].median()]
-Observation: southern: rows=610 (latitude lte median=33.776676)
+Action Input: south = df[df['latitude'] lte df['latitude'].median()]
+Observation: south: rows=610 (latitude lte median=33.776676)
 Thought: typed operator step 4 (AGGREGATE_PARTITIONS)
 Action: typed_operator_exec
 Action Input: result = {label: agg(partition) for label in partitions}
-Observation: {'northern': 11.722590691852952, 'southern': 11.194853285218633}
+Observation: {'north': 11.722590691852952, 'south': 11.194853285218633}
 Thought: typed operator step 5 (COMPARE_PARTITIONS)
 Action: typed_operator_exec
-Action Input: result = compare(northern, southern, mode='abs_difference')
-Observation: {'higher': 'northern', 'lower': 'southern', 'metric': 'mean peak_accel_magnitude', 'northern': 11.722590691852952, 'southern': 11.194853285218633, 'abs_difference': 0.5277374066343192}
-Final Answer: {'higher': 'northern', 'lower': 'southern', 'metric': 'mean peak_accel_magnitude', 'northern': 11.722590691852952, 'southern': 11.194853285218633, 'abs_difference': 0.5277374066343192}
+Action Input: result = compare(north, south, mode='abs_difference')
+Observation: {'higher': 'north', 'lower': 'south', 'metric': 'mean peak_accel_magnitude', 'north': 11.722590691852952, 'south': 11.194853285218633, 'abs_difference': 0.5277374066343192}
+Final Answer: {'higher': 'north', 'lower': 'south', 'metric': 'mean peak_accel_magnitude', 'north': 11.722590691852952, 'south': 11.194853285218633, 'abs_difference': 0.5277374066343192}
 ```
 
 **Final Code Executed**
 
 ```python
 df['peak_accel_magnitude'] = (df['accel_stats_x_p99']**2 + df['accel_stats_y_p99']**2 + df['accel_stats_z_p99']**2)**0.5
-northern = df[df['latitude'] gt df['latitude'].median()]
-southern = df[df['latitude'] lte df['latitude'].median()]
+north = df[df['latitude'] gt df['latitude'].median()]
+south = df[df['latitude'] lte df['latitude'].median()]
 result = {label: agg(partition) for label in partitions}
-result = compare(northern, southern, mode='abs_difference')
+result = compare(north, south, mode='abs_difference')
 ```
 
 ---
 
-### Q19: Derive the vertical shock range as accel_stats_z_p99 minus accel_stats_z_p1. Calculate its mean separately for aggressive and calm behavior labels, then report the aggressive-minus-calm difference.
+### Q19: For every 5-minute timestamp window, derive the vertical shock range as accel_stats_z_p99 minus accel_stats_z_p1 and Calculate its mean separately for aggressive and calm behavior labels. Report the overall aggressive-minus-calm difference across the route.
 
 #### FLASH_FUSION_CACHE
 
-**Answer:** The result is {'higher': 'aggressive_group', 'lower': 'calm_group', 'metric': 'mean vertical_shock_range', 'aggressive_group': 4.869682926829269, 'calm_group': 1.4331774193548388, 'difference': 3.436505507474431}
+**Answer:** 
 
-- Executed: True | Rejected: False | Judge: N/A
-- Stages: exact_cache_hit,cache_light_grounding,cache_miss_or_validation_failure,guardrail_plan,plan_validated,typed_exec
-- Path: typed_operator
-- Operators: DERIVE_BINARY,SPLIT_BY_VALUES,SPLIT_BY_VALUES,AGGREGATE_PARTITIONS,COMPARE_PARTITIONS
-- Latency: 8.97s | Cost: $0.00254
+- Executed: False | Rejected: False | Judge: N/A
+- Stages: hybrid_cache_hit,cache_light_grounding,cache_miss_or_validation_failure,guardrail_plan,plan_validated,typed_plan_unavailable
+- Path: typed_plan_unavailable
+- Operators: DERIVE_BIN,PARALLEL_AGGREGATE,DERIVE_BINARY,DERIVE_BINARY,AGGREGATE_COLUMN,AGGREGATE_COLUMN,COMPARE_VALUES
+- Fallback (execution): execution: DERIVE_BIN: ValueError: Invalid frequency: 5T. Failed to parse with error message: ValueError("Invalid frequency: T. Failed to parse with error message: KeyError('T'). Did you mean min?")
+- Latency: 13.00s | Cost: $0.00384
 
-**Agent Trace**
+**Alignment Explanation**
 
-```
-Thought: typed operator step 1 (DERIVE_BINARY)
-Action: typed_operator_exec
-Action Input: df['vertical_shock_range'] = df['accel_stats_z_p99'] - df['accel_stats_z_p1']
-Observation: derived 'vertical_shock_range' (rows=1219)
-Thought: typed operator step 2 (SPLIT_BY_VALUES)
-Action: typed_operator_exec
-Action Input: aggressive_group = df[df['behavior'].isin(['aggressive'])]
-Observation: aggressive_group: rows=164
-Thought: typed operator step 3 (SPLIT_BY_VALUES)
-Action: typed_operator_exec
-Action Input: calm_group = df[df['behavior'].isin(['calm'])]
-Observation: calm_group: rows=186
-Thought: typed operator step 4 (AGGREGATE_PARTITIONS)
-Action: typed_operator_exec
-Action Input: result = {label: agg(partition) for label in partitions}
-Observation: {'aggressive_group': 4.869682926829269, 'calm_group': 1.4331774193548388}
-Thought: typed operator step 5 (COMPARE_PARTITIONS)
-Action: typed_operator_exec
-Action Input: result = compare(aggressive_group, calm_group, mode='difference')
-Observation: {'higher': 'aggressive_group', 'lower': 'calm_group', 'metric': 'mean vertical_shock_range', 'aggressive_group': 4.869682926829269, 'calm_group': 1.4331774193548388, 'difference': 3.436505507474431}
-Final Answer: {'higher': 'aggressive_group', 'lower': 'calm_group', 'metric': 'mean vertical_shock_range', 'aggressive_group': 4.869682926829269, 'calm_group': 1.4331774193548388, 'difference': 3.436505507474431}
-```
-
-**Final Code Executed**
-
-```python
-df['vertical_shock_range'] = df['accel_stats_z_p99'] - df['accel_stats_z_p1']
-aggressive_group = df[df['behavior'].isin(['aggressive'])]
-calm_group = df[df['behavior'].isin(['calm'])]
-result = {label: agg(partition) for label in partitions}
-result = compare(aggressive_group, calm_group, mode='difference')
-```
+Flash-Fusion could not produce a valid typed plan and ReAct fallback is disabled. Reason: execution: DERIVE_BIN: ValueError: Invalid frequency: 5T. Failed to parse with error message: ValueError("Invalid frequency: T. Failed to parse with error message: KeyError('T'). Did you mean min?")
 
 ---
 
@@ -126,7 +97,7 @@ result = compare(aggressive_group, calm_group, mode='difference')
 - Stages: exact_cache_hit,cache_light_grounding,cache_miss_or_validation_failure,guardrail_plan,plan_validated,typed_exec
 - Path: typed_operator
 - Operators: FILTER_IN,DERIVE_BINARY,DERIVE_BIN,GROUP_AGGREGATE,RANK_GROUPS
-- Latency: 7.96s | Cost: $0.00236
+- Latency: 6.32s | Cost: $0.00236
 
 **Agent Trace**
 
@@ -176,7 +147,7 @@ result = result.idxmax()
 - Stages: exact_cache_hit,cache_light_grounding,cache_miss_or_validation_failure,guardrail_plan,plan_validated,typed_exec
 - Path: typed_operator
 - Operators: FILTER_IN,DERIVE_BIN,GROUP_AGGREGATE,RANK_GROUPS
-- Latency: 7.26s | Cost: $0.00212
+- Latency: 7.13s | Cost: $0.00212
 
 **Agent Trace**
 
