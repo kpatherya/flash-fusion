@@ -26,7 +26,39 @@ from collections.abc import Sequence
 from dataclasses import dataclass
 from typing import Literal
 
-from flashfusion.pipeline.operators import ALL_OPERATOR_NAMES
+_FALLBACK_OPERATOR_NAMES: tuple[str, ...] = (
+    "FILTER_COMPARE",
+    "FILTER_IN",
+    "FILTER_NOT_EMPTY",
+    "FILTER_EQ_AGGREGATE",
+    "AGGREGATE_COLUMN",
+    "COUNT_ROWS",
+    "COUNT_DISTINCT",
+    "SELECT_COLUMN",
+    "DERIVE_BINARY",
+    "DERIVE_VECTOR_MAGNITUDE",
+    "DERIVE_BIN",
+    "DERIVE_DURATION_SECONDS",
+    "GROUP_AGGREGATE",
+    "AGGREGATE_GROUPS",
+    "RANK_GROUPS",
+    "RANK_ROWS",
+    "SPLIT_BY_THRESHOLD",
+    "SPLIT_BY_VALUES",
+    "AGGREGATE_PARTITIONS",
+    "COMPARE_PARTITIONS",
+    "COMPARE_VALUES",
+    "CORRELATE_COLUMNS",
+    "PARALLEL_AGGREGATE",
+    "PREDICTIVE_PIPELINE",
+)
+
+try:
+    from flashfusion.pipeline.operators import ALL_OPERATOR_NAMES
+except ModuleNotFoundError as exc:
+    if exc.name != "numpy":
+        raise
+    ALL_OPERATOR_NAMES = _FALLBACK_OPERATOR_NAMES
 
 __all__ = [
     "BUCKETS",
