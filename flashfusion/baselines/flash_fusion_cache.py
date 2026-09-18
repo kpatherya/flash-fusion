@@ -79,11 +79,13 @@ import pandas as pd
 from langchain_core.messages import HumanMessage, SystemMessage
 from pydantic import ValidationError
 
-from flashfusion.baselines.flash_fusion import (
+from flashfusion.baselines.flash_fusion_no_cache import (
     _format_typed_execution_value,
+    record_policy_provenance,
     run_flash_fusion,
     typed_plan_digest,
 )
+from flashfusion.baselines.flash_fusion_policy import FlashFusionPolicy, resolve_policy
 from flashfusion.pipeline.operators import (
     DeterministicPlan,
     PlanExecutionError,
@@ -96,6 +98,25 @@ from flashfusion.pipeline.operators import (
 from flashfusion.pipeline.runner import LLMClient, RunResult
 
 BASELINE_NAME = "FLASH_FUSION_CACHE"
+#: Default policy for this module: the full system (cache + pruning + guidance).
+DEFAULT_POLICY = resolve_policy("FF_FULL")
+
+#: ``cache_outcome`` values recorded on every Flash-Fusion result row. Recorded
+#: at the branch that produced them rather than reconstructed downstream from
+#: ``execution_path``, so aggregate hit rates are reproducible from raw records.
+CACHE_OUTCOME_DISABLED = "disabled"
+CACHE_OUTCOME_EXACT_HIT = "exact_hit"
+CACHE_OUTCOME_SEMANTIC_HIT = "semantic_hit"
+CACHE_OUTCOME_HIT_REJECTED = "hit_rejected"
+CACHE_OUTCOME_MISS = "miss"
+
+#: Maps an internal lookup status to its recorded outcome label.
+_LOOKUP_STATUS_TO_OUTCOME = {
+    "exact_cache_hit": CACHE_OUTCOME_EXACT_HIT,
+    "semantic_cache_hit": CACHE_OUTCOME_SEMANTIC_HIT,
+    "exact_cache_hit_out_of_scope": CACHE_OUTCOME_HIT_REJECTED,
+    "semantic_cache_hit_out_of_scope": CACHE_OUTCOME_HIT_REJECTED,
+}
 DEFAULT_CACHE_PATH = Path(__file__).resolve().parents[1] / "eval" / "cache" / "cache_registry.json"
 DEFAULT_HYBRID_CONFIG_PATH = Path(__file__).resolve().parents[1] / "eval" / "cache" / "hybrid_match_config.json"
 
@@ -2147,6 +2168,7 @@ def run_flash_fusion_cache(
     enable_semantic_matching: bool = True,
     expected_operator_contract_hash: str | None = None,
     trace: CacheGroundingTrace | None = None,
+    policy: FlashFusionPolicy | None = None,
     **flash_fusion_kwargs: Any,
 ) -> RunResult:
     """Run the cache-first Flash-Fusion baseline.
@@ -2154,9 +2176,21 @@ def run_flash_fusion_cache(
     On a valid cache hit this uses one light-model call for value grounding,
     then normal typed validation/execution. On every non-successful cache
     path it falls back to the existing full Flash-Fusion planner.
+
+    Args:
+        policy: The active policy. Its pruning and planner-guidance settings
+            are forwarded to the planner used on cache miss/fallback, so a
+            cache-on ablation keeps its treatment on the planner path instead
+            of silently reverting to the full policy there. Defaults to
+            ``FF_FULL``.
     """
     trace = trace if trace is not None else CacheGroundingTrace()
     result = r if r is not None else _new_result(query, client)
+    active_policy = policy or DEFAULT_POLICY
+    record_policy_provenance(result, active_policy)
+    # Forward the treatment to the planner fallback; run_flash_fusion re-stamps
+    # provenance from the same object, so hits and misses agree on the policy.
+    flash_fusion_kwargs.setdefault("policy", active_policy)
     stage_latency = (
         dict(result.stage_latency_s)
         if isinstance(result.stage_latency_s, dict)
@@ -2250,6 +2284,8 @@ def run_flash_fusion_cache(
         # skeleton, so we ask the light model for the guardrail reason instead
         # of invoking the full planner/guardrail pipeline.
         if lookup_status in {"exact_cache_hit_out_of_scope", "semantic_cache_hit_out_of_scope"}:
+            _set_if_present(result, "cache_outcome", CACHE_OUTCOME_HIT_REJECTED)
+            _set_if_present(result, "cache_outcome_reason", lookup_status)
             _append_stage(result, lookup_status)
             _append_stage(result, "cache_light_rejection_reason")
             grounding_started = time.perf_counter()
@@ -2292,6 +2328,8 @@ def run_flash_fusion_cache(
                 #     raise LookupError("schema_fingerprint_mismatch")
             finally:
                 stage_latency["cache_validation"] += time.perf_counter() - validation_started
+            _set_if_present(result, "cache_outcome", CACHE_OUTCOME_EXACT_HIT)
+            _set_if_present(result, "cache_outcome_reason", lookup_status)
             return _execute_grounded_cache_entry(
                 query=query,
                 df=df,
@@ -2306,6 +2344,8 @@ def run_flash_fusion_cache(
             )
 
         if lookup_status == "semantic_cache_hit":
+            _set_if_present(result, "cache_outcome", CACHE_OUTCOME_SEMANTIC_HIT)
+            _set_if_present(result, "cache_outcome_reason", lookup_status)
             return _execute_grounded_cache_entry(
                 query=query,
                 df=df,
@@ -2336,6 +2376,11 @@ def run_flash_fusion_cache(
         _record(trace, failure_reason=f"{type(exc).__name__}: {exc}", fell_back=True)
         failure_trace = asdict(trace)
         _set_if_present(result, "cache_grounding_failure", failure_trace)
+        # Every non-hit path lands here: lookup miss, hard-gate rejection,
+        # grounding failure, and post-grounding validation failure. The reason
+        # string distinguishes them without re-deriving anything downstream.
+        _set_if_present(result, "cache_outcome", CACHE_OUTCOME_MISS)
+        _set_if_present(result, "cache_outcome_reason", f"{type(exc).__name__}: {exc}")
         _record_cache_failure(result, str(exc))
         fallback_result = _run_normal_flash_fusion(query, df, client, result, **flash_fusion_kwargs)
         _set_if_present(fallback_result, "cache_grounding_failure", failure_trace)

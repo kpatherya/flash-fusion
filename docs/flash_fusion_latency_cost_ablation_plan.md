@@ -1,244 +1,204 @@
-# Flash-Fusion Latency and Cost Ablation Plan
+Please revise the Flash-Fusion baseline implementation and benchmark integration so that we can run reliable, interpretable ablations of the system’s three components:
 
-Status: Planned experiment; no behavior changes in this document
+1. caching,
+2. operator pruning, and
+3. planner prompting/guidance.
 
-## Decision
+Start by inspecting the current baseline implementations, benchmark dispatch, result-writing code, visualization inputs, and the most recent ablation outputs. In particular, determine why the existing ablation runs do not currently produce trustworthy comparisons. Treat the existing `flash_fusion.py` and `flash_fusion_cache.py` behavior as the starting point, not as an assumed correct experimental design.
 
-Measure the following four policies on the same benchmark queries, datasets,
-repetitions, models, and retry settings:
+## Goal
 
-| Code | Display label | Cache | Pruned vocabulary | Planner chaining guidance/examples |
-| --- | --- | --- | --- | --- |
-| `FLASH_FUSION` | Flash-Fusion | enabled | enabled | enabled |
-| `FLASH_FUSION_NO_CACHE` | Flash-Fusion (-cache) | disabled | enabled | enabled |
-| `FLASH_FUSION_NO_CACHE_NO_PRUNING` | Flash-Fusion (-cache -pruning) | disabled | disabled | enabled |
-| `FLASH_FUSION_NO_CACHE_NO_PRUNING_NO_PLANNING` | Flash-Fusion (-cache -pruning -planning) | disabled | disabled | disabled |
+Create ablations that isolate the effect of a single component. Each ablation should differ from the full Flash-Fusion configuration in only one intended dimension:
 
-`FLASH_FUSION` is the deployed full policy: it first attempts exact or
-semantic skeleton reuse, uses light-model parameter grounding on an accepted
-cache entry, and otherwise runs the pruned full planner. The current
-`FLASH_FUSION_CACHE` code path supplies this behavior and should remain a
-backward-compatible implementation alias during migration.
+- Full Flash-Fusion: cache enabled, operator pruning enabled, planner guidance enabled.
+- No-cache: cache disabled; pruning and planner guidance unchanged.
+- No-pruning: operator pruning disabled; cache and planner guidance unchanged.
+- No-prompting: planner-specific chaining guidance/examples disabled; cache and pruning unchanged.
 
-The final policy is deliberately not a no-validation baseline. It still sends
-the complete typed/Pydantic operator field signatures, associated operator and
-field descriptions, and JSON output contract, then runs the identical
-structural and DataFrame-schema validation gates. It removes only the
-planner-specific instructions and worked operator-chaining examples that help
-the LLM decide how to compose a multi-step plan.
+Do not make the ablations cumulative unless there is a separate, clearly labeled diagnostic reason to do so. The primary reported comparisons should support component-level claims rather than conflate multiple removals.
 
-## Causal Questions
+## Terminal runbook (copy/paste)
 
-The main comparisons support this cumulative ablation ladder:
+Use the canonical primary policy labels for component-level ablations:
 
-| Paired contrast | Component isolated | Claim supported |
-| --- | --- | --- |
-| `FLASH_FUSION` vs. `FLASH_FUSION_NO_CACHE` | Cache | Net effect of exact plus semantic cache reuse, including lookup, light grounding, cache failures, and normal fallback. |
-| `FLASH_FUSION_NO_CACHE` vs. `FLASH_FUSION_NO_CACHE_NO_PRUNING` | Operator pruning | Effect of reducing the planner's supplied operator vocabulary while retaining its planning guidance, validators, executor, and fallback. |
-| `FLASH_FUSION_NO_CACHE_NO_PRUNING` vs. `FLASH_FUSION_NO_CACHE_NO_PRUNING_NO_PLANNING` | Planning guidance/examples | Effect of the prompt material that teaches the LLM how to chain the supplied typed operators. |
+- `FF_FULL` (cache on, pruning on, guidance on)
+- `FF_NO_CACHE`
+- `FF_NO_PRUNE`
+- `FF_NO_PROMPT`
 
-The cache comparison is an end-to-end policy effect. The second and third
-comparisons are clean adjacent ablations because neither policy uses cache.
-Do not add all three deltas to claim independent savings across the entire
-system; cache hits change which requests reach the planner.
+### 1) Quick smoke check (single dataset)
 
-## Why These Components
+```bash
+python -m flashfusion.eval.benchmark \
+   --dataset bus \
+   --data data/bus/bus_data_enriched_behavior.csv \
+   --ground-truth flashfusion/eval/ground_truth/ground_truth_bus.json \
+   --baselines FF_FULL,FF_NO_CACHE,FF_NO_PRUNE,FF_NO_PROMPT \
+   --queries 1,5,9,13 \
+   --runs 1 \
+   --interleave-policies \
+   --query-rewording paired \
+   --prompt-cache-warmup \
+   --cache-prewarm-hybrid \
+   --output flashfusion/results/ablations/smoke_bus
+```
 
-### Cache policy
+### 2) Full primary ablation run per dataset
 
-`flashfusion/baselines/flash_fusion_cache.py` replaces the full planner on an
-accepted cache hit with cache lookup/matching, a light-model grounding call,
-the normal typed validators, and deterministic execution. On every cache
-failure it invokes the normal Flash-Fusion planner. Thus its observed delta is
-the operational cost of the complete cache policy, not merely an optimistic
-cache-hit microbenchmark.
+```bash
+python -m flashfusion.eval.benchmark \
+   --dataset wisdm \
+   --data data/AutoIOT_dataset/IMU/WISDM_ar_v1.1_raw.txt \
+   --ground-truth flashfusion/eval/ground_truth/ground_truth_wisdm.json \
+   --baselines FF_FULL,FF_NO_CACHE,FF_NO_PRUNE,FF_NO_PROMPT \
+   --queries all \
+   --runs 3 \
+   --interleave-policies \
+   --query-rewording paired \
+   --prompt-cache-warmup \
+   --cache-prewarm-hybrid \
+   --output flashfusion/results/ablations/primary/wisdm
 
-### Operator pruning
+python -m flashfusion.eval.benchmark \
+   --dataset mit_ecg \
+   --data data/AutoIOT_dataset/ECG.0/MIT_arrythmia_v1.txt \
+   --ground-truth flashfusion/eval/ground_truth/ground_truth_mit_ecg.json \
+   --baselines FF_FULL,FF_NO_CACHE,FF_NO_PRUNE,FF_NO_PROMPT \
+   --queries all \
+   --runs 3 \
+   --interleave-policies \
+   --query-rewording paired \
+   --prompt-cache-warmup \
+   --cache-prewarm-hybrid \
+   --output flashfusion/results/ablations/primary/mit_ecg
 
-`flashfusion/baselines/flash_fusion.py` routes each query through
-`route_operator_bucket` before its single structured guardrail-and-plan call.
-The router is deterministic and only removes vocabulary buckets; it does not
-choose a plan. It changes the planner-prefix size, input tokens, prompt-cache
-key, and potentially plan/fallback behavior. The no-pruning variant must
-replace the query route with `_FULL_ROUTE` while leaving every downstream
-operation unchanged.
+python -m flashfusion.eval.benchmark \
+   --dataset bus \
+   --data data/bus/bus_data_enriched_behavior.csv \
+   --ground-truth flashfusion/eval/ground_truth/ground_truth_bus.json \
+   --baselines FF_FULL,FF_NO_CACHE,FF_NO_PRUNE,FF_NO_PROMPT \
+   --queries all \
+   --runs 3 \
+   --interleave-policies \
+   --query-rewording paired \
+   --prompt-cache-warmup \
+   --cache-prewarm-hybrid \
+   --output flashfusion/results/ablations/primary/bus
+```
 
-### Planning guidance and examples
+### 3) Collect and inspect outputs
 
-`flashfusion/pipeline/operators.py` constructs the planner prefix from a
-complete vocabulary specification plus role, scope, planning, no-invention,
-and output-contract sections. The vocabulary description includes both the
-typed operator/Pydantic descriptions that remain in this ablation and
-planner-specific usage prose plus worked operator-chain examples that do not.
+```bash
+# Per-dataset core outputs
+find flashfusion/results/ablations/primary -name metrics.csv -o -name raw_results.jsonl | sort
 
-The `-planning` condition must retain the complete, unpruned operator
-signatures and descriptions, aggregate enums, role/scope constraints,
-no-invention rules, and strict JSON output grammar. It must remove
-planner-only composition material:
+# Example: inspect one metrics file quickly
+python - <<'PY'
+import pandas as pd
+df = pd.read_csv("flashfusion/results/ablations/primary/bus/metrics.csv")
+cols = [
+      "baseline", "query_id", "gt_score", "latency_s", "cost_usd",
+      "policy_name", "policy_cache_enabled", "policy_pruning_enabled",
+      "policy_planner_guidance_enabled", "cache_outcome",
+      "planner_candidate_op_count", "planner_prefix_chars", "execution_path"
+]
+cols = [c for c in cols if c in df.columns]
+print(df[cols].head(20).to_string(index=False))
+PY
 
-- worked multi-step operator-chain examples
-- operator usage prose that prescribes sequencing or composition
-- the `PLANNING` instructions that teach mapping from question intent to
-  multi-step chains
+# Optional: regenerate comparison plots for one run folder
+python -m flashfusion.eval.visualize_comparison \
+   --metrics flashfusion/results/ablations/primary/bus/metrics.csv \
+   --dataset bus \
+   --output flashfusion/results/ablations/primary/bus
+```
 
-It must not request hidden chain-of-thought. The observable output remains one
-typed JSON plan, with the same tokens/model/decode settings and the same
-validators as the other policies.
+### 4) If using the shell wrapper, override legacy defaults explicitly
 
-## Explicitly Excluded Main-Figure Ablations
+```bash
+RUN_TAG=ablations_primary_n3 \
+RUNS=3 \
+BASELINES=FF_FULL,FF_NO_CACHE,FF_NO_PRUNE,FF_NO_PROMPT \
+SMOKE_TEST=1 \
+./run_benchmark.sh --all --queries all
+```
 
-Do not place these in the three primary ablation figures:
+## Requested file organization
 
-- Removing Pydantic structural validation or DataFrame schema validation.
-  These gates are part of the system's safety contract; removing them can
-  create cheap invalid results rather than a meaningful efficiency baseline.
-- Disabling semantic hard compatibility gates. This is appropriate only for an
-  offline false-positive-reuse audit, never a production comparison.
-- Disabling pruning only after a cache miss. That is a useful miss-conditioned
-  diagnostic, but it is not a component-isolating population: cache outcomes
-  determine which requests receive the treatment.
-- Removing local metadata construction, typed execution, Pydantic structural
-  validation, or DataFrame schema validation. These are part of the executable
-  safety contract and must remain in every ablation.
+Rename the current non-cache baseline implementation from:
 
-## Implementation Plan
+`flashfusion/baselines/flash_fusion.py`
 
-### 1. Make policy selection explicit
+to:
 
-Add a narrowly scoped Flash-Fusion policy/configuration object, or equivalent
-keyword arguments, owned by `flashfusion/baselines/flash_fusion.py` and
-`flashfusion/baselines/flash_fusion_cache.py`:
+`flashfusion/baselines/flash_fusion_no_cache.py`
 
-- `cache_enabled: bool`
-- `operator_pruning_enabled: bool`
-- `planner_guidance_enabled: bool`
-- `baseline_code: str`
+Update imports, benchmark dispatch, scripts, tests, documentation, and other dependencies accordingly.
 
-The no-cache policies must call the same `run_flash_fusion` path. When pruning
-is disabled, force `_FULL_ROUTE`; otherwise preserve
-`route_operator_bucket(query, list(df.columns))`. When planning guidance is
-disabled, render a new no-guidance planner prefix from the full operator field
-signature specification. Do not mutate or delete the normal prompt; give the
-ablation a separately versioned/digested prompt constructor so prompt-cache
-keys and results remain traceable.
+Create:
 
-Keep these invariants identical in all four policies:
+`flashfusion/baselines/flash_fusion_no_prune.py`
 
-- full planner model and light grounding model
-- provider parameters and decoding configuration
-- operator registry, JSON response schema, scope/no-invention constraints, and
-  Pydantic field signatures
-- typed-plan normalization, structural validation, schema validation, timeout,
-  typed execution, and ReAct fallback
-- query text, DataFrame copy policy, cache registry content, and contract hash
+This variant should preserve the full-policy behavior as much as possible while disabling only operator pruning. It should not accidentally become a no-cache implementation merely because of how the existing code is organized.
 
-### 2. Extend benchmark dispatch and provenance
+If the current architecture makes a separate no-prompting entry point necessary for clear experiment dispatch, create an appropriately named baseline module as well. Prefer a small shared policy/configuration mechanism over copying substantial orchestration logic across several scripts, but do not over-refactor unrelated code.
 
-Add the four codes to `BaselineRunner.MODES` and dispatch them through the
-policy switches above. Preserve the current `FLASH_FUSION_CACHE` code as a
-backward-compatible alias until existing results and scripts have migrated.
+Keep a backward-compatible alias or migration path for existing `FLASH_FUSION` / `FLASH_FUSION_CACHE` references if existing scripts or saved experiments still depend on those names. Clearly document the final mapping between legacy names, implementation entry points, and experimental labels.
 
-Persist the following in every `RunResult` and `metrics.csv` row:
+## Experimental invariants
 
-- `ablation_policy` with the three binary switches
-- total latency, total input/output tokens, and total provider cost
-- full-planner latency/input/output/cost
-- light-grounding latency/input/output/cost
-- cache lookup, semantic retrieval, compatibility validation, and cache-plan
-  validation latency
-- deterministic router latency, `operator_route_candidate_ops`, and
-  `operator_route_full_fallback`
-- planner prompt mode, prompt-prefix digest, character length, and input-token
-  count; label modes `full_guidance`, `pruned_guidance`, and
-  `full_vocabulary_no_chaining_guidance`
-- execution path, cache outcome, cache decision, and fallback reason
-- structural/schema/execution failure and fallback recovery indicators
+Across the full system and all ablations, preserve the same:
 
-Provider prompt cache warming is allowed only as setup. Record cached-input
-and cache-write tokens separately so provider-side reuse remains auditable.
+- benchmark queries, datasets, repetitions, models, decoding parameters, retries, timeouts, and execution environment;
+- operator registry, typed operator schemas, JSON response contract, validation gates, execution path, and fallback behavior;
+- cache contents and cache-read/write protocol except where caching itself is the treatment;
+- data-copy behavior and evaluation/scoring logic.
 
-### 3. Run a paired, frozen experiment
+Do not weaken structural validation, schema validation, safety checks, or typed execution as part of these primary ablations. A cheaper invalid answer is not a meaningful efficiency result.
 
-Use the same query IDs, wording version, DataFrame, registry snapshot,
-semantic index snapshot, model identifiers, temperature, timeout, retry
-policy, and repetitions for every policy. The current N=3 protocol may be
-retained, but randomize or interleave policy order within each replicate to
-reduce provider-load drift.
+For the no-pruning condition, use the complete operator vocabulary while preserving the same planner, validation, execution, and fallback pipeline. For the no-prompting condition, retain operator signatures, field descriptions, output grammar, scope constraints, and no-invention rules. Remove only material that teaches or demonstrates planner-specific operator sequencing/composition, such as worked multi-step chaining examples and explicit planning guidance. Do not request hidden reasoning or chain-of-thought.
 
-Prewarm all applicable provider prompt prefixes and the hybrid matcher outside
-per-query timing for every policy. Do not let one policy's online cache writes
-or provider warmup become available only to later policies. Use read-only,
-pre-populated cache registries for this experiment.
+## Logging and provenance
 
-Include all query outcomes in the primary means: accepted cache hits, cache
-misses, cache grounding failures, full-planner calls, ReAct fallbacks, and
-out-of-scope rejections. Report cache-hit-only values only as a supplemental
-diagnostic.
+The recent runs make it difficult to diagnose whether observed differences arise from caching, pruning, prompting, fallback behavior, or instrumentation. Make the logging sufficient to reconstruct the actual execution path for every query and repetition.
 
-### 4. Create the three ablation figures
+Use a common logging/result schema for all Flash-Fusion variants. At minimum, record:
 
-Extend `flashfusion/viz/measure.py` baseline order, labels, and colors, then
-allow the plotting scripts to select the four codes without turning them into
-the current cache-hit/cache-miss synthetic copies.
+- baseline code and an explicit policy description identifying cache, pruning, and planner-guidance settings;
+- query ID, dataset, replicate, model/configuration identifiers, and prompt/version digest;
+- accuracy or task score and outcome category;
+- end-to-end latency, token counts, and provider cost;
+- stage-level latency/cost where available, including routing, cache lookup/matching, cache grounding, full planning, validation, execution, and fallback;
+- cache outcome and reason, including exact hit, semantic hit, miss, hard-gate rejection, grounding failure, and post-grounding validation failure;
+- routing/pruning metadata, such as candidate operator count, whether the full vocabulary was used, and prompt-prefix size;
+- planner prompt mode and enough provenance to distinguish the normal guided prompt from the no-guidance prompt;
+- typed-path success, validation failures, schema/scope rejections, execution failures, and ReAct fallback/recovery.
 
-Update these paper outputs:
+Avoid visualization-only substitutions or copied timing values. The raw results should make all aggregate latency and cost figures reproducible from measured per-query records.
 
-- accuracy diagram: plot benchmark task score/accuracy for all four policies,
-  overall and by query type. Include typed-path, fallback, and rejection rates
-  in its companion CSV so accuracy changes can be interpreted.
-- latency diagram: update
-  `results/primary_visualizations/paper/latency_cost_horizontal_three.pdf` or
-  replace it with an explicitly named four-policy latency output. Plot total
-  mean latency and paired uncertainty; report median and p95 in the companion
-  CSV/table.
-- cost diagram: produce a parallel four-policy cost figure from total provider
-  cost, with total input/output and cached-input tokens in its companion CSV.
-- `results/primary_visualizations/paper/semantic_stage_comparison_overall_log_n3.pdf`:
-  show comparable stages: deterministic preparation/routing, cache
-  lookup/match plus light grounding, full planning, validation, execution, and
-  fallback. Do not silently call cache work "planning" without documenting
-  that definition.
+## Evaluation expectations
 
-The existing visualization-only execution cookie-cut must be disabled for
-ablation figures. Copying no-cache execution timing onto cache rows masks real
-end-to-end execution differences and invalidates the causal contrasts above.
+Ensure the benchmark runner can execute and label all policies consistently. Preserve paired per-query comparisons by using the same query set and repetitions across policies. If possible, interleave policy order within a replicate and perform any prompt-cache warming outside timed measurements so provider load or warmup does not systematically favor one policy.
 
-## Required Reporting
+The expected hypotheses are:
 
-For each policy overall and by query type, report:
+- Removing planner guidance may reduce task accuracy, particularly for multi-step operator composition.
+- Removing guidance or pruning may increase planning latency because the planner receives fewer composition hints or a larger operator vocabulary.
+- Removing caching may increase latency and provider cost when the full planner replaces accepted cache reuse.
 
-- task accuracy/score with paired confidence interval
-- mean, median, p95, and paired 95% confidence interval for total latency and
-  cost
-- total/full-planner/light-grounding input and output tokens, cached input
-  tokens, and provider cost
-- semantic-stage decomposition and total-stage sum
-- cache exact-hit, semantic-hit, miss, hard-gate rejection, grounding failure,
-  and post-grounding validation-failure rates
-- router candidate-operator count, prompt-prefix size, and full-route rate
-- typed-path, guardrail-rejection, schema-scope-rejection, and ReAct-fallback
-  proportions
-- task score and safety failures so an apparent efficiency gain cannot conceal
-  quality loss
+Treat these as hypotheses to test, not conclusions to encode into result summaries.
 
-Use paired per-query deltas for adjacent contrasts as the headline statistic.
-Aggregate bars alone can be distorted when policies fall back on different
-queries.
+## Deliverables
 
-## Acceptance Criteria
+1. Implement the renamed and new baseline entry points, with shared internals where that improves consistency.
+2. Update all affected imports, dispatch tables, CLI/configuration paths, tests, and documentation.
+3. Add or update logging so each policy’s execution path and metrics are auditable.
+4. Add focused tests or smoke checks demonstrating that each primary ablation toggles only its intended component.
+5. Provide a concise implementation summary that includes:
+   - the final policy matrix;
+   - changed files and compatibility decisions;
+   - the root cause(s) found in the existing ablation setup;
+   - commands used for validation;
+   - any unresolved experimental limitations or follow-up work.
 
-1. The four policies differ only in the named cache, pruning, and
-  planner-guidance controls.
-2. All retain the same typed validation and execution safety path.
-3. Raw results make it possible to reconstruct each primary-figure stage and
-   each total latency/cost value without visualization-only substitutions.
-4. Both PDFs and their companion CSV summaries label policies unambiguously.
-5. The report includes quality and fallback rates beside efficiency results.
-
-## Follow-On Diagnostic (Supplement Only)
-
-After the four-policy experiment, a semantic-cache authorization audit may
-compare the normal hard-gated matcher against a deliberately unsafe,
-non-production gate-free matcher. Report false-positive reuse, abstention, and
-correct-authorized-hit rates separately. It must not feed answers, latency, or
-cost into the three primary ablation figures.
+Avoid unrelated cleanup. Make decisions based on the current repository structure, explain any assumptions, and flag any conflict between existing naming/behavior and the isolation requirement before making a potentially incompatible change.

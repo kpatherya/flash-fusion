@@ -2851,18 +2851,67 @@ NO INVENTION
 """
 
 
+#: Paragraphs removed by the FF_NO_PROMPT treatment.
+#:
+#: These are the only parts of the planner contract that *teach* multi-step
+#: operator composition: a worked recipe for building a PREDICTIVE_PIPELINE
+#: plan, and a rule about choosing between two operators when chaining a
+#: binning step. Removing them removes guidance.
+#:
+#: Everything else in the PLANNING block stays, because it is contract rather
+#: than guidance: concept-to-column resolution defines what
+#: ``ambiguous_concepts`` means, and the final paragraph is a no-invention plus
+#: output-grammar rule ("set plan to null", "do not invent an operator", "do
+#: not emit Python code"). Dropping those would make the arm cheaper by
+#: weakening validation instead of by removing guidance, which would not be a
+#: meaningful efficiency result.
+_PLANNER_COMPOSITION_GUIDANCE: tuple[str, ...] = (
+    """  For in-dataset train/predict requests (chronological train/holdout split with
+  a prediction on a holdout row), emit a single-step PREDICTIVE_PIPELINE plan.
+  Use only supported model values exactly as listed in the operator vocabulary,
+  provide explicit feature_columns from real schema columns, set sort_by from
+  the chronological ordering requested, and set holdout_row to first or last.
+  Do not emit free-form modeling steps or Python code.
+""",
+    """  When the question asks to bucket/group a numeric or datetime column into
+  fixed-size intervals against a CONSTANT (e.g. "1-minute intervals", "bins of
+  width 10"), use DERIVE_BIN with that column and the constant as `width` —
+  NEVER DERIVE_BINARY, whose `left`/`right` fields must always be existing
+  column names and never a numeric literal or time constant.
+""",
+)
+
+
+class PlannerPromptVariantError(RuntimeError):
+    """Raised when the no-guidance planner prompt cannot be built exactly.
+
+    Failing loudly beats silently shipping the guided prompt under the
+    ``FF_NO_PROMPT`` label: a no-op treatment would read as "guidance does not
+    matter" rather than as a build error.
+    """
+
+
 def _planner_scope_rules(*, include_planning_guidance: bool) -> str:
-    """Return scope/planning contract text for one planner policy variant."""
+    """Return the scope/planning contract text for one planner policy variant.
+
+    With ``include_planning_guidance=True`` the text is returned verbatim, so
+    the guided prefix stays byte-identical to previously recorded runs and the
+    provider prompt cache is unaffected by this ablation machinery existing.
+    """
     if include_planning_guidance:
         return _PLANNER_SCOPE_RULES
 
-    start_marker = "\nPLANNING\n"
-    end_marker = "\nNO INVENTION\n"
-    if start_marker not in _PLANNER_SCOPE_RULES or end_marker not in _PLANNER_SCOPE_RULES:
-        return _PLANNER_SCOPE_RULES
-    prefix, tail = _PLANNER_SCOPE_RULES.split(start_marker, 1)
-    _, suffix = tail.split(end_marker, 1)
-    return f"{prefix}\nNO INVENTION\n{suffix}"
+    text = _PLANNER_SCOPE_RULES
+    for paragraph in _PLANNER_COMPOSITION_GUIDANCE:
+        if paragraph not in text:
+            raise PlannerPromptVariantError(
+                "planner composition-guidance paragraph not found in "
+                "_PLANNER_SCOPE_RULES; the no-guidance prompt variant is stale. "
+                "Update _PLANNER_COMPOSITION_GUIDANCE to match the current "
+                f"contract text. Missing paragraph starts: {paragraph[:60]!r}"
+            )
+        text = text.replace(paragraph, "", 1)
+    return text
 
 _PLANNER_OUTPUT_CONTRACT: str = """\
 Respond with a single JSON object and nothing else:

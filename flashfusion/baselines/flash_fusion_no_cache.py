@@ -77,6 +77,7 @@ from flashfusion.pipeline.operators import (
     ParsedGuardrail,
     PlanSchemaError,
     StructuralValidationError,
+    build_compact_operator_spec,
     build_planner_prefix,
     build_vocabulary_spec,
     execute_plan,
@@ -168,8 +169,13 @@ def _planner_prefix_message(
     cached = _PLANNER_PREFIX_CACHE.get(key)
     if cached is None:
         include_planning_guidance = planner_guidance != PLANNER_GUIDANCE_NONE
+        vocabulary_spec = (
+            build_compact_operator_spec(route.candidate_ops)
+            if not include_planning_guidance
+            else build_vocabulary_spec(route.candidate_ops)
+        )
         text = build_planner_prefix(
-            build_vocabulary_spec(route.candidate_ops),
+            vocabulary_spec,
             include_planning_guidance=include_planning_guidance,
         )
         message = SystemMessage(
@@ -222,6 +228,7 @@ def prewarm_flash_fusion_prompt_cache(
     client: LLMClient,
     queries: list[str],
     planner_guidance: str = PLANNER_GUIDANCE_FULL,
+    route_mode: str = ROUTE_MODE_ROUTER,
 ) -> int:
     """Populate provider caches for the static planner prefixes used by *queries*.
 
@@ -229,12 +236,20 @@ def prewarm_flash_fusion_prompt_cache(
     planner, the same model session, and a disposable one-token completion.
     Benchmark callers must use a distinct setup client so warmup usage stays
     outside timed per-query metrics.
+
+    ``route_mode`` must match the policy being warmed. A ``full`` policy sends
+    one full-vocabulary prefix for every query, so warming the router-narrowed
+    prefixes instead would leave that policy cold at measurement time and
+    charge the difference to the pruning treatment.
     """
     meta_str = meta_to_str(build_column_metadata(df))
     unique_routes: dict[str, OperatorRoute] = {}
-    for query in queries:
-        route = route_operator_bucket(query, list(df.columns))
-        unique_routes[route.route_key] = route
+    if route_mode == ROUTE_MODE_FULL:
+        unique_routes[_FULL_ROUTE.route_key] = _FULL_ROUTE
+    else:
+        for query in queries:
+            route = route_operator_bucket(query, list(df.columns))
+            unique_routes[route.route_key] = route
     for route in unique_routes.values():
         prefix_message, _ = _planner_prefix_message(
             client,
@@ -493,6 +508,11 @@ def run_flash_fusion(
         r.route_mode = effective_route_mode
     if hasattr(r, "planner_guidance_mode"):
         r.planner_guidance_mode = effective_guidance
+    if hasattr(r, "cache_outcome") and not r.cache_outcome:
+        # Only when the cache wrapper has not already recorded an outcome: on
+        # a cache miss this function runs as the fallback and must not
+        # overwrite the "miss" the wrapper recorded.
+        r.cache_outcome = "disabled" if not active_policy.cache else "miss"
 
     route_mode = effective_route_mode
     planner_guidance = effective_guidance

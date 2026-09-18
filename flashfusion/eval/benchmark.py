@@ -130,6 +130,13 @@ from flashfusion.pipeline.runner import (
     RunResult,
     _is_groq_model,
 )
+from flashfusion.baselines.flash_fusion_policy import (
+    LEGACY_POLICY_ALIASES,
+    POLICIES,
+    PRIMARY_POLICY_SET,
+    is_flash_fusion_policy,
+    resolve_policy,
+)
 from flashfusion.config import DEFAULT_LIGHT_MODEL, DEFAULT_MODEL
 
 ALL_BASELINES = [
@@ -137,13 +144,17 @@ ALL_BASELINES = [
     "WELLMAX_ONLY",
     "REACT_ONLY",
     "AUTOIOT_PAPER",
-    "FLASH_FUSION",
-    "FF_NO_PRUNING",
-    "FF_NO_PLANNING",
-    "FLASH_FUSION_CACHE",
     "HARGPT_PAPER",
     "LLMSENSE_PAPER",
+    # Flash-Fusion policy arms (see baselines/flash_fusion_policy.py).
+    *PRIMARY_POLICY_SET,
 ]
+
+#: Every accepted Flash-Fusion label, canonical and legacy.
+FLASH_FUSION_BASELINES = frozenset(POLICIES) | frozenset(LEGACY_POLICY_ALIASES)
+
+#: The four arms that support component-level claims.
+PRIMARY_ABLATION_BASELINES = ",".join(PRIMARY_POLICY_SET)
 
 DEFAULT_DATA_PATHS = {
     "wisdm": "data/AutoIOT_dataset/IMU/WISDM_ar_v1.1_raw.txt",
@@ -192,6 +203,87 @@ def _cache_query_order_for_run(
     rng = random.Random(seed)
     rng.shuffle(ordered)
     return ordered, seed
+
+
+def _rewording_baselines(baselines: list[str], mode: str) -> set[str]:
+    """Return the baselines that get the per-run reworded query bank.
+
+    The v1/v2/v3 reworded banks and the shuffled order exist to exercise
+    *semantic* cache matching, so historically only ``FLASH_FUSION_CACHE``
+    received them. That is fine when the cache baseline is measured on its own,
+    but it destroys paired comparison the moment a cache arm and a no-cache arm
+    appear in the same experiment: the two arms would be answering differently
+    worded questions in different orders.
+
+    Modes:
+        ``paired`` — nobody gets rewording; every arm sees the same bank in the
+            same order. Required for the FF_FULL vs FF_NO_CACHE contrast.
+        ``cache-only`` — legacy behaviour; cache policies get the reworded bank.
+        ``auto`` — ``cache-only`` when the run contains no non-cache
+            Flash-Fusion arm to pair against, otherwise ``paired``.
+    """
+    policy_arms = [b for b in baselines if is_flash_fusion_policy(b)]
+    cache_arms = {b for b in policy_arms if resolve_policy(b).cache}
+
+    if mode == "paired":
+        return set()
+    if mode == "cache-only":
+        return cache_arms
+    if mode != "auto":
+        raise ValueError(f"unknown query-rewording mode {mode!r}")
+
+    non_cache_arms = [b for b in policy_arms if not resolve_policy(b).cache]
+    return set() if (cache_arms and non_cache_arms) else cache_arms
+
+
+def _per_baseline_overrides(
+    *,
+    baselines: list[str],
+    rewording_mode: str,
+    cache_query_defs: list[dict],
+    cache_order_ids: list[int],
+) -> tuple[dict[str, list[dict]], dict[str, list[int]]]:
+    """Build the per-baseline query-bank and query-order override maps."""
+    targets = _rewording_baselines(baselines, rewording_mode)
+    defs_by_baseline = {b: cache_query_defs for b in targets}
+    ids_by_baseline = {b: cache_order_ids for b in targets}
+    return defs_by_baseline, ids_by_baseline
+
+
+def _run_schedule(
+    *,
+    baselines: list[str],
+    query_ids: list[int],
+    query_ids_by_baseline: dict[str, list[int]] | None,
+    interleave: bool,
+) -> list[tuple[str, int]]:
+    """Return the (baseline, query_id) execution order for one replicate.
+
+    Blocked order (``interleave=False``) runs every query of one arm before
+    starting the next, which confounds arm with wall-clock position: provider
+    load, rate-limit backoff and cache warmth all drift over a run and that
+    drift lands entirely on whichever arm occupied that stretch of time.
+
+    Interleaved order runs all arms on one query before moving to the next, so
+    that drift is shared across arms at each query instead of being absorbed
+    by one of them. Arm order is rotated per query so no arm is always first,
+    which would otherwise let it consistently absorb cold-start cost.
+    """
+    per_baseline = {
+        baseline: list((query_ids_by_baseline or {}).get(baseline, query_ids))
+        for baseline in baselines
+    }
+    if not interleave:
+        return [(b, qid) for b in baselines for qid in per_baseline[b]]
+
+    schedule: list[tuple[str, int]] = []
+    for position in range(max((len(v) for v in per_baseline.values()), default=0)):
+        rotated = baselines[position % len(baselines):] + baselines[: position % len(baselines)]
+        for baseline in rotated:
+            ids = per_baseline[baseline]
+            if position < len(ids):
+                schedule.append((baseline, ids[position]))
+    return schedule
 
 
 def _query_defs_for_reporting(
@@ -425,9 +517,15 @@ def _prewarm_provider_prompt_caches(
     dataset: str,
     cache_path: str | None,
 ) -> None:
-    """Populate static provider prompt caches outside benchmark query timing."""
-    ff_like = {"FLASH_FUSION", "FF_NO_PRUNING", "FF_NO_PLANNING"}
-    if not ((ff_like | {"FLASH_FUSION_CACHE"}) & set(baselines)):
+    """Populate static provider prompt caches outside benchmark query timing.
+
+    Each policy is warmed for the exact (route_mode, planner_guidance) prefix
+    it will send. Warming only the router-narrowed, guidance-on prefix — as an
+    earlier version did — left the no-pruning arm sending an unwarmed
+    full-vocabulary prefix, so a cold provider cache was charged to "pruning".
+    """
+    policy_baselines = [b for b in baselines if is_flash_fusion_policy(b)]
+    if not policy_baselines:
         return
 
     setup_client = LLMClient(
@@ -437,29 +535,36 @@ def _prewarm_provider_prompt_caches(
         light_api_key=light_api_key,
     )
     warmed: list[str] = []
+    cache_policies = [b for b in policy_baselines if resolve_policy(b).cache]
     try:
-        if ff_like & set(baselines):
-            from flashfusion.baselines.flash_fusion import prewarm_flash_fusion_prompt_cache
+        from flashfusion.baselines.flash_fusion_no_cache import (
+            prewarm_flash_fusion_prompt_cache,
+        )
 
-            selected_queries = [
-                query["text"] for query in query_defs if int(query["id"]) in set(query_ids)
-            ]
+        selected_queries = [
+            query["text"] for query in query_defs if int(query["id"]) in set(query_ids)
+        ]
+        # Deduplicate by prefix variant: two arms sharing (route_mode,
+        # guidance) share byte-identical prefixes and must not be warmed twice.
+        variants: dict[tuple[str, str], list[str]] = {}
+        for baseline in policy_baselines:
+            policy = resolve_policy(baseline)
+            key = (policy.route_mode, policy.planner_guidance_mode)
+            variants.setdefault(key, []).append(baseline)
+
+        for (route_mode, guidance), arms in sorted(variants.items()):
             count = prewarm_flash_fusion_prompt_cache(
                 df,
                 setup_client,
                 selected_queries,
-                planner_guidance="full",
+                planner_guidance=guidance,
+                route_mode=route_mode,
             )
-            warmed.append(f"planner_prefixes={count}")
-            if "FF_NO_PLANNING" in baselines:
-                count_no_planning = prewarm_flash_fusion_prompt_cache(
-                    df,
-                    setup_client,
-                    selected_queries,
-                    planner_guidance="none",
-                )
-                warmed.append(f"planner_prefixes_no_planning={count_no_planning}")
-        if "FLASH_FUSION_CACHE" in baselines:
+            warmed.append(
+                f"planner_prefixes[route={route_mode},guidance={guidance}]"
+                f"={count}({'+'.join(sorted(arms))})"
+            )
+        if cache_policies:
             from flashfusion.baselines.flash_fusion_cache import (
                 DEFAULT_CACHE_PATH,
                 prewarm_flash_fusion_cache_prompt_cache,
@@ -514,6 +619,7 @@ def _run_single_benchmark_iteration(
     cache_path: str | None = None,
     semantic_cache_path: str | None = None,
     prewarm_cache_runtime: bool = True,
+    interleave_policies: bool = False,
 ) -> tuple[list[RunResult], pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     """Execute one full baseline x query benchmark run and persist artifacts."""
     report_query_defs = _query_defs_for_reporting(query_defs, query_defs_by_baseline)
@@ -522,151 +628,163 @@ def _run_single_benchmark_iteration(
     if os.path.exists(raw_results_path):
         os.remove(raw_results_path)
 
+    # Hybrid-matcher warmup is a one-time embedding-model load and index build.
+    # It must happen before any timed query and outside the per-query loop, so
+    # that an interleaved schedule does not charge it to whichever arm happens
+    # to run first.
+    if prewarm_cache_runtime and any(
+        is_flash_fusion_policy(b) and resolve_policy(b).cache for b in baselines
+    ):
+        from flashfusion.baselines.flash_fusion_cache import (
+            DEFAULT_CACHE_PATH,
+            prewarm_hybrid_cache_runtime,
+        )
+
+        warm = prewarm_hybrid_cache_runtime(
+            df=df_base,
+            dataset=dataset,
+            cache_path=cache_path or DEFAULT_CACHE_PATH,
+            semantic_cache_path=semantic_cache_path,
+        )
+        print(
+            "[cache runtime] prewarm complete: "
+            f"model_load_ms={warm.get('model_load_ms', 0.0):.2f} "
+            f"warm_up_ms={warm.get('warm_up_ms', 0.0):.2f} "
+            f"dense_index_build_ms={warm.get('dense_index_build_ms', 0.0):.2f}",
+            flush=True,
+        )
+
     results: list[RunResult] = []
-    for baseline in baselines:
+    for baseline, qid in _run_schedule(
+        baselines=baselines,
+        query_ids=query_ids,
+        query_ids_by_baseline=query_ids_by_baseline,
+        interleave=interleave_policies,
+    ):
         baseline_queries = (query_defs_by_baseline or {}).get(baseline, query_defs)
         baseline_query_lookup = {int(query["id"]): query for query in baseline_queries}
-        baseline_query_ids = list((query_ids_by_baseline or {}).get(baseline, query_ids))
 
-        if baseline == "FLASH_FUSION_CACHE" and prewarm_cache_runtime:
-            from flashfusion.baselines.flash_fusion_cache import (
-                DEFAULT_CACHE_PATH,
-                prewarm_hybrid_cache_runtime,
-            )
+        query_def = baseline_query_lookup.get(int(qid))
+        if query_def is None:
+            raise ValueError(f"Query id {qid} was not found in baseline query definitions.")
+        query_text = query_def["text"]
+        print(
+            f"\n[{baseline}] Q{qid}: {query_text[:60]}...",
+            flush=True,
+        )
+        # print(f"  [DEBUG] Starting runner.run() at {time.strftime('%H:%M:%S')}", flush=True)
 
-            warm = prewarm_hybrid_cache_runtime(
-                df=df_base,
-                dataset=dataset,
-                cache_path=cache_path or DEFAULT_CACHE_PATH,
-                semantic_cache_path=semantic_cache_path,
-            )
-            print(
-                "[FLASH_FUSION_CACHE] prewarm complete: "
-                f"model_load_ms={warm.get('model_load_ms', 0.0):.2f} "
-                f"warm_up_ms={warm.get('warm_up_ms', 0.0):.2f} "
-                f"dense_index_build_ms={warm.get('dense_index_build_ms', 0.0):.2f}",
-                flush=True,
-            )
+        # DEBUG: Check df_base before passing to runner
+        # import sys
+        # print(f"[BENCHMARK DEBUG] df_base len={len(df_base)}, cols={list(df_base.columns)}", file=sys.stderr, flush=True)
+        # if len(df_base) > 0:
+        #     print(f"[BENCHMARK DEBUG] df_base.head(3):\n{df_base.head(3)}", file=sys.stderr, flush=True)
 
-        for qid in baseline_query_ids:
-            query_def = baseline_query_lookup.get(int(qid))
-            if query_def is None:
-                raise ValueError(f"Query id {qid} was not found in baseline query definitions.")
-            query_text = query_def["text"]
-            print(
-                f"\n[{baseline}] Q{qid}: {query_text[:60]}...",
-                flush=True,
-            )
-            # print(f"  [DEBUG] Starting runner.run() at {time.strftime('%H:%M:%S')}", flush=True)
+        t0 = time.time()
+        client: LLMClient | None = None
 
-            # DEBUG: Check df_base before passing to runner
-            # import sys
-            # print(f"[BENCHMARK DEBUG] df_base len={len(df_base)}, cols={list(df_base.columns)}", file=sys.stderr, flush=True)
-            # if len(df_base) > 0:
-            #     print(f"[BENCHMARK DEBUG] df_base.head(3):\n{df_base.head(3)}", file=sys.stderr, flush=True)
+        def _timeout_handler(signum, frame):
+            raise QueryTimeoutError()
 
-            t0 = time.time()
-            client: LLMClient | None = None
-
-            def _timeout_handler(signum, frame):
-                raise QueryTimeoutError()
-
-            prev_handler = signal.getsignal(signal.SIGALRM)
-            signal.signal(signal.SIGALRM, _timeout_handler)
-            signal.setitimer(signal.ITIMER_REAL, max_query_latency)
-            try:
-                for attempt in range(_QUERY_MAX_ATTEMPTS):
-                    client = LLMClient(
-                        model_name=model_name,
-                        api_key=api_key,
-                        light_model_name=stage12_model,
-                        light_api_key=light_api_key,
-                    )
-                    runner = BaselineRunner(
-                        mode=baseline,
-                        df=df_base.copy(),
-                        client=client,
-                        dataset=dataset,
-                        cache_path=cache_path,
-                        semantic_cache_path=(
-                            semantic_cache_path if baseline == "FLASH_FUSION_CACHE" else None
-                        ),
-                    )
-                    try:
-                        result = runner.run(query_text)
-                        break
-                    except Exception as exc:
-                        if not _is_retryable_query_error(exc) or attempt + 1 == _QUERY_MAX_ATTEMPTS:
-                            raise
-                        retry_delay = _query_retry_delay_seconds(exc, attempt)
-                        print(
-                            f"  [WARN] {type(exc).__name__} on query attempt "
-                            f"{attempt + 1}/{_QUERY_MAX_ATTEMPTS}; retrying in "
-                            f"{retry_delay:.1f}s...",
-                            flush=True,
-                        )
-                        time.sleep(retry_delay)
-            except QueryTimeoutError:
-                elapsed = time.time() - t0
-                result = RunResult(
-                    baseline=baseline,
-                    model=model_name,
-                    query=query_text,
-                    answer=(
-                        f"[TIMEOUT] Query exceeded {max_query_latency:.1f}s "
-                        "latency budget; skipped to next query."
+        prev_handler = signal.getsignal(signal.SIGALRM)
+        signal.signal(signal.SIGALRM, _timeout_handler)
+        signal.setitimer(signal.ITIMER_REAL, max_query_latency)
+        try:
+            for attempt in range(_QUERY_MAX_ATTEMPTS):
+                client = LLMClient(
+                    model_name=model_name,
+                    api_key=api_key,
+                    light_model_name=stage12_model,
+                    light_api_key=light_api_key,
+                )
+                runner = BaselineRunner(
+                    mode=baseline,
+                    df=df_base.copy(),
+                    client=client,
+                    dataset=dataset,
+                    cache_path=cache_path,
+                    semantic_cache_path=(
+                        semantic_cache_path
+                        if is_flash_fusion_policy(baseline)
+                        and resolve_policy(baseline).cache
+                        else None
                     ),
-                    rejected=False,
-                    executed=False,
                 )
-                result.latency_s = elapsed
-                result.rejection_reason = (
-                    f"Timed out after {elapsed:.2f}s (budget {max_query_latency:.2f}s)"
-                )
-                result.stages_run = ["timeout"]
-                if client is not None:
-                    result.input_tokens = client.total_input_tokens()
-                    result.output_tokens = client.total_output_tokens()
-                    result.cost_usd = client.total_cost_usd()
-            except Exception as e:
-                import traceback
-                tb_lines = traceback.format_exc().splitlines()
-                traceback_tail = "\n".join(tb_lines[-10:]) if len(tb_lines) > 10 else traceback.format_exc()
-                error_msg = f"[ERROR] {type(e).__name__}: {e}"
-                result = RunResult(
-                    baseline=baseline,
-                    model=model_name,
-                    query=query_text,
-                    answer=error_msg,
-                    rejected=False,
-                    executed=False,
-                )
-                result.alignment_explanation = f"Exception during {baseline} execution:\n{traceback_tail}"
-                if client is not None:
-                    result.input_tokens = client.total_input_tokens()
-                    result.output_tokens = client.total_output_tokens()
-                    result.cost_usd = client.total_cost_usd()
-                print(f"  [ERROR] {baseline} failed: {e}", file=sys.stderr, flush=True)
-                print(f"  Traceback (last 10 lines):\n{traceback_tail}", file=sys.stderr, flush=True)
-            finally:
-                signal.setitimer(signal.ITIMER_REAL, 0)
-                signal.signal(signal.SIGALRM, prev_handler)
-            # Query wording changes across v1/v2/v3, but the numeric ID is the
-            # stable benchmark identity used to join results, judgments, and GT.
-            result.query_id = int(qid)
-            results.append(result)
-
-            j = result.judge_verdict.get("verdict", "N/A") if result.judge_verdict else "N/A"
-            print(
-                f"  -> executed={result.executed} rejected={result.rejected} "
-                f"alignment={j} latency={result.latency_s:.1f}s "
-                f"tokens={result.input_tokens}in/{result.output_tokens}out "
-                f"cost=${result.cost_usd:.4f}",
-                flush=True,
+                try:
+                    result = runner.run(query_text)
+                    break
+                except Exception as exc:
+                    if not _is_retryable_query_error(exc) or attempt + 1 == _QUERY_MAX_ATTEMPTS:
+                        raise
+                    retry_delay = _query_retry_delay_seconds(exc, attempt)
+                    print(
+                        f"  [WARN] {type(exc).__name__} on query attempt "
+                        f"{attempt + 1}/{_QUERY_MAX_ATTEMPTS}; retrying in "
+                        f"{retry_delay:.1f}s...",
+                        flush=True,
+                    )
+                    time.sleep(retry_delay)
+        except QueryTimeoutError:
+            elapsed = time.time() - t0
+            result = RunResult(
+                baseline=baseline,
+                model=model_name,
+                query=query_text,
+                answer=(
+                    f"[TIMEOUT] Query exceeded {max_query_latency:.1f}s "
+                    "latency budget; skipped to next query."
+                ),
+                rejected=False,
+                executed=False,
             )
+            result.latency_s = elapsed
+            result.rejection_reason = (
+                f"Timed out after {elapsed:.2f}s (budget {max_query_latency:.2f}s)"
+            )
+            result.stages_run = ["timeout"]
+            if client is not None:
+                result.input_tokens = client.total_input_tokens()
+                result.output_tokens = client.total_output_tokens()
+                result.cost_usd = client.total_cost_usd()
+        except Exception as e:
+            import traceback
+            tb_lines = traceback.format_exc().splitlines()
+            traceback_tail = "\n".join(tb_lines[-10:]) if len(tb_lines) > 10 else traceback.format_exc()
+            error_msg = f"[ERROR] {type(e).__name__}: {e}"
+            result = RunResult(
+                baseline=baseline,
+                model=model_name,
+                query=query_text,
+                answer=error_msg,
+                rejected=False,
+                executed=False,
+            )
+            result.alignment_explanation = f"Exception during {baseline} execution:\n{traceback_tail}"
+            if client is not None:
+                result.input_tokens = client.total_input_tokens()
+                result.output_tokens = client.total_output_tokens()
+                result.cost_usd = client.total_cost_usd()
+            print(f"  [ERROR] {baseline} failed: {e}", file=sys.stderr, flush=True)
+            print(f"  Traceback (last 10 lines):\n{traceback_tail}", file=sys.stderr, flush=True)
+        finally:
+            signal.setitimer(signal.ITIMER_REAL, 0)
+            signal.signal(signal.SIGALRM, prev_handler)
+        # Query wording changes across v1/v2/v3, but the numeric ID is the
+        # stable benchmark identity used to join results, judgments, and GT.
+        result.query_id = int(qid)
+        results.append(result)
 
-            with open(raw_results_path, "a", encoding="utf-8") as f:
-                f.write(json.dumps(dataclasses.asdict(result), default=_json_serialize) + "\n")
+        j = result.judge_verdict.get("verdict", "N/A") if result.judge_verdict else "N/A"
+        print(
+            f"  -> executed={result.executed} rejected={result.rejected} "
+            f"alignment={j} latency={result.latency_s:.1f}s "
+            f"tokens={result.input_tokens}in/{result.output_tokens}out "
+            f"cost=${result.cost_usd:.4f}",
+            flush=True,
+        )
+
+        with open(raw_results_path, "a", encoding="utf-8") as f:
+            f.write(json.dumps(dataclasses.asdict(result), default=_json_serialize) + "\n")
 
     judge_out_dir = os.path.join(output_dir, "ground_truth_llm_judge")
     rows_for_judge: list[dict] = []
@@ -888,11 +1006,18 @@ def run_benchmark(args: argparse.Namespace) -> list[RunResult]:
             randomize=bool(args.cache_random_order),
             base_seed=int(args.cache_order_base_seed),
         )
-        if "FLASH_FUSION_CACHE" in baselines:
+        single_defs_by_baseline, single_ids_by_baseline = _per_baseline_overrides(
+            baselines=baselines,
+            rewording_mode=args.query_rewording,
+            cache_query_defs=query_defs,
+            cache_order_ids=cache_order_ids,
+        )
+        if single_ids_by_baseline:
             order_manifest = {
                 "randomized": bool(args.cache_random_order),
                 "seed": cache_order_seed,
                 "query_order": cache_order_ids,
+                "applies_to": sorted(single_ids_by_baseline),
             }
             with open(os.path.join(args.output, "flash_fusion_cache_query_order.json"), "w", encoding="utf-8") as fh:
                 json.dump(order_manifest, fh, indent=2)
@@ -900,7 +1025,7 @@ def run_benchmark(args: argparse.Namespace) -> list[RunResult]:
         results, _, _, _ = _run_single_benchmark_iteration(
             baselines=baselines,
             query_ids=query_ids,
-            query_ids_by_baseline={"FLASH_FUSION_CACHE": cache_order_ids},
+            query_ids_by_baseline=single_ids_by_baseline,
             df_base=df_base,
             output_dir=args.output,
             model_name=args.model,
@@ -917,6 +1042,7 @@ def run_benchmark(args: argparse.Namespace) -> list[RunResult]:
             cache_path=getattr(args, "cache_path", None),
             semantic_cache_path=getattr(args, "semantic_cache_path", None),
             prewarm_cache_runtime=bool(args.cache_prewarm_hybrid),
+            interleave_policies=bool(args.interleave_policies),
         )
         _write_cache_grounding_issues(
             args.output, os.path.join(args.output, "raw_results.jsonl")
@@ -952,9 +1078,13 @@ def run_benchmark(args: argparse.Namespace) -> list[RunResult]:
             randomize=bool(args.cache_random_order),
             base_seed=int(args.cache_order_base_seed),
         )
-        query_defs_by_baseline = {"FLASH_FUSION_CACHE": cache_query_defs}
-        query_ids_by_baseline = {"FLASH_FUSION_CACHE": cache_order_ids}
-        if "FLASH_FUSION_CACHE" in baselines:
+        query_defs_by_baseline, query_ids_by_baseline = _per_baseline_overrides(
+            baselines=baselines,
+            rewording_mode=args.query_rewording,
+            cache_query_defs=cache_query_defs,
+            cache_order_ids=cache_order_ids,
+        )
+        if query_ids_by_baseline:
             print(
                 f"[FLASH_FUSION_CACHE] Query version for run {run_id}: "
                 f"{cache_query_version}; semantic registry: {args.semantic_cache_path}; "
@@ -996,6 +1126,7 @@ def run_benchmark(args: argparse.Namespace) -> list[RunResult]:
             cache_path=getattr(args, "cache_path", None),
             semantic_cache_path=getattr(args, "semantic_cache_path", None),
             prewarm_cache_runtime=bool(args.cache_prewarm_hybrid),
+            interleave_policies=bool(args.interleave_policies),
         )
 
         all_results.extend(run_results)
@@ -1126,11 +1257,37 @@ def _build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument(
         "--baselines",
-        default="FLASH_FUSION,FF_NO_PRUNING,FF_NO_PLANNING",
+        default=PRIMARY_ABLATION_BASELINES,
         help=(
             'Comma-separated baseline names or "all". '
-            "Default focuses on Flash-Fusion ablations. "
-            f"Options: {', '.join(ALL_BASELINES)}"
+            "Default is the primary component-ablation set. "
+            f"Options: {', '.join(ALL_BASELINES)}. "
+            "Diagnostics: "
+            + ", ".join(n for n in POLICIES if n not in PRIMARY_POLICY_SET)
+            + ". Legacy aliases: "
+            + ", ".join(f"{k}->{v}" for k, v in LEGACY_POLICY_ALIASES.items())
+        ),
+    )
+    parser.add_argument(
+        "--interleave-policies",
+        action="store_true",
+        help=(
+            "Run every baseline on one query before advancing to the next, "
+            "rotating arm order per query. Shares provider-load drift across "
+            "arms instead of letting one arm absorb it. Requires all arms in "
+            "one invocation."
+        ),
+    )
+    parser.add_argument(
+        "--query-rewording",
+        choices=("auto", "paired", "cache-only"),
+        default="auto",
+        help=(
+            "Who receives the per-run reworded query bank (v1/v2/v3) and the "
+            "shuffled order. 'paired' gives nobody rewording so every arm sees "
+            "identical queries in identical order; 'cache-only' is the legacy "
+            "behaviour; 'auto' (default) uses 'paired' whenever a cache arm "
+            "and a no-cache arm are both present, else 'cache-only'."
         ),
     )
     parser.add_argument(

@@ -5,6 +5,20 @@
 #   results/primary_visualizations/baselines/
 #   results/primary_visualizations/ablations/
 #
+# Quick usage:
+#   RUN_ABLATION_BENCHMARKS=0 ./flashfusion/viz/run_primary_visualizations.sh
+#
+# If ablation artifacts are missing, run benchmarks first with canonical labels:
+#   RUN_TAG=ablations_primary_n3 RUNS=3 \
+#   BASELINES=FF_FULL,FF_NO_CACHE,FF_NO_PRUNE,FF_NO_PROMPT \
+#   ./run_benchmark.sh --all --queries all
+#
+# Then point roots (example):
+#   FLASH_FUSION_ROOT=flashfusion/results/ablations/FF_NO_CACHE \
+#   FF_NO_PRUNING_ROOT=flashfusion/results/ablations/FF_NO_PRUNE \
+#   FF_NO_PLANNING_ROOT=flashfusion/results/ablations/FF_NO_PROMPT \
+#   ./flashfusion/viz/run_primary_visualizations.sh
+#
 # By default, runs the two missing N=3 ablation benchmarks before producing
 # figures. Set RUN_ABLATION_BENCHMARKS=0 to regenerate figures from existing
 # artifacts only.
@@ -56,7 +70,7 @@ cd "${SCRIPT_DIR}"
     --react-root "${REACT_ROOT}" \
     --baseline-set FLASH_FUSION_CACHE,REACT_ONLY,AUTOIOT_PAPER,HARGPT_PAPER,LLMSENSE_PAPER \
     --dataset-baseline-set FLASH_FUSION_CACHE,REACT_ONLY,AUTOIOT_PAPER,HARGPT_PAPER,LLMSENSE_PAPER \
-    --query-type-baseline-set FLASH_FUSION_CACHE,REACT_ONLY,AUTOIOT_PAPER \
+    --query-type-baseline-set FLASH_FUSION_CACHE,REACT_ONLY,AUTOIOT_PAPER,HARGPT_PAPER,LLMSENSE_PAPER \
     --cost-query-type-baseline-set FLASH_FUSION_CACHE,FLASH_FUSION_CACHE_HIT,FLASH_FUSION_CACHE_MISS,REACT_ONLY \
     --extra-hard-root "${EXTRA_HARD_ROOT}" \
     --output-dir "../../${BASELINE_VIZ_DIR}"

@@ -47,6 +47,13 @@ try:
 except ImportError:
     _OpenRouterResponseValidationError = None  # type: ignore[assignment,misc]
 
+from flashfusion.baselines.flash_fusion_policy import (
+    LEGACY_POLICY_ALIASES,
+    POLICIES,
+    is_flash_fusion_policy,
+    resolve_policy,
+    run_with_policy,
+)
 from flashfusion.config import (
     DEFAULT_LIGHT_MODEL,
     FLASH_FUSION_PREDICTIVE_TIMEOUT_S,
@@ -619,6 +626,36 @@ class RunResult:
     operator_route_candidate_ops: list = field(default_factory=list)
     operator_route_full_fallback: bool = False
 
+    # --- Flash-Fusion policy provenance ------------------------------------
+    # Which of (cache, pruning, planner guidance) were active for this run.
+    # Recorded directly rather than inferred from `baseline`, so legacy and
+    # current labels can be pooled and so an ablation can never be mislabelled
+    # by a call-site override. Populated by
+    # baselines.flash_fusion_no_cache.record_policy_provenance().
+    policy_name: str = ""                            # e.g. "FF_NO_PRUNE"
+    policy_cache_enabled: bool = False
+    policy_pruning_enabled: bool = False
+    policy_planner_guidance_enabled: bool = False
+    policy_role: str = ""                            # full_system | primary_ablation | diagnostic
+    policy_reference: str = ""                       # policy this arm is differenced against
+    policy_treatment: str = ""                       # the single component this arm removes
+    policy_digest: str = ""                          # digest of the settings, label-independent
+    route_mode: str = ""                             # "router" (pruned) | "full"
+    planner_guidance_mode: str = ""                  # "full" | "none"
+
+    # Pruning / prompting mechanism telemetry. These are the quantities the
+    # pruning and prompting treatments actually change, so aggregate claims
+    # about either are reproducible from per-query records.
+    planner_candidate_op_count: int = 0              # operators shown to the planner
+    planner_full_vocabulary: bool = False            # True when no bucket was pruned away
+    planner_prefix_chars: int = 0                    # size of the cached system prefix
+    planner_suffix_chars: int = 0                    # size of the per-query human message
+
+    # Cache outcome, recorded on the cache path itself rather than derived
+    # post hoc from execution_path by the metrics/visualization layer.
+    cache_outcome: str = ""                          # exact_hit | semantic_hit | hit_rejected | miss | disabled
+    cache_outcome_reason: str = ""                   # lookup status / gate that produced the outcome
+
     # Prompt-prefix / cache provenance
     planner_prefix_version: str = ""
     planner_prefix_sha256: str = ""
@@ -653,31 +690,42 @@ class BaselineRunner:
         "WELLMAX_ONLY"  — B3: S1 + S2 + S3 → grounded query → pandas agent
         "REACT_ONLY"  — ReAct: raw query → pandas agent (paper-faithful ReAct)
         "LLMSENSE_PAPER" — narration/summarization + reasoning over narrative text
-        "FLASH_FUSION"  — B4: S1 + S2 + S3 + guardrail + agent + judge (+ retry)
-        "FF_NO_PRUNING" — Flash-Fusion without operator-route pruning
-        "FF_NO_PLANNING" — Flash-Fusion without pruning and without planning guidance
-        "FLASH_FUSION_CACHE" — exact-query operator-skeleton cache; on a hit the
-                        light model regrounds the cached skeleton and the plan is
-                        revalidated/executed, otherwise it falls back to
-                        FLASH_FUSION
+
+    Flash-Fusion policy modes — every one of these is the same implementation
+    under a different (cache, pruning, planner-guidance) setting, resolved via
+    baselines.flash_fusion_policy.resolve_policy(). See that module, and
+    docs/flash_fusion_ablation_policy_matrix.md, for the full matrix.
+
+        "FF_FULL"       — cache + pruning + guidance (the full system)
+        "FF_NO_CACHE"   — cache off; pruning and guidance unchanged
+        "FF_NO_PRUNE"   — pruning off; cache and guidance match FF_NO_CACHE
+        "FF_NO_PROMPT"  — planner composition guidance off; cache and pruning
+                          match FF_NO_CACHE
+        diagnostics: "FF_NO_PRUNE_CACHED", "FF_NO_PROMPT_CACHED",
+                     "FF_NO_PRUNE_NO_PROMPT"
+        legacy aliases (unchanged semantics, still accepted and still written
+        out under their original label): "FLASH_FUSION" -> FF_NO_CACHE,
+        "FLASH_FUSION_CACHE" -> FF_FULL, "FF_NO_PRUNING" -> FF_NO_PRUNE,
+        "FF_NO_PLANNING" -> FF_NO_PRUNE_NO_PROMPT
 
     Rewriting baselines derive features only after schema grounding explicitly
     identifies a computation supported by the raw dataset columns.
     """
 
-    MODES: frozenset = frozenset(
+    #: Non-Flash-Fusion baselines.
+    NON_POLICY_MODES: frozenset = frozenset(
         {
             "LLM_ONLY",
             "WELLMAX_ONLY",
             "REACT_ONLY",
             "AUTOIOT_PAPER",
-            "FLASH_FUSION",
-            "FF_NO_PRUNING",
-            "FF_NO_PLANNING",
-            "FLASH_FUSION_CACHE",
             "HARGPT_PAPER",
             "LLMSENSE_PAPER",
         }
+    )
+
+    MODES: frozenset = NON_POLICY_MODES | frozenset(POLICIES) | frozenset(
+        LEGACY_POLICY_ALIASES
     )
 
     def __init__(
@@ -728,19 +776,18 @@ class BaselineRunner:
         self.dataset = dataset
         self.cache_path = cache_path
         self.semantic_cache_path = semantic_cache_path
-        if self.mode in (
-            "FLASH_FUSION",
-            "FF_NO_PRUNING",
-            "FF_NO_PLANNING",
-            "FLASH_FUSION_CACHE",
-        ):
-            from flashfusion.baselines.flash_fusion import warm_flash_fusion_prefix
+        self.policy = resolve_policy(mode) if is_flash_fusion_policy(mode) else None
+        if self.policy is not None:
+            from flashfusion.baselines.flash_fusion_no_cache import (
+                warm_flash_fusion_prefix,
+            )
 
-            planner_guidance = "none" if self.mode == "FF_NO_PLANNING" else "full"
+            # Warm the prefix variant this policy will actually send, so no arm
+            # pays a first-call assembly cost another arm avoided.
             warm_flash_fusion_prefix(
                 self.df,
                 self.client,
-                planner_guidance=planner_guidance,
+                planner_guidance=self.policy.planner_guidance_mode,
             )
 
     def run(self, query: str) -> RunResult:
@@ -777,61 +824,31 @@ class BaselineRunner:
 
         from flashfusion.baselines.react_only import run_react_only
         from flashfusion.baselines.autoiot_paper import run_autoiot_paper
-        from flashfusion.baselines.flash_fusion import run_flash_fusion
         from flashfusion.baselines.hargpt_paper import run_hargpt_paper
         from flashfusion.baselines.llmsense_paper import run_llmsense_paper
         from flashfusion.baselines.llm_only import run_llm_only
 
-        if self.mode == "LLM_ONLY":
+        if self.policy is not None:
+            # One call site for every Flash-Fusion arm. The policy decides
+            # cache / pruning / guidance; nothing else about the run differs,
+            # so an arm cannot accidentally change a second component.
+            run_with_policy(
+                query,
+                self.df,
+                self.client,
+                r,
+                self.policy,
+                timeout_s=self.predictive_timeout_s,
+                dataset=self.dataset,
+                cache_path=self.cache_path,
+                semantic_cache_path=self.semantic_cache_path,
+            )
+        elif self.mode == "LLM_ONLY":
             run_llm_only(query, self.df, self.client, r)
         elif self.mode == "REACT_ONLY":
             run_react_only(query, self.df, self.client, r)
         elif self.mode == "AUTOIOT_PAPER":
             run_autoiot_paper(query, self.df, self.client, r)
-        elif self.mode == "FLASH_FUSION":
-            run_flash_fusion(
-                query,
-                self.df,
-                self.client,
-                r,
-                timeout_s=self.predictive_timeout_s,
-            )
-        elif self.mode == "FF_NO_PRUNING":
-            run_flash_fusion(
-                query,
-                self.df,
-                self.client,
-                r,
-                timeout_s=self.predictive_timeout_s,
-                route_mode="full",
-                planner_guidance="full",
-            )
-        elif self.mode == "FF_NO_PLANNING":
-            run_flash_fusion(
-                query,
-                self.df,
-                self.client,
-                r,
-                timeout_s=self.predictive_timeout_s,
-                route_mode="full",
-                planner_guidance="none",
-            )
-        elif self.mode == "FLASH_FUSION_CACHE":
-            from flashfusion.baselines.flash_fusion_cache import (
-                DEFAULT_CACHE_PATH,
-                run_flash_fusion_cache,
-            )
-
-            run_flash_fusion_cache(
-                query,
-                self.df,
-                self.client,
-                r,
-                dataset=self.dataset,
-                cache_path=self.cache_path or DEFAULT_CACHE_PATH,
-                semantic_cache_path=self.semantic_cache_path,
-                timeout_s=self.predictive_timeout_s,
-            )
         elif self.mode == "HARGPT_PAPER":
             # DEBUG: Check dataframe before calling HARGPT
             import sys
@@ -864,6 +881,16 @@ class BaselineRunner:
         return run_react_only(query, self.df, self.client, r)
 
     def _run_flash_fusion(self, query: str, r: RunResult) -> RunResult:
-        """Delegates to baselines.flash_fusion.run_flash_fusion."""
-        from flashfusion.baselines.flash_fusion import run_flash_fusion
-        return run_flash_fusion(query, self.df, self.client, r)
+        """Delegates to the policy runner using this runner's active policy."""
+        policy = self.policy or resolve_policy("FF_NO_CACHE")
+        return run_with_policy(
+            query,
+            self.df,
+            self.client,
+            r,
+            policy,
+            timeout_s=self.predictive_timeout_s,
+            dataset=self.dataset,
+            cache_path=self.cache_path,
+            semantic_cache_path=self.semantic_cache_path,
+        )

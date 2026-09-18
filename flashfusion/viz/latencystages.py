@@ -414,6 +414,20 @@ def _aggregate_cookie_cut_semantic_total_by_query_type(
     return out.sort_values(["query_type", "baseline"]).reset_index(drop=True)
 
 
+def _dissolve_extra_hard_into_reasoning(df: pd.DataFrame) -> pd.DataFrame:
+    """Merge Extra-Hard rows into Reasoning (AutoIOT has no extra-hard timings)."""
+    out = df.copy()
+    query_type = out["query_type"].astype(str).where(
+        out["query_type"].astype(str) != "Extra-Hard", "Reasoning"
+    )
+    out["query_type"] = pd.Categorical(
+        query_type,
+        categories=[qt for qt in QUERY_TYPE_ORDER if qt != "Extra-Hard"],
+        ordered=True,
+    )
+    return out
+
+
 def _prompt_for_root(baseline_label: str, current_default: str | None) -> str | None:
     """Prompt the user for a baseline's results root, defaulting to current_default.
 
@@ -927,6 +941,7 @@ def plot_semantic_stage_comparison_overall_log(
     summary,
     out_path: Path,
     paper_dir: Path | None = None,
+    baselines: list[str] | None = None,
 ) -> None:
     """Stacked horizontal bar per baseline, stages averaged across all query types (log).
 
@@ -936,11 +951,11 @@ def plot_semantic_stage_comparison_overall_log(
     """
     _apply_rc()
 
-    baselines = ["FLASH_FUSION", CACHE_BASELINE, "REACT_ONLY", "AUTOIOT_PAPER"]
+    baselines = baselines or list(CUMULATIVE_LATENCY_THREE_BASELINES)
     y = list(range(len(baselines)))
     left = [0.0 for _ in baselines]
 
-    fig, ax = plt.subplots(figsize=(9.4, 5.0))
+    fig, ax = plt.subplots(figsize=(9.4, 2.4 + 0.62 * len(baselines)))
     for stage in SEMANTIC_STAGE_ORDER:
         color = SEMANTIC_STAGE_COLORS[stage]
         vals = []
@@ -951,7 +966,7 @@ def plot_semantic_stage_comparison_overall_log(
         ax.barh(
             y,
             vals,
-            height=0.56,
+            height=0.68,
             left=left,
             color=color,
             edgecolor="#f5f5f5",
@@ -977,6 +992,7 @@ def plot_semantic_stage_comparison_overall_log(
 
     ax.set_yticks(y)
     ax.set_yticklabels([display_baseline(b) for b in baselines])
+    ax.margins(y=0.12)
     ax.invert_yaxis()
     ax.set_xlabel("Mean latency (s, log)")
     ax.set_xscale("log", nonpositive="clip")
@@ -999,11 +1015,18 @@ def plot_semantic_stage_comparison_overall_log(
     #         fontsize=9.5,
     #     )
 
-    ax.legend(ncol=4, loc="upper left", bbox_to_anchor=(-0.05, -0.22), frameon=False, columnspacing=0.8)
+    ax.legend(
+        ncol=len(SEMANTIC_STAGE_ORDER),
+        loc="upper left",
+        bbox_to_anchor=(0.0, -0.16, 1.0, 0.1),
+        mode="expand",
+        borderaxespad=0.0,
+        frameon=False,
+    )
     fig.patch.set_facecolor("white")
     ax.set_facecolor("white")
-    fig.subplots_adjust(bottom=0.28)
-    fig.tight_layout(rect=(0.0, 0.04, 1.0, 1.0))
+    fig.subplots_adjust(bottom=0.24)
+    fig.tight_layout(rect=(0.0, 0.02, 1.0, 1.0))
     fig.savefig(out_path, dpi=220, bbox_inches="tight", facecolor="white")
     _save_paper_pdf(fig, out_path, paper_dir)
     plt.close(fig)
@@ -1148,7 +1171,7 @@ def plot_semantic_stage_comparison(
     ax.set_yticklabels(y_labels)
     ax.invert_yaxis()
     if log_scale:
-        ax.set_xlabel("Mean Latency (s, log)")
+        ax.set_xlabel("Mean latency (s, log)")
         ax.set_xscale("log")
     else:
         ax.set_xlabel("Mean Latency (s)")
@@ -1593,16 +1616,21 @@ def main() -> None:
             index=False,
         )
 
+        latency_compare_summary = aggregate_semantic_stage_total_latency_by_query_type(
+            _dissolve_extra_hard_into_reasoning(df),
+            baselines=CUMULATIVE_LATENCY_THREE_BASELINES,
+        )
         latency_compare_out = output_dir / "cumulative_latency_comparison_log_by_baseline_n3.png"
         plot_cumulative_latency_comparison(
-            semantic_total,
+            latency_compare_summary,
             latency_compare_out,
-            baselines=selected_baselines,
-            query_types=selected_query_types,
-            log_scale=False,
+            baselines=CUMULATIVE_LATENCY_THREE_BASELINES,
+            query_types=[qt for qt in selected_query_types if qt != "Extra-Hard"],
+            show_error_bars=False,
+            log_scale=True,
             paper_dir=paper_dir,
         )
-        semantic_total.to_csv(
+        latency_compare_summary.to_csv(
             output_dir / "cumulative_latency_comparison_log_by_baseline_n3_summary.csv",
             index=False,
         )
@@ -1665,6 +1693,15 @@ def main() -> None:
         semantic_overall,
         semantic_overall_log_out,
         paper_dir=paper_dir,
+        baselines=CUMULATIVE_LATENCY_THREE_BASELINES,
+    )
+
+    standalone_semantic_stage_out = output_dir / "latency_by_semantic_stage.png"
+    plot_semantic_stage_comparison_overall_log(
+        semantic_overall,
+        standalone_semantic_stage_out,
+        paper_dir=paper_dir,
+        baselines=CUMULATIVE_LATENCY_THREE_BASELINES,
     )
 
     semantic_overall_two_raw = aggregate_semantic_stage_latency_overall(df, baselines=TWO_WAY_BASELINES)
@@ -1706,7 +1743,7 @@ def main() -> None:
     semantic_overall_ff_cache.to_csv(output_dir / "semantic_stage_comparison_overall_ff_cache_n3_summary.csv", index=False)
 
     latency_compare = _aggregate_cookie_cut_semantic_total_by_query_type(
-        df,
+        _dissolve_extra_hard_into_reasoning(df),
         baselines=CUMULATIVE_LATENCY_THREE_BASELINES,
     )
     latency_compare_out = output_dir / "cumulative_latency_comparison_log_by_baseline_n3.png"
@@ -1714,7 +1751,7 @@ def main() -> None:
         latency_compare,
         latency_compare_out,
         baselines=CUMULATIVE_LATENCY_THREE_BASELINES,
-        query_types=selected_query_types,
+        query_types=[qt for qt in selected_query_types if qt != "Extra-Hard"],
         show_error_bars=False,
         log_scale=True,
         paper_dir=paper_dir,
@@ -1754,6 +1791,7 @@ def main() -> None:
     print(f"Wrote {semantic_three_out}")
     print(f"Wrote {semantic_overall_out}")
     print(f"Wrote {semantic_overall_log_out}")
+    print(f"Wrote {standalone_semantic_stage_out}")
     print(f"Wrote {semantic_overall_two_out}")
     print(f"Wrote {semantic_overall_three_out}")
     print(f"Wrote {semantic_overall_ff_cache_out}")

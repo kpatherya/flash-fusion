@@ -48,14 +48,22 @@
 # =============================================================================
 
 : <<'NOTE'
-NOTE: commands to run (july 2, 2026) ---
+NOTE: primary Flash-Fusion ablation commands ---
 
-# Run once per baseline; paste into terminal sequentially.
-RUN_TAG=july26_full RUNS=3 BASELINES=FLASH_FUSION    ./run_benchmark.sh
-RUN_TAG=july26_full RUNS=3 BASELINES=HARGPT_PAPER    ./run_benchmark.sh
-RUN_TAG=july26_full RUNS=3 BASELINES=LLMSENSE_PAPER  ./run_benchmark.sh
-RUN_TAG=july26_full RUNS=3 BASELINES=REACT_ONLY      ./run_benchmark.sh
-RUN_TAG=july26_full RUNS=3 BASELINES=AUTOIOT_PAPER   ./run_benchmark.sh
+# Primary 4-arm component ablation (all datasets, paired/interleaved handled in benchmark)
+RUN_TAG=ablations_primary_n3 \
+RUNS=3 \
+BASELINES=FF_FULL,FF_NO_CACHE,FF_NO_PRUNE,FF_NO_PROMPT \
+./run_benchmark.sh --all --queries all
+
+# Quick smoke (bus only)
+RUN_TAG=ablations_smoke_bus \
+RUNS=1 \
+BASELINES=FF_FULL,FF_NO_CACHE,FF_NO_PRUNE,FF_NO_PROMPT \
+./run_benchmark.sh --bus --queries 1,5,9,13
+
+# Collect outputs
+find flashfusion/results/ablations -name metrics.csv -o -name raw_results.jsonl | sort
 NOTE
 
 set -euo pipefail

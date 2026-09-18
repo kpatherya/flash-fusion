@@ -122,8 +122,28 @@ def compute_cost(result: RunResult) -> dict:
     }
 
 
+#: Recorded cache_outcome values -> the coarse label used in reports/figures.
+_RECORDED_CACHE_OUTCOMES = {
+    "exact_hit": "hit",
+    "semantic_hit": "hit",
+    "hit_rejected": "hit_rejected",
+    "miss": "miss",
+    "disabled": "not_applicable",
+}
+
+
 def _cache_outcome_label(result: RunResult) -> str:
-    """Classify FLASH_FUSION_CACHE rows into branch-accurate outcomes."""
+    """Classify a run into a branch-accurate cache outcome.
+
+    Prefers the outcome the cache path recorded on the row itself. The
+    execution_path/plan_source reconstruction below is retained only to read
+    runs saved before ``cache_outcome`` existed; new runs never reach it.
+    """
+    recorded = str(getattr(result, "cache_outcome", "") or "")
+    if recorded:
+        return _RECORDED_CACHE_OUTCOMES.get(recorded, recorded)
+
+    # --- legacy fallback for pre-cache_outcome result files ----------------
     if result.baseline != "FLASH_FUSION_CACHE":
         return "not_applicable"
 
@@ -260,6 +280,27 @@ def aggregate_metrics(
             {
                 "baseline": r.baseline,
                 "cache_outcome": _cache_outcome_label(r),
+                "cache_outcome_reason": getattr(r, "cache_outcome_reason", ""),
+                # Policy provenance travels with every row so a component-level
+                # claim can be checked against the settings that produced it,
+                # and so legacy and current labels for the same policy pool.
+                "policy_name": getattr(r, "policy_name", ""),
+                "policy_cache_enabled": getattr(r, "policy_cache_enabled", False),
+                "policy_pruning_enabled": getattr(r, "policy_pruning_enabled", False),
+                "policy_planner_guidance_enabled": getattr(
+                    r, "policy_planner_guidance_enabled", False
+                ),
+                "policy_role": getattr(r, "policy_role", ""),
+                "policy_reference": getattr(r, "policy_reference", ""),
+                "policy_treatment": getattr(r, "policy_treatment", ""),
+                "policy_digest": getattr(r, "policy_digest", ""),
+                "route_mode": getattr(r, "route_mode", ""),
+                "planner_guidance_mode": getattr(r, "planner_guidance_mode", ""),
+                "planner_candidate_op_count": getattr(r, "planner_candidate_op_count", 0),
+                "planner_full_vocabulary": getattr(r, "planner_full_vocabulary", False),
+                "planner_prefix_chars": getattr(r, "planner_prefix_chars", 0),
+                "planner_prefix_sha256": getattr(r, "planner_prefix_sha256", ""),
+                "model": r.model,
                 "query_id": query_id,
                 "gt_score": gt_score,
                 "gt_method": gt_method,

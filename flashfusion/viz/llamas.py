@@ -86,21 +86,15 @@ EXTRA_HARD_MERGE_BASELINES = {
     CACHE_BASELINE,
     "REACT_ONLY",
 }
-DATASET_FIG_BASELINES = TOP3_BASELINES
-FULL_BASELINES = [
+DATASET_FIG_BASELINES = [
     CACHE_BASELINE,
     "REACT_ONLY",
     "AUTOIOT_PAPER",
     "HARGPT_PAPER",
     "LLMSENSE_PAPER",
 ]
-ERROR_RATE_BASELINES = [
-    CACHE_BASELINE,
-    "REACT_ONLY",
-    "AUTOIOT_PAPER",
-    "HARGPT_PAPER",
-    "LLMSENSE_PAPER",
-]
+FULL_BASELINES = DATASET_FIG_BASELINES
+ERROR_RATE_BASELINES = DATASET_FIG_BASELINES
 
 RC: dict[str, Any] = {
     "font.family": "DejaVu Sans",
@@ -408,7 +402,7 @@ def plot_cost_across_datasets(
         labels.append(display_baseline(baseline))
         values.append(value)
 
-    fig, ax = plt.subplots(figsize=(9.6, 4.7))
+    fig, ax = plt.subplots(figsize=(9.6, 1.6 + 0.85 * len(baselines)))
     y = np.arange(len(labels))
     colors = [BASELINE_COLORS.get(baseline, "#999999") for baseline in baselines]
     bars = ax.barh(
@@ -417,7 +411,7 @@ def plot_cost_across_datasets(
         color=colors,
         edgecolor="#333333",
         linewidth=0.8,
-        height=0.62,
+        height=0.58,
     )
 
     for bar, value in zip(bars, values):
@@ -436,6 +430,7 @@ def plot_cost_across_datasets(
 
     ax.set_yticks(y)
     ax.set_yticklabels(labels)
+    ax.margins(y=0.15)
     ax.invert_yaxis()
     ax.set_xlabel(r"Mean cost ($\times 10^{-5}$ USD, log)")
     ax.set_xscale("log", nonpositive="clip")
@@ -523,6 +518,100 @@ def plot_cost_across_query_types(
     plt.close(fig)
 
 
+def _draw_semantic_stage_latency_bars(
+    ax,
+    semantic: pd.DataFrame,
+    baselines: list[str],
+) -> np.ndarray:
+    """Draw stacked semantic-stage latency bars on ax; returns per-baseline totals."""
+    positions = np.arange(len(baselines))
+    left = np.zeros(len(baselines), dtype=float)
+    for stage in SEMANTIC_STAGE_ORDER:
+        values = []
+        for baseline in baselines:
+            row = semantic[(semantic["baseline"] == baseline) & (semantic["stage"] == stage)]
+            values.append(0.0 if row.empty else float(row["mean"].iloc[0]))
+        ax.barh(
+            positions,
+            values,
+            left=left,
+            height=0.58,
+            label=stage,
+            color=SEMANTIC_STAGE_COLORS[stage],
+            edgecolor="white",
+            linewidth=0.8,
+        )
+        left += np.asarray(values)
+
+    for position, total_latency in zip(positions, left):
+        if total_latency <= 0.0:
+            continue
+        ax.text(
+            total_latency * 1.04,
+            position,
+            f"{total_latency:.2f}s",
+            va="center",
+            ha="left",
+            fontsize=12.5,
+            fontweight="bold",
+        )
+    return left
+
+
+def _resolve_latency_baselines(df: pd.DataFrame) -> list[str]:
+    present = set(df["baseline"].astype(str).unique())
+    baselines = [baseline for baseline in TOP3_BASELINES if baseline in present]
+    if not baselines:
+        baselines = [baseline for baseline in BASELINE_ORDER if baseline in present]
+    return baselines
+
+
+def plot_latency_by_semantic_stage(
+    df: pd.DataFrame,
+    out_path: Path,
+    paper_dir: Path | None = None,
+) -> None:
+    """Standalone latency-by-semantic-stage figure: no title, legend spread horizontally."""
+    _apply_plot_style()
+    baselines = _resolve_latency_baselines(df)
+    semantic = aggregate_semantic_stage_latency_overall(df, baselines=baselines)
+
+    fig, ax = plt.subplots(figsize=(9.6, 1.6 + 0.85 * len(baselines)))
+    left = _draw_semantic_stage_latency_bars(ax, semantic, baselines)
+
+    labels = [display_baseline(baseline) for baseline in baselines]
+    ax.set_yticks(np.arange(len(baselines)), labels)
+    ax.margins(y=0.15)
+    ax.invert_yaxis()
+    positive_latencies = [value for value in left if value > 0.0]
+    if positive_latencies:
+        ax.set_xlabel("Mean latency (s, log)")
+        _set_clean_log_ticks(
+            ax,
+            min_value=min(positive_latencies) * 0.75,
+            max_value=max(positive_latencies) * 1.5,
+        )
+    else:
+        ax.set_xlabel("Mean latency (s)")
+    ax.xaxis.grid(linestyle="--", alpha=0.3)
+    ax.set_axisbelow(True)
+    _clean_axes(ax)
+    ax.legend(
+        ncol=len(SEMANTIC_STAGE_ORDER),
+        loc="upper left",
+        bbox_to_anchor=(0.0, -0.40, 1.0, 0.06),
+        mode="expand",
+        borderaxespad=0.0,
+        frameon=False,
+    )
+    fig.patch.set_facecolor("white")
+    ax.set_facecolor("white")
+    fig.tight_layout(rect=(0.0, 0.02, 1.0, 1.0))
+    fig.savefig(out_path, dpi=220, bbox_inches="tight", facecolor="white")
+    _save_paper_pdf(fig, out_path, paper_dir, ax=ax)
+    plt.close(fig)
+
+
 def plot_latency_and_cost_horizontal(
     df: pd.DataFrame,
     out_path: Path,
@@ -530,8 +619,7 @@ def plot_latency_and_cost_horizontal(
 ) -> None:
     """Compare the three primary systems using stage-visible latency and cost."""
     _apply_plot_style()
-    present = set(df["baseline"].astype(str).unique())
-    baselines = [baseline for baseline in TOP3_BASELINES if baseline in present]
+    baselines = _resolve_latency_baselines(df)
     semantic = aggregate_semantic_stage_latency_overall(df, baselines=baselines)
 
     per_run = (
@@ -549,23 +637,7 @@ def plot_latency_and_cost_horizontal(
         gridspec_kw={"width_ratios": [1.65, 1.0]},
     )
     positions = np.arange(len(baselines))
-    left = np.zeros(len(baselines), dtype=float)
-    for stage in SEMANTIC_STAGE_ORDER:
-        values = []
-        for baseline in baselines:
-            row = semantic[(semantic["baseline"] == baseline) & (semantic["stage"] == stage)]
-            values.append(0.0 if row.empty else float(row["mean"].iloc[0]))
-        latency_ax.barh(
-            positions,
-            values,
-            left=left,
-            height=0.58,
-            label=stage,
-            color=SEMANTIC_STAGE_COLORS[stage],
-            edgecolor="white",
-            linewidth=0.8,
-        )
-        left += np.asarray(values)
+    left = _draw_semantic_stage_latency_bars(latency_ax, semantic, baselines)
 
     cost_values = []
     for baseline in baselines:
@@ -594,7 +666,16 @@ def plot_latency_and_cost_horizontal(
     cost_ax.set_yticks(positions, labels)
     latency_ax.invert_yaxis()
     cost_ax.invert_yaxis()
-    latency_ax.set_xlabel("Mean latency (s)")
+    positive_latencies = [value for value in left if value > 0.0]
+    if positive_latencies:
+        latency_ax.set_xlabel("Mean latency (s, log)")
+        _set_clean_log_ticks(
+            latency_ax,
+            min_value=min(positive_latencies) * 0.75,
+            max_value=max(positive_latencies) * 1.5,
+        )
+    else:
+        latency_ax.set_xlabel("Mean latency (s)")
     cost_ax.set_xlabel(r"Mean cost ($\times 10^{-5}$ USD)")
     latency_ax.set_title("Latency by semantic stage", fontweight="bold")
     cost_ax.set_title("Cost per query", fontweight="bold")
@@ -833,7 +914,7 @@ def plot_accuracy_across_query_types(
         x_labels = [qt for qt in QUERY_TYPE_ORDER if qt in present_query_types]
     else:
         x_labels = [qt for qt in QUERY_TYPE_ORDER if qt in query_types]
-    baselines = baselines or TOP3_BASELINES
+    baselines = baselines or DATASET_FIG_BASELINES
     x = list(range(len(x_labels)))
     width = 0.8 / max(len(baselines), 1)
 
@@ -1629,7 +1710,7 @@ def main() -> None:
     query_type_baselines = expand_baselines([
         baseline.strip().upper()
         for baseline in (
-            _parse_csv_list(args.query_type_baseline_set) or list(TOP3_BASELINES)
+            _parse_csv_list(args.query_type_baseline_set) or list(DATASET_FIG_BASELINES)
         )
     ])
     cost_query_type_baselines = expand_baselines([
@@ -1804,6 +1885,8 @@ def main() -> None:
         query_types=selected_query_types,
     )
     plot_latency_and_cost_horizontal(df, fig8, paper_dir=paper_dir)
+    fig11 = output_dir / "latency_by_semantic_stage.png"
+    plot_latency_by_semantic_stage(df, fig11, paper_dir=paper_dir)
     plot_query_accuracy_across_baselines(
         by_dataset,
         fig10,
