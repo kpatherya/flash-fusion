@@ -10,6 +10,9 @@ correctness requirement, more important than bucket size.
 
 from __future__ import annotations
 
+import builtins
+import importlib
+import sys
 from unittest.mock import patch
 
 from flashfusion.pipeline.operator_router import (
@@ -103,6 +106,28 @@ def test_router_is_pure_no_llm_or_network_call() -> None:
     sock.assert_not_called()
     urlopen.assert_not_called()
     assert route.candidate_ops  # sanity: still returned a route
+
+
+def test_router_import_falls_back_when_numpy_is_unavailable(monkeypatch) -> None:
+    module_name = "flashfusion.pipeline.operator_router"
+    real_import = builtins.__import__
+    original_module = sys.modules.get(module_name)
+
+    def fake_import(name, globals=None, locals=None, fromlist=(), level=0):
+        if name == "flashfusion.pipeline.operators":
+            raise ModuleNotFoundError("No module named 'numpy'", name="numpy")
+        return real_import(name, globals, locals, fromlist, level)
+
+    monkeypatch.setattr(builtins, "__import__", fake_import)
+    sys.modules.pop(module_name, None)
+    try:
+        fallback_module = importlib.import_module(module_name)
+        assert fallback_module.BUCKET_FULL == BUCKET_FULL
+        assert fallback_module.route_operator_bucket("What is the average x value?")
+    finally:
+        sys.modules.pop(module_name, None)
+        if original_module is not None:
+            sys.modules[module_name] = original_module
 
 
 def test_every_canonical_bucket_is_reachable() -> None:
