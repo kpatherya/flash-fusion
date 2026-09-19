@@ -57,3 +57,4 @@ analysis/playground/__pycache__
 analysis/playground/.env
 analysis/playground/run_query_analysis.py
 .env*
+flashfusion/viz/docs

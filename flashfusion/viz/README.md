@@ -1,82 +1,39 @@
-# Primary Visualization Scripts
+# Primary Visualizations
 
-This folder now has a clean, focused plotting flow for July26 baseline data.
+`primary_visualizations.py` is the single entrypoint for the primary Flash-Fusion figures. It normalizes the benchmark metrics from their canonical result roots, joins the requested extra-hard runs, and writes only the paper figures and reproducible summaries.
 
-## Data source
-
-Scripts can read from one primary root and optionally override specific baselines
-from alternate roots.
-
-Default baseline layout:
-
-- `flashfusion/results/<RUN_ROOT>/<BASELINE>/<DATASET>/july26_full/metrics.csv`
-
-Supported baselines:
-
-- `FLASH_FUSION`
-- `AUTOIOT_PAPER`
-- `REACT_ONLY`
-- `HARGPT_PAPER`
-- `LLMSENSE_PAPER`
-
-Supported datasets:
-
-- `bus`
-- `wisdm`
-- `mit_ecg` (normalized to `ecg` in plots)
-
-## Scripts
-
-- `measure.py`
-  - Shared data loading and aggregation helpers.
-  - No figure writing by default.
-
-- `llamas.py`
-  - Figure (i): `accuracy_vs_baselines_across_datasets.png`
-  - Figure (ii): `accuracy_vs_baselines_across_query_types.png`
-  - Also writes CSV summaries for both.
-
-- `latencystages.py`
-  - Figure (iii): `per_stage_latency_breakdown_across_query_types_n3.png`
-  - Uses Flash-Fusion stage columns and explicitly reflects N=3 runs.
-  - Also writes a CSV summary.
-
-- `miniexp/latencystages.py`
-  - Compatibility wrapper that forwards to `latencystages.py`.
-
-## Output location
-
-Primary figures and summaries are written to:
-
-- `flashfusion/viz/results/primary_visualizations`
-
-## Commands
-
-From repository root:
+Run from the repository root:
 
 ```bash
-python3 flashfusion/viz/llamas.py
-python3 flashfusion/viz/latencystages.py
+./flashfusion/viz/run_primary_visualizations.sh
 ```
 
-For the requested three-baseline comparison with mixed roots:
-
-- Flash-Fusion and ReAct-Only from `flashfusion/results/ff_newlook_with_react`
-- AutoIOT from `flashfusion/results/with_slm_predictive`
-- Query types: Direct, Reasoning, Out-of-Scope, Predictive
+Optional environment variables:
 
 ```bash
-python3 flashfusion/viz/llamas.py \
-  --results-root flashfusion/results/ff_newlook_with_react \
-  --autoiot-root flashfusion/results/with_slm_predictive \
-  --baseline-set FLASH_FUSION,REACT_ONLY,AUTOIOT_PAPER \
-  --query-types Direct,Reasoning,Out-of-Scope,Predictive \
-  --output-dir flashfusion/viz/results/primary_visualizations
-
-python3 flashfusion/viz/latencystages.py \
-  --results-root flashfusion/results/ff_newlook_with_react \
-  --autoiot-root flashfusion/results/with_slm_predictive \
-  --baseline-set FLASH_FUSION,REACT_ONLY,AUTOIOT_PAPER \
-  --query-types Direct,Reasoning,Out-of-Scope,Predictive \
-  --output-dir flashfusion/viz/results/primary_visualizations
+MODE=baselines ./flashfusion/viz/run_primary_visualizations.sh
+MODE=ablations ./flashfusion/viz/run_primary_visualizations.sh
+VIZ_ROOT=results/primary_visualizations ./flashfusion/viz/run_primary_visualizations.sh
+STRICT=0 ./flashfusion/viz/run_primary_visualizations.sh
 ```
+
+## Output Contract
+
+Baseline outputs are written to `results/primary_visualizations/baselines`:
+
+- `query_accuracy_across_baselines.{png,pdf}`
+- `latency_by_semantic_stage.{png,pdf}`
+- `cumulative_latency_comparison_log_by_baseline_n3.{png,pdf}`
+- `cost_vs_baselines_across_datasets.{png,pdf}`
+- `grounding_loss_vs_model_size.{png,pdf,csv}`
+- `cache_hit_rate_vs_cost_flash_fusion_vs_react.{png,pdf,csv}`
+- `summary_baselines.{csv,md}`
+
+Ablation outputs are written to `results/primary_visualizations/ablations`:
+
+- `query_accuracy_across_ablations.{png,pdf}`
+- `latency_by_semantic_stage.{png,pdf}`
+- `cumulative_latency_comparison_by_ablation_n3.{png,pdf}`
+- `summary_ablations.{csv,md}`
+
+Superseded plotting scripts are retained under `flashfusion/viz/archive` for historical reference and are not part of the generation workflow.

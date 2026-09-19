@@ -45,6 +45,10 @@ CACHE_HIT_BASELINE = "FLASH_FUSION_CACHE_HIT"
 CACHE_MISS_BASELINE = "FLASH_FUSION_CACHE_MISS"
 CACHE_BASELINE_VARIANTS = [CACHE_HIT_BASELINE, CACHE_MISS_BASELINE]
 BASELINE_ORDER = [
+    "FF_FULL",
+    "FF_NO_CACHE",
+    "FF_NO_PRUNE",
+    "FF_NO_PROMPT",
     "FLASH_FUSION",
     "FF_NO_PRUNING",
     "FF_NO_PLANNING",
@@ -57,6 +61,10 @@ BASELINE_ORDER = [
 ]
 
 BASELINE_LABELS = {
+    "FF_FULL": "FF full",
+    "FF_NO_CACHE": "FF no cache",
+    "FF_NO_PRUNE": "FF no prune",
+    "FF_NO_PROMPT": "FF no prompt",
     "FLASH_FUSION": "Flash-Fusion",
     "FF_NO_PRUNING": "FF no pruning",
     "FF_NO_PLANNING": "FF no planning",
@@ -70,6 +78,10 @@ BASELINE_LABELS = {
 }
 
 BASELINE_COLORS = {
+    "FF_FULL": "#0f4c81",
+    "FF_NO_CACHE": "#1b9e77",
+    "FF_NO_PRUNE": "#2f855a",
+    "FF_NO_PROMPT": "#14532d",
     "FLASH_FUSION": "#1b9e77",
     "FF_NO_PRUNING": "#2f855a",
     "FF_NO_PLANNING": "#14532d",
@@ -95,7 +107,13 @@ DATASET_LABELS = {
 
 
 def normalize_baseline(value: object) -> str:
-    return str(value).strip().upper()
+    key = str(value).strip().upper()
+    aliases = {
+        "FLASH_FUSION": "FF_NO_CACHE",
+        "FF_NO_PRUNING": "FF_NO_PRUNE",
+        "FF_NO_PLANNING": "FF_NO_PROMPT",
+    }
+    return aliases.get(key, key)
 
 
 def display_baseline(code: str) -> str:
@@ -850,7 +868,7 @@ def aggregate_accuracy_by_dataset_query_type(
 
 def aggregate_flash_fusion_stage_latency_by_query_type(df: pd.DataFrame) -> pd.DataFrame:
     sem = _semantic_stage_frame(df)
-    ff = sem[sem["baseline"] == "FLASH_FUSION"].copy()
+    ff = sem[sem["baseline"] == "FF_NO_CACHE"].copy()
     stage_cols = [
         "grounding_s",
         "validation_s",
@@ -920,7 +938,10 @@ def _semantic_stage_frame(df: pd.DataFrame) -> pd.DataFrame:
     # stages reconcile with latency_s, except that cache hits have no planning
     # stage and must not receive a planning allocation.
     ff_mask = sem["baseline"].isin([
-        "FLASH_FUSION",
+        "FF_NO_CACHE",
+        "FF_FULL",
+        "FF_NO_PRUNE",
+        "FF_NO_PROMPT",
         CACHE_BASELINE,
         *CACHE_BASELINE_VARIANTS,
     ])
@@ -993,7 +1014,7 @@ def _semantic_stage_frame(df: pd.DataFrame) -> pd.DataFrame:
 
 def aggregate_semantic_stage_latency_by_query_type(
     df: pd.DataFrame,
-    baselines: Iterable[str] = ("FLASH_FUSION", "AUTOIOT_PAPER", "REACT_ONLY"),
+    baselines: Iterable[str] = ("FF_NO_CACHE", "AUTOIOT_PAPER", "REACT_ONLY"),
 ) -> pd.DataFrame:
     sem = _semantic_stage_frame(df)
     sem = sem[sem["baseline"].isin(list(baselines))].copy()
@@ -1043,7 +1064,7 @@ def aggregate_semantic_stage_latency_by_query_type(
 
 def aggregate_semantic_stage_total_latency_by_query_type(
     df: pd.DataFrame,
-    baselines: Iterable[str] = ("FLASH_FUSION", "AUTOIOT_PAPER", "REACT_ONLY"),
+    baselines: Iterable[str] = ("FF_NO_CACHE", "AUTOIOT_PAPER", "REACT_ONLY"),
 ) -> pd.DataFrame:
     """Mean/std of TOTAL semantic-stage latency (all 4 stages summed) per (baseline, query_type).
 
@@ -1075,7 +1096,7 @@ def aggregate_semantic_stage_total_latency_by_query_type(
 
 def aggregate_semantic_stage_latency_overall(
     df: pd.DataFrame,
-    baselines: Iterable[str] = ("FLASH_FUSION", "AUTOIOT_PAPER", "REACT_ONLY"),
+    baselines: Iterable[str] = ("FF_NO_CACHE", "AUTOIOT_PAPER", "REACT_ONLY"),
 ) -> pd.DataFrame:
     """Average semantic-stage latencies across all query types.
 
@@ -1130,7 +1151,7 @@ def aggregate_semantic_stage_latency_overall(
 
 def aggregate_latency_by_baseline_query_type(
     df: pd.DataFrame,
-    baselines: Iterable[str] = ("FLASH_FUSION", "AUTOIOT_PAPER", "REACT_ONLY"),
+    baselines: Iterable[str] = ("FF_NO_CACHE", "AUTOIOT_PAPER", "REACT_ONLY"),
 ) -> pd.DataFrame:
     subset = df[df["baseline"].isin(list(baselines))].copy()
 
