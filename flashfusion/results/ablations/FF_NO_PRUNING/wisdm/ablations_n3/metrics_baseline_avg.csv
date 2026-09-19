@@ -1,2 +1,0 @@
-baseline,gt_score,latency_s,cost_usd,input_tokens,output_tokens,runs
-FF_NO_PRUNING,0.8833333333333333,6.077036662896474,0.00114363375,9018.983333333332,157.20000000000002,3

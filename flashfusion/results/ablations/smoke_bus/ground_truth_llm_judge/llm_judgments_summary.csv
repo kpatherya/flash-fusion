@@ -1,5 +1,0 @@
-baseline,pass_rate,fail_rate,count
-FF_FULL,1.0,0.0,3
-FF_NO_CACHE,1.0,0.0,3
-FF_NO_PROMPT,1.0,0.0,3
-FF_NO_PRUNE,1.0,0.0,3

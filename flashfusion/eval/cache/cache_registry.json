@@ -722,6 +722,40 @@
       "query_text": "Calculate the root mean square (RMS) of the MLII signal for record_id 106.",
       "query_text_source": "raw_results",
       "reasons": [],
+      "schema_fingerprint": "8a468207a2c8d18a",
+      "semantic_signature": {
+        "admissibility": "in_scope",
+        "aggregate": "mean",
+        "confidence": 0.85,
+        "fields": [
+          "MLII",
+          "record_id"
+        ],
+        "filter_values": {
+          "record_id": 106
+        },
+        "intent_flags": {
+          "correlation": false,
+          "derived_magnitude": true,
+          "difference": false,
+          "group_by": false,
+          "last_event": false,
+          "predictive": false,
+          "rank": false,
+          "time_bin": false
+        },
+        "operator_skeleton_hint": null,
+        "output_shape": "scalar",
+        "predicate_ops": {
+          "record_id": "eq"
+        },
+        "predictive": {
+          "holdout_row": null,
+          "model": null,
+          "target_column": null,
+          "train_fraction": null
+        }
+      },
       "status": "reusable"
     },
     {
@@ -804,6 +838,7 @@
       "n_runs_observed": 6,
       "operator_contract_hash": "78a4cd22b7dbe6673097919cfed0b476be06682bdfc09df50fed9b6a234f751b",
       "operator_skeleton": [
+        "FILTER_NOT_EMPTY",
         "SPLIT_BY_VALUES",
         "SPLIT_BY_VALUES",
         "AGGREGATE_PARTITIONS",
@@ -1017,6 +1052,35 @@
       "query_text": "How many users have the activity label walking?",
       "query_text_source": "raw_results",
       "reasons": [],
+      "schema_fingerprint": "b927f02262d7702e",
+      "semantic_signature": {
+        "admissibility": "in_scope",
+        "aggregate": "count",
+        "confidence": 0.85,
+        "fields": [],
+        "filter_values": {
+          "activity": "walking"
+        },
+        "intent_flags": {
+          "correlation": false,
+          "derived_magnitude": false,
+          "difference": false,
+          "group_by": false,
+          "last_event": false,
+          "predictive": false,
+          "rank": false,
+          "time_bin": false
+        },
+        "operator_skeleton_hint": null,
+        "output_shape": "scalar",
+        "predicate_ops": {},
+        "predictive": {
+          "holdout_row": null,
+          "model": null,
+          "target_column": "activity_label",
+          "train_fraction": null
+        }
+      },
       "status": "reusable"
     },
     {
@@ -1261,7 +1325,7 @@
       "operator_contract_hash": "78a4cd22b7dbe6673097919cfed0b476be06682bdfc09df50fed9b6a234f751b",
       "operator_skeleton": [
         "FILTER_COMPARE",
-        "FILTER_EQ_AGGREGATE",
+        "FILTER_COMPARE",
         "COUNT_ROWS"
       ],
       "plan_source_modes": [
@@ -1360,6 +1424,40 @@
       "query_text": "What is the timestamp (time_s) of the last annotated beat for record_id 221?",
       "query_text_source": "raw_results",
       "reasons": [],
+      "schema_fingerprint": "8a468207a2c8d18a",
+      "semantic_signature": {
+        "admissibility": "in_scope",
+        "aggregate": null,
+        "confidence": 0.85,
+        "fields": [
+          "record_id",
+          "time_s"
+        ],
+        "filter_values": {
+          "record_id": 221
+        },
+        "intent_flags": {
+          "correlation": false,
+          "derived_magnitude": false,
+          "difference": false,
+          "group_by": false,
+          "last_event": true,
+          "predictive": false,
+          "rank": false,
+          "time_bin": false
+        },
+        "operator_skeleton_hint": null,
+        "output_shape": "unknown",
+        "predicate_ops": {
+          "record_id": "eq"
+        },
+        "predictive": {
+          "holdout_row": null,
+          "model": null,
+          "target_column": null,
+          "train_fraction": null
+        }
+      },
       "status": "reusable"
     },
     {
@@ -1455,7 +1553,7 @@
       "query_text": "For record_id 208, what is the average count of rows with a non-empty annotation in each 60-second time_s bin?",
       "query_text_source": "raw_results",
       "reasons": [],
-      "schema_fingerprint": "3e2dc640c05be9c3",
+      "schema_fingerprint": "8a468207a2c8d18a",
       "semantic_signature": {
         "admissibility": "in_scope",
         "aggregate": "mean",
@@ -1607,6 +1705,40 @@
       "query_text": "What is the minimum MLII value recorded for record_id 101?",
       "query_text_source": "raw_results",
       "reasons": [],
+      "schema_fingerprint": "8a468207a2c8d18a",
+      "semantic_signature": {
+        "admissibility": "in_scope",
+        "aggregate": "min",
+        "confidence": 0.85,
+        "fields": [
+          "MLII",
+          "record_id"
+        ],
+        "filter_values": {
+          "record_id": 101
+        },
+        "intent_flags": {
+          "correlation": false,
+          "derived_magnitude": false,
+          "difference": false,
+          "group_by": false,
+          "last_event": false,
+          "predictive": false,
+          "rank": false,
+          "time_bin": false
+        },
+        "operator_skeleton_hint": null,
+        "output_shape": "scalar",
+        "predicate_ops": {
+          "record_id": "eq"
+        },
+        "predictive": {
+          "holdout_row": null,
+          "model": null,
+          "target_column": null,
+          "train_fraction": null
+        }
+      },
       "status": "reusable"
     },
     {
@@ -2046,7 +2178,8 @@
       "n_runs_observed": 6,
       "operator_contract_hash": "78a4cd22b7dbe6673097919cfed0b476be06682bdfc09df50fed9b6a234f751b",
       "operator_skeleton": [
-        "FILTER_EQ_AGGREGATE"
+        "FILTER_EQ_AGGREGATE",
+        "SELECT_COLUMN"
       ],
       "plan_source_modes": [
         "llm"
@@ -2253,6 +2386,40 @@
       "query_text": "What is the total recording duration in seconds (maximum time_s) for record_id 234?",
       "query_text_source": "raw_results",
       "reasons": [],
+      "schema_fingerprint": "8a468207a2c8d18a",
+      "semantic_signature": {
+        "admissibility": "in_scope",
+        "aggregate": "max",
+        "confidence": 0.85,
+        "fields": [
+          "record_id",
+          "time_s"
+        ],
+        "filter_values": {
+          "record_id": 234
+        },
+        "intent_flags": {
+          "correlation": false,
+          "derived_magnitude": false,
+          "difference": false,
+          "group_by": false,
+          "last_event": false,
+          "predictive": false,
+          "rank": false,
+          "time_bin": false
+        },
+        "operator_skeleton_hint": null,
+        "output_shape": "scalar",
+        "predicate_ops": {
+          "record_id": "eq"
+        },
+        "predictive": {
+          "holdout_row": null,
+          "model": null,
+          "target_column": null,
+          "train_fraction": null
+        }
+      },
       "status": "reusable"
     },
     {
@@ -2351,6 +2518,7 @@
       "n_runs_observed": 6,
       "operator_contract_hash": "78a4cd22b7dbe6673097919cfed0b476be06682bdfc09df50fed9b6a234f751b",
       "operator_skeleton": [
+        "PARALLEL_AGGREGATE",
         "DERIVE_BINARY",
         "RANK_ROWS"
       ],
@@ -2520,7 +2688,7 @@
         "COMPARE_PARTITIONS"
       ],
       "query_text": "Compare the overall acceleration magnitude between dynamic (walking,jogging,upstairs,downstairs) and resting (sitting,standing) states.",
-      "schema_fingerprint": "7ad69ccf7f729a4d",
+      "schema_fingerprint": "b927f02262d7702e",
       "semantic_signature": {
         "admissibility": "unknown",
         "aggregate": null,
@@ -4879,7 +5047,7 @@
       "query_text": "Filter the route to rows labeled aggressive, group them into 5-minute timestamp windows, and return the window with the highest mean instability_score.",
       "query_text_source": "query_def_seed",
       "reasons": [],
-      "schema_fingerprint": "1d29adee7efb7ed4",
+      "schema_fingerprint": "1856b7e244a7940d",
       "semantic_signature": {
         "admissibility": "in_scope",
         "aggregate": "max",
@@ -4962,6 +5130,7 @@
       "operator_contract_hash": "2be2d0b165f22ee01479bee3042b9568475c1f3b99a8aa028e2d2f5b4c5d0240",
       "operator_skeleton": [
         "DERIVE_VECTOR_MAGNITUDE",
+        "AGGREGATE_COLUMN",
         "SPLIT_BY_THRESHOLD",
         "SPLIT_BY_THRESHOLD",
         "AGGREGATE_PARTITIONS",
@@ -4974,7 +5143,7 @@
       "query_text": "For each recorded latitude reading, derive peak acceleration magnitude from accel_stats_x_p99, accel_stats_y_p99, and accel_stats_z_p99. Report the absolute difference between the mean peak magnitude north versus south of the median latitude.",
       "query_text_source": "query_def_seed",
       "reasons": [],
-      "schema_fingerprint": "1d29adee7efb7ed4",
+      "schema_fingerprint": "1856b7e244a7940d",
       "semantic_signature": {
         "admissibility": "in_scope",
         "aggregate": "median",
@@ -5082,7 +5251,7 @@
       "query_text": "For each 5-minute timestamp window, derive the vertical shock range as accel_stats_z_p99 minus accel_stats_z_p1 and compute its mean separately for aggressive and calm behavior labels. Report the overall aggressive-minus-calm difference across the route.",
       "query_text_source": "query_def_seed",
       "reasons": [],
-      "schema_fingerprint": "1d29adee7efb7ed4",
+      "schema_fingerprint": "1856b7e244a7940d",
       "semantic_signature": {
         "admissibility": "in_scope",
         "aggregate": "mean",
@@ -5183,7 +5352,7 @@
       "query_text": "Derive the vertical shock range as accel_stats_z_p99 minus accel_stats_z_p1. Filter to aggressive behavior, group rows into 5-minute timestamp windows, and return the window with the highest mean vertical shock range.",
       "query_text_source": "query_def_seed",
       "reasons": [],
-      "schema_fingerprint": "1d29adee7efb7ed4",
+      "schema_fingerprint": "1856b7e244a7940d",
       "semantic_signature": {
         "admissibility": "in_scope",
         "aggregate": "max",
@@ -5271,7 +5440,7 @@
       "query_text": "For every subject_id, compute mean acceleration magnitude separately for dynamic activities (Walking, Jogging, Upstairs, Downstairs) and resting activities (Sitting, Standing). Return the subject_id with the largest dynamic-minus-resting mean magnitude.",
       "query_text_source": "query_def_seed",
       "reasons": [],
-      "schema_fingerprint": "7ad69ccf7f729a4d",
+      "schema_fingerprint": "b927f02262d7702e",
       "semantic_signature": {
         "admissibility": "in_scope",
         "aggregate": "max",
@@ -5352,7 +5521,7 @@
       "query_text": "For every subject_id, compute mean acceleration magnitude while Jogging and while Walking. Report whether subjects who jog harder also walk harder, ranking subjects consistently across both activities.",
       "query_text_source": "query_def_seed",
       "reasons": [],
-      "schema_fingerprint": "7ad69ccf7f729a4d",
+      "schema_fingerprint": "b927f02262d7702e",
       "semantic_signature": {
         "admissibility": "in_scope",
         "aggregate": "mean",
@@ -5449,7 +5618,7 @@
       "query_text": "For every subject_id, derive elapsed seconds from timestamp, then compute total locomotion duration (Walking, Jogging, Upstairs, Downstairs) and total resting duration (Sitting, Standing). Among subjects with more locomotion than resting time, return the subject_id with the largest locomotion-minus-resting duration.",
       "query_text_source": "query_def_seed",
       "reasons": [],
-      "schema_fingerprint": "7ad69ccf7f729a4d",
+      "schema_fingerprint": "b927f02262d7702e",
       "semantic_signature": {
         "admissibility": "in_scope",
         "aggregate": "max",
@@ -5536,7 +5705,7 @@
       "query_text": "Among rows whose annotation is one of the known MIT-ECG annotation codes, partition each record_id's time_s values into consecutive groups of width 10. For each group, compute MLII RMS. Return the group with the greatest RMS.",
       "query_text_source": "query_def_seed",
       "reasons": [],
-      "schema_fingerprint": "3e2dc640c05be9c3",
+      "schema_fingerprint": "8a468207a2c8d18a",
       "semantic_signature": {
         "admissibility": "in_scope",
         "aggregate": "max",
@@ -5670,7 +5839,7 @@
       "n_runs_observed": 0,
       "operator_contract_hash": "2be2d0b165f22ee01479bee3042b9568475c1f3b99a8aa028e2d2f5b4c5d0240",
       "operator_skeleton": [
-        "FILTER_IN",
+        "FILTER_COMPARE",
         "DERIVE_BIN",
         "PARALLEL_AGGREGATE",
         "DERIVE_BINARY",
@@ -5683,7 +5852,7 @@
       "query_text": "For record_id 101, divide time_s into 10-second bins. For each bin, compute annotated-row rate as rows with an annotation in the known annotation-code list divided by all rows in the bin. Return the Pearson correlation between bin index and annotated-row rate.",
       "query_text_source": "query_def_seed",
       "reasons": [],
-      "schema_fingerprint": "3e2dc640c05be9c3",
+      "schema_fingerprint": "8a468207a2c8d18a",
       "semantic_signature": {
         "admissibility": "in_scope",
         "aggregate": null,
@@ -5765,7 +5934,7 @@
       "query_text": "For every record_id, independently compute MLII variance and V1 variance. Define total lead variability as their sum. Return the record_id with the largest total lead variability.",
       "query_text_source": "query_def_seed",
       "reasons": [],
-      "schema_fingerprint": "3e2dc640c05be9c3",
+      "schema_fingerprint": "8a468207a2c8d18a",
       "semantic_signature": {
         "admissibility": "in_scope",
         "aggregate": "max",
