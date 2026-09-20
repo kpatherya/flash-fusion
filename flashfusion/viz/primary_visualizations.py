@@ -44,8 +44,8 @@ COLORS = {
     "HARGPT_PAPER": "#ef4444",
     "LLMSENSE_PAPER": "#8b5cf6",
     "FLASH_FUSION": "#1b9e77",
-    "FF_NO_PRUNE": "#2f855a",
-    "FF_NO_PROMPT": "#14532d",
+    "FF_NO_PRUNE": "#4fae91",
+    "FF_NO_PROMPT": "#82c5b1",
 }
 LABELS = {
     "FLASH_FUSION_CACHE": "Flash-Fusion",
@@ -58,17 +58,17 @@ LABELS = {
     "FF_NO_PROMPT": "- prompt",
 }
 STAGE_COLORS = {
-    "Grounding": "#2f8f57",
-    "Validation": "#df2127",
-    "Planning": "#ef8b2c",
-    "Execution": "#8d67b8",
+    "Grounding": "#C77C9B",    # dusty rose
+    "Validation": "#9B7BB5",   # muted purple
+    "Planning": "#E5A04F",     # amber
+    "Execution": "#6C8E5E",    # muted olive
 }
 GROUNDING_MODELS = (
     ("meta-llama/llama-3.2-1b-instruct", "Llama 3.2\n1B"),
     ("meta-llama/llama-3.2-3b-instruct", "Llama 3.2\n3B"),
-    ("qwen/qwen3-14b", "Qwen 3\n14B"),
     ("ibm-granite/granite-4.1-8b", "Granite 4.1\n8B"),
     ("google/gemma-3-12b-it", "Gemma 3\n12B"),
+    ("qwen/qwen3-14b", "Qwen 3\n14B"),
 )
 PLOT_RC: dict[str, Any] = {
     "font.family": "DejaVu Sans",
@@ -90,6 +90,7 @@ PLOT_RC: dict[str, Any] = {
 class SourceSpec:
     code: str
     root: Path
+    baseline: str | None = None
     include_extra_hard: bool = False
 
 
@@ -98,19 +99,25 @@ def build_source_registry(repo_root: Path = REPO_ROOT) -> dict[str, SourceSpec]:
     results = repo_root / "flashfusion" / "results"
     return {
         "FLASH_FUSION_CACHE": SourceSpec(
-            "FLASH_FUSION_CACHE", results / "ff_hybrid_cache" / "FLASH_FUSION_CACHE", True
+            code="FLASH_FUSION_CACHE",
+            root=results / "ff_hybrid_cache" / "FLASH_FUSION_CACHE",
+            include_extra_hard=True,
         ),
         "FLASH_FUSION": SourceSpec(
-            "FLASH_FUSION", results / "ff_and_react_qwen" / "FLASH_FUSION", True
+            code="FLASH_FUSION",
+            root=results / "ablations" / "primary",
+            baseline="FF_NO_CACHE",
         ),
         "REACT_ONLY": SourceSpec(
-            "REACT_ONLY", results / "ff_and_react_qwen" / "REACT_ONLY", True
+            code="REACT_ONLY",
+            root=results / "ff_and_react_qwen" / "REACT_ONLY",
+            include_extra_hard=True,
         ),
-        "AUTOIOT_PAPER": SourceSpec("AUTOIOT_PAPER", results / "with_slm_predictive"),
-        "HARGPT_PAPER": SourceSpec("HARGPT_PAPER", results / "july26" / "HARGPT_PAPER"),
-        "LLMSENSE_PAPER": SourceSpec("LLMSENSE_PAPER", results / "july26" / "LLMSENSE_PAPER"),
-        "FF_NO_PRUNE": SourceSpec("FF_NO_PRUNE", results / "ablations" / "primary"),
-        "FF_NO_PROMPT": SourceSpec("FF_NO_PROMPT", results / "ablations" / "primary"),
+        "AUTOIOT_PAPER": SourceSpec(code="AUTOIOT_PAPER", root=results / "with_slm_predictive"),
+        "HARGPT_PAPER": SourceSpec(code="HARGPT_PAPER", root=results / "july26" / "HARGPT_PAPER"),
+        "LLMSENSE_PAPER": SourceSpec(code="LLMSENSE_PAPER", root=results / "july26" / "LLMSENSE_PAPER"),
+        "FF_NO_PRUNE": SourceSpec(code="FF_NO_PRUNE", root=results / "ablations" / "primary"),
+        "FF_NO_PROMPT": SourceSpec(code="FF_NO_PROMPT", root=results / "ablations" / "primary"),
     }
 
 
@@ -185,11 +192,14 @@ def load_metrics(spec: SourceSpec, strict: bool) -> pd.DataFrame:
             raise FileNotFoundError(message)
         print(f"[WARN] {message}")
         return pd.DataFrame()
-    frames = [normalize_schema(pd.read_csv(path), path, spec.code) for path in paths]
+    expected_baseline = spec.baseline or spec.code
+    frames = [normalize_schema(pd.read_csv(path), path, expected_baseline) for path in paths]
     usable = [frame for frame in frames if not frame.empty]
     if not usable:
         raise ValueError(f"No {spec.code} rows found under {spec.root}")
-    return pd.concat(usable, ignore_index=True)
+    combined = pd.concat(usable, ignore_index=True)
+    combined["baseline"] = spec.code
+    return combined
 
 
 def merge_extra_hard_queries(frame: pd.DataFrame, code: str, repo_root: Path, strict: bool) -> pd.DataFrame:
@@ -237,16 +247,77 @@ def compute_semantic_stages(frame: pd.DataFrame) -> pd.DataFrame:
     out.loc[react, "Planning"] = 0.0
     out.loc[react, "Execution"] = out.loc[react, "latency_s"] * 0.90
 
-    for baseline in ("FLASH_FUSION_CACHE", "FLASH_FUSION", "FF_NO_PRUNE", "FF_NO_PROMPT"):
-        mask = out["baseline"] == baseline
-        assigned = out.loc[mask, list(STAGES)].sum(axis=1)
-        residual = (out.loc[mask, "latency_s"] - assigned).clip(lower=0.0)
-        out.loc[mask, "Planning"] += residual
+    assigned = out.loc[:, list(STAGES)].sum(axis=1)
+    oversubscribed = assigned > out["latency_s"]
+    if oversubscribed.any():
+        scale = out.loc[oversubscribed, "latency_s"] / assigned.loc[oversubscribed]
+        out.loc[oversubscribed, list(STAGES)] = out.loc[oversubscribed, list(STAGES)].mul(scale, axis=0)
+    assigned = out.loc[:, list(STAGES)].sum(axis=1)
+    out["Planning"] += (out["latency_s"] - assigned).clip(lower=0.0)
     return out
 
 
 def _mean_by(frame: pd.DataFrame, value: str, groups: list[str]) -> pd.DataFrame:
     return frame.groupby(groups, observed=True)[value].mean().reset_index()
+
+
+def _fold_extra_hard(frame: pd.DataFrame) -> pd.DataFrame:
+    out = frame.copy()
+    out.loc[out["query_type"] == "Extra-Hard", "query_type"] = "Reasoning"
+    return out
+
+
+def compute_query_type_summary(frame: pd.DataFrame, codes: list[str], value: str) -> pd.DataFrame:
+    """Return row means for `value` for each displayed query type after folding extra-hard rows."""
+    comparison = _fold_extra_hard(frame[frame["baseline"].isin(codes)])
+    return _mean_by(comparison, value, ["baseline", "query_type"])
+
+
+def compute_query_type_latency_summary(frame: pd.DataFrame, codes: list[str]) -> pd.DataFrame:
+    """Return row means for each displayed query type after folding extra-hard rows."""
+    return compute_query_type_summary(frame, codes, "latency_s")
+
+
+def compute_balanced_metric_summary(frame: pd.DataFrame, codes: list[str], value: str) -> pd.DataFrame:
+    """Average `value` equally across the four displayed query types per baseline."""
+    per_query_type = compute_query_type_summary(frame, codes, value)
+    return per_query_type.groupby("baseline", as_index=False, observed=True)[value].mean()
+
+
+def compute_balanced_dataset_run_summary(frame: pd.DataFrame, codes: list[str], value: str) -> pd.DataFrame:
+    """Average `value` per (dataset, run_id) cell, then equally across cells per baseline."""
+    per_cell = frame[frame["baseline"].isin(codes)].groupby(
+        ["baseline", "dataset", "run_id"], as_index=False, observed=True
+    )[value].mean()
+    return per_cell.groupby("baseline", as_index=False, observed=True)[value].agg(["mean", "std"]).reset_index()
+
+
+def compute_balanced_stage_summary(frame: pd.DataFrame, codes: list[str]) -> pd.DataFrame:
+    """Average semantic stages equally across the four displayed query types."""
+    staged = _fold_extra_hard(compute_semantic_stages(frame[frame["baseline"].isin(codes)]))
+    per_query_type = staged.groupby(["baseline", "query_type"], observed=True)[list(STAGES)].mean().reset_index()
+    return per_query_type.groupby("baseline", as_index=False, observed=True)[list(STAGES)].mean()
+
+
+def validate_latency_consistency(
+    frame: pd.DataFrame, codes: list[str], tol: float = 1e-6, strict: bool = False
+) -> pd.DataFrame:
+    """Check that balanced cumulative and semantic latency summaries agree."""
+    query_summary = compute_query_type_latency_summary(frame, codes)
+    cumulative = query_summary.groupby("baseline", as_index=False, observed=True)["latency_s"].mean()
+    stages = compute_balanced_stage_summary(frame, codes)
+    validation = cumulative.merge(stages, on="baseline", how="left")
+    validation["balanced_cumulative_latency"] = validation.pop("latency_s")
+    validation["balanced_semantic_total"] = validation.loc[:, list(STAGES)].sum(axis=1)
+    validation["delta"] = validation["balanced_semantic_total"] - validation["balanced_cumulative_latency"]
+    print("[INFO] Balanced latency consistency:\n" + validation[["baseline", "balanced_cumulative_latency", "balanced_semantic_total", "delta"]].to_string(index=False))
+    invalid = validation[validation["delta"].abs() > tol]
+    if not invalid.empty:
+        message = f"Semantic-stage totals differ from cumulative latency for {invalid['baseline'].tolist()}"
+        if strict:
+            raise ValueError(message)
+        print(f"[WARN] {message}")
+    return validation
 
 
 def _save(fig: Figure, destination: Path) -> None:
@@ -270,10 +341,7 @@ def _apply_plot_style() -> None:
 
 def plot_accuracy(frame: pd.DataFrame, codes: list[str], destination: Path, title: str | None = None) -> None:
     _apply_plot_style()
-    per_run = frame[frame["baseline"].isin(codes)].groupby(
-        ["baseline", "dataset", "run_id"], as_index=False, observed=True
-    )["accuracy_percent"].mean()
-    summary = per_run.groupby("baseline", as_index=False, observed=True)["accuracy_percent"].agg(["mean", "std"]).reset_index()
+    summary = compute_balanced_dataset_run_summary(frame, codes, "accuracy_percent")
     means = [float(summary.loc[summary["baseline"] == code, "mean"].iloc[0]) for code in codes]
     stds = [float(summary.loc[summary["baseline"] == code, "std"].fillna(0.0).iloc[0]) for code in codes]
     bounded_yerr = np.vstack([
@@ -290,7 +358,7 @@ def plot_accuracy(frame: pd.DataFrame, codes: list[str], destination: Path, titl
         axis.text(bar.get_x() + bar.get_width() / 2, mean + error + 1.0, f"{mean:.1f}%", ha="center", va="bottom", fontsize=16.25, fontweight="bold")
     axis.set_xticks(range(len(codes)), [LABELS[code] for code in codes])
     axis.set_ylabel("Query Accuracy (%)")
-    axis.set_ylim(0, 110)
+    axis.set_ylim(0, 100)
     if title:
         axis.set_title(title, loc="left")
     _style_axes(axis)
@@ -309,7 +377,7 @@ def plot_cost(frame: pd.DataFrame, codes: list[str], destination: Path) -> None:
     axis.set_yticks(range(len(codes)), [LABELS[code] for code in codes])
     axis.invert_yaxis()
     axis.set_xscale("log")
-    axis.set_xlabel("Mean Cost ($ x 10^-5 USD, log)")
+    axis.set_xlabel(r"Mean Cost ($\times 10^{-5}$ USD, log)")
     _style_axes(axis)
     fig.tight_layout()
     _save(fig, destination)
@@ -317,8 +385,7 @@ def plot_cost(frame: pd.DataFrame, codes: list[str], destination: Path) -> None:
 
 def plot_stage_latency(frame: pd.DataFrame, codes: list[str], destination: Path, log_scale: bool) -> None:
     _apply_plot_style()
-    staged = compute_semantic_stages(frame[frame["baseline"].isin(codes)])
-    summary = staged.groupby("baseline", as_index=False, observed=True)[list(STAGES)].mean()
+    summary = compute_balanced_stage_summary(frame, codes)
     fig, axis = plt.subplots(figsize=(9.6, 1.6 + 0.85 * len(codes)))
     left = np.zeros(len(codes))
     for stage in STAGES:
@@ -336,16 +403,17 @@ def plot_stage_latency(frame: pd.DataFrame, codes: list[str], destination: Path,
             axis.text(total * 1.04 if log_scale else total + max(left) * 0.015, position, f"{total:.2f}s", va="center", ha="left", fontsize=12.5, fontweight="bold")
     axis.invert_yaxis()
     _style_axes(axis)
-    axis.legend(ncol=4, frameon=False, loc="upper center", bbox_to_anchor=(0.5, -0.16))
+    legend_y = -0.26 if log_scale else -0.20
+    axis.legend(ncol=4, frameon=False, loc="upper center", bbox_to_anchor=(0.5, legend_y))
+    if log_scale:
+        fig.subplots_adjust(bottom=0.30)
     fig.tight_layout()
     _save(fig, destination)
 
 
 def plot_latency_by_query_type(frame: pd.DataFrame, codes: list[str], destination: Path, log_scale: bool) -> None:
     _apply_plot_style()
-    comparison = frame[frame["baseline"].isin(codes)].copy()
-    comparison.loc[comparison["query_type"] == "Extra-Hard", "query_type"] = "Reasoning"
-    summary = _mean_by(comparison, "latency_s", ["baseline", "query_type"])
+    summary = compute_query_type_latency_summary(frame, codes)
     qtypes = [query_type for query_type in PLOTTED_QUERY_TYPES if query_type in set(summary["query_type"])]
     y = np.arange(len(qtypes), dtype=float)
     width = 0.8 / len(codes)
@@ -359,7 +427,10 @@ def plot_latency_by_query_type(frame: pd.DataFrame, codes: list[str], destinatio
                 axis.text(mean * 1.08, bar.get_y() + bar.get_height() / 2, f"{mean:.2f}", va="center", ha="left", fontsize=12.5, fontweight="bold")
     axis.set_yticks(y, qtypes)
     axis.invert_yaxis()
-    axis.set_xlabel("Mean Latency (s)" + (", log" if log_scale else ""))
+    axis.set_xlabel(
+        "Mean Latency (s)" + (", log" if log_scale else ""),
+        labelpad=8,
+    )
     if log_scale:
         axis.set_xscale("log")
     _style_axes(axis)
@@ -369,8 +440,11 @@ def plot_latency_by_query_type(frame: pd.DataFrame, codes: list[str], destinatio
 
 
 def compute_summary_table(frame: pd.DataFrame, codes: list[str]) -> pd.DataFrame:
-    """Compute the reported cross-dataset, cross-run per-query summary."""
+    """Compute the reported summary using the same balanced aggregations as the figures."""
     subset = frame[frame["baseline"].isin(codes)].copy()
+    accuracy_summary = compute_balanced_dataset_run_summary(subset, codes, "accuracy_percent")
+    latency_summary = compute_balanced_metric_summary(subset, codes, "latency_s")
+    cost_summary = compute_balanced_metric_summary(subset, codes, "cost_usd")
     rows: list[dict[str, Any]] = []
     for code in codes:
         part = subset[subset["baseline"] == code]
@@ -378,9 +452,9 @@ def compute_summary_table(frame: pd.DataFrame, codes: list[str]) -> pd.DataFrame
             {
                 "System/Ablation": LABELS[code],
                 "baseline": code,
-                "Accuracy (%)": part["accuracy_percent"].mean(),
-                "Latency (s)": part["latency_s"].mean(),
-                "Cost ($ x 10^-5)": part["cost_usd"].mean() * 1e5,
+                "Accuracy (%)": float(accuracy_summary.loc[accuracy_summary["baseline"] == code, "mean"].iloc[0]),
+                "Latency (s)": float(latency_summary.loc[latency_summary["baseline"] == code, "latency_s"].iloc[0]),
+                "Cost ($ x 10^-5)": float(cost_summary.loc[cost_summary["baseline"] == code, "cost_usd"].iloc[0]) * 1e5,
                 "Rows": len(part),
                 "Query IDs": ", ".join(str(value) for value in sorted(part["query_id"].unique())),
             }
@@ -403,28 +477,78 @@ def write_summary_tables(frame: pd.DataFrame, codes: list[str], output_dir: Path
     return summary
 
 
-def plot_cache_hit_rate_cost_curve(baseline_summary: pd.DataFrame, destination: Path) -> None:
-    costs = baseline_summary.set_index("baseline")["Cost ($ x 10^-5)"]
-    cache_cost = float(costs["FLASH_FUSION_CACHE"])
-    no_cache_cost = float(costs["FLASH_FUSION"])
-    react_cost = float(costs["REACT_ONLY"])
-    hit_rates = np.linspace(0.0, 1.0, 101)
-    curve = hit_rates * cache_cost + (1.0 - hit_rates) * no_cache_cost
+def build_cache_hit_curve_points(
+    frame: pd.DataFrame, step_percent: int = 5, seed: int = 7, strict: bool = False
+) -> pd.DataFrame:
+    """Simulate increasing cache hits by replacing aligned no-cache query costs."""
+    if step_percent <= 0 or 100 % step_percent:
+        raise ValueError("step_percent must be a positive divisor of 100")
+    keys = ["dataset", "query_id", "run_id"]
+    costs = frame[frame["baseline"].isin(["FLASH_FUSION", "FLASH_FUSION_CACHE"])][keys + ["baseline", "cost_usd"]]
+    no_cache = costs[costs["baseline"] == "FLASH_FUSION"].drop(columns="baseline")
+    cached = costs[costs["baseline"] == "FLASH_FUSION_CACHE"].drop(columns="baseline")
+    merged = no_cache.merge(cached, on=keys, how="inner", suffixes=("_no_cache", "_cached"))
+    dropped = len(no_cache) + len(cached) - 2 * len(merged)
+    if dropped:
+        message = f"Cache curve excluded {dropped} unmatched source rows"
+        if strict:
+            raise ValueError(message)
+        print(f"[WARN] {message}")
+    if merged.empty:
+        raise ValueError("Cache curve has no aligned FLASH_FUSION and FLASH_FUSION_CACHE rows")
 
-    points = pd.DataFrame(
-        {
-            "cache_hit_rate": hit_rates,
-            "flash_fusion_cost_x_1e5": curve,
-            "react_cost_x_1e5": react_cost,
-        }
-    )
+    available_runs = sorted(merged["run_id"].unique().tolist())
+    run_ids = available_runs[:3]
+    if len(run_ids) < 3:
+        print(f"[WARN] Cache curve uses {len(run_ids)} run(s), expected 3: {run_ids}")
+    print(f"[INFO] Cache curve uses {len(merged)} aligned rows across run IDs {run_ids}")
+
+    rng = np.random.default_rng(seed)
+    per_run: dict[int, list[float]] = {}
+    hit_rates = list(range(0, 101, step_percent))
+    for run_id in run_ids:
+        part = merged[merged["run_id"] == run_id].sort_values(["dataset", "query_id"])
+        no_cache_costs = part["cost_usd_no_cache"].to_numpy(dtype=float)
+        cached_costs = part["cost_usd_cached"].to_numpy(dtype=float)
+        order = rng.permutation(len(part))
+        values: list[float] = []
+        for hit_rate in hit_rates:
+            replacement_count = round(hit_rate / 100.0 * len(part))
+            simulated = no_cache_costs.copy()
+            simulated[order[:replacement_count]] = cached_costs[order[:replacement_count]]
+            values.append(float(simulated.mean() * 1e5))
+        per_run[int(run_id)] = values
+
+    points = pd.DataFrame({"cache_hit_rate_percent": hit_rates})
+    for index, run_id in enumerate(run_ids, start=1):
+        points[f"flash_fusion_cost_run{index}_x_1e5"] = per_run[int(run_id)]
+    run_columns = [column for column in points.columns if column.startswith("flash_fusion_cost_run")]
+    points["flash_fusion_cost_mean_x_1e5"] = points[run_columns].mean(axis=1)
+    points["flash_fusion_cost_std_x_1e5"] = points[run_columns].std(axis=1, ddof=1).fillna(0.0)
+    return points
+
+
+def plot_cache_hit_rate_cost_curve(points: pd.DataFrame, react_cost: float, destination: Path) -> None:
+    points = points.copy()
+    points["react_cost_x_1e5"] = react_cost
     points.to_csv(destination.with_suffix(".csv"), index=False, float_format="%.6f")
 
     fig, axis = plt.subplots(figsize=(9, 5.25))
-    axis.plot(hit_rates * 100.0, curve, color=COLORS["FLASH_FUSION_CACHE"], linewidth=2.8, label="Flash-Fusion")
+    hit_rates = points["cache_hit_rate_percent"]
+    mean_costs = points["flash_fusion_cost_mean_x_1e5"]
+    cost_std = points["flash_fusion_cost_std_x_1e5"]
+    axis.plot(hit_rates, mean_costs, color=COLORS["FLASH_FUSION_CACHE"], linewidth=2.8, label="Flash-Fusion")
+    axis.fill_between(
+        hit_rates,
+        mean_costs - cost_std,
+        mean_costs + cost_std,
+        color=COLORS["FLASH_FUSION_CACHE"],
+        alpha=0.18,
+        linewidth=0,
+    )
     axis.axhline(react_cost, color=COLORS["REACT_ONLY"], linestyle="--", linewidth=2.2, label="ReAct")
     axis.set_xlabel("Cache Hit Rate (%)")
-    axis.set_ylabel("Cost ($ x 10^-5)")
+    axis.set_ylabel(r"Mean Cost ($\times 10^{-5}$ USD)")
     axis.set_xlim(0, 100)
     _style_axes(axis)
     axis.legend(frameon=False)
@@ -479,7 +603,7 @@ def plot_grounding_error_rate(repo_root: Path, destination: Path) -> bool:
     bars = axis.bar(summary.index, summary["error_rate"], color="#5b8def", edgecolor="#333333", linewidth=0.7)
     axis.set_xticks(summary.index, summary["label"])
     axis.set_ylabel("Grounding Error Rate (%)")
-    axis.set_ylim(0, max(10.0, float(summary["error_rate"].max()) * 1.2))
+    axis.set_ylim(0, max(10.0, float(summary["error_rate"].max()) * 1.0))
     for bar, value in zip(bars, summary["error_rate"]):
         axis.text(bar.get_x() + bar.get_width() / 2.0, bar.get_height(), f"{value:.1f}%", ha="center", va="bottom")
     _style_axes(axis)
@@ -488,7 +612,7 @@ def plot_grounding_error_rate(repo_root: Path, destination: Path) -> bool:
     return True
 
 
-def plot_baselines(frame: pd.DataFrame, output_dir: Path) -> None:
+def plot_baselines(frame: pd.DataFrame, output_dir: Path, strict: bool = False) -> None:
     all_codes = ["FLASH_FUSION_CACHE", "REACT_ONLY", "AUTOIOT_PAPER", "HARGPT_PAPER", "LLMSENSE_PAPER"]
     latency_codes = ["FLASH_FUSION_CACHE", "REACT_ONLY", "AUTOIOT_PAPER"]
     plot_accuracy(frame, all_codes, output_dir / "query_accuracy_across_baselines")
@@ -498,17 +622,22 @@ def plot_baselines(frame: pd.DataFrame, output_dir: Path) -> None:
     summary = write_summary_tables(frame, all_codes, output_dir, "summary_baselines")
     curve_codes = ["FLASH_FUSION_CACHE", "FLASH_FUSION", "REACT_ONLY"]
     curve_frame = load_collection(["FLASH_FUSION"], strict=True)
-    curve_summary = compute_summary_table(pd.concat([frame, curve_frame], ignore_index=True), curve_codes)
-    plot_cache_hit_rate_cost_curve(curve_summary, output_dir / "cache_hit_rate_vs_cost_flash_fusion_vs_react")
+    curve_data = pd.concat([frame, curve_frame], ignore_index=True)
+    curve_summary = compute_summary_table(curve_data, curve_codes)
+    react_cost = float(curve_summary.loc[curve_summary["baseline"] == "REACT_ONLY", "Cost ($ x 10^-5)"].iloc[0])
+    points = build_cache_hit_curve_points(curve_data, strict=strict)
+    plot_cache_hit_rate_cost_curve(points, react_cost, output_dir / "cache_hit_rate_vs_cost_flash_fusion_vs_react")
+    validate_latency_consistency(frame, latency_codes, strict=strict)
     plot_grounding_error_rate(REPO_ROOT, output_dir / "grounding_loss_vs_model_size")
 
 
-def plot_ablations(frame: pd.DataFrame, output_dir: Path) -> None:
+def plot_ablations(frame: pd.DataFrame, output_dir: Path, strict: bool = False) -> None:
     codes = ["FLASH_FUSION_CACHE", "FLASH_FUSION", "FF_NO_PRUNE", "FF_NO_PROMPT"]
-    plot_accuracy(frame, codes, output_dir / "query_accuracy_across_ablations", "Flash-Fusion ablations")
+    plot_accuracy(frame, codes, output_dir / "query_accuracy_across_ablations", "")
     plot_stage_latency(frame, codes, output_dir / "latency_by_semantic_stage", log_scale=False)
-    plot_latency_by_query_type(frame, codes, output_dir / "cumulative_latency_comparison_by_ablation_n3", log_scale=True)
+    plot_latency_by_query_type(frame, codes, output_dir / "cumulative_latency_comparison_by_ablation_n3", log_scale=False)
     write_summary_tables(frame, codes, output_dir, "summary_ablations")
+    validate_latency_consistency(frame, codes, strict=strict)
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -523,10 +652,10 @@ def main() -> None:
     args = build_parser().parse_args()
     if args.mode in {"baselines", "all"}:
         baseline_codes = ["FLASH_FUSION_CACHE", "REACT_ONLY", "AUTOIOT_PAPER", "HARGPT_PAPER", "LLMSENSE_PAPER"]
-        plot_baselines(load_collection(baseline_codes, args.strict), args.output_root / "baselines")
+        plot_baselines(load_collection(baseline_codes, args.strict), args.output_root / "baselines", args.strict)
     if args.mode in {"ablations", "all"}:
         ablation_codes = ["FLASH_FUSION_CACHE", "FLASH_FUSION", "FF_NO_PRUNE", "FF_NO_PROMPT"]
-        plot_ablations(load_collection(ablation_codes, args.strict), args.output_root / "ablations")
+        plot_ablations(load_collection(ablation_codes, args.strict), args.output_root / "ablations", args.strict)
 
 
 if __name__ == "__main__":
