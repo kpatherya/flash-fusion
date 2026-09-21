@@ -43,12 +43,24 @@ from flashfusion.prompts.llmsense_prompts import (
 )
 
 
+# Empirically, WISDM CSV consumes substantially more tokens per row than the
+# fixed row caps assume. Keep table inputs below roughly 80k tokens even for
+# token-dense rows, leaving ample context and output room on 128k models.
+_MAX_TABLE_CHARS = 160_000
+
+
 def _df_to_table_string(df: pd.DataFrame, max_rows: int = 200) -> str:
-    """Render a dataframe excerpt as compact CSV text for prompt data slots."""
+    """Render a compact CSV prefix within a conservative prompt-size budget."""
     sample = df.head(max_rows)
     buf = io.StringIO()
     sample.to_csv(buf, index=False, float_format="%.4f")
-    return buf.getvalue()
+    table = buf.getvalue()
+    if len(table) <= _MAX_TABLE_CHARS:
+        return table
+
+    prefix = table[:_MAX_TABLE_CHARS]
+    last_newline = prefix.rfind("\n")
+    return prefix[: last_newline + 1] if last_newline >= 0 else prefix
 
 
 def _infer_dataset_name(df: pd.DataFrame) -> str:

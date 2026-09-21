@@ -47,6 +47,13 @@ try:
 except ImportError:
     _OpenRouterResponseValidationError = None  # type: ignore[assignment,misc]
 
+try:
+    from openrouter.errors.badrequestresponse_error import (
+        BadRequestResponseError as _OpenRouterBadRequestResponseError,
+    )
+except ImportError:
+    _OpenRouterBadRequestResponseError = None  # type: ignore[assignment,misc]
+
 from flashfusion.baselines.flash_fusion_policy import (
     LEGACY_POLICY_ALIASES,
     POLICIES,
@@ -190,11 +197,23 @@ def _retry_after_seconds(exc: Exception, attempt: int) -> float:
 def _is_retryable_invocation_error(exc: Exception, httpx_module: object) -> bool:
     if isinstance(exc, getattr(httpx_module, "ReadTimeout")):
         return True
-    return bool(
+    if bool(
         _OpenRouterResponseValidationError is not None
         and isinstance(exc, _OpenRouterResponseValidationError)
         and getattr(exc, "status_code", None) == 429
-    )
+    ):
+        return True
+    if not (
+        _OpenRouterBadRequestResponseError is not None
+        and isinstance(exc, _OpenRouterBadRequestResponseError)
+    ):
+        return False
+
+    # OpenRouter can surface an upstream provider outage as HTTP 400 with no
+    # actionable detail. Retry only this explicitly transient form; malformed,
+    # unauthorized, and context-window requests must fail immediately.
+    message = str(exc).strip().lower()
+    return message == "provider returned error"
 
 
 def _build_chat_model(model_name: str, api_key: str, session_key: str):

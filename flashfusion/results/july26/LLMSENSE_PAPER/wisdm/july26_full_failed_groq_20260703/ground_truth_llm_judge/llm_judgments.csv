@@ -1,0 +1,919 @@
+run_id,source_file,baseline,query_id,query_text,expected_rejection,gt_reference_answer,candidate_answer,candidate_rejected,candidate_executed,candidate_code,llm_verdict,llm_score,llm_reason,gt_sanity,gt_sanity_note,llm_raw
+1,[in_memory_benchmark_run],LLMSENSE_PAPER,1,What is the maximum recorded x-acceleration for user 15?,False,Maximum x-acceleration for user 15 is 19.5700.,"[ERROR] ResponseValidationError: Response validation failed: 6 validation errors for Unmarshaller
+body.choices
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.created
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.id
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.model
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.object
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.system_fingerprint
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing",False,False,,FAIL,0.0,Candidate answer does not match the ground truth.,SOUND,Ground truth is a clear numeric value.,"```json
+{
+  ""verdict"": ""FAIL"",
+  ""reason"": ""Candidate answer does not match the ground truth."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Ground truth is a clear numeric value.""
+}
+```"
+1,[in_memory_benchmark_run],LLMSENSE_PAPER,2,How many total samples in the dataset are classified as the Walking activity?,False,Total Walking samples in the dataset: 424397.,"[ERROR] ResponseValidationError: Response validation failed: 6 validation errors for Unmarshaller
+body.choices
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.created
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.id
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.model
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.object
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.system_fingerprint
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing",False,False,,FAIL,0.0,Candidate answer does not match the ground truth,SOUND,Total Walking samples in the dataset is a clear numeric value,"```json
+{
+  ""verdict"": ""FAIL"",
+  ""reason"": ""Candidate answer does not match the ground truth"",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Total Walking samples in the dataset is a clear numeric value""
+}
+```"
+1,[in_memory_benchmark_run],LLMSENSE_PAPER,3,What is the average y-accel value for user 5 during the Sitting activity?,False,Average y-acceleration for user 5 during Sitting is 3.0414.,"[ERROR] ResponseValidationError: Response validation failed: 6 validation errors for Unmarshaller
+body.choices
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.created
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.id
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.model
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.object
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.system_fingerprint
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing",False,False,,FAIL,0.0,"Candidate answer is an error message, not a numeric value.",SOUND,Average y-acceleration value is provided.,"```json
+{
+  ""verdict"": ""FAIL"",
+  ""reason"": ""Candidate answer is an error message, not a numeric value."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Average y-acceleration value is provided.""
+}
+```"
+1,[in_memory_benchmark_run],LLMSENSE_PAPER,4,Which user has the highest total number of recorded data samples?,False,User with the highest sample count is 20 with 56632 samples.,"[ERROR] ResponseValidationError: Response validation failed: 6 validation errors for Unmarshaller
+body.choices
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.created
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.id
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.model
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.object
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.system_fingerprint
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing",False,False,,FAIL,0.0,Candidate answer does not match the ground truth.,SOUND,User 20 has the highest sample count with 56632 samples.,"```json
+{
+  ""verdict"": ""FAIL"",
+  ""reason"": ""Candidate answer does not match the ground truth."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""User 20 has the highest sample count with 56632 samples.""
+}
+```"
+1,[in_memory_benchmark_run],LLMSENSE_PAPER,5,Compare the overall acceleration magnitude between dynamic movements and resting states.,False,"Average magnitude for dynamic activities (walking,jogging,upstairs,downstairs) is 11.9625; resting activities (sitting,standing) is 9.8328; difference (dynamic-resting) is 2.1297.","[ERROR] ResponseValidationError: Response validation failed: 6 validation errors for Unmarshaller
+body.choices
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.created
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.id
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.model
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.object
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.system_fingerprint
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing",False,False,,FAIL,0.0,Candidate answer does not provide a factual comparison of acceleration magnitudes,SOUND,Ground truth provides specific average magnitudes for dynamic and resting activities,"```json
+{
+  ""verdict"": ""FAIL"",
+  ""reason"": ""Candidate answer does not provide a factual comparison of acceleration magnitudes"",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Ground truth provides specific average magnitudes for dynamic and resting activities""
+}
+```"
+1,[in_memory_benchmark_run],LLMSENSE_PAPER,6,Identify the user whose total recorded duration of stationary activities exceeds their duration of active locomotion by the largest margin.,False,"Users [20, 6, 16] have total stationary duration (sitting, standing) exceeding locomotion duration (walking, jogging, upstairs, downstairs). User 20 has the largest margin (delta=54004.34s).","[ERROR] ResponseValidationError: Response validation failed: 6 validation errors for Unmarshaller
+body.choices
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.created
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.id
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.model
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.object
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.system_fingerprint
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing",False,False,,FAIL,0.0,Candidate answer contains an error message and does not provide a valid user ID.,SOUND,Ground truth answer clearly identifies user 20 as the correct answer.,"```json
+{
+  ""verdict"": ""FAIL"",
+  ""reason"": ""Candidate answer contains an error message and does not provide a valid user ID."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Ground truth answer clearly identifies user 20 as the correct answer.""
+}
+```"
+1,[in_memory_benchmark_run],LLMSENSE_PAPER,7,What is the median net acceleration vector length for user 20 while ascending steps?,False,Median net acceleration vector length for user 20 while ascending steps is 9.8931.,"[ERROR] ResponseValidationError: Response validation failed: 6 validation errors for Unmarshaller
+body.choices
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.created
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.id
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.model
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.object
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.system_fingerprint
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing",False,False,,FAIL,0.0,"Candidate answer is an error message, not a numeric value.",SOUND,Ground truth is a specific numeric value.,"```json
+{
+  ""verdict"": ""FAIL"",
+  ""reason"": ""Candidate answer is an error message, not a numeric value."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Ground truth is a specific numeric value.""
+}
+```"
+1,[in_memory_benchmark_run],LLMSENSE_PAPER,8,Calculate the difference between the average z-axis acceleration between Upstairs and Downstairs activities for all users.,False,Average z for ascending elevation changes is 0.3235; descending is 0.6841; difference (ascending-descending) is -0.3605.,"[ERROR] ResponseValidationError: Response validation failed: 6 validation errors for Unmarshaller
+body.choices
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.created
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.id
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.model
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.object
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.system_fingerprint
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing",False,False,,FAIL,0.0,"Candidate answer is an error message, not a numeric value.",SOUND,Ground truth answer is a clear numeric difference.,"```json
+{
+  ""verdict"": ""FAIL"",
+  ""reason"": ""Candidate answer is an error message, not a numeric value."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Ground truth answer is a clear numeric difference.""
+}
+```"
+1,[in_memory_benchmark_run],LLMSENSE_PAPER,9,How does the average walking speed in miles per hour correlate with the age of the users?,True,Reject: speed in mph and user age are not available in this dataset.,"[ERROR] ResponseValidationError: Response validation failed: 6 validation errors for Unmarshaller
+body.choices
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.created
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.id
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.model
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.object
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.system_fingerprint
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing",False,False,,FAIL,0.0,Candidate answer does not clearly state the request is unanswerable or out of scope.,SOUND,Ground truth correctly identifies that speed in mph and user age are not available in the dataset.,"```json
+{
+  ""verdict"": ""FAIL"",
+  ""reason"": ""Candidate answer does not clearly state the request is unanswerable or out of scope."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Ground truth correctly identifies that speed in mph and user age are not available in the dataset.""
+}
+```"
+1,[in_memory_benchmark_run],LLMSENSE_PAPER,10,"Based on the acceleration data, predict the exact geographic location where user 10 was jogging.",True,Reject: acceleration records do not contain geographic location signals.,"[ERROR] ResponseValidationError: Response validation failed: 6 validation errors for Unmarshaller
+body.choices
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.created
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.id
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.model
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.object
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.system_fingerprint
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing",False,False,,FAIL,0.0,Candidate answer does not clearly state the request is unanswerable or out of scope.,SOUND,Ground truth answer correctly rejects the request due to lack of geographic location signals in acceleration data.,"```json
+{
+  ""verdict"": ""FAIL"",
+  ""reason"": ""Candidate answer does not clearly state the request is unanswerable or out of scope."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Ground truth answer correctly rejects the request due to lack of geographic location signals in acceleration data.""
+}
+```"
+1,[in_memory_benchmark_run],LLMSENSE_PAPER,11,Are female subjects more likely to have a higher cadence during stair climbing than male subjects?,True,Reject: sex and cadence attributes are unavailable in this dataset.,"[ERROR] ResponseValidationError: Response validation failed: 6 validation errors for Unmarshaller
+body.choices
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.created
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.id
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.model
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.object
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.system_fingerprint
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing",False,False,,FAIL,0.0,Candidate answer does not clearly state the request is unanswerable or out of scope.,SOUND,Ground truth correctly identifies unavailable attributes.,"```json
+{
+  ""verdict"": ""FAIL"",
+  ""reason"": ""Candidate answer does not clearly state the request is unanswerable or out of scope."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Ground truth correctly identifies unavailable attributes.""
+}
+```"
+1,[in_memory_benchmark_run],LLMSENSE_PAPER,12,Predict whether user 3 will meet the WHO recommended weekly moderate-to-vigorous physical activity guideline next week.,True,Reject: future MVPA-guideline compliance cannot be predicted from this dataset and the WHO guideline threshold is not represented in the schema.,"[ERROR] ResponseValidationError: Response validation failed: 6 validation errors for Unmarshaller
+body.choices
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.created
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.id
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.model
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.object
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.system_fingerprint
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing",False,False,,FAIL,0.0,Candidate answer does not clearly reject the request as unanswerable or out of scope.,SOUND,Ground truth correctly identifies that future MVPA-guideline compliance cannot be predicted.,"```json
+{
+  ""verdict"": ""FAIL"",
+  ""reason"": ""Candidate answer does not clearly reject the request as unanswerable or out of scope."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Ground truth correctly identifies that future MVPA-guideline compliance cannot be predicted.""
+}
+```"
+2,[in_memory_benchmark_run],LLMSENSE_PAPER,1,What is the maximum recorded x-acceleration for user 15?,False,Maximum x-acceleration for user 15 is 19.5700.,"[ERROR] ResponseValidationError: Response validation failed: 6 validation errors for Unmarshaller
+body.choices
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.created
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.id
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.model
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.object
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.system_fingerprint
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing",False,False,,FAIL,0.0,Candidate answer does not match ground truth,SOUND,Maximum x-acceleration for user 15 is clearly stated,"```json
+{
+  ""verdict"": ""FAIL"",
+  ""reason"": ""Candidate answer does not match ground truth"",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Maximum x-acceleration for user 15 is clearly stated""
+}
+```"
+2,[in_memory_benchmark_run],LLMSENSE_PAPER,2,How many total samples in the dataset are classified as the Walking activity?,False,Total Walking samples in the dataset: 424397.,"[ERROR] ResponseValidationError: Response validation failed: 6 validation errors for Unmarshaller
+body.choices
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.created
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.id
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.model
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.object
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.system_fingerprint
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing",False,False,,FAIL,0.0,"Candidate answer is an error message, not a numeric value.",SOUND,Ground truth value is a specific number.,"```json
+{
+  ""verdict"": ""FAIL"",
+  ""reason"": ""Candidate answer is an error message, not a numeric value."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Ground truth value is a specific number.""
+}
+```"
+2,[in_memory_benchmark_run],LLMSENSE_PAPER,3,What is the average y-accel value for user 5 during the Sitting activity?,False,Average y-acceleration for user 5 during Sitting is 3.0414.,"[ERROR] ResponseValidationError: Response validation failed: 6 validation errors for Unmarshaller
+body.choices
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.created
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.id
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.model
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.object
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.system_fingerprint
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing",False,False,,FAIL,0.0,"Candidate answer is an error message, not a valid answer",SOUND,Average y-acceleration value is provided,"```json
+{
+  ""verdict"": ""FAIL"",
+  ""reason"": ""Candidate answer is an error message, not a valid answer"",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Average y-acceleration value is provided""
+}
+```"
+2,[in_memory_benchmark_run],LLMSENSE_PAPER,4,Which user has the highest total number of recorded data samples?,False,User with the highest sample count is 20 with 56632 samples.,"[ERROR] ResponseValidationError: Response validation failed: 6 validation errors for Unmarshaller
+body.choices
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.created
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.id
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.model
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.object
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.system_fingerprint
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing",False,False,,FAIL,0.0,Candidate answer does not match the ground truth.,SOUND,Ground truth is clear and consistent with the deterministic sanity hint.,"```json
+{
+  ""verdict"": ""FAIL"",
+  ""reason"": ""Candidate answer does not match the ground truth."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Ground truth is clear and consistent with the deterministic sanity hint.""
+}
+```"
+2,[in_memory_benchmark_run],LLMSENSE_PAPER,5,Compare the overall acceleration magnitude between dynamic movements and resting states.,False,"Average magnitude for dynamic activities (walking,jogging,upstairs,downstairs) is 11.9625; resting activities (sitting,standing) is 9.8328; difference (dynamic-resting) is 2.1297.","[ERROR] ResponseValidationError: Response validation failed: 6 validation errors for Unmarshaller
+body.choices
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.created
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.id
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.model
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.object
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.system_fingerprint
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing",False,False,,FAIL,0.0,Candidate answer does not provide a factual comparison of acceleration magnitudes,SOUND,Ground truth provides specific average magnitudes for dynamic and resting activities,"```json
+{
+  ""verdict"": ""FAIL"",
+  ""reason"": ""Candidate answer does not provide a factual comparison of acceleration magnitudes"",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Ground truth provides specific average magnitudes for dynamic and resting activities""
+}
+```"
+2,[in_memory_benchmark_run],LLMSENSE_PAPER,6,Identify the user whose total recorded duration of stationary activities exceeds their duration of active locomotion by the largest margin.,False,"Users [20, 6, 16] have total stationary duration (sitting, standing) exceeding locomotion duration (walking, jogging, upstairs, downstairs). User 20 has the largest margin (delta=54004.34s).","[ERROR] ResponseValidationError: Response validation failed: 6 validation errors for Unmarshaller
+body.choices
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.created
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.id
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.model
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.object
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.system_fingerprint
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing",False,False,,FAIL,0.0,Candidate answer is an error message and does not match the ground truth.,SOUND,Ground truth is clear and specific about user 20 having the largest margin.,"```json
+{
+  ""verdict"": ""FAIL"",
+  ""reason"": ""Candidate answer is an error message and does not match the ground truth."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Ground truth is clear and specific about user 20 having the largest margin.""
+}
+```"
+2,[in_memory_benchmark_run],LLMSENSE_PAPER,7,What is the median net acceleration vector length for user 20 while ascending steps?,False,Median net acceleration vector length for user 20 while ascending steps is 9.8931.,"[ERROR] ResponseValidationError: Response validation failed: 6 validation errors for Unmarshaller
+body.choices
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.created
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.id
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.model
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.object
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.system_fingerprint
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing",False,False,,FAIL,0.0,Candidate answer does not match ground truth,SOUND,Ground truth is a specific numeric value,"```json
+{
+  ""verdict"": ""FAIL"",
+  ""reason"": ""Candidate answer does not match ground truth"",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Ground truth is a specific numeric value""
+}
+```"
+2,[in_memory_benchmark_run],LLMSENSE_PAPER,8,Calculate the difference between the average z-axis acceleration between Upstairs and Downstairs activities for all users.,False,Average z for ascending elevation changes is 0.3235; descending is 0.6841; difference (ascending-descending) is -0.3605.,"[ERROR] ResponseValidationError: Response validation failed: 6 validation errors for Unmarshaller
+body.choices
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.created
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.id
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.model
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.object
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.system_fingerprint
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing",False,False,,FAIL,0.0,Candidate answer does not provide a numeric solution to the problem.,SOUND,Ground truth answer is a clear numeric difference.,"```json
+{
+  ""verdict"": ""FAIL"",
+  ""reason"": ""Candidate answer does not provide a numeric solution to the problem."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Ground truth answer is a clear numeric difference.""
+}
+```"
+2,[in_memory_benchmark_run],LLMSENSE_PAPER,9,How does the average walking speed in miles per hour correlate with the age of the users?,True,Reject: speed in mph and user age are not available in this dataset.,"[ERROR] ResponseValidationError: Response validation failed: 6 validation errors for Unmarshaller
+body.choices
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.created
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.id
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.model
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.object
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.system_fingerprint
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing",False,False,,FAIL,0.0,Candidate answer does not clearly state the request is unanswerable or out of scope.,SOUND,Ground truth correctly identifies that speed in mph and user age are not available in the dataset.,"```json
+{
+  ""verdict"": ""FAIL"",
+  ""reason"": ""Candidate answer does not clearly state the request is unanswerable or out of scope."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Ground truth correctly identifies that speed in mph and user age are not available in the dataset.""
+}
+```"
+2,[in_memory_benchmark_run],LLMSENSE_PAPER,10,"Based on the acceleration data, predict the exact geographic location where user 10 was jogging.",True,Reject: acceleration records do not contain geographic location signals.,"[ERROR] ResponseValidationError: Response validation failed: 6 validation errors for Unmarshaller
+body.choices
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.created
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.id
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.model
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.object
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.system_fingerprint
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing",False,False,,FAIL,0.0,Candidate answer does not clearly state the request is unanswerable or out of scope.,SOUND,Ground truth correctly indicates that acceleration records do not contain geographic location signals.,"```json
+{
+  ""verdict"": ""FAIL"",
+  ""reason"": ""Candidate answer does not clearly state the request is unanswerable or out of scope."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Ground truth correctly indicates that acceleration records do not contain geographic location signals.""
+}
+```"
+2,[in_memory_benchmark_run],LLMSENSE_PAPER,11,Are female subjects more likely to have a higher cadence during stair climbing than male subjects?,True,Reject: sex and cadence attributes are unavailable in this dataset.,"[ERROR] ResponseValidationError: Response validation failed: 6 validation errors for Unmarshaller
+body.choices
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.created
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.id
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.model
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.object
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.system_fingerprint
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing",False,False,,FAIL,0.0,Candidate answer does not clearly state the request is unanswerable or out of scope.,SOUND,Ground truth correctly identifies unavailable attributes.,"```json
+{
+  ""verdict"": ""FAIL"",
+  ""reason"": ""Candidate answer does not clearly state the request is unanswerable or out of scope."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Ground truth correctly identifies unavailable attributes.""
+}
+```"
+2,[in_memory_benchmark_run],LLMSENSE_PAPER,12,Predict whether user 3 will meet the WHO recommended weekly moderate-to-vigorous physical activity guideline next week.,True,Reject: future MVPA-guideline compliance cannot be predicted from this dataset and the WHO guideline threshold is not represented in the schema.,"[ERROR] ResponseValidationError: Response validation failed: 6 validation errors for Unmarshaller
+body.choices
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.created
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.id
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.model
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.object
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.system_fingerprint
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing",False,False,,FAIL,0.0,Candidate answer does not clearly state that the request is unanswerable or out of scope.,SOUND,Ground truth answer correctly rejects the prediction due to lack of data and schema representation.,"```json
+{
+  ""verdict"": ""FAIL"",
+  ""reason"": ""Candidate answer does not clearly state that the request is unanswerable or out of scope."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Ground truth answer correctly rejects the prediction due to lack of data and schema representation.""
+}
+```"
+3,[in_memory_benchmark_run],LLMSENSE_PAPER,1,What is the maximum recorded x-acceleration for user 15?,False,Maximum x-acceleration for user 15 is 19.5700.,"[ERROR] ResponseValidationError: Response validation failed: 6 validation errors for Unmarshaller
+body.choices
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.created
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.id
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.model
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.object
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.system_fingerprint
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing",False,False,,FAIL,0.0,Candidate answer does not match ground truth,SOUND,Maximum x-acceleration for user 15 is provided,"```json
+{
+  ""verdict"": ""FAIL"",
+  ""reason"": ""Candidate answer does not match ground truth"",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Maximum x-acceleration for user 15 is provided""
+}
+```"
+3,[in_memory_benchmark_run],LLMSENSE_PAPER,2,How many total samples in the dataset are classified as the Walking activity?,False,Total Walking samples in the dataset: 424397.,"[ERROR] ResponseValidationError: Response validation failed: 6 validation errors for Unmarshaller
+body.choices
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.created
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.id
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.model
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.object
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.system_fingerprint
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing",False,False,,FAIL,0.0,Candidate answer does not match the ground truth,SOUND,Total Walking samples in the dataset is a clear numeric value,"```json
+{
+  ""verdict"": ""FAIL"",
+  ""reason"": ""Candidate answer does not match the ground truth"",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Total Walking samples in the dataset is a clear numeric value""
+}
+```"
+3,[in_memory_benchmark_run],LLMSENSE_PAPER,3,What is the average y-accel value for user 5 during the Sitting activity?,False,Average y-acceleration for user 5 during Sitting is 3.0414.,"[ERROR] ResponseValidationError: Response validation failed: 6 validation errors for Unmarshaller
+body.choices
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.created
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.id
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.model
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.object
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.system_fingerprint
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing",False,False,,FAIL,0.0,Candidate answer does not match the ground truth,SOUND,Average y-acceleration for user 5 during Sitting is 3.041,"```json
+{
+  ""verdict"": ""FAIL"",
+  ""reason"": ""Candidate answer does not match the ground truth"",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Average y-acceleration for user 5 during Sitting is 3.041""
+}
+```"
+3,[in_memory_benchmark_run],LLMSENSE_PAPER,4,Which user has the highest total number of recorded data samples?,False,User with the highest sample count is 20 with 56632 samples.,"[ERROR] ResponseValidationError: Response validation failed: 6 validation errors for Unmarshaller
+body.choices
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.created
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.id
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.model
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.object
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.system_fingerprint
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing",False,False,,FAIL,0.0,Candidate answer does not match the ground truth.,SOUND,Ground truth is clear and specific.,"```json
+{
+  ""verdict"": ""FAIL"",
+  ""reason"": ""Candidate answer does not match the ground truth."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Ground truth is clear and specific.""
+}
+```"
+3,[in_memory_benchmark_run],LLMSENSE_PAPER,5,Compare the overall acceleration magnitude between dynamic movements and resting states.,False,"Average magnitude for dynamic activities (walking,jogging,upstairs,downstairs) is 11.9625; resting activities (sitting,standing) is 9.8328; difference (dynamic-resting) is 2.1297.","[ERROR] ResponseValidationError: Response validation failed: 6 validation errors for Unmarshaller
+body.choices
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.created
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.id
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.model
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.object
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.system_fingerprint
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing",False,False,,FAIL,0.0,Candidate answer does not provide a factual comparison of acceleration magnitudes,SOUND,Ground truth provides specific average magnitudes for dynamic and resting activities,"```json
+{
+  ""verdict"": ""FAIL"",
+  ""reason"": ""Candidate answer does not provide a factual comparison of acceleration magnitudes"",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Ground truth provides specific average magnitudes for dynamic and resting activities""
+}
+```"
+3,[in_memory_benchmark_run],LLMSENSE_PAPER,6,Identify the user whose total recorded duration of stationary activities exceeds their duration of active locomotion by the largest margin.,False,"Users [20, 6, 16] have total stationary duration (sitting, standing) exceeding locomotion duration (walking, jogging, upstairs, downstairs). User 20 has the largest margin (delta=54004.34s).","[ERROR] ResponseValidationError: Response validation failed: 6 validation errors for Unmarshaller
+body.choices
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.created
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.id
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.model
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.object
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.system_fingerprint
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing",False,False,,FAIL,0.0,Candidate answer is an error message and does not address the query,SOUND,User 20 has the largest margin,"```json
+{
+  ""verdict"": ""FAIL"",
+  ""reason"": ""Candidate answer is an error message and does not address the query"",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""User 20 has the largest margin""
+}
+```"
+3,[in_memory_benchmark_run],LLMSENSE_PAPER,7,What is the median net acceleration vector length for user 20 while ascending steps?,False,Median net acceleration vector length for user 20 while ascending steps is 9.8931.,"[ERROR] ResponseValidationError: Response validation failed: 6 validation errors for Unmarshaller
+body.choices
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.created
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.id
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.model
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.object
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.system_fingerprint
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing",False,False,,FAIL,0.0,"Candidate answer is an error message, not a numeric value.",SOUND,Ground truth answer is a specific numeric value.,"```json
+{
+  ""verdict"": ""FAIL"",
+  ""reason"": ""Candidate answer is an error message, not a numeric value."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Ground truth answer is a specific numeric value.""
+}
+```"
+3,[in_memory_benchmark_run],LLMSENSE_PAPER,8,Calculate the difference between the average z-axis acceleration between Upstairs and Downstairs activities for all users.,False,Average z for ascending elevation changes is 0.3235; descending is 0.6841; difference (ascending-descending) is -0.3605.,"[ERROR] ResponseValidationError: Response validation failed: 6 validation errors for Unmarshaller
+body.choices
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.created
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.id
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.model
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.object
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.system_fingerprint
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing",False,False,,FAIL,0.0,"Candidate answer is an error message, not a numerical answer.",SOUND,Ground truth answer is a clear numerical value.,"```json
+{
+  ""verdict"": ""FAIL"",
+  ""reason"": ""Candidate answer is an error message, not a numerical answer."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Ground truth answer is a clear numerical value.""
+}
+```"
+3,[in_memory_benchmark_run],LLMSENSE_PAPER,9,How does the average walking speed in miles per hour correlate with the age of the users?,True,Reject: speed in mph and user age are not available in this dataset.,"[ERROR] ResponseValidationError: Response validation failed: 6 validation errors for Unmarshaller
+body.choices
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.created
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.id
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.model
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.object
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.system_fingerprint
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing",False,False,,FAIL,0.0,Candidate answer does not clearly state the request is unanswerable or out of scope.,SOUND,Ground truth correctly identifies that speed in mph and user age are not available in the dataset.,"```json
+{
+  ""verdict"": ""FAIL"",
+  ""reason"": ""Candidate answer does not clearly state the request is unanswerable or out of scope."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Ground truth correctly identifies that speed in mph and user age are not available in the dataset.""
+}
+```"
+3,[in_memory_benchmark_run],LLMSENSE_PAPER,10,"Based on the acceleration data, predict the exact geographic location where user 10 was jogging.",True,Reject: acceleration records do not contain geographic location signals.,"[ERROR] ResponseValidationError: Response validation failed: 6 validation errors for Unmarshaller
+body.choices
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.created
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.id
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.model
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.object
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.system_fingerprint
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing",False,False,,FAIL,0.0,Candidate answer does not clearly state the request is unanswerable or out of scope.,SOUND,Ground truth correctly rejects the request due to lack of geographic location signals in acceleration records.,"```json
+{
+  ""verdict"": ""FAIL"",
+  ""reason"": ""Candidate answer does not clearly state the request is unanswerable or out of scope."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Ground truth correctly rejects the request due to lack of geographic location signals in acceleration records.""
+}
+```"
+3,[in_memory_benchmark_run],LLMSENSE_PAPER,11,Are female subjects more likely to have a higher cadence during stair climbing than male subjects?,True,Reject: sex and cadence attributes are unavailable in this dataset.,[ERROR] BadRequestResponseError: Provider returned error,False,False,,FAIL,0.0,Candidate did not clearly reject the request as unanswerable,SOUND,Ground truth clearly states that sex and cadence attributes are unavailable,"```json
+{
+  ""verdict"": ""FAIL"",
+  ""reason"": ""Candidate did not clearly reject the request as unanswerable"",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Ground truth clearly states that sex and cadence attributes are unavailable""
+}
+```"
+3,[in_memory_benchmark_run],LLMSENSE_PAPER,12,Predict whether user 3 will meet the WHO recommended weekly moderate-to-vigorous physical activity guideline next week.,True,Reject: future MVPA-guideline compliance cannot be predicted from this dataset and the WHO guideline threshold is not represented in the schema.,"[ERROR] ResponseValidationError: Response validation failed: 6 validation errors for Unmarshaller
+body.choices
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.created
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.id
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.model
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.object
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+body.system_fingerprint
+  Field required [type=missing, input_value={'error': {'message': 'Pr...ed error', 'code': 400}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing",False,False,,FAIL,0.0,Candidate answer does not clearly state the request is unanswerable or out of scope.,SOUND,Ground truth answer correctly identifies the limitation of predicting future MVPA-guideline compliance.,"```json
+{
+  ""verdict"": ""FAIL"",
+  ""reason"": ""Candidate answer does not clearly state the request is unanswerable or out of scope."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Ground truth answer correctly identifies the limitation of predicting future MVPA-guideline compliance.""
+}
+```"

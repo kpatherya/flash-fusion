@@ -1,0 +1,2 @@
+baseline,gt_score,latency_s,cost_usd,input_tokens,output_tokens,runs
+LLMSENSE_PAPER,0.0,0.0,0.006369641111111111,10775.805555555555,15.083333333333334,3

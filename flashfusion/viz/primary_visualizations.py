@@ -26,6 +26,7 @@ import matplotlib.pyplot as plt
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 DATASETS = ("bus", "wisdm", "ecg")
+DATASET_LABELS = {"bus": "Bus", "wisdm": "WISDM", "ecg": "ECG"}
 QUERY_TYPES = ("Direct", "Reasoning", "Predictive", "Out-of-Scope", "Extra-Hard")
 PLOTTED_QUERY_TYPES = ("Direct", "Reasoning", "Predictive", "Out-of-Scope")
 STAGES = ("Grounding", "Validation", "Planning", "Execution")
@@ -284,12 +285,26 @@ def compute_balanced_metric_summary(frame: pd.DataFrame, codes: list[str], value
     return per_query_type.groupby("baseline", as_index=False, observed=True)[value].mean()
 
 
+def compute_balanced_metric_stats_summary(frame: pd.DataFrame, codes: list[str], value: str) -> pd.DataFrame:
+    """Return mean and std for `value` across the displayed query types per baseline."""
+    per_query_type = compute_query_type_summary(frame, codes, value)
+    return per_query_type.groupby("baseline", as_index=False, observed=True)[value].agg(["mean", "std"]).reset_index()
+
+
 def compute_balanced_dataset_run_summary(frame: pd.DataFrame, codes: list[str], value: str) -> pd.DataFrame:
     """Average `value` per (dataset, run_id) cell, then equally across cells per baseline."""
     per_cell = frame[frame["baseline"].isin(codes)].groupby(
         ["baseline", "dataset", "run_id"], as_index=False, observed=True
     )[value].mean()
     return per_cell.groupby("baseline", as_index=False, observed=True)[value].agg(["mean", "std"]).reset_index()
+
+
+def compute_dataset_accuracy_summary(frame: pd.DataFrame, codes: list[str], value: str = "accuracy_percent") -> pd.DataFrame:
+    """Average `value` per (dataset, run_id) cell, then across cells per (baseline, dataset)."""
+    per_cell = frame[frame["baseline"].isin(codes)].groupby(
+        ["baseline", "dataset", "run_id"], as_index=False, observed=True
+    )[value].mean()
+    return per_cell.groupby(["baseline", "dataset"], as_index=False, observed=True)[value].agg(["mean", "std"]).reset_index()
 
 
 def compute_balanced_stage_summary(frame: pd.DataFrame, codes: list[str]) -> pd.DataFrame:
@@ -363,6 +378,56 @@ def plot_accuracy(frame: pd.DataFrame, codes: list[str], destination: Path, titl
         axis.set_title(title, loc="left")
     _style_axes(axis)
     fig.tight_layout()
+    _save(fig, destination)
+
+
+def plot_accuracy_by_dataset(
+    frame: pd.DataFrame, codes: list[str], destination: Path, title: str | None = None, legend_ncol: int | None = None
+) -> None:
+    _apply_plot_style()
+    summary = compute_dataset_accuracy_summary(frame, codes)
+    x = list(range(len(DATASETS)))
+    width = 0.8 / len(codes)
+    fig, axis = plt.subplots(figsize=(9.4, 5.0))
+    for index, code in enumerate(codes):
+        rows = [summary[(summary["baseline"] == code) & (summary["dataset"] == dataset)] for dataset in DATASETS]
+        means = [float(row["mean"].iloc[0]) if not row.empty else 0.0 for row in rows]
+        stds = [float(row["std"].fillna(0.0).iloc[0]) if not row.empty else 0.0 for row in rows]
+        means_arr = np.asarray(means)
+        stds_arr = np.asarray(stds)
+        bounded_yerr = np.vstack([
+            np.minimum(stds_arr, means_arr),
+            np.minimum(stds_arr, 100.0 - means_arr),
+        ])
+        xpos = [p - 0.4 + (index + 0.5) * width for p in x]
+        bars = axis.bar(
+            xpos, means, width, label=LABELS[code], color=COLORS[code],
+            edgecolor="#333333", linewidth=0.9, yerr=bounded_yerr,
+            error_kw={"elinewidth": 1.2, "capsize": 4, "ecolor": "#222222"},
+        )
+        for bar, mean, error in zip(bars, means, bounded_yerr[1]):
+            if mean <= 0:
+                continue
+            axis.text(bar.get_x() + bar.get_width() / 2, mean + error + 1.0, f"{mean:.0f}%", ha="center", va="bottom", fontsize=12.5, fontweight="bold")
+    axis.set_xticks(x, [DATASET_LABELS[dataset] for dataset in DATASETS])
+    axis.set_xlabel("Dataset")
+    axis.set_ylabel("Query Accuracy (%)")
+    axis.set_ylim(0, 110)
+    if title:
+        axis.set_title(title, loc="left")
+    _style_axes(axis)
+    axis.legend(
+        ncol=legend_ncol or len(codes),
+        loc="upper center",
+        bbox_to_anchor=(0.5, -0.20),
+        frameon=False,
+        handlelength=1.1,
+        handletextpad=0.35,
+        columnspacing=0.9,
+        fontsize=13.0,
+    )
+    fig.subplots_adjust(bottom=0.30)
+    fig.tight_layout(rect=(0.0, 0.04, 1.0, 1.0))
     _save(fig, destination)
 
 
@@ -462,14 +527,53 @@ def compute_summary_table(frame: pd.DataFrame, codes: list[str]) -> pd.DataFrame
     return pd.DataFrame(rows)
 
 
+def compute_summary_statistics(frame: pd.DataFrame, codes: list[str]) -> pd.DataFrame:
+    """Return mean/std for each metric used in the exported summaries."""
+    subset = frame[frame["baseline"].isin(codes)].copy()
+    accuracy_summary = compute_balanced_dataset_run_summary(subset, codes, "accuracy_percent")
+    latency_summary = compute_balanced_metric_stats_summary(subset, codes, "latency_s")
+    cost_summary = compute_balanced_metric_stats_summary(subset, codes, "cost_usd")
+    rows: list[dict[str, Any]] = []
+    for code in codes:
+        acc_row = accuracy_summary.loc[accuracy_summary["baseline"] == code].iloc[0]
+        latency_row = latency_summary.loc[latency_summary["baseline"] == code].iloc[0]
+        cost_row = cost_summary.loc[cost_summary["baseline"] == code].iloc[0]
+        rows.append(
+            {
+                "baseline": code,
+                "accuracy_mean": float(acc_row["mean"]),
+                "accuracy_std": float(acc_row["std"]) if pd.notna(acc_row["std"]) else 0.0,
+                "latency_mean": float(latency_row["mean"]),
+                "latency_std": float(latency_row["std"]) if pd.notna(latency_row["std"]) else 0.0,
+                "cost_mean_x_1e5": float(cost_row["mean"]) * 1e5,
+                "cost_std_x_1e5": float(cost_row["std"]) * 1e5 if pd.notna(cost_row["std"]) else 0.0,
+            }
+        )
+    return pd.DataFrame(rows)
+
+
+def _summarize_with_std(mean: float, std: float | None, suffix: str = "") -> str:
+    std_value = float(std) if std is not None and pd.notna(std) else 0.0
+    return f"{mean:.2f} ± {std_value:.2f}{suffix}"
+
+
 def write_summary_tables(frame: pd.DataFrame, codes: list[str], output_dir: Path, stem: str) -> pd.DataFrame:
     summary = compute_summary_table(frame, codes)
+    stats = compute_summary_statistics(frame, codes).set_index("baseline")
     output_dir.mkdir(parents=True, exist_ok=True)
-    summary.to_csv(output_dir / f"{stem}.csv", index=False, float_format="%.4f")
 
-    display = summary[["System/Ablation", "Accuracy (%)", "Latency (s)", "Cost ($ x 10^-5)"]].copy()
-    for column in display.columns[1:]:
-        display[column] = display[column].map(lambda value: f"{float(value):.2f}")
+    display = summary[["System/Ablation"]].copy()
+    display.insert(1, "Accuracy (%)", "")
+    display.insert(2, "Latency (s)", "")
+    display.insert(3, "Cost ($ x 10^-5)", "")
+    for _, row in summary.iterrows():
+        code = row["baseline"]
+        acc_stats = stats.loc[code]
+        display.at[row.name, "Accuracy (%)"] = _summarize_with_std(acc_stats["accuracy_mean"], acc_stats["accuracy_std"], "%")
+        display.at[row.name, "Latency (s)"] = _summarize_with_std(acc_stats["latency_mean"], acc_stats["latency_std"], " s")
+        display.at[row.name, "Cost ($ x 10^-5)"] = _summarize_with_std(acc_stats["cost_mean_x_1e5"], acc_stats["cost_std_x_1e5"])
+
+    display.to_csv(output_dir / f"{stem}.csv", index=False)
     lines = [display.to_markdown(index=False), "", "## Coverage", ""]
     for _, row in summary.iterrows():
         lines.append(f"- {row['System/Ablation']}: {int(row['Rows'])} rows; query IDs {row['Query IDs']}")
@@ -616,6 +720,7 @@ def plot_baselines(frame: pd.DataFrame, output_dir: Path, strict: bool = False) 
     all_codes = ["FLASH_FUSION_CACHE", "REACT_ONLY", "AUTOIOT_PAPER", "HARGPT_PAPER", "LLMSENSE_PAPER"]
     latency_codes = ["FLASH_FUSION_CACHE", "REACT_ONLY", "AUTOIOT_PAPER"]
     plot_accuracy(frame, all_codes, output_dir / "query_accuracy_across_baselines")
+    plot_accuracy_by_dataset(frame, all_codes, output_dir / "query_accuracy_by_dataset_across_baselines", legend_ncol=len(all_codes))
     plot_cost(frame, all_codes, output_dir / "cost_vs_baselines_across_datasets")
     plot_stage_latency(frame, latency_codes, output_dir / "latency_by_semantic_stage", log_scale=True)
     plot_latency_by_query_type(frame, latency_codes, output_dir / "cumulative_latency_comparison_log_by_baseline_n3", log_scale=True)
@@ -634,6 +739,7 @@ def plot_baselines(frame: pd.DataFrame, output_dir: Path, strict: bool = False) 
 def plot_ablations(frame: pd.DataFrame, output_dir: Path, strict: bool = False) -> None:
     codes = ["FLASH_FUSION_CACHE", "FLASH_FUSION", "FF_NO_PRUNE", "FF_NO_PROMPT"]
     plot_accuracy(frame, codes, output_dir / "query_accuracy_across_ablations", "")
+    plot_accuracy_by_dataset(frame, codes, output_dir / "query_accuracy_by_dataset_across_ablations")
     plot_stage_latency(frame, codes, output_dir / "latency_by_semantic_stage", log_scale=False)
     plot_latency_by_query_type(frame, codes, output_dir / "cumulative_latency_comparison_by_ablation_n3", log_scale=False)
     write_summary_tables(frame, codes, output_dir, "summary_ablations")
