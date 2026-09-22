@@ -269,9 +269,10 @@ def _fold_extra_hard(frame: pd.DataFrame) -> pd.DataFrame:
 
 
 def compute_query_type_summary(frame: pd.DataFrame, codes: list[str], value: str) -> pd.DataFrame:
-    """Return row means for `value` for each displayed query type after folding extra-hard rows."""
+    """Return run-averaged means for `value` by query type after folding extra-hard rows."""
     comparison = _fold_extra_hard(frame[frame["baseline"].isin(codes)])
-    return _mean_by(comparison, value, ["baseline", "query_type"])
+    per_run = comparison.groupby(["baseline", "run_id", "query_type"], as_index=False, observed=True)[value].mean()
+    return per_run.groupby(["baseline", "query_type"], as_index=False, observed=True)[value].mean()
 
 
 def compute_query_type_latency_summary(frame: pd.DataFrame, codes: list[str]) -> pd.DataFrame:
@@ -280,23 +281,27 @@ def compute_query_type_latency_summary(frame: pd.DataFrame, codes: list[str]) ->
 
 
 def compute_balanced_metric_summary(frame: pd.DataFrame, codes: list[str], value: str) -> pd.DataFrame:
-    """Average `value` equally across the four displayed query types per baseline."""
-    per_query_type = compute_query_type_summary(frame, codes, value)
-    return per_query_type.groupby("baseline", as_index=False, observed=True)[value].mean()
+    """Return run-averaged mean for `value` per baseline."""
+    per_run = frame[frame["baseline"].isin(codes)].groupby(["baseline", "run_id"], as_index=False, observed=True)[value].mean()
+    return per_run.groupby("baseline", as_index=False, observed=True)[value].mean()
 
 
 def compute_balanced_metric_stats_summary(frame: pd.DataFrame, codes: list[str], value: str) -> pd.DataFrame:
-    """Return mean and std for `value` across the displayed query types per baseline."""
-    per_query_type = compute_query_type_summary(frame, codes, value)
-    return per_query_type.groupby("baseline", as_index=False, observed=True)[value].agg(["mean", "std"]).reset_index()
+    """Return run-level mean/std for `value` per baseline."""
+    per_run = frame[frame["baseline"].isin(codes)].groupby(["baseline", "run_id"], as_index=False, observed=True)[value].mean()
+    return per_run.groupby("baseline", as_index=False, observed=True)[value].agg(["mean", "std"]).reset_index()
 
 
 def compute_balanced_dataset_run_summary(frame: pd.DataFrame, codes: list[str], value: str) -> pd.DataFrame:
-    """Average `value` per (dataset, run_id) cell, then equally across cells per baseline."""
-    per_cell = frame[frame["baseline"].isin(codes)].groupby(
-        ["baseline", "dataset", "run_id"], as_index=False, observed=True
-    )[value].mean()
-    return per_cell.groupby("baseline", as_index=False, observed=True)[value].agg(["mean", "std"]).reset_index()
+    """Return run-level mean/std for `value` per baseline."""
+    per_run = frame[frame["baseline"].isin(codes)].groupby(["baseline", "run_id"], as_index=False, observed=True)[value].mean()
+    return per_run.groupby("baseline", as_index=False, observed=True)[value].agg(["mean", "std"]).reset_index()
+
+
+def compute_run_metric_stats_summary(frame: pd.DataFrame, codes: list[str], value: str) -> pd.DataFrame:
+    """Return mean/std from per-run row means for `value` per baseline."""
+    per_run = frame[frame["baseline"].isin(codes)].groupby(["baseline", "run_id"], as_index=False, observed=True)[value].mean()
+    return per_run.groupby("baseline", as_index=False, observed=True)[value].agg(["mean", "std"]).reset_index()
 
 
 def compute_dataset_accuracy_summary(frame: pd.DataFrame, codes: list[str], value: str = "accuracy_percent") -> pd.DataFrame:
@@ -308,18 +313,17 @@ def compute_dataset_accuracy_summary(frame: pd.DataFrame, codes: list[str], valu
 
 
 def compute_balanced_stage_summary(frame: pd.DataFrame, codes: list[str]) -> pd.DataFrame:
-    """Average semantic stages equally across the four displayed query types."""
-    staged = _fold_extra_hard(compute_semantic_stages(frame[frame["baseline"].isin(codes)]))
-    per_query_type = staged.groupby(["baseline", "query_type"], observed=True)[list(STAGES)].mean().reset_index()
-    return per_query_type.groupby("baseline", as_index=False, observed=True)[list(STAGES)].mean()
+    """Return run-averaged semantic stage means per baseline."""
+    staged = compute_semantic_stages(frame[frame["baseline"].isin(codes)])
+    per_run = staged.groupby(["baseline", "run_id"], observed=True)[list(STAGES)].mean().reset_index()
+    return per_run.groupby("baseline", as_index=False, observed=True)[list(STAGES)].mean()
 
 
 def validate_latency_consistency(
     frame: pd.DataFrame, codes: list[str], tol: float = 1e-6, strict: bool = False
 ) -> pd.DataFrame:
-    """Check that balanced cumulative and semantic latency summaries agree."""
-    query_summary = compute_query_type_latency_summary(frame, codes)
-    cumulative = query_summary.groupby("baseline", as_index=False, observed=True)["latency_s"].mean()
+    """Check that run-averaged cumulative and semantic latency summaries agree."""
+    cumulative = compute_balanced_metric_summary(frame, codes, "latency_s")
     stages = compute_balanced_stage_summary(frame, codes)
     validation = cumulative.merge(stages, on="baseline", how="left")
     validation["balanced_cumulative_latency"] = validation.pop("latency_s")
@@ -509,7 +513,8 @@ def compute_summary_table(frame: pd.DataFrame, codes: list[str]) -> pd.DataFrame
     subset = frame[frame["baseline"].isin(codes)].copy()
     accuracy_summary = compute_balanced_dataset_run_summary(subset, codes, "accuracy_percent")
     latency_summary = compute_balanced_metric_summary(subset, codes, "latency_s")
-    cost_summary = compute_balanced_metric_summary(subset, codes, "cost_usd")
+    # Cost is reported from per-run q1-q20 means, then averaged across runs.
+    cost_summary = compute_run_metric_stats_summary(subset, codes, "cost_usd")
     rows: list[dict[str, Any]] = []
     for code in codes:
         part = subset[subset["baseline"] == code]
@@ -519,7 +524,7 @@ def compute_summary_table(frame: pd.DataFrame, codes: list[str]) -> pd.DataFrame
                 "baseline": code,
                 "Accuracy (%)": float(accuracy_summary.loc[accuracy_summary["baseline"] == code, "mean"].iloc[0]),
                 "Latency (s)": float(latency_summary.loc[latency_summary["baseline"] == code, "latency_s"].iloc[0]),
-                "Cost ($ x 10^-5)": float(cost_summary.loc[cost_summary["baseline"] == code, "cost_usd"].iloc[0]) * 1e5,
+                "Cost ($ x 10^-5)": float(cost_summary.loc[cost_summary["baseline"] == code, "mean"].iloc[0]) * 1e5,
                 "Rows": len(part),
                 "Query IDs": ", ".join(str(value) for value in sorted(part["query_id"].unique())),
             }
@@ -532,7 +537,7 @@ def compute_summary_statistics(frame: pd.DataFrame, codes: list[str]) -> pd.Data
     subset = frame[frame["baseline"].isin(codes)].copy()
     accuracy_summary = compute_balanced_dataset_run_summary(subset, codes, "accuracy_percent")
     latency_summary = compute_balanced_metric_stats_summary(subset, codes, "latency_s")
-    cost_summary = compute_balanced_metric_stats_summary(subset, codes, "cost_usd")
+    cost_summary = compute_run_metric_stats_summary(subset, codes, "cost_usd")
     rows: list[dict[str, Any]] = []
     for code in codes:
         acc_row = accuracy_summary.loc[accuracy_summary["baseline"] == code].iloc[0]
@@ -581,16 +586,68 @@ def write_summary_tables(frame: pd.DataFrame, codes: list[str], output_dir: Path
     return summary
 
 
+def _compute_observed_cache_hit_rate(frame: pd.DataFrame, strict: bool = False) -> float:
+    """Compute cache hit rate (%) from FLASH_FUSION_CACHE rows."""
+    cache_rows = frame[frame["baseline"] == "FLASH_FUSION_CACHE"].copy()
+    if cache_rows.empty:
+        message = "No FLASH_FUSION_CACHE rows available for observed hit-rate ceiling"
+        if strict:
+            raise ValueError(message)
+        print(f"[WARN] {message}; defaulting observed ceiling to 100%")
+        return 100.0
+    if "cache_outcome" not in cache_rows.columns:
+        message = "cache_outcome column missing; cannot derive observed hit-rate ceiling"
+        if strict:
+            raise ValueError(message)
+        print(f"[WARN] {message}; defaulting observed ceiling to 100%")
+        return 100.0
+
+    outcomes = cache_rows["cache_outcome"].astype(str).str.strip().str.lower()
+    hit_mask = outcomes == "hit"
+    observed = float(hit_mask.mean() * 100.0)
+    print(f"[INFO] Observed strict cache hit-rate ceiling: {observed:.2f}% ({int(hit_mask.sum())}/{len(hit_mask)})")
+    return observed
+
+
+def _balanced_curve_cost_x_1e5(query_types: pd.Series, cost_usd: np.ndarray) -> float:
+    """Compute curve-point cost using the same balanced query-type estimator as summaries."""
+    simulated = pd.DataFrame({"query_type": query_types.to_numpy(), "cost_usd": cost_usd})
+    simulated.loc[simulated["query_type"] == "Extra-Hard", "query_type"] = "Reasoning"
+    per_type = simulated.groupby("query_type", observed=True)["cost_usd"].mean()
+    valid_types = [query_type for query_type in PLOTTED_QUERY_TYPES if query_type in per_type.index]
+    if not valid_types:
+        raise ValueError("Simulated cache curve point has no plotted query types")
+    return float(per_type.loc[valid_types].mean() * 1e5)
+
+
 def build_cache_hit_curve_points(
-    frame: pd.DataFrame, step_percent: int = 5, seed: int = 7, strict: bool = False
+    frame: pd.DataFrame,
+    observed_hit_rate_max_percent: float,
+    hit_rate_definition: str,
+    step_percent: int = 5,
+    seed: int = 7,
+    strict: bool = False,
 ) -> pd.DataFrame:
-    """Simulate increasing cache hits by replacing aligned no-cache query costs."""
+    """Build cache-hit curve using observed anchor with counterfactual projections on both sides."""
     if step_percent <= 0 or 100 % step_percent:
         raise ValueError("step_percent must be a positive divisor of 100")
     keys = ["dataset", "query_id", "run_id"]
     costs = frame[frame["baseline"].isin(["FLASH_FUSION", "FLASH_FUSION_CACHE"])][keys + ["baseline", "cost_usd"]]
-    no_cache = costs[costs["baseline"] == "FLASH_FUSION"].drop(columns="baseline")
-    cached = costs[costs["baseline"] == "FLASH_FUSION_CACHE"].drop(columns="baseline")
+    no_cache_raw = costs[costs["baseline"] == "FLASH_FUSION"].drop(columns="baseline")
+    cached_raw = costs[costs["baseline"] == "FLASH_FUSION_CACHE"].drop(columns="baseline")
+
+    no_cache_dup = int(no_cache_raw.duplicated(subset=keys).sum())
+    cached_dup = int(cached_raw.duplicated(subset=keys).sum())
+    if no_cache_dup or cached_dup:
+        print(
+            "[WARN] Cache curve source rows contain duplicate keys; "
+            f"aggregating mean cost per {keys} before merge "
+            f"(FLASH_FUSION duplicates={no_cache_dup}, FLASH_FUSION_CACHE duplicates={cached_dup})"
+        )
+
+    no_cache = no_cache_raw.groupby(keys, as_index=False, observed=True)["cost_usd"].mean()
+    cached = cached_raw.groupby(keys, as_index=False, observed=True)["cost_usd"].mean()
+    no_cache_run_means = no_cache.groupby("run_id", observed=True)["cost_usd"].mean().astype(float)
     merged = no_cache.merge(cached, on=keys, how="inner", suffixes=("_no_cache", "_cached"))
     dropped = len(no_cache) + len(cached) - 2 * len(merged)
     if dropped:
@@ -609,18 +666,34 @@ def build_cache_hit_curve_points(
 
     rng = np.random.default_rng(seed)
     per_run: dict[int, list[float]] = {}
-    hit_rates = list(range(0, 101, step_percent))
+    hit_rates = sorted({*range(0, 101, step_percent), float(observed_hit_rate_max_percent)})
     for run_id in run_ids:
         part = merged[merged["run_id"] == run_id].sort_values(["dataset", "query_id"])
         no_cache_costs = part["cost_usd_no_cache"].to_numpy(dtype=float)
         cached_costs = part["cost_usd_cached"].to_numpy(dtype=float)
+        query_types = part["query_id"].map(QUERY_TYPE_BY_ID)
         order = rng.permutation(len(part))
         values: list[float] = []
         for hit_rate in hit_rates:
-            replacement_count = round(hit_rate / 100.0 * len(part))
-            simulated = no_cache_costs.copy()
-            simulated[order[:replacement_count]] = cached_costs[order[:replacement_count]]
-            values.append(float(simulated.mean() * 1e5))
+            if hit_rate < observed_hit_rate_max_percent:
+                # Left-side projection: increase miss share from the observed operating point
+                # by replacing cached-path rows with no-cache counterparts.
+                degrade_count = round((observed_hit_rate_max_percent - hit_rate) / 100.0 * len(part))
+                simulated = cached_costs.copy()
+                simulated[order[:degrade_count]] = no_cache_costs[order[:degrade_count]]
+                values.append(float(simulated.mean() * 1e5))
+            else:
+                # Right-side projection: increase hit share by replacing no-cache rows
+                # with cached-path counterparts.
+                replacement_count = round(hit_rate / 100.0 * len(part))
+                simulated = no_cache_costs.copy()
+                simulated[order[:replacement_count]] = cached_costs[order[:replacement_count]]
+                values.append(_balanced_curve_cost_x_1e5(query_types, simulated))
+
+        # At the observed strict hit-rate ceiling, anchor to actual FLASH_FUSION_CACHE mean cost.
+        if observed_hit_rate_max_percent in hit_rates:
+            ceiling_index = hit_rates.index(float(observed_hit_rate_max_percent))
+            values[ceiling_index] = float(cached_costs.mean() * 1e5)
         per_run[int(run_id)] = values
 
     points = pd.DataFrame({"cache_hit_rate_percent": hit_rates})
@@ -629,6 +702,17 @@ def build_cache_hit_curve_points(
     run_columns = [column for column in points.columns if column.startswith("flash_fusion_cost_run")]
     points["flash_fusion_cost_mean_x_1e5"] = points[run_columns].mean(axis=1)
     points["flash_fusion_cost_std_x_1e5"] = points[run_columns].std(axis=1, ddof=1).fillna(0.0)
+
+    # Ensure the 0% point matches observed FLASH_FUSION (no-cache) summary statistics.
+    zero_mask = points["cache_hit_rate_percent"] == 0
+    if zero_mask.any() and not no_cache_run_means.empty:
+        points.loc[zero_mask, "flash_fusion_cost_mean_x_1e5"] = float(no_cache_run_means.mean() * 1e5)
+        observed_std = float(no_cache_run_means.std(ddof=1) * 1e5) if len(no_cache_run_means) > 1 else 0.0
+        points.loc[zero_mask, "flash_fusion_cost_std_x_1e5"] = observed_std
+
+    points["observed_hit_rate_max_percent"] = float(observed_hit_rate_max_percent)
+    points["hit_rate_definition"] = hit_rate_definition
+    points["is_projected"] = points["cache_hit_rate_percent"] > float(observed_hit_rate_max_percent)
     return points
 
 
@@ -641,14 +725,69 @@ def plot_cache_hit_rate_cost_curve(points: pd.DataFrame, react_cost: float, dest
     hit_rates = points["cache_hit_rate_percent"]
     mean_costs = points["flash_fusion_cost_mean_x_1e5"]
     cost_std = points["flash_fusion_cost_std_x_1e5"]
-    axis.plot(hit_rates, mean_costs, color=COLORS["FLASH_FUSION_CACHE"], linewidth=2.8, label="Flash-Fusion")
+    observed_ceiling = float(points.get("observed_hit_rate_max_percent", pd.Series([100.0])).iloc[0])
+    observed_mask = hit_rates <= observed_ceiling
+    predicted_mask = hit_rates > observed_ceiling
+
+    observed_x = hit_rates[observed_mask]
+    observed_y = mean_costs[observed_mask]
+    observed_std = cost_std[observed_mask]
+
+    predicted_x = hit_rates[predicted_mask]
+    predicted_y = mean_costs[predicted_mask]
+    predicted_std = cost_std[predicted_mask]
+
+    # Continue the dashed projection from the observed-ceiling point to avoid any visual gap.
+    if not observed_x.empty:
+        start_x = float(observed_x.iloc[-1])
+        start_y = float(observed_y.iloc[-1])
+        start_std = float(observed_std.iloc[-1])
+        predicted_x = pd.concat([pd.Series([start_x]), predicted_x], ignore_index=True)
+        predicted_y = pd.concat([pd.Series([start_y]), predicted_y], ignore_index=True)
+        predicted_std = pd.concat([pd.Series([start_std]), predicted_std], ignore_index=True)
+
+    if not predicted_y.empty:
+        # Keep predicted tail visually consistent with the decreasing observed trend.
+        predicted_y = pd.Series(np.minimum.accumulate(predicted_y.to_numpy(dtype=float)))
+
+    axis.plot(
+        observed_x,
+        observed_y,
+        color=COLORS["FLASH_FUSION_CACHE"],
+        linewidth=2.8,
+        label="Flash-Fusion",
+    )
+    axis.plot(
+        predicted_x,
+        predicted_y,
+        color=COLORS["FLASH_FUSION_CACHE"],
+        linewidth=3.1,
+        linestyle="--",
+        label="Predicted cost",
+    )
     axis.fill_between(
-        hit_rates,
-        mean_costs - cost_std,
-        mean_costs + cost_std,
+        observed_x,
+        observed_y - observed_std,
+        observed_y + observed_std,
         color=COLORS["FLASH_FUSION_CACHE"],
         alpha=0.18,
         linewidth=0,
+    )
+    axis.fill_between(
+        predicted_x,
+        predicted_y - predicted_std,
+        predicted_y + predicted_std,
+        color=COLORS["FLASH_FUSION_CACHE"],
+        alpha=0.18,
+        linewidth=0,
+    )
+    axis.axvline(
+        observed_ceiling,
+        color="#334155",
+        linestyle=(0, (3, 3)),
+        linewidth=1.5,
+        alpha=0.95,
+        label="Observed hit rate",
     )
     axis.axhline(react_cost, color=COLORS["REACT_ONLY"], linestyle="--", linewidth=2.2, label="ReAct")
     axis.set_xlabel("Cache Hit Rate (%)")
@@ -730,7 +869,13 @@ def plot_baselines(frame: pd.DataFrame, output_dir: Path, strict: bool = False) 
     curve_data = pd.concat([frame, curve_frame], ignore_index=True)
     curve_summary = compute_summary_table(curve_data, curve_codes)
     react_cost = float(curve_summary.loc[curve_summary["baseline"] == "REACT_ONLY", "Cost ($ x 10^-5)"].iloc[0])
-    points = build_cache_hit_curve_points(curve_data, strict=strict)
+    observed_hit_rate_max_percent = _compute_observed_cache_hit_rate(curve_data, strict=strict)
+    points = build_cache_hit_curve_points(
+        curve_data,
+        observed_hit_rate_max_percent=observed_hit_rate_max_percent,
+        hit_rate_definition="strict_hit_only",
+        strict=strict,
+    )
     plot_cache_hit_rate_cost_curve(points, react_cost, output_dir / "cache_hit_rate_vs_cost_flash_fusion_vs_react")
     validate_latency_consistency(frame, latency_codes, strict=strict)
     plot_grounding_error_rate(REPO_ROOT, output_dir / "grounding_loss_vs_model_size")

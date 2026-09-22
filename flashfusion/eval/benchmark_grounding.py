@@ -5,13 +5,31 @@ benchmark_grounding.py
 
 Benchmark cache-grounding stability in FLASH_FUSION_CACHE across light models.
 
-End-to-end run command example (single dataset):
+PLAN (grounding_loss_vs_model_size expansion):
+1. Densify the 3-7B range and drop the noisy qwen-2.5-7b-instruct point:
+   swap qwen/qwen-2.5-7b-instruct -> qwen/qwen3-4b, qwen/qwen3-8b.
+   Add google/gemma-3-4b-it, meta-llama/llama-3.1-8b-instruct, and
+   microsoft/phi-4 to bring the model count to 10; all three ids were
+   verified live against https://openrouter.ai/api/v1/models on 2026-09-22
+   (mistralai/mistral-7b-instruct and its v0.3/:free variants 404 and were
+   excluded). Every id's params_b falls within the existing MODEL_SIZE_META
+   1-14B range.
+2. Broaden scope from ids 1-8 (direct, intermediate) to the full ids 1-20
+   (direct, intermediate, out_of_scope, predictive, extra_hard) so every
+   query id is exercised across v1-v3 for bus, wisdm, and mit_ecg.
+3. Re-run the CLI commands below for all three datasets, then regenerate
+   MODEL_SIZE_META entries, flashfusion/config.py pricing for the new
+   models, and the GROUNDING_MODELS tuple in flashfusion/viz/primary_visualizations.py.
+4. Regenerate results/primary_visualizations/baselines/grounding_loss_vs_model_size.{csv,png,pdf}
+   via `python -m flashfusion.viz.primary_visualizations`.
+
+End-to-end run command example (single dataset, full ids 1-20 x v1-v3):
 
 BUS:
 python -m flashfusion.eval.benchmark_grounding \
     --dataset bus \
     --model ibm-granite/granite-4.2-8b \
-    --models meta-llama/llama-3.2-1b-instruct,meta-llama/llama-3.2-3b-instruct,qwen/qwen-2.5-7b-instruct,ibm-granite/granite-4.2-8b,google/gemma-3-12b-it,qwen/qwen3-14b \
+    --models meta-llama/llama-3.2-1b-instruct,meta-llama/llama-3.2-3b-instruct,google/gemma-3-4b-it,qwen/qwen3-4b,qwen/qwen3-8b,meta-llama/llama-3.1-8b-instruct,ibm-granite/granite-4.2-8b,google/gemma-3-12b-it,microsoft/phi-4,qwen/qwen3-14b \
     --runs 3 \
     --query-versions v1,v2,v3 \
     --output-dir flashfusion/results/ff_hybrid_cache/grounding_benchmark/bus \
@@ -26,7 +44,7 @@ WISDM:
 python -m flashfusion.eval.benchmark_grounding \
     --dataset wisdm \
     --model ibm-granite/granite-4.2-8b \
-    --models meta-llama/llama-3.2-1b-instruct,meta-llama/llama-3.2-3b-instruct,qwen/qwen-2.5-7b-instruct,ibm-granite/granite-4.2-8b,google/gemma-3-12b-it,qwen/qwen3-14b \
+    --models meta-llama/llama-3.2-1b-instruct,meta-llama/llama-3.2-3b-instruct,google/gemma-3-4b-it,qwen/qwen3-4b,qwen/qwen3-8b,meta-llama/llama-3.1-8b-instruct,ibm-granite/granite-4.2-8b,google/gemma-3-12b-it,microsoft/phi-4,qwen/qwen3-14b \
     --runs 3 \
     --query-versions v1,v2,v3 \
     --output-dir flashfusion/results/ff_hybrid_cache/grounding_benchmark/wisdm \
@@ -41,7 +59,7 @@ ECG:
 python -m flashfusion.eval.benchmark_grounding \
     --dataset mit_ecg \
     --model ibm-granite/granite-4.2-8b \
-    --models meta-llama/llama-3.2-1b-instruct,meta-llama/llama-3.2-3b-instruct,qwen/qwen-2.5-7b-instruct,ibm-granite/granite-4.2-8b,google/gemma-3-12b-it \
+    --models meta-llama/llama-3.2-1b-instruct,meta-llama/llama-3.2-3b-instruct,google/gemma-3-4b-it,qwen/qwen3-4b,qwen/qwen3-8b,meta-llama/llama-3.1-8b-instruct,ibm-granite/granite-4.2-8b,google/gemma-3-12b-it,microsoft/phi-4,qwen/qwen3-14b \
     --runs 3 \
     --query-versions v1,v2,v3 \
     --output-dir flashfusion/results/ff_hybrid_cache/grounding_benchmark/mit_ecg \
@@ -83,23 +101,32 @@ from flashfusion.pipeline.runner import BaselineRunner, LLMClient, RunResult, _i
 DEFAULT_STAGE12_MODELS = [
     "meta-llama/llama-3.2-1b-instruct",
     "meta-llama/llama-3.2-3b-instruct",
-    "qwen/qwen-2.5-7b-instruct",
+    "google/gemma-3-4b-it",
+    "qwen/qwen3-4b",
+    "qwen/qwen3-8b",
+    "meta-llama/llama-3.1-8b-instruct",
     "ibm-granite/granite-4.2-8b",
     "google/gemma-3-12b-it",
+    "microsoft/phi-4",
     "qwen/qwen3-14b",
 ]
 
 MODEL_SIZE_META = {
     "meta-llama/llama-3.2-1b-instruct": {"label": "1b", "params_b": 1.0},
     "meta-llama/llama-3.2-3b-instruct": {"label": "3b", "params_b": 3.0},
-    "qwen/qwen-2.5-7b-instruct": {"label": "7b", "params_b": 7.0},
+    "google/gemma-3-4b-it": {"label": "4b", "params_b": 4.0},
+    "qwen/qwen3-4b": {"label": "4b", "params_b": 4.0},
+    "qwen/qwen3-8b": {"label": "8b", "params_b": 8.0},
+    "meta-llama/llama-3.1-8b-instruct": {"label": "8b", "params_b": 8.0},
     "ibm-granite/granite-4.2-8b": {"label": "8b", "params_b": 8.0},
     "google/gemma-3-12b-it": {"label": "12b", "params_b": 12.0},
+    "microsoft/phi-4": {"label": "14b", "params_b": 14.0},
     "qwen/qwen3-14b": {"label": "14b", "params_b": 14.0},
 }
 
 SUPPORTED_QUERY_VERSIONS = ("v1", "v2", "v3")
-INSCOPE_COMPLEXITIES = {"direct", "intermediate"}
+# Covers query ids 1-20 (direct, intermediate, out_of_scope, predictive, extra_hard).
+INSCOPE_COMPLEXITIES = {"direct", "intermediate", "out_of_scope", "predictive", "extra_hard"}
 FALLBACK_STAGE = "cache_miss_or_validation_failure"
 ALL_DATASETS = ("bus", "wisdm", "mit_ecg")
 GROUNDING_ATTEMPT_TIMEOUT_S = 15.0
