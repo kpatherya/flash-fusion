@@ -205,7 +205,7 @@
       "query_text": "What is the average accel_mean across all recorded samples?",
       "query_text_source": "raw_results",
       "reasons": [],
-      "schema_fingerprint": "1856b7e244a7940d",
+      "schema_fingerprint": "1d29adee7efb7ed4",
       "semantic_signature": {
         "admissibility": "in_scope",
         "aggregate": "mean",
@@ -458,6 +458,36 @@
       "query_text": "What is the median acceleration magnitude for user 20 with activity label Upstairs?",
       "query_text_source": "raw_results",
       "reasons": [],
+      "schema_fingerprint": "7ad69ccf7f729a4d",
+      "semantic_signature": {
+        "admissibility": "in_scope",
+        "aggregate": "median",
+        "confidence": 0.85,
+        "fields": [],
+        "filter_values": {
+          "activity": "upstairs",
+          "subject_id": 20
+        },
+        "intent_flags": {
+          "correlation": false,
+          "derived_magnitude": true,
+          "difference": false,
+          "group_by": false,
+          "last_event": false,
+          "predictive": false,
+          "rank": false,
+          "time_bin": false
+        },
+        "operator_skeleton_hint": null,
+        "output_shape": "scalar",
+        "predicate_ops": {},
+        "predictive": {
+          "holdout_row": null,
+          "model": null,
+          "target_column": "activity_label",
+          "train_fraction": null
+        }
+      },
       "status": "reusable"
     },
     {
@@ -520,7 +550,7 @@
       "query_text": "Is the northern half of the route (latitude above median) rougher than the southern half, based on average acceleration variance?",
       "query_text_source": "raw_results",
       "reasons": [],
-      "schema_fingerprint": "1856b7e244a7940d",
+      "schema_fingerprint": "1d29adee7efb7ed4",
       "semantic_signature": {
         "admissibility": "in_scope",
         "aggregate": "median",
@@ -1052,7 +1082,7 @@
       "query_text": "How many users have the activity label walking?",
       "query_text_source": "raw_results",
       "reasons": [],
-      "schema_fingerprint": "b927f02262d7702e",
+      "schema_fingerprint": "7ad69ccf7f729a4d",
       "semantic_signature": {
         "admissibility": "in_scope",
         "aggregate": "count",
@@ -1257,7 +1287,7 @@
       "query_text": "How many data samples show an accel_variance strictly greater than 0.20?",
       "query_text_source": "raw_results",
       "reasons": [],
-      "schema_fingerprint": "1856b7e244a7940d",
+      "schema_fingerprint": "1d29adee7efb7ed4",
       "semantic_signature": {
         "admissibility": "in_scope",
         "aggregate": "count",
@@ -1976,7 +2006,7 @@
       "query_text": "Which user has the highest total number of recorded data samples?",
       "query_text_source": "raw_results",
       "reasons": [],
-      "schema_fingerprint": "b927f02262d7702e",
+      "schema_fingerprint": "7ad69ccf7f729a4d",
       "semantic_signature": {
         "admissibility": "in_scope",
         "aggregate": "max",
@@ -2045,7 +2075,7 @@
       "query_text": "Calculate the average overall magnitude of peak acceleration using the 99th percentiles of the X, Y, and Z axes.",
       "query_text_source": "raw_results",
       "reasons": [],
-      "schema_fingerprint": "1856b7e244a7940d",
+      "schema_fingerprint": "1d29adee7efb7ed4",
       "semantic_signature": {
         "admissibility": "in_scope",
         "aggregate": "max",
@@ -2115,7 +2145,7 @@
       "query_text": "What is the maximum recorded x-acceleration for user 15?",
       "query_text_source": "raw_results",
       "reasons": [],
-      "schema_fingerprint": "b927f02262d7702e",
+      "schema_fingerprint": "7ad69ccf7f729a4d",
       "semantic_signature": {
         "admissibility": "in_scope",
         "aggregate": "max",
@@ -2188,7 +2218,7 @@
       "query_text": "List all timestamps where accel_stats_z_p99 reaches its maximum value across the dataset.",
       "query_text_source": "raw_results",
       "reasons": [],
-      "schema_fingerprint": "1856b7e244a7940d",
+      "schema_fingerprint": "1d29adee7efb7ed4",
       "semantic_signature": {
         "admissibility": "in_scope",
         "aggregate": "max",
@@ -2269,7 +2299,7 @@
       "query_text": "What is the average y-acceleration of user 5 with activity label Sitting?",
       "query_text_source": "raw_results",
       "reasons": [],
-      "schema_fingerprint": "b927f02262d7702e",
+      "schema_fingerprint": "7ad69ccf7f729a4d",
       "semantic_signature": {
         "admissibility": "in_scope",
         "aggregate": "mean",
@@ -2529,7 +2559,7 @@
       "query_text": "Which location (latitude, longitude) recorded the largest difference between the 99th and 1st percentile of the z-axis acceleration?",
       "query_text_source": "raw_results",
       "reasons": [],
-      "schema_fingerprint": "1856b7e244a7940d",
+      "schema_fingerprint": "1d29adee7efb7ed4",
       "semantic_signature": {
         "admissibility": "in_scope",
         "aggregate": "max",
@@ -2569,7 +2599,7 @@
         "RANK_GROUPS"
       ],
       "query_text": "If we group the data into 1-minute intervals, which time window has the highest mean instability_score?",
-      "schema_fingerprint": "1856b7e244a7940d",
+      "schema_fingerprint": "1d29adee7efb7ed4",
       "semantic_signature": {
         "admissibility": "in_scope",
         "aggregate": "max",
@@ -2608,7 +2638,7 @@
         "RANK_GROUPS"
       ],
       "query_text": "If we group the data into 1-minute intervals, Tell me which time window has the highest mean instability_score?",
-      "schema_fingerprint": "1856b7e244a7940d",
+      "schema_fingerprint": "1d29adee7efb7ed4",
       "semantic_signature": {
         "admissibility": "in_scope",
         "aggregate": "max",
@@ -2646,7 +2676,7 @@
         "SELECT_COLUMN"
       ],
       "query_text": "List all timestamps where accel_stats_z_p99 reaches its highest value across the dataset.",
-      "schema_fingerprint": "1856b7e244a7940d",
+      "schema_fingerprint": "1d29adee7efb7ed4",
       "semantic_signature": {
         "admissibility": "in_scope",
         "aggregate": "max",
@@ -2688,7 +2718,7 @@
         "COMPARE_PARTITIONS"
       ],
       "query_text": "Compare the overall acceleration magnitude between dynamic (walking,jogging,upstairs,downstairs) and resting (sitting,standing) states.",
-      "schema_fingerprint": "b927f02262d7702e",
+      "schema_fingerprint": "7ad69ccf7f729a4d",
       "semantic_signature": {
         "admissibility": "unknown",
         "aggregate": null,
@@ -2771,7 +2801,7 @@
         "RANK_ROWS"
       ],
       "query_text": "Identify the user whose total recorded duration of resting states (sitting,standing) exceeds their duration of dynamic movements (walking,jogging,upstairs,downstairs) by the largest margin.",
-      "schema_fingerprint": "b927f02262d7702e",
+      "schema_fingerprint": "7ad69ccf7f729a4d",
       "semantic_signature": {
         "admissibility": "in_scope",
         "aggregate": "max",
@@ -3165,7 +3195,7 @@
         "COMPARE_PARTITIONS"
       ],
       "query_text": "Is the northern half of the route (latitude above median) rougher than the southern half, Using average acceleration variance?",
-      "schema_fingerprint": "1856b7e244a7940d",
+      "schema_fingerprint": "1d29adee7efb7ed4",
       "semantic_signature": {
         "admissibility": "in_scope",
         "aggregate": "median",
@@ -3351,10 +3381,11 @@
     {
       "dataset": "bus",
       "operator_skeleton": [
-        "FILTER_EQ_AGGREGATE"
+        "FILTER_EQ_AGGREGATE",
+        "SELECT_COLUMN"
       ],
       "query_text": "List every timestamps where accel_stats_z_p99 reaches its maximum value across the dataset.",
-      "schema_fingerprint": "1856b7e244a7940d",
+      "schema_fingerprint": "1d29adee7efb7ed4",
       "semantic_signature": {
         "admissibility": "in_scope",
         "aggregate": "max",
@@ -3619,7 +3650,7 @@
         "AGGREGATE_COLUMN"
       ],
       "query_text": "Could you report the maximum accel_variance observed in this dataset?",
-      "schema_fingerprint": "1856b7e244a7940d",
+      "schema_fingerprint": "1d29adee7efb7ed4",
       "semantic_signature": {
         "admissibility": "in_scope",
         "aggregate": "max",
@@ -3656,7 +3687,7 @@
         "AGGREGATE_COLUMN"
       ],
       "query_text": "Could you report the average accel_mean across all observed samples?",
-      "schema_fingerprint": "1856b7e244a7940d",
+      "schema_fingerprint": "1d29adee7efb7ed4",
       "semantic_signature": {
         "admissibility": "in_scope",
         "aggregate": "mean",
@@ -3694,7 +3725,7 @@
         "COUNT_ROWS"
       ],
       "query_text": "What number of data samples show an accel_variance strictly greater than 0.20?",
-      "schema_fingerprint": "1856b7e244a7940d",
+      "schema_fingerprint": "1d29adee7efb7ed4",
       "semantic_signature": {
         "admissibility": "in_scope",
         "aggregate": "count",
@@ -3845,7 +3876,7 @@
         "COUNT_ROWS"
       ],
       "query_text": "How much of a count of data samples show an accel_variance strictly greater than 0.20?",
-      "schema_fingerprint": "1856b7e244a7940d",
+      "schema_fingerprint": "1d29adee7efb7ed4",
       "semantic_signature": {
         "admissibility": "in_scope",
         "aggregate": "count",
@@ -5047,7 +5078,7 @@
       "query_text": "Filter the route to rows labeled aggressive, group them into 5-minute timestamp windows, and return the window with the highest mean instability_score.",
       "query_text_source": "query_def_seed",
       "reasons": [],
-      "schema_fingerprint": "1856b7e244a7940d",
+      "schema_fingerprint": "1d29adee7efb7ed4",
       "semantic_signature": {
         "admissibility": "in_scope",
         "aggregate": "max",
@@ -5130,7 +5161,6 @@
       "operator_contract_hash": "2be2d0b165f22ee01479bee3042b9568475c1f3b99a8aa028e2d2f5b4c5d0240",
       "operator_skeleton": [
         "DERIVE_VECTOR_MAGNITUDE",
-        "AGGREGATE_COLUMN",
         "SPLIT_BY_THRESHOLD",
         "SPLIT_BY_THRESHOLD",
         "AGGREGATE_PARTITIONS",
@@ -5143,7 +5173,7 @@
       "query_text": "For each recorded latitude reading, derive peak acceleration magnitude from accel_stats_x_p99, accel_stats_y_p99, and accel_stats_z_p99. Report the absolute difference between the mean peak magnitude north versus south of the median latitude.",
       "query_text_source": "query_def_seed",
       "reasons": [],
-      "schema_fingerprint": "1856b7e244a7940d",
+      "schema_fingerprint": "1d29adee7efb7ed4",
       "semantic_signature": {
         "admissibility": "in_scope",
         "aggregate": "median",
@@ -5251,7 +5281,7 @@
       "query_text": "For each 5-minute timestamp window, derive the vertical shock range as accel_stats_z_p99 minus accel_stats_z_p1 and compute its mean separately for aggressive and calm behavior labels. Report the overall aggressive-minus-calm difference across the route.",
       "query_text_source": "query_def_seed",
       "reasons": [],
-      "schema_fingerprint": "1856b7e244a7940d",
+      "schema_fingerprint": "1d29adee7efb7ed4",
       "semantic_signature": {
         "admissibility": "in_scope",
         "aggregate": "mean",
@@ -5352,7 +5382,7 @@
       "query_text": "Derive the vertical shock range as accel_stats_z_p99 minus accel_stats_z_p1. Filter to aggressive behavior, group rows into 5-minute timestamp windows, and return the window with the highest mean vertical shock range.",
       "query_text_source": "query_def_seed",
       "reasons": [],
-      "schema_fingerprint": "1856b7e244a7940d",
+      "schema_fingerprint": "1d29adee7efb7ed4",
       "semantic_signature": {
         "admissibility": "in_scope",
         "aggregate": "max",
@@ -6206,6 +6236,158 @@
           "derived_magnitude": true,
           "difference": false,
           "group_by": true,
+          "last_event": false,
+          "predictive": false,
+          "rank": false,
+          "time_bin": false
+        },
+        "operator_skeleton_hint": null,
+        "output_shape": "scalar",
+        "predicate_ops": {},
+        "predictive": {
+          "holdout_row": null,
+          "model": null,
+          "target_column": null,
+          "train_fraction": null
+        }
+      },
+      "status": "reusable"
+    },
+    {
+      "dataset": "bus",
+      "operator_skeleton": [
+        "DERIVE_VECTOR_MAGNITUDE",
+        "AGGREGATE_COLUMN"
+      ],
+      "query_text": "Compute the average overall magnitude of peak acceleration using the 99th percentiles of the X, Y, and Z axes.",
+      "schema_fingerprint": "1d29adee7efb7ed4",
+      "semantic_signature": {
+        "admissibility": "in_scope",
+        "aggregate": "max",
+        "confidence": 0.85,
+        "fields": [],
+        "filter_values": {},
+        "intent_flags": {
+          "correlation": false,
+          "derived_magnitude": true,
+          "difference": false,
+          "group_by": false,
+          "last_event": false,
+          "predictive": false,
+          "rank": false,
+          "time_bin": false
+        },
+        "operator_skeleton_hint": null,
+        "output_shape": "scalar",
+        "predicate_ops": {},
+        "predictive": {
+          "holdout_row": null,
+          "model": null,
+          "target_column": null,
+          "train_fraction": null
+        }
+      },
+      "status": "reusable"
+    },
+    {
+      "dataset": "bus",
+      "operator_skeleton": [
+        "PREDICTIVE_PIPELINE"
+      ],
+      "query_text": "Order all bus rows by timestamp in ascending order. Use the first 80% of rows for training and the final 20% as the chronological holdout. Train a logistic regression model using the acceleration features. Estimate the label in the behavior column for the first row in the holdout set.",
+      "schema_fingerprint": "1d29adee7efb7ed4",
+      "semantic_signature": {
+        "admissibility": "in_scope",
+        "aggregate": null,
+        "confidence": 0.85,
+        "fields": [
+          "behavior",
+          "timestamp"
+        ],
+        "filter_values": {},
+        "intent_flags": {
+          "correlation": false,
+          "derived_magnitude": false,
+          "difference": false,
+          "group_by": true,
+          "last_event": false,
+          "predictive": true,
+          "rank": false,
+          "time_bin": false
+        },
+        "operator_skeleton_hint": [
+          "PREDICTIVE_PIPELINE"
+        ],
+        "output_shape": "predictive",
+        "predicate_ops": {},
+        "predictive": {
+          "holdout_row": "first",
+          "model": "logistic_regression",
+          "target_column": "behavior",
+          "train_fraction": 0.8
+        }
+      },
+      "status": "reusable"
+    },
+    {
+      "dataset": "bus",
+      "operator_skeleton": [
+        "PREDICTIVE_PIPELINE"
+      ],
+      "query_text": "Order all bus rows by timestamp in ascending order. Use the first 80% of rows for training and the final 20% as the chronological holdout. Train a random forest model using the acceleration features. Estimate the label in the behavior column for the first row in the holdout set.",
+      "schema_fingerprint": "1d29adee7efb7ed4",
+      "semantic_signature": {
+        "admissibility": "in_scope",
+        "aggregate": null,
+        "confidence": 0.85,
+        "fields": [
+          "behavior",
+          "timestamp"
+        ],
+        "filter_values": {},
+        "intent_flags": {
+          "correlation": false,
+          "derived_magnitude": false,
+          "difference": false,
+          "group_by": true,
+          "last_event": false,
+          "predictive": true,
+          "rank": false,
+          "time_bin": false
+        },
+        "operator_skeleton_hint": [
+          "PREDICTIVE_PIPELINE"
+        ],
+        "output_shape": "predictive",
+        "predicate_ops": {},
+        "predictive": {
+          "holdout_row": "first",
+          "model": "random_forest",
+          "target_column": "behavior",
+          "train_fraction": 0.8
+        }
+      },
+      "status": "reusable"
+    },
+    {
+      "dataset": "bus",
+      "operator_skeleton": [
+        "DERIVE_VECTOR_MAGNITUDE",
+        "AGGREGATE_COLUMN"
+      ],
+      "query_text": "Work out the average overall magnitude of peak acceleration using the 99th percentiles of the X, Y, and Z axes.",
+      "schema_fingerprint": "1d29adee7efb7ed4",
+      "semantic_signature": {
+        "admissibility": "in_scope",
+        "aggregate": "max",
+        "confidence": 0.85,
+        "fields": [],
+        "filter_values": {},
+        "intent_flags": {
+          "correlation": false,
+          "derived_magnitude": true,
+          "difference": false,
+          "group_by": false,
           "last_event": false,
           "predictive": false,
           "rank": false,

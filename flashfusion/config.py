@@ -34,6 +34,22 @@ MODEL_RATE_PER_1M_TOKENS: dict[str, dict[str, float]] = {
         "input": 0.05,
         "output": 0.08,
     },
+    "google/gemma-3-4b-it": {
+        "input": 0.05,
+        "output": 0.10,
+    },
+    "mistralai/ministral-8b-2512": {
+        "input": 0.15,
+        "output": 0.15,
+    },
+    "qwen/qwen3-8b": {
+        "input": 0.117,
+        "output": 0.455,
+    },
+    "microsoft/phi-4": {
+        "input": 0.07,
+        "output": 0.14,
+    },
     "qwen/qwen3-30b-a3b": {
         "input": 0.12,
         "output": 0.50,

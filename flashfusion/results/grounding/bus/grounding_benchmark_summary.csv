@@ -1,0 +1,2 @@
+model,size_label,params_b,n_queries_total,n_failures,grounding_loss_mean_pct,grounding_loss_std_pct,grounding_loss_ci95_pct
+meta-llama/llama-3.2-3b-instruct,3b,3.0,24,17,70.83333333333333,7.216878364870322,8.166666666666666

@@ -1,0 +1,61 @@
+{
+  "benchmark": {
+    "name": "ff_cache_grounding_loss_vs_model_size",
+    "timestamp_utc": "2026-09-23T01:01:35.626506+00:00",
+    "fallback_stage": "cache_miss_or_validation_failure",
+    "runs": 3
+  },
+  "model_order": [
+    "meta-llama/llama-3.2-3b-instruct"
+  ],
+  "x_axis_size_labels": [
+    "3b"
+  ],
+  "model_label_map": {
+    "3b": "meta-llama/llama-3.2-3b-instruct"
+  },
+  "per_model": {
+    "meta-llama/llama-3.2-3b-instruct": {
+      "size_label": "3b",
+      "params_b": 3.0,
+      "n_queries_total": 24,
+      "n_failures": 17,
+      "grounding_loss_mean_pct": 70.83333333333333,
+      "grounding_loss_std_pct": 7.216878364870322,
+      "grounding_loss_ci95_pct": 8.166666666666666,
+      "per_run_loss_pct": [
+        75.0,
+        75.0,
+        62.5
+      ],
+      "per_run_counts": {
+        "1": {
+          "n_queries": 8,
+          "n_failures": 6
+        },
+        "2": {
+          "n_queries": 8,
+          "n_failures": 6
+        },
+        "3": {
+          "n_queries": 8,
+          "n_failures": 5
+        }
+      },
+      "failure_reason_breakdown": {
+        "cache: Grounding step count mismatch: expected 2 for skeleton ['FILTER_EQ_AGGREGATE', 'SELECT_COLUMN'], got 1": 2,
+        "cache: Grounding step count mismatch: expected 2 for skeleton ['FILTER_COMPARE', 'COUNT_ROWS'], got 1": 1,
+        "cache: light model JSON repair failed: Expecting ':' delimiter": 4,
+        "cache: Grounding step count mismatch: expected 2 for skeleton ['DERIVE_VECTOR_MAGNITUDE', 'AGGREGATE_COLUMN'], got 1": 2,
+        "cache: Grounding step count mismatch: expected 3 for skeleton ['DERIVE_BIN', 'GROUP_AGGREGATE', 'RANK_GROUPS'], got 2": 1,
+        "cache: light model JSON repair failed: Extra data": 4,
+        "cache: light model JSON repair failed: Expecting ',' delimiter": 2,
+        "cache: semantic: semantic_ambiguous_candidates": 1
+      },
+      "cache_plan_source_breakdown": {
+        "exact_query_cache_light_grounded": 7,
+        "llm": 17
+      }
+    }
+  }
+}

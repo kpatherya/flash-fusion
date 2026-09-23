@@ -7,16 +7,17 @@ Benchmark cache-grounding stability in FLASH_FUSION_CACHE across light models.
 
 PLAN (grounding_loss_vs_model_size expansion):
 1. Densify the 3-7B range and drop the noisy qwen-2.5-7b-instruct point:
-   swap qwen/qwen-2.5-7b-instruct -> qwen/qwen3-4b, qwen/qwen3-8b.
+   swap qwen/qwen-2.5-7b-instruct -> mistralai/ministral-8b-2512, qwen/qwen3-8b.
    Add google/gemma-3-4b-it, meta-llama/llama-3.1-8b-instruct, and
    microsoft/phi-4 to bring the model count to 10; all three ids were
    verified live against https://openrouter.ai/api/v1/models on 2026-09-22
    (mistralai/mistral-7b-instruct and its v0.3/:free variants 404 and were
    excluded). Every id's params_b falls within the existing MODEL_SIZE_META
    1-14B range.
-2. Broaden scope from ids 1-8 (direct, intermediate) to the full ids 1-20
-   (direct, intermediate, out_of_scope, predictive, extra_hard) so every
-   query id is exercised across v1-v3 for bus, wisdm, and mit_ecg.
+2. Broaden scope from ids 1-8 (direct, intermediate) to every query with a
+    typed operator skeleton: ids 1-8 and 13-20 (direct, intermediate,
+    predictive, extra_hard). Out-of-scope ids 9-12 are evaluated separately as
+    rejection cases because they intentionally have no operator skeleton.
 3. Re-run the CLI commands below for all three datasets, then regenerate
    MODEL_SIZE_META entries, flashfusion/config.py pricing for the new
    models, and the GROUNDING_MODELS tuple in flashfusion/viz/primary_visualizations.py.
@@ -29,7 +30,7 @@ BUS:
 python -m flashfusion.eval.benchmark_grounding \
     --dataset bus \
     --model ibm-granite/granite-4.2-8b \
-    --models meta-llama/llama-3.2-1b-instruct,meta-llama/llama-3.2-3b-instruct,google/gemma-3-4b-it,qwen/qwen3-4b,qwen/qwen3-8b,meta-llama/llama-3.1-8b-instruct,ibm-granite/granite-4.2-8b,google/gemma-3-12b-it,microsoft/phi-4,qwen/qwen3-14b \
+    --models meta-llama/llama-3.2-1b-instruct,meta-llama/llama-3.2-3b-instruct,google/gemma-3-4b-it,mistralai/ministral-8b-2512,qwen/qwen3-8b,meta-llama/llama-3.1-8b-instruct,ibm-granite/granite-4.2-8b,google/gemma-3-12b-it,microsoft/phi-4,qwen/qwen3-14b \
     --runs 3 \
     --query-versions v1,v2,v3 \
     --output-dir flashfusion/results/ff_hybrid_cache/grounding_benchmark/bus \
@@ -44,7 +45,7 @@ WISDM:
 python -m flashfusion.eval.benchmark_grounding \
     --dataset wisdm \
     --model ibm-granite/granite-4.2-8b \
-    --models meta-llama/llama-3.2-1b-instruct,meta-llama/llama-3.2-3b-instruct,google/gemma-3-4b-it,qwen/qwen3-4b,qwen/qwen3-8b,meta-llama/llama-3.1-8b-instruct,ibm-granite/granite-4.2-8b,google/gemma-3-12b-it,microsoft/phi-4,qwen/qwen3-14b \
+    --models meta-llama/llama-3.2-1b-instruct,meta-llama/llama-3.2-3b-instruct,google/gemma-3-4b-it,mistralai/ministral-8b-2512,qwen/qwen3-8b,meta-llama/llama-3.1-8b-instruct,ibm-granite/granite-4.2-8b,google/gemma-3-12b-it,microsoft/phi-4,qwen/qwen3-14b \
     --runs 3 \
     --query-versions v1,v2,v3 \
     --output-dir flashfusion/results/ff_hybrid_cache/grounding_benchmark/wisdm \
@@ -59,7 +60,7 @@ ECG:
 python -m flashfusion.eval.benchmark_grounding \
     --dataset mit_ecg \
     --model ibm-granite/granite-4.2-8b \
-    --models meta-llama/llama-3.2-1b-instruct,meta-llama/llama-3.2-3b-instruct,google/gemma-3-4b-it,qwen/qwen3-4b,qwen/qwen3-8b,meta-llama/llama-3.1-8b-instruct,ibm-granite/granite-4.2-8b,google/gemma-3-12b-it,microsoft/phi-4,qwen/qwen3-14b \
+    --models meta-llama/llama-3.2-1b-instruct,meta-llama/llama-3.2-3b-instruct,google/gemma-3-4b-it,mistralai/ministral-8b-2512,qwen/qwen3-8b,meta-llama/llama-3.1-8b-instruct,ibm-granite/granite-4.2-8b,google/gemma-3-12b-it,microsoft/phi-4,qwen/qwen3-14b \
     --runs 3 \
     --query-versions v1,v2,v3 \
     --output-dir flashfusion/results/ff_hybrid_cache/grounding_benchmark/mit_ecg \
@@ -102,7 +103,7 @@ DEFAULT_STAGE12_MODELS = [
     "meta-llama/llama-3.2-1b-instruct",
     "meta-llama/llama-3.2-3b-instruct",
     "google/gemma-3-4b-it",
-    "qwen/qwen3-4b",
+    "mistralai/ministral-8b-2512",
     "qwen/qwen3-8b",
     "meta-llama/llama-3.1-8b-instruct",
     "ibm-granite/granite-4.2-8b",
@@ -115,7 +116,7 @@ MODEL_SIZE_META = {
     "meta-llama/llama-3.2-1b-instruct": {"label": "1b", "params_b": 1.0},
     "meta-llama/llama-3.2-3b-instruct": {"label": "3b", "params_b": 3.0},
     "google/gemma-3-4b-it": {"label": "4b", "params_b": 4.0},
-    "qwen/qwen3-4b": {"label": "4b", "params_b": 4.0},
+    "mistralai/ministral-8b-2512": {"label": "8b", "params_b": 8.0},
     "qwen/qwen3-8b": {"label": "8b", "params_b": 8.0},
     "meta-llama/llama-3.1-8b-instruct": {"label": "8b", "params_b": 8.0},
     "ibm-granite/granite-4.2-8b": {"label": "8b", "params_b": 8.0},
@@ -125,8 +126,9 @@ MODEL_SIZE_META = {
 }
 
 SUPPORTED_QUERY_VERSIONS = ("v1", "v2", "v3")
-# Covers query ids 1-20 (direct, intermediate, out_of_scope, predictive, extra_hard).
-INSCOPE_COMPLEXITIES = {"direct", "intermediate", "out_of_scope", "predictive", "extra_hard"}
+# Typed-plan grounding applies only to queries that should produce an operator
+# skeleton. Out-of-scope questions are rejection tests, not plan-grounding tests.
+INSCOPE_COMPLEXITIES = {"direct", "intermediate", "predictive", "extra_hard"}
 FALLBACK_STAGE = "cache_miss_or_validation_failure"
 ALL_DATASETS = ("bus", "wisdm", "mit_ecg")
 GROUNDING_ATTEMPT_TIMEOUT_S = 15.0
@@ -154,11 +156,16 @@ def _get_queries(dataset: str, version: str) -> list[dict[str, Any]]:
     raise ValueError(f"Unsupported query version: {version!r}")
 
 
-def _inscope_query_defs(dataset: str, version: str) -> dict[int, dict[str, Any]]:
+def _inscope_query_defs(
+    dataset: str,
+    version: str,
+    query_ids: set[int] | None = None,
+) -> dict[int, dict[str, Any]]:
     defs = _get_queries(dataset, version)
     return {
         int(q["id"]): q
         for q in defs
+        if query_ids is None or int(q["id"]) in query_ids
         if str(q.get("complexity", "")).strip().lower() in INSCOPE_COMPLEXITIES
     }
 
@@ -257,6 +264,9 @@ def _record_from_result(
         "cache_validation_latency_s": float(stage_latency.get("cache_validation", 0.0) or 0.0),
         "typed_exec_latency_s": float(stage_latency.get("typed_exec", 0.0) or 0.0),
         "total_latency_s": float(result.latency_s or 0.0),
+        "input_tokens": int(result.input_tokens or 0),
+        "output_tokens": int(result.output_tokens or 0),
+        "cost_usd": float(result.cost_usd or 0.0),
         "run_source": source,
         "cache_grounding_failure": cache_grounding_failure or dict(result.cache_grounding_failure or {}),
         "typed_plan_signature": typed_plan_signature,
@@ -417,6 +427,34 @@ def _load_typed_plan_ground_truth(path: Path) -> dict[str, Any]:
     return payload
 
 
+def _validate_typed_plan_ground_truth_coverage(
+    gt: dict[str, Any],
+    *,
+    datasets: tuple[str, ...],
+    query_versions: list[str],
+    query_ids: set[int],
+) -> None:
+    missing: list[str] = []
+    for dataset in datasets:
+        queries = ((gt.get("datasets") or {}).get(dataset) or {}).get("queries")
+        for query_id in sorted(query_ids):
+            query_payload = queries.get(str(query_id)) if isinstance(queries, dict) else None
+            by_version = query_payload.get("by_version") if isinstance(query_payload, dict) else None
+            for query_version in query_versions:
+                version_payload = by_version.get(query_version) if isinstance(by_version, dict) else None
+                typed_plan = version_payload.get("typed_plan") if isinstance(version_payload, dict) else None
+                signature = version_payload.get("typed_plan_signature") if isinstance(version_payload, dict) else ""
+                if not isinstance(typed_plan, dict) or not str(signature or "").strip():
+                    missing.append(f"{dataset}:{query_id}:{query_version}")
+    if missing:
+        preview = ", ".join(missing[:8])
+        suffix = " ..." if len(missing) > 8 else ""
+        raise SystemExit(
+            "Typed-plan ground truth is incomplete for selected queries: "
+            f"{preview}{suffix} (missing={len(missing)})"
+        )
+
+
 def _lookup_ground_truth_signature(
     gt: dict[str, Any],
     *,
@@ -494,6 +532,7 @@ def _load_existing_granite_rows(
     planner_model: str,
     existing_root: Path,
     runs: int,
+    query_ids: set[int] | None,
 ) -> list[dict[str, Any]]:
     base = existing_root / dataset
     if not base.exists():
@@ -512,7 +551,7 @@ def _load_existing_granite_rows(
         if query_version not in SUPPORTED_QUERY_VERSIONS:
             continue
 
-        inscope = _inscope_query_defs(dataset, query_version)
+        inscope = _inscope_query_defs(dataset, query_version, query_ids)
         for payload in _safe_jsonl_load(raw_path):
             qid = payload.get("query_id")
             if not isinstance(qid, int):
@@ -560,12 +599,13 @@ def _run_live_model(
     query_versions: list[str],
     cache_path: str | None,
     semantic_cache_path: str | None,
+    query_ids: set[int] | None,
 ) -> list[dict[str, Any]]:
     rows: list[dict[str, Any]] = []
 
     for run_index in range(1, runs + 1):
         query_version = query_versions[(run_index - 1) % len(query_versions)]
-        inscope = _inscope_query_defs(dataset, query_version)
+        inscope = _inscope_query_defs(dataset, query_version, query_ids)
         print(
             f"[benchmark_grounding] model={stage12_model} run={run_index}/{runs} "
             f"query_version={query_version} n_in_scope={len(inscope)}",
@@ -665,10 +705,9 @@ def _run_live_model(
 
             if result is None:
                 raise RuntimeError("grounding attempt completed without a result")
-            if result.execution_path == "grounding_attempt_failed":
-                result.input_tokens = client.total_input_tokens() - input_tokens_before
-                result.output_tokens = client.total_output_tokens() - output_tokens_before
-                result.cost_usd = client.total_cost_usd() - cost_usd_before
+            result.input_tokens = client.total_input_tokens() - input_tokens_before
+            result.output_tokens = client.total_output_tokens() - output_tokens_before
+            result.cost_usd = client.total_cost_usd() - cost_usd_before
             print(
                 f"[benchmark_grounding] model={stage12_model} run={run_index}/{runs} "
                 f"query_id={query_id} complete elapsed_s={time.perf_counter() - query_started:.2f}",
@@ -720,16 +759,37 @@ def _summarize(
             by_run[int(row["run_index"])].append(row)
 
         per_run_loss_pct: list[float] = []
-        per_run_counts: dict[str, dict[str, int]] = {}
+        per_run_accuracy_pct: list[float] = []
+        per_run_latency_s: list[float] = []
+        per_run_cost_usd: list[float] = []
+        per_run_input_tokens: list[float] = []
+        per_run_output_tokens: list[float] = []
+        per_run_metrics: dict[str, dict[str, float | int]] = {}
         for run_index in range(1, runs + 1):
             run_rows = by_run.get(run_index, [])
             total = len(run_rows)
             fails = sum(1 for r in run_rows if bool(r["failure_for_grounding_loss"]))
             loss = (100.0 * fails / total) if total else 0.0
+            accuracy = 100.0 - loss
+            latency = _mean([float(r.get("total_latency_s", 0.0) or 0.0) for r in run_rows])
+            cost = _mean([float(r.get("cost_usd", 0.0) or 0.0) for r in run_rows])
+            input_tokens = _mean([float(r.get("input_tokens", 0) or 0) for r in run_rows])
+            output_tokens = _mean([float(r.get("output_tokens", 0) or 0) for r in run_rows])
             per_run_loss_pct.append(loss)
-            per_run_counts[str(run_index)] = {
+            per_run_accuracy_pct.append(accuracy)
+            per_run_latency_s.append(latency)
+            per_run_cost_usd.append(cost)
+            per_run_input_tokens.append(input_tokens)
+            per_run_output_tokens.append(output_tokens)
+            per_run_metrics[str(run_index)] = {
                 "n_queries": total,
                 "n_failures": fails,
+                "grounding_loss_pct": loss,
+                "grounding_accuracy_pct": accuracy,
+                "mean_latency_s": latency,
+                "mean_cost_usd": cost,
+                "mean_input_tokens": input_tokens,
+                "mean_output_tokens": output_tokens,
             }
 
         total = len(model_rows)
@@ -756,7 +816,17 @@ def _summarize(
             "grounding_loss_std_pct": std_loss,
             "grounding_loss_ci95_pct": ci95,
             "per_run_loss_pct": per_run_loss_pct,
-            "per_run_counts": per_run_counts,
+            "grounding_accuracy_mean_pct": _mean(per_run_accuracy_pct),
+            "grounding_accuracy_std_pct": _sample_std(per_run_accuracy_pct),
+            "latency_mean_s": _mean(per_run_latency_s),
+            "latency_std_s": _sample_std(per_run_latency_s),
+            "cost_mean_usd": _mean(per_run_cost_usd),
+            "cost_std_usd": _sample_std(per_run_cost_usd),
+            "input_tokens_mean": _mean(per_run_input_tokens),
+            "input_tokens_std": _sample_std(per_run_input_tokens),
+            "output_tokens_mean": _mean(per_run_output_tokens),
+            "output_tokens_std": _sample_std(per_run_output_tokens),
+            "per_run_metrics": per_run_metrics,
             "failure_reason_breakdown": dict(failure_reasons),
             "cache_plan_source_breakdown": dict(plan_sources),
         }
@@ -796,6 +866,16 @@ def _write_summary_csv(path: Path, summary: dict[str, Any], model_order: list[st
                 "grounding_loss_mean_pct",
                 "grounding_loss_std_pct",
                 "grounding_loss_ci95_pct",
+                "grounding_accuracy_mean_pct",
+                "grounding_accuracy_std_pct",
+                "latency_mean_s",
+                "latency_std_s",
+                "cost_mean_usd",
+                "cost_std_usd",
+                "input_tokens_mean",
+                "input_tokens_std",
+                "output_tokens_mean",
+                "output_tokens_std",
             ],
         )
         writer.writeheader()
@@ -811,6 +891,16 @@ def _write_summary_csv(path: Path, summary: dict[str, Any], model_order: list[st
                     "grounding_loss_mean_pct": row.get("grounding_loss_mean_pct", 0.0),
                     "grounding_loss_std_pct": row.get("grounding_loss_std_pct", 0.0),
                     "grounding_loss_ci95_pct": row.get("grounding_loss_ci95_pct", 0.0),
+                    "grounding_accuracy_mean_pct": row.get("grounding_accuracy_mean_pct", 0.0),
+                    "grounding_accuracy_std_pct": row.get("grounding_accuracy_std_pct", 0.0),
+                    "latency_mean_s": row.get("latency_mean_s", 0.0),
+                    "latency_std_s": row.get("latency_std_s", 0.0),
+                    "cost_mean_usd": row.get("cost_mean_usd", 0.0),
+                    "cost_std_usd": row.get("cost_std_usd", 0.0),
+                    "input_tokens_mean": row.get("input_tokens_mean", 0.0),
+                    "input_tokens_std": row.get("input_tokens_std", 0.0),
+                    "output_tokens_mean": row.get("output_tokens_mean", 0.0),
+                    "output_tokens_std": row.get("output_tokens_std", 0.0),
                 }
             )
 
@@ -855,6 +945,11 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument("--runs", type=int, default=3)
     parser.add_argument("--query-versions", default="v1,v2,v3")
+    parser.add_argument(
+        "--query-ids",
+        default=None,
+        help="Optional comma-separated query ids to benchmark (for example, cached skeleton ids).",
+    )
     parser.add_argument("--cache-path", default=None)
     parser.add_argument("--semantic-cache-path", default=None)
     parser.add_argument("--data", default=None, help="Override dataset path.")
@@ -905,6 +1000,11 @@ def parse_args() -> argparse.Namespace:
         default=None,
         help="Optional typed-plan ground-truth JSON used to enrich/impute signatures in output rows.",
     )
+    parser.add_argument(
+        "--require-typed-plan-ground-truth",
+        action="store_true",
+        help="Fail before model calls unless every selected query/version has a value-filled typed plan.",
+    )
     return parser.parse_args()
 
 
@@ -922,6 +1022,30 @@ def main() -> None:
     stage12_models = _parse_csv_arg(args.models, DEFAULT_STAGE12_MODELS)
     if not stage12_models:
         raise SystemExit("No models supplied in --models")
+
+    query_ids: set[int] | None = None
+    if args.query_ids:
+        try:
+            query_ids = {int(value) for value in _parse_csv_arg(args.query_ids, [])}
+        except ValueError as exc:
+            raise SystemExit(f"Invalid --query-ids value: {args.query_ids!r}") from exc
+        if not query_ids or any(query_id <= 0 for query_id in query_ids):
+            raise SystemExit("--query-ids must contain positive integer ids")
+
+    gt_payload: dict[str, Any] | None = None
+    if args.typed_plan_ground_truth_json:
+        gt_payload = _load_typed_plan_ground_truth(Path(args.typed_plan_ground_truth_json))
+    if args.require_typed_plan_ground_truth:
+        if query_ids is None:
+            raise SystemExit("--require-typed-plan-ground-truth requires --query-ids")
+        if gt_payload is None:
+            raise SystemExit("--require-typed-plan-ground-truth requires --typed-plan-ground-truth-json")
+        _validate_typed_plan_ground_truth_coverage(
+            gt_payload,
+            datasets=(args.dataset,),
+            query_versions=query_versions,
+            query_ids=query_ids,
+        )
 
     model_order = sorted(
         stage12_models,
@@ -946,6 +1070,7 @@ def main() -> None:
             planner_model=args.model,
             existing_root=Path(args.existing_granite_root),
             runs=args.runs,
+            query_ids=query_ids,
         )
         if existing_rows:
             print(
@@ -973,6 +1098,7 @@ def main() -> None:
             query_versions=query_versions,
             cache_path=args.cache_path,
             semantic_cache_path=args.semantic_cache_path,
+            query_ids=query_ids,
         )
         all_rows.extend(rows)
 
@@ -985,10 +1111,7 @@ def main() -> None:
         gt_out.write_text(json.dumps(built_gt, indent=2, ensure_ascii=True), encoding="utf-8")
         print(f"[benchmark_grounding] wrote typed-plan ground truth: {gt_out}", flush=True)
 
-    gt_payload: dict[str, Any] | None = None
-    if args.typed_plan_ground_truth_json:
-        gt_payload = _load_typed_plan_ground_truth(Path(args.typed_plan_ground_truth_json))
-    elif built_gt is not None:
+    if gt_payload is None and built_gt is not None:
         gt_payload = built_gt
 
     if gt_payload is not None:

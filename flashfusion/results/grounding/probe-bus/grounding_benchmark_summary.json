@@ -1,0 +1,44 @@
+{
+  "benchmark": {
+    "name": "ff_cache_grounding_loss_vs_model_size",
+    "timestamp_utc": "2026-09-23T00:48:58.066823+00:00",
+    "fallback_stage": "cache_miss_or_validation_failure",
+    "runs": 1
+  },
+  "model_order": [
+    "qwen/qwen3-4b"
+  ],
+  "x_axis_size_labels": [
+    "4b"
+  ],
+  "model_label_map": {
+    "4b": "qwen/qwen3-4b"
+  },
+  "per_model": {
+    "qwen/qwen3-4b": {
+      "size_label": "4b",
+      "params_b": 4.0,
+      "n_queries_total": 20,
+      "n_failures": 16,
+      "grounding_loss_mean_pct": 80.0,
+      "grounding_loss_std_pct": 0.0,
+      "grounding_loss_ci95_pct": 0.0,
+      "per_run_loss_pct": [
+        80.0
+      ],
+      "per_run_counts": {
+        "1": {
+          "n_queries": 20,
+          "n_failures": 16
+        }
+      },
+      "failure_reason_breakdown": {
+        "cache: NotFoundResponseError: No endpoints found for qwen/qwen3-4b.": 16
+      },
+      "cache_plan_source_breakdown": {
+        "benchmark_failed_grounding_attempt": 16,
+        "exact_query_cache_light_grounded": 4
+      }
+    }
+  }
+}

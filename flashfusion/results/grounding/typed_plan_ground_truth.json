@@ -1,0 +1,3156 @@
+{
+  "name": "ff_cache_typed_plan_ground_truth",
+  "generated_at_utc": "2026-09-01T20:54:04.563838+00:00",
+  "source_root": "flashfusion/results/ff_hybrid_cache/grounding_benchmark",
+  "datasets": {
+    "bus": {
+      "queries": {
+        "1": {
+          "by_version": {
+            "v1": {
+              "typed_plan_signature": "{\"steps\": [{\"aggregate\": \"max\", \"column\": \"accel_variance\", \"op\": \"AGGREGATE_COLUMN\"}], \"version\": \"1\"}",
+              "typed_plan": {
+                "steps": [
+                  {
+                    "aggregate": "max",
+                    "column": "accel_variance",
+                    "op": "AGGREGATE_COLUMN"
+                  }
+                ],
+                "version": "1"
+              },
+              "support_count": 6,
+              "failure_support_count": 1,
+              "candidate_signature_count": 1
+            },
+            "v2": {
+              "typed_plan_signature": "{\"steps\": [{\"aggregate\": \"max\", \"column\": \"accel_variance\", \"op\": \"AGGREGATE_COLUMN\"}], \"version\": \"1\"}",
+              "typed_plan": {
+                "steps": [
+                  {
+                    "aggregate": "max",
+                    "column": "accel_variance",
+                    "op": "AGGREGATE_COLUMN"
+                  }
+                ],
+                "version": "1"
+              },
+              "support_count": 6,
+              "failure_support_count": 1,
+              "candidate_signature_count": 1
+            },
+            "v3": {
+              "typed_plan_signature": "{\"steps\": [{\"aggregate\": \"max\", \"column\": \"accel_variance\", \"op\": \"AGGREGATE_COLUMN\"}], \"version\": \"1\"}",
+              "typed_plan": {
+                "steps": [
+                  {
+                    "aggregate": "max",
+                    "column": "accel_variance",
+                    "op": "AGGREGATE_COLUMN"
+                  }
+                ],
+                "version": "1"
+              },
+              "support_count": 5,
+              "failure_support_count": 2,
+              "candidate_signature_count": 2
+            }
+          },
+          "canonical_typed_plan_signature": "{\"steps\": [{\"aggregate\": \"max\", \"column\": \"accel_variance\", \"op\": \"AGGREGATE_COLUMN\"}], \"version\": \"1\"}",
+          "canonical_typed_plan": {
+            "steps": [
+              {
+                "aggregate": "max",
+                "column": "accel_variance",
+                "op": "AGGREGATE_COLUMN"
+              }
+            ],
+            "version": "1"
+          }
+        },
+        "2": {
+          "by_version": {
+            "v1": {
+              "typed_plan_signature": "{\"steps\": [{\"aggregate\": \"mean\", \"column\": \"accel_mean\", \"op\": \"AGGREGATE_COLUMN\"}], \"version\": \"1\"}",
+              "typed_plan": {
+                "steps": [
+                  {
+                    "aggregate": "mean",
+                    "column": "accel_mean",
+                    "op": "AGGREGATE_COLUMN"
+                  }
+                ],
+                "version": "1"
+              },
+              "support_count": 6,
+              "failure_support_count": 1,
+              "candidate_signature_count": 1
+            },
+            "v2": {
+              "typed_plan_signature": "{\"steps\": [{\"aggregate\": \"mean\", \"column\": \"accel_mean\", \"op\": \"AGGREGATE_COLUMN\"}], \"version\": \"1\"}",
+              "typed_plan": {
+                "steps": [
+                  {
+                    "aggregate": "mean",
+                    "column": "accel_mean",
+                    "op": "AGGREGATE_COLUMN"
+                  }
+                ],
+                "version": "1"
+              },
+              "support_count": 6,
+              "failure_support_count": 1,
+              "candidate_signature_count": 1
+            },
+            "v3": {
+              "typed_plan_signature": "{\"steps\": [{\"aggregate\": \"mean\", \"column\": \"accel_mean\", \"op\": \"AGGREGATE_COLUMN\"}], \"version\": \"1\"}",
+              "typed_plan": {
+                "steps": [
+                  {
+                    "aggregate": "mean",
+                    "column": "accel_mean",
+                    "op": "AGGREGATE_COLUMN"
+                  }
+                ],
+                "version": "1"
+              },
+              "support_count": 6,
+              "failure_support_count": 1,
+              "candidate_signature_count": 1
+            }
+          },
+          "canonical_typed_plan_signature": "{\"steps\": [{\"aggregate\": \"mean\", \"column\": \"accel_mean\", \"op\": \"AGGREGATE_COLUMN\"}], \"version\": \"1\"}",
+          "canonical_typed_plan": {
+            "steps": [
+              {
+                "aggregate": "mean",
+                "column": "accel_mean",
+                "op": "AGGREGATE_COLUMN"
+              }
+            ],
+            "version": "1"
+          }
+        },
+        "3": {
+          "by_version": {
+            "v1": {
+              "typed_plan_signature": "{\"steps\": [{\"aggregate\": \"max\", \"column\": \"accel_stats_z_p99\", \"op\": \"FILTER_EQ_AGGREGATE\"}], \"version\": \"1\"}",
+              "typed_plan": {
+                "steps": [
+                  {
+                    "aggregate": "max",
+                    "column": "accel_stats_z_p99",
+                    "op": "FILTER_EQ_AGGREGATE"
+                  }
+                ],
+                "version": "1"
+              },
+              "support_count": 5,
+              "failure_support_count": 1,
+              "candidate_signature_count": 2
+            },
+            "v2": {
+              "typed_plan_signature": "{\"steps\": [{\"aggregate\": \"max\", \"column\": \"accel_stats_z_p99\", \"op\": \"FILTER_EQ_AGGREGATE\"}, {\"column\": \"timestamp\", \"distinct\": false, \"op\": \"SELECT_COLUMN\"}], \"version\": \"1\"}",
+              "typed_plan": {
+                "steps": [
+                  {
+                    "aggregate": "max",
+                    "column": "accel_stats_z_p99",
+                    "op": "FILTER_EQ_AGGREGATE"
+                  },
+                  {
+                    "column": "timestamp",
+                    "distinct": false,
+                    "op": "SELECT_COLUMN"
+                  }
+                ],
+                "version": "1"
+              },
+              "support_count": 5,
+              "failure_support_count": 2,
+              "candidate_signature_count": 2
+            },
+            "v3": {
+              "typed_plan_signature": "{\"steps\": [{\"aggregate\": \"max\", \"column\": \"accel_stats_z_p99\", \"op\": \"FILTER_EQ_AGGREGATE\"}, {\"column\": \"timestamp\", \"distinct\": false, \"op\": \"SELECT_COLUMN\"}], \"version\": \"1\"}",
+              "typed_plan": {
+                "steps": [
+                  {
+                    "aggregate": "max",
+                    "column": "accel_stats_z_p99",
+                    "op": "FILTER_EQ_AGGREGATE"
+                  },
+                  {
+                    "column": "timestamp",
+                    "distinct": false,
+                    "op": "SELECT_COLUMN"
+                  }
+                ],
+                "version": "1"
+              },
+              "support_count": 6,
+              "failure_support_count": 2,
+              "candidate_signature_count": 1
+            }
+          },
+          "canonical_typed_plan_signature": "{\"steps\": [{\"aggregate\": \"max\", \"column\": \"accel_stats_z_p99\", \"op\": \"FILTER_EQ_AGGREGATE\"}, {\"column\": \"timestamp\", \"distinct\": false, \"op\": \"SELECT_COLUMN\"}], \"version\": \"1\"}",
+          "canonical_typed_plan": {
+            "steps": [
+              {
+                "aggregate": "max",
+                "column": "accel_stats_z_p99",
+                "op": "FILTER_EQ_AGGREGATE"
+              },
+              {
+                "column": "timestamp",
+                "distinct": false,
+                "op": "SELECT_COLUMN"
+              }
+            ],
+            "version": "1"
+          }
+        },
+        "4": {
+          "by_version": {
+            "v1": {
+              "typed_plan_signature": "{\"steps\": [{\"column\": \"accel_variance\", \"comparator\": \"gt\", \"op\": \"FILTER_COMPARE\", \"value\": 0.2}, {\"op\": \"COUNT_ROWS\"}], \"version\": \"1\"}",
+              "typed_plan": {
+                "steps": [
+                  {
+                    "column": "accel_variance",
+                    "comparator": "gt",
+                    "op": "FILTER_COMPARE",
+                    "value": 0.2
+                  },
+                  {
+                    "op": "COUNT_ROWS"
+                  }
+                ],
+                "version": "1"
+              },
+              "support_count": 6,
+              "failure_support_count": 2,
+              "candidate_signature_count": 1
+            },
+            "v2": {
+              "typed_plan_signature": "{\"steps\": [{\"column\": \"accel_variance\", \"comparator\": \"gt\", \"op\": \"FILTER_COMPARE\", \"value\": 0.2}, {\"op\": \"COUNT_ROWS\"}], \"version\": \"1\"}",
+              "typed_plan": {
+                "steps": [
+                  {
+                    "column": "accel_variance",
+                    "comparator": "gt",
+                    "op": "FILTER_COMPARE",
+                    "value": 0.2
+                  },
+                  {
+                    "op": "COUNT_ROWS"
+                  }
+                ],
+                "version": "1"
+              },
+              "support_count": 6,
+              "failure_support_count": 2,
+              "candidate_signature_count": 1
+            },
+            "v3": {
+              "typed_plan_signature": "{\"steps\": [{\"column\": \"accel_variance\", \"comparator\": \"gt\", \"op\": \"FILTER_COMPARE\", \"value\": 0.2}, {\"op\": \"COUNT_ROWS\"}], \"version\": \"1\"}",
+              "typed_plan": {
+                "steps": [
+                  {
+                    "column": "accel_variance",
+                    "comparator": "gt",
+                    "op": "FILTER_COMPARE",
+                    "value": 0.2
+                  },
+                  {
+                    "op": "COUNT_ROWS"
+                  }
+                ],
+                "version": "1"
+              },
+              "support_count": 6,
+              "failure_support_count": 2,
+              "candidate_signature_count": 1
+            }
+          },
+          "canonical_typed_plan_signature": "{\"steps\": [{\"column\": \"accel_variance\", \"comparator\": \"gt\", \"op\": \"FILTER_COMPARE\", \"value\": 0.2}, {\"op\": \"COUNT_ROWS\"}], \"version\": \"1\"}",
+          "canonical_typed_plan": {
+            "steps": [
+              {
+                "column": "accel_variance",
+                "comparator": "gt",
+                "op": "FILTER_COMPARE",
+                "value": 0.2
+              },
+              {
+                "op": "COUNT_ROWS"
+              }
+            ],
+            "version": "1"
+          }
+        },
+        "5": {
+          "by_version": {
+            "v1": {
+              "typed_plan_signature": "{\"steps\": [{\"column\": \"latitude\", \"comparator\": \"gt\", \"label\": \"north\", \"op\": \"SPLIT_BY_THRESHOLD\", \"threshold\": \"median\"}, {\"column\": \"latitude\", \"comparator\": \"lt\", \"label\": \"south\", \"op\": \"SPLIT_BY_THRESHOLD\", \"threshold\": \"median\"}, {\"aggregate\": \"mean\", \"column\": \"accel_variance\", \"op\": \"AGGREGATE_PARTITIONS\", \"partitions\": [\"north\", \"south\"]}, {\"mode\": \"difference\", \"op\": \"COMPARE_PARTITIONS\"}], \"version\": \"1\"}",
+              "typed_plan": {
+                "steps": [
+                  {
+                    "column": "latitude",
+                    "comparator": "gt",
+                    "label": "north",
+                    "op": "SPLIT_BY_THRESHOLD",
+                    "threshold": "median"
+                  },
+                  {
+                    "column": "latitude",
+                    "comparator": "lt",
+                    "label": "south",
+                    "op": "SPLIT_BY_THRESHOLD",
+                    "threshold": "median"
+                  },
+                  {
+                    "aggregate": "mean",
+                    "column": "accel_variance",
+                    "op": "AGGREGATE_PARTITIONS",
+                    "partitions": [
+                      "north",
+                      "south"
+                    ]
+                  },
+                  {
+                    "mode": "difference",
+                    "op": "COMPARE_PARTITIONS"
+                  }
+                ],
+                "version": "1"
+              },
+              "support_count": 2,
+              "failure_support_count": 0,
+              "candidate_signature_count": 4
+            },
+            "v2": {
+              "typed_plan_signature": "{\"steps\": [{\"column\": \"latitude\", \"comparator\": \"gt\", \"label\": \"north\", \"op\": \"SPLIT_BY_THRESHOLD\", \"threshold\": \"median\"}, {\"column\": \"latitude\", \"comparator\": \"lte\", \"label\": \"south\", \"op\": \"SPLIT_BY_THRESHOLD\", \"threshold\": \"median\"}, {\"aggregate\": \"mean\", \"column\": \"accel_variance\", \"op\": \"AGGREGATE_PARTITIONS\", \"partitions\": [\"north\", \"south\"]}, {\"mode\": \"difference\", \"op\": \"COMPARE_PARTITIONS\"}], \"version\": \"1\"}",
+              "typed_plan": {
+                "steps": [
+                  {
+                    "column": "latitude",
+                    "comparator": "gt",
+                    "label": "north",
+                    "op": "SPLIT_BY_THRESHOLD",
+                    "threshold": "median"
+                  },
+                  {
+                    "column": "latitude",
+                    "comparator": "lte",
+                    "label": "south",
+                    "op": "SPLIT_BY_THRESHOLD",
+                    "threshold": "median"
+                  },
+                  {
+                    "aggregate": "mean",
+                    "column": "accel_variance",
+                    "op": "AGGREGATE_PARTITIONS",
+                    "partitions": [
+                      "north",
+                      "south"
+                    ]
+                  },
+                  {
+                    "mode": "difference",
+                    "op": "COMPARE_PARTITIONS"
+                  }
+                ],
+                "version": "1"
+              },
+              "support_count": 2,
+              "failure_support_count": 2,
+              "candidate_signature_count": 5
+            },
+            "v3": {
+              "typed_plan_signature": "{\"steps\": [{\"column\": \"latitude\", \"comparator\": \"gt\", \"label\": \"north\", \"op\": \"SPLIT_BY_THRESHOLD\", \"threshold\": \"median\"}, {\"column\": \"latitude\", \"comparator\": \"lte\", \"label\": \"south\", \"op\": \"SPLIT_BY_THRESHOLD\", \"threshold\": \"median\"}, {\"aggregate\": \"mean\", \"column\": \"accel_variance\", \"op\": \"AGGREGATE_PARTITIONS\", \"partitions\": [\"north\", \"south\"]}, {\"mode\": \"difference\", \"op\": \"COMPARE_PARTITIONS\"}], \"version\": \"1\"}",
+              "typed_plan": {
+                "steps": [
+                  {
+                    "column": "latitude",
+                    "comparator": "gt",
+                    "label": "north",
+                    "op": "SPLIT_BY_THRESHOLD",
+                    "threshold": "median"
+                  },
+                  {
+                    "column": "latitude",
+                    "comparator": "lte",
+                    "label": "south",
+                    "op": "SPLIT_BY_THRESHOLD",
+                    "threshold": "median"
+                  },
+                  {
+                    "aggregate": "mean",
+                    "column": "accel_variance",
+                    "op": "AGGREGATE_PARTITIONS",
+                    "partitions": [
+                      "north",
+                      "south"
+                    ]
+                  },
+                  {
+                    "mode": "difference",
+                    "op": "COMPARE_PARTITIONS"
+                  }
+                ],
+                "version": "1"
+              },
+              "support_count": 4,
+              "failure_support_count": 4,
+              "candidate_signature_count": 3
+            }
+          },
+          "canonical_typed_plan_signature": "{\"steps\": [{\"column\": \"latitude\", \"comparator\": \"gt\", \"label\": \"north\", \"op\": \"SPLIT_BY_THRESHOLD\", \"threshold\": \"median\"}, {\"column\": \"latitude\", \"comparator\": \"lte\", \"label\": \"south\", \"op\": \"SPLIT_BY_THRESHOLD\", \"threshold\": \"median\"}, {\"aggregate\": \"mean\", \"column\": \"accel_variance\", \"op\": \"AGGREGATE_PARTITIONS\", \"partitions\": [\"north\", \"south\"]}, {\"mode\": \"difference\", \"op\": \"COMPARE_PARTITIONS\"}], \"version\": \"1\"}",
+          "canonical_typed_plan": {
+            "steps": [
+              {
+                "column": "latitude",
+                "comparator": "gt",
+                "label": "north",
+                "op": "SPLIT_BY_THRESHOLD",
+                "threshold": "median"
+              },
+              {
+                "column": "latitude",
+                "comparator": "lte",
+                "label": "south",
+                "op": "SPLIT_BY_THRESHOLD",
+                "threshold": "median"
+              },
+              {
+                "aggregate": "mean",
+                "column": "accel_variance",
+                "op": "AGGREGATE_PARTITIONS",
+                "partitions": [
+                  "north",
+                  "south"
+                ]
+              },
+              {
+                "mode": "difference",
+                "op": "COMPARE_PARTITIONS"
+              }
+            ],
+            "version": "1"
+          }
+        },
+        "6": {
+          "by_version": {
+            "v1": {
+              "typed_plan_signature": "{\"steps\": [{\"left\": \"accel_stats_z_p99\", \"op\": \"DERIVE_BINARY\", \"operation\": \"subtract\", \"result\": \"z_accel_diff\", \"right\": \"accel_stats_z_p1\"}, {\"column\": \"z_accel_diff\", \"direction\": \"max\", \"op\": \"RANK_ROWS\", \"return_columns\": [\"latitude\", \"longitude\"]}], \"version\": \"1\"}",
+              "typed_plan": {
+                "steps": [
+                  {
+                    "left": "accel_stats_z_p99",
+                    "op": "DERIVE_BINARY",
+                    "operation": "subtract",
+                    "result": "z_accel_diff",
+                    "right": "accel_stats_z_p1"
+                  },
+                  {
+                    "column": "z_accel_diff",
+                    "direction": "max",
+                    "op": "RANK_ROWS",
+                    "return_columns": [
+                      "latitude",
+                      "longitude"
+                    ]
+                  }
+                ],
+                "version": "1"
+              },
+              "support_count": 2,
+              "failure_support_count": 0,
+              "candidate_signature_count": 5
+            },
+            "v2": {
+              "typed_plan_signature": "{\"steps\": [{\"branches\": [{\"aggregate\": \"max\", \"column\": \"accel_stats_z_p99\", \"filter_column\": null, \"filter_values\": null, \"group_by\": [\"latitude\", \"longitude\"], \"result_column\": \"p99_z\"}, {\"aggregate\": \"min\", \"column\": \"accel_stats_z_p1\", \"filter_column\": null, \"filter_values\": null, \"group_by\": [\"latitude\", \"longitude\"], \"result_column\": \"p1_z\"}], \"op\": \"PARALLEL_AGGREGATE\"}, {\"left\": \"p99_z\", \"op\": \"DERIVE_BINARY\", \"operation\": \"subtract\", \"result\": \"z_diff\", \"right\": \"p1_z\"}, {\"column\": \"z_diff\", \"direction\": \"max\", \"op\": \"RANK_ROWS\", \"return_columns\": [\"latitude\", \"longitude\"]}], \"version\": \"1\"}",
+              "typed_plan": {
+                "steps": [
+                  {
+                    "branches": [
+                      {
+                        "aggregate": "max",
+                        "column": "accel_stats_z_p99",
+                        "filter_column": null,
+                        "filter_values": null,
+                        "group_by": [
+                          "latitude",
+                          "longitude"
+                        ],
+                        "result_column": "p99_z"
+                      },
+                      {
+                        "aggregate": "min",
+                        "column": "accel_stats_z_p1",
+                        "filter_column": null,
+                        "filter_values": null,
+                        "group_by": [
+                          "latitude",
+                          "longitude"
+                        ],
+                        "result_column": "p1_z"
+                      }
+                    ],
+                    "op": "PARALLEL_AGGREGATE"
+                  },
+                  {
+                    "left": "p99_z",
+                    "op": "DERIVE_BINARY",
+                    "operation": "subtract",
+                    "result": "z_diff",
+                    "right": "p1_z"
+                  },
+                  {
+                    "column": "z_diff",
+                    "direction": "max",
+                    "op": "RANK_ROWS",
+                    "return_columns": [
+                      "latitude",
+                      "longitude"
+                    ]
+                  }
+                ],
+                "version": "1"
+              },
+              "support_count": 1,
+              "failure_support_count": 0,
+              "candidate_signature_count": 6
+            },
+            "v3": {
+              "typed_plan_signature": "{\"steps\": [{\"left\": \"accel_stats_z_p99\", \"op\": \"DERIVE_BINARY\", \"operation\": \"subtract\", \"result\": \"z_diff\", \"right\": \"accel_stats_z_p1\"}, {\"column\": \"z_diff\", \"direction\": \"max\", \"op\": \"RANK_ROWS\", \"return_columns\": [\"latitude\", \"longitude\", \"z_diff\"]}], \"version\": \"1\"}",
+              "typed_plan": {
+                "steps": [
+                  {
+                    "left": "accel_stats_z_p99",
+                    "op": "DERIVE_BINARY",
+                    "operation": "subtract",
+                    "result": "z_diff",
+                    "right": "accel_stats_z_p1"
+                  },
+                  {
+                    "column": "z_diff",
+                    "direction": "max",
+                    "op": "RANK_ROWS",
+                    "return_columns": [
+                      "latitude",
+                      "longitude",
+                      "z_diff"
+                    ]
+                  }
+                ],
+                "version": "1"
+              },
+              "support_count": 2,
+              "failure_support_count": 2,
+              "candidate_signature_count": 5
+            }
+          },
+          "canonical_typed_plan_signature": "{\"steps\": [{\"left\": \"accel_stats_z_p99\", \"op\": \"DERIVE_BINARY\", \"operation\": \"subtract\", \"result\": \"z_accel_diff\", \"right\": \"accel_stats_z_p1\"}, {\"column\": \"z_accel_diff\", \"direction\": \"max\", \"op\": \"RANK_ROWS\", \"return_columns\": [\"latitude\", \"longitude\"]}], \"version\": \"1\"}",
+          "canonical_typed_plan": {
+            "steps": [
+              {
+                "left": "accel_stats_z_p99",
+                "op": "DERIVE_BINARY",
+                "operation": "subtract",
+                "result": "z_accel_diff",
+                "right": "accel_stats_z_p1"
+              },
+              {
+                "column": "z_accel_diff",
+                "direction": "max",
+                "op": "RANK_ROWS",
+                "return_columns": [
+                  "latitude",
+                  "longitude"
+                ]
+              }
+            ],
+            "version": "1"
+          }
+        },
+        "7": {
+          "by_version": {
+            "v1": {
+              "typed_plan_signature": "{\"steps\": [{\"columns\": [\"accel_stats_x_p99\", \"accel_stats_y_p99\", \"accel_stats_z_p99\"], \"op\": \"DERIVE_VECTOR_MAGNITUDE\", \"result\": \"peak_accel_magnitude\"}, {\"aggregate\": \"mean\", \"column\": \"peak_accel_magnitude\", \"op\": \"AGGREGATE_COLUMN\"}], \"version\": \"1\"}",
+              "typed_plan": {
+                "steps": [
+                  {
+                    "columns": [
+                      "accel_stats_x_p99",
+                      "accel_stats_y_p99",
+                      "accel_stats_z_p99"
+                    ],
+                    "op": "DERIVE_VECTOR_MAGNITUDE",
+                    "result": "peak_accel_magnitude"
+                  },
+                  {
+                    "aggregate": "mean",
+                    "column": "peak_accel_magnitude",
+                    "op": "AGGREGATE_COLUMN"
+                  }
+                ],
+                "version": "1"
+              },
+              "support_count": 4,
+              "failure_support_count": 4,
+              "candidate_signature_count": 3
+            },
+            "v2": {
+              "typed_plan_signature": "{\"steps\": [{\"columns\": [\"accel_stats_x_p99\", \"accel_stats_y_p99\", \"accel_stats_z_p99\"], \"op\": \"DERIVE_VECTOR_MAGNITUDE\", \"result\": \"peak_acceleration_magnitude\"}, {\"aggregate\": \"mean\", \"column\": \"peak_acceleration_magnitude\", \"op\": \"AGGREGATE_COLUMN\"}], \"version\": \"1\"}",
+              "typed_plan": {
+                "steps": [
+                  {
+                    "columns": [
+                      "accel_stats_x_p99",
+                      "accel_stats_y_p99",
+                      "accel_stats_z_p99"
+                    ],
+                    "op": "DERIVE_VECTOR_MAGNITUDE",
+                    "result": "peak_acceleration_magnitude"
+                  },
+                  {
+                    "aggregate": "mean",
+                    "column": "peak_acceleration_magnitude",
+                    "op": "AGGREGATE_COLUMN"
+                  }
+                ],
+                "version": "1"
+              },
+              "support_count": 4,
+              "failure_support_count": 2,
+              "candidate_signature_count": 3
+            },
+            "v3": {
+              "typed_plan_signature": "{\"steps\": [{\"columns\": [\"accel_stats_x_p99\", \"accel_stats_y_p99\", \"accel_stats_z_p99\"], \"op\": \"DERIVE_VECTOR_MAGNITUDE\", \"result\": \"peak_acceleration_magnitude\"}, {\"aggregate\": \"mean\", \"column\": \"peak_acceleration_magnitude\", \"op\": \"AGGREGATE_COLUMN\"}], \"version\": \"1\"}",
+              "typed_plan": {
+                "steps": [
+                  {
+                    "columns": [
+                      "accel_stats_x_p99",
+                      "accel_stats_y_p99",
+                      "accel_stats_z_p99"
+                    ],
+                    "op": "DERIVE_VECTOR_MAGNITUDE",
+                    "result": "peak_acceleration_magnitude"
+                  },
+                  {
+                    "aggregate": "mean",
+                    "column": "peak_acceleration_magnitude",
+                    "op": "AGGREGATE_COLUMN"
+                  }
+                ],
+                "version": "1"
+              },
+              "support_count": 4,
+              "failure_support_count": 2,
+              "candidate_signature_count": 3
+            }
+          },
+          "canonical_typed_plan_signature": "{\"steps\": [{\"columns\": [\"accel_stats_x_p99\", \"accel_stats_y_p99\", \"accel_stats_z_p99\"], \"op\": \"DERIVE_VECTOR_MAGNITUDE\", \"result\": \"peak_acceleration_magnitude\"}, {\"aggregate\": \"mean\", \"column\": \"peak_acceleration_magnitude\", \"op\": \"AGGREGATE_COLUMN\"}], \"version\": \"1\"}",
+          "canonical_typed_plan": {
+            "steps": [
+              {
+                "columns": [
+                  "accel_stats_x_p99",
+                  "accel_stats_y_p99",
+                  "accel_stats_z_p99"
+                ],
+                "op": "DERIVE_VECTOR_MAGNITUDE",
+                "result": "peak_acceleration_magnitude"
+              },
+              {
+                "aggregate": "mean",
+                "column": "peak_acceleration_magnitude",
+                "op": "AGGREGATE_COLUMN"
+              }
+            ],
+            "version": "1"
+          }
+        },
+        "8": {
+          "by_version": {
+            "v1": {
+              "typed_plan_signature": "{\"steps\": [{\"column\": \"timestamp\", \"epoch_unit\": null, \"freq\": \"1min\", \"kind\": \"temporal\", \"op\": \"DERIVE_BIN\", \"result\": \"time_bin\", \"width\": null}, {\"aggregate\": \"mean\", \"column\": \"instability_score\", \"freq\": null, \"group_by\": [\"time_bin\"], \"op\": \"GROUP_AGGREGATE\"}, {\"direction\": \"max\", \"op\": \"RANK_GROUPS\"}], \"version\": \"1\"}",
+              "typed_plan": {
+                "steps": [
+                  {
+                    "column": "timestamp",
+                    "epoch_unit": null,
+                    "freq": "1min",
+                    "kind": "temporal",
+                    "op": "DERIVE_BIN",
+                    "result": "time_bin",
+                    "width": null
+                  },
+                  {
+                    "aggregate": "mean",
+                    "column": "instability_score",
+                    "freq": null,
+                    "group_by": [
+                      "time_bin"
+                    ],
+                    "op": "GROUP_AGGREGATE"
+                  },
+                  {
+                    "direction": "max",
+                    "op": "RANK_GROUPS"
+                  }
+                ],
+                "version": "1"
+              },
+              "support_count": 3,
+              "failure_support_count": 1,
+              "candidate_signature_count": 3
+            },
+            "v2": {
+              "typed_plan_signature": "{\"steps\": [{\"column\": \"timestamp\", \"epoch_unit\": null, \"freq\": \"1min\", \"kind\": \"temporal\", \"op\": \"DERIVE_BIN\", \"result\": \"minute_bin\", \"width\": null}, {\"aggregate\": \"mean\", \"column\": \"instability_score\", \"freq\": null, \"group_by\": [\"minute_bin\"], \"op\": \"GROUP_AGGREGATE\"}, {\"direction\": \"max\", \"op\": \"RANK_GROUPS\"}], \"version\": \"1\"}",
+              "typed_plan": {
+                "steps": [
+                  {
+                    "column": "timestamp",
+                    "epoch_unit": null,
+                    "freq": "1min",
+                    "kind": "temporal",
+                    "op": "DERIVE_BIN",
+                    "result": "minute_bin",
+                    "width": null
+                  },
+                  {
+                    "aggregate": "mean",
+                    "column": "instability_score",
+                    "freq": null,
+                    "group_by": [
+                      "minute_bin"
+                    ],
+                    "op": "GROUP_AGGREGATE"
+                  },
+                  {
+                    "direction": "max",
+                    "op": "RANK_GROUPS"
+                  }
+                ],
+                "version": "1"
+              },
+              "support_count": 3,
+              "failure_support_count": 3,
+              "candidate_signature_count": 3
+            },
+            "v3": {
+              "typed_plan_signature": "{\"steps\": [{\"column\": \"timestamp\", \"epoch_unit\": null, \"freq\": \"1min\", \"kind\": \"temporal\", \"op\": \"DERIVE_BIN\", \"result\": \"minute_bin\", \"width\": null}, {\"aggregate\": \"mean\", \"column\": \"instability_score\", \"freq\": null, \"group_by\": [\"minute_bin\"], \"op\": \"GROUP_AGGREGATE\"}, {\"direction\": \"max\", \"op\": \"RANK_GROUPS\"}], \"version\": \"1\"}",
+              "typed_plan": {
+                "steps": [
+                  {
+                    "column": "timestamp",
+                    "epoch_unit": null,
+                    "freq": "1min",
+                    "kind": "temporal",
+                    "op": "DERIVE_BIN",
+                    "result": "minute_bin",
+                    "width": null
+                  },
+                  {
+                    "aggregate": "mean",
+                    "column": "instability_score",
+                    "freq": null,
+                    "group_by": [
+                      "minute_bin"
+                    ],
+                    "op": "GROUP_AGGREGATE"
+                  },
+                  {
+                    "direction": "max",
+                    "op": "RANK_GROUPS"
+                  }
+                ],
+                "version": "1"
+              },
+              "support_count": 3,
+              "failure_support_count": 3,
+              "candidate_signature_count": 3
+            }
+          },
+          "canonical_typed_plan_signature": "{\"steps\": [{\"column\": \"timestamp\", \"epoch_unit\": null, \"freq\": \"1min\", \"kind\": \"temporal\", \"op\": \"DERIVE_BIN\", \"result\": \"minute_bin\", \"width\": null}, {\"aggregate\": \"mean\", \"column\": \"instability_score\", \"freq\": null, \"group_by\": [\"minute_bin\"], \"op\": \"GROUP_AGGREGATE\"}, {\"direction\": \"max\", \"op\": \"RANK_GROUPS\"}], \"version\": \"1\"}",
+          "canonical_typed_plan": {
+            "steps": [
+              {
+                "column": "timestamp",
+                "epoch_unit": null,
+                "freq": "1min",
+                "kind": "temporal",
+                "op": "DERIVE_BIN",
+                "result": "minute_bin",
+                "width": null
+              },
+              {
+                "aggregate": "mean",
+                "column": "instability_score",
+                "freq": null,
+                "group_by": [
+                  "minute_bin"
+                ],
+                "op": "GROUP_AGGREGATE"
+              },
+              {
+                "direction": "max",
+                "op": "RANK_GROUPS"
+              }
+            ],
+            "version": "1"
+          }
+        }
+      }
+    },
+    "wisdm": {
+      "queries": {
+        "1": {
+          "by_version": {
+            "v1": {
+              "typed_plan_signature": "{\"steps\": [{\"column\": \"subject_id\", \"comparator\": \"eq\", \"op\": \"FILTER_COMPARE\", \"value\": 15}, {\"aggregate\": \"max\", \"column\": \"x\", \"op\": \"AGGREGATE_COLUMN\"}], \"version\": \"1\"}",
+              "typed_plan": {
+                "steps": [
+                  {
+                    "column": "subject_id",
+                    "comparator": "eq",
+                    "op": "FILTER_COMPARE",
+                    "value": 15
+                  },
+                  {
+                    "aggregate": "max",
+                    "column": "x",
+                    "op": "AGGREGATE_COLUMN"
+                  }
+                ],
+                "version": "1"
+              },
+              "support_count": 5,
+              "failure_support_count": 2,
+              "candidate_signature_count": 1
+            },
+            "v2": {
+              "typed_plan_signature": "{\"steps\": [{\"column\": \"subject_id\", \"comparator\": \"eq\", \"op\": \"FILTER_COMPARE\", \"value\": 15}, {\"aggregate\": \"max\", \"column\": \"x\", \"op\": \"AGGREGATE_COLUMN\"}], \"version\": \"1\"}",
+              "typed_plan": {
+                "steps": [
+                  {
+                    "column": "subject_id",
+                    "comparator": "eq",
+                    "op": "FILTER_COMPARE",
+                    "value": 15
+                  },
+                  {
+                    "aggregate": "max",
+                    "column": "x",
+                    "op": "AGGREGATE_COLUMN"
+                  }
+                ],
+                "version": "1"
+              },
+              "support_count": 5,
+              "failure_support_count": 2,
+              "candidate_signature_count": 1
+            },
+            "v3": {
+              "typed_plan_signature": "{\"steps\": [{\"column\": \"subject_id\", \"comparator\": \"eq\", \"op\": \"FILTER_COMPARE\", \"value\": 15}, {\"aggregate\": \"max\", \"column\": \"x\", \"op\": \"AGGREGATE_COLUMN\"}], \"version\": \"1\"}",
+              "typed_plan": {
+                "steps": [
+                  {
+                    "column": "subject_id",
+                    "comparator": "eq",
+                    "op": "FILTER_COMPARE",
+                    "value": 15
+                  },
+                  {
+                    "aggregate": "max",
+                    "column": "x",
+                    "op": "AGGREGATE_COLUMN"
+                  }
+                ],
+                "version": "1"
+              },
+              "support_count": 5,
+              "failure_support_count": 3,
+              "candidate_signature_count": 1
+            }
+          },
+          "canonical_typed_plan_signature": "{\"steps\": [{\"column\": \"subject_id\", \"comparator\": \"eq\", \"op\": \"FILTER_COMPARE\", \"value\": 15}, {\"aggregate\": \"max\", \"column\": \"x\", \"op\": \"AGGREGATE_COLUMN\"}], \"version\": \"1\"}",
+          "canonical_typed_plan": {
+            "steps": [
+              {
+                "column": "subject_id",
+                "comparator": "eq",
+                "op": "FILTER_COMPARE",
+                "value": 15
+              },
+              {
+                "aggregate": "max",
+                "column": "x",
+                "op": "AGGREGATE_COLUMN"
+              }
+            ],
+            "version": "1"
+          }
+        },
+        "2": {
+          "by_version": {
+            "v1": {
+              "typed_plan_signature": "{\"steps\": [{\"column\": \"activity_label\", \"op\": \"FILTER_NOT_EMPTY\"}, {\"column\": \"activity_label\", \"comparator\": \"eq\", \"op\": \"FILTER_COMPARE\", \"value\": \"Walking\"}, {\"column\": \"subject_id\", \"op\": \"COUNT_DISTINCT\"}], \"version\": \"1\"}",
+              "typed_plan": {
+                "steps": [
+                  {
+                    "column": "activity_label",
+                    "op": "FILTER_NOT_EMPTY"
+                  },
+                  {
+                    "column": "activity_label",
+                    "comparator": "eq",
+                    "op": "FILTER_COMPARE",
+                    "value": "Walking"
+                  },
+                  {
+                    "column": "subject_id",
+                    "op": "COUNT_DISTINCT"
+                  }
+                ],
+                "version": "1"
+              },
+              "support_count": 4,
+              "failure_support_count": 3,
+              "candidate_signature_count": 2
+            },
+            "v2": {
+              "typed_plan_signature": "{\"steps\": [{\"column\": \"activity_label\", \"op\": \"FILTER_NOT_EMPTY\"}, {\"column\": \"activity_label\", \"comparator\": \"eq\", \"op\": \"FILTER_COMPARE\", \"value\": \"Walking\"}, {\"column\": \"subject_id\", \"op\": \"COUNT_DISTINCT\"}], \"version\": \"1\"}",
+              "typed_plan": {
+                "steps": [
+                  {
+                    "column": "activity_label",
+                    "op": "FILTER_NOT_EMPTY"
+                  },
+                  {
+                    "column": "activity_label",
+                    "comparator": "eq",
+                    "op": "FILTER_COMPARE",
+                    "value": "Walking"
+                  },
+                  {
+                    "column": "subject_id",
+                    "op": "COUNT_DISTINCT"
+                  }
+                ],
+                "version": "1"
+              },
+              "support_count": 5,
+              "failure_support_count": 2,
+              "candidate_signature_count": 1
+            },
+            "v3": {
+              "typed_plan_signature": "{\"steps\": [{\"column\": \"activity_label\", \"op\": \"FILTER_NOT_EMPTY\"}, {\"column\": \"activity_label\", \"comparator\": \"eq\", \"op\": \"FILTER_COMPARE\", \"value\": \"Walking\"}, {\"column\": \"subject_id\", \"op\": \"COUNT_DISTINCT\"}], \"version\": \"1\"}",
+              "typed_plan": {
+                "steps": [
+                  {
+                    "column": "activity_label",
+                    "op": "FILTER_NOT_EMPTY"
+                  },
+                  {
+                    "column": "activity_label",
+                    "comparator": "eq",
+                    "op": "FILTER_COMPARE",
+                    "value": "Walking"
+                  },
+                  {
+                    "column": "subject_id",
+                    "op": "COUNT_DISTINCT"
+                  }
+                ],
+                "version": "1"
+              },
+              "support_count": 5,
+              "failure_support_count": 4,
+              "candidate_signature_count": 1
+            }
+          },
+          "canonical_typed_plan_signature": "{\"steps\": [{\"column\": \"activity_label\", \"op\": \"FILTER_NOT_EMPTY\"}, {\"column\": \"activity_label\", \"comparator\": \"eq\", \"op\": \"FILTER_COMPARE\", \"value\": \"Walking\"}, {\"column\": \"subject_id\", \"op\": \"COUNT_DISTINCT\"}], \"version\": \"1\"}",
+          "canonical_typed_plan": {
+            "steps": [
+              {
+                "column": "activity_label",
+                "op": "FILTER_NOT_EMPTY"
+              },
+              {
+                "column": "activity_label",
+                "comparator": "eq",
+                "op": "FILTER_COMPARE",
+                "value": "Walking"
+              },
+              {
+                "column": "subject_id",
+                "op": "COUNT_DISTINCT"
+              }
+            ],
+            "version": "1"
+          }
+        },
+        "3": {
+          "by_version": {
+            "v1": {
+              "typed_plan_signature": "{\"steps\": [{\"column\": \"subject_id\", \"comparator\": \"eq\", \"op\": \"FILTER_COMPARE\", \"value\": 5}, {\"column\": \"activity_label\", \"comparator\": \"eq\", \"op\": \"FILTER_COMPARE\", \"value\": \"Sitting\"}, {\"aggregate\": \"mean\", \"column\": \"y\", \"op\": \"AGGREGATE_COLUMN\"}], \"version\": \"1\"}",
+              "typed_plan": {
+                "steps": [
+                  {
+                    "column": "subject_id",
+                    "comparator": "eq",
+                    "op": "FILTER_COMPARE",
+                    "value": 5
+                  },
+                  {
+                    "column": "activity_label",
+                    "comparator": "eq",
+                    "op": "FILTER_COMPARE",
+                    "value": "Sitting"
+                  },
+                  {
+                    "aggregate": "mean",
+                    "column": "y",
+                    "op": "AGGREGATE_COLUMN"
+                  }
+                ],
+                "version": "1"
+              },
+              "support_count": 5,
+              "failure_support_count": 2,
+              "candidate_signature_count": 1
+            },
+            "v2": {
+              "typed_plan_signature": "{\"steps\": [{\"column\": \"subject_id\", \"comparator\": \"eq\", \"op\": \"FILTER_COMPARE\", \"value\": 5}, {\"column\": \"activity_label\", \"comparator\": \"eq\", \"op\": \"FILTER_COMPARE\", \"value\": \"Sitting\"}, {\"aggregate\": \"mean\", \"column\": \"y\", \"op\": \"AGGREGATE_COLUMN\"}], \"version\": \"1\"}",
+              "typed_plan": {
+                "steps": [
+                  {
+                    "column": "subject_id",
+                    "comparator": "eq",
+                    "op": "FILTER_COMPARE",
+                    "value": 5
+                  },
+                  {
+                    "column": "activity_label",
+                    "comparator": "eq",
+                    "op": "FILTER_COMPARE",
+                    "value": "Sitting"
+                  },
+                  {
+                    "aggregate": "mean",
+                    "column": "y",
+                    "op": "AGGREGATE_COLUMN"
+                  }
+                ],
+                "version": "1"
+              },
+              "support_count": 5,
+              "failure_support_count": 2,
+              "candidate_signature_count": 1
+            },
+            "v3": {
+              "typed_plan_signature": "{\"steps\": [{\"column\": \"subject_id\", \"comparator\": \"eq\", \"op\": \"FILTER_COMPARE\", \"value\": 5}, {\"column\": \"activity_label\", \"comparator\": \"eq\", \"op\": \"FILTER_COMPARE\", \"value\": \"Sitting\"}, {\"aggregate\": \"mean\", \"column\": \"y\", \"op\": \"AGGREGATE_COLUMN\"}], \"version\": \"1\"}",
+              "typed_plan": {
+                "steps": [
+                  {
+                    "column": "subject_id",
+                    "comparator": "eq",
+                    "op": "FILTER_COMPARE",
+                    "value": 5
+                  },
+                  {
+                    "column": "activity_label",
+                    "comparator": "eq",
+                    "op": "FILTER_COMPARE",
+                    "value": "Sitting"
+                  },
+                  {
+                    "aggregate": "mean",
+                    "column": "y",
+                    "op": "AGGREGATE_COLUMN"
+                  }
+                ],
+                "version": "1"
+              },
+              "support_count": 5,
+              "failure_support_count": 2,
+              "candidate_signature_count": 1
+            }
+          },
+          "canonical_typed_plan_signature": "{\"steps\": [{\"column\": \"subject_id\", \"comparator\": \"eq\", \"op\": \"FILTER_COMPARE\", \"value\": 5}, {\"column\": \"activity_label\", \"comparator\": \"eq\", \"op\": \"FILTER_COMPARE\", \"value\": \"Sitting\"}, {\"aggregate\": \"mean\", \"column\": \"y\", \"op\": \"AGGREGATE_COLUMN\"}], \"version\": \"1\"}",
+          "canonical_typed_plan": {
+            "steps": [
+              {
+                "column": "subject_id",
+                "comparator": "eq",
+                "op": "FILTER_COMPARE",
+                "value": 5
+              },
+              {
+                "column": "activity_label",
+                "comparator": "eq",
+                "op": "FILTER_COMPARE",
+                "value": "Sitting"
+              },
+              {
+                "aggregate": "mean",
+                "column": "y",
+                "op": "AGGREGATE_COLUMN"
+              }
+            ],
+            "version": "1"
+          }
+        },
+        "4": {
+          "by_version": {
+            "v1": {
+              "typed_plan_signature": "{\"steps\": [{\"aggregate\": \"count\", \"column\": null, \"freq\": null, \"group_by\": [\"subject_id\"], \"op\": \"GROUP_AGGREGATE\"}, {\"direction\": \"max\", \"op\": \"RANK_GROUPS\"}], \"version\": \"1\"}",
+              "typed_plan": {
+                "steps": [
+                  {
+                    "aggregate": "count",
+                    "column": null,
+                    "freq": null,
+                    "group_by": [
+                      "subject_id"
+                    ],
+                    "op": "GROUP_AGGREGATE"
+                  },
+                  {
+                    "direction": "max",
+                    "op": "RANK_GROUPS"
+                  }
+                ],
+                "version": "1"
+              },
+              "support_count": 5,
+              "failure_support_count": 3,
+              "candidate_signature_count": 1
+            },
+            "v2": {
+              "typed_plan_signature": "{\"steps\": [{\"aggregate\": \"count\", \"column\": null, \"freq\": null, \"group_by\": [\"subject_id\"], \"op\": \"GROUP_AGGREGATE\"}, {\"direction\": \"max\", \"op\": \"RANK_GROUPS\"}], \"version\": \"1\"}",
+              "typed_plan": {
+                "steps": [
+                  {
+                    "aggregate": "count",
+                    "column": null,
+                    "freq": null,
+                    "group_by": [
+                      "subject_id"
+                    ],
+                    "op": "GROUP_AGGREGATE"
+                  },
+                  {
+                    "direction": "max",
+                    "op": "RANK_GROUPS"
+                  }
+                ],
+                "version": "1"
+              },
+              "support_count": 5,
+              "failure_support_count": 4,
+              "candidate_signature_count": 1
+            },
+            "v3": {
+              "typed_plan_signature": "{\"steps\": [{\"aggregate\": \"count\", \"column\": null, \"freq\": null, \"group_by\": [\"subject_id\"], \"op\": \"GROUP_AGGREGATE\"}, {\"direction\": \"max\", \"op\": \"RANK_GROUPS\"}], \"version\": \"1\"}",
+              "typed_plan": {
+                "steps": [
+                  {
+                    "aggregate": "count",
+                    "column": null,
+                    "freq": null,
+                    "group_by": [
+                      "subject_id"
+                    ],
+                    "op": "GROUP_AGGREGATE"
+                  },
+                  {
+                    "direction": "max",
+                    "op": "RANK_GROUPS"
+                  }
+                ],
+                "version": "1"
+              },
+              "support_count": 5,
+              "failure_support_count": 2,
+              "candidate_signature_count": 1
+            }
+          },
+          "canonical_typed_plan_signature": "{\"steps\": [{\"aggregate\": \"count\", \"column\": null, \"freq\": null, \"group_by\": [\"subject_id\"], \"op\": \"GROUP_AGGREGATE\"}, {\"direction\": \"max\", \"op\": \"RANK_GROUPS\"}], \"version\": \"1\"}",
+          "canonical_typed_plan": {
+            "steps": [
+              {
+                "aggregate": "count",
+                "column": null,
+                "freq": null,
+                "group_by": [
+                  "subject_id"
+                ],
+                "op": "GROUP_AGGREGATE"
+              },
+              {
+                "direction": "max",
+                "op": "RANK_GROUPS"
+              }
+            ],
+            "version": "1"
+          }
+        },
+        "5": {
+          "by_version": {
+            "v1": {
+              "typed_plan_signature": "{\"steps\": [{\"column\": \"activity_label\", \"op\": \"FILTER_NOT_EMPTY\"}, {\"columns\": [\"x\", \"y\", \"z\"], \"op\": \"DERIVE_VECTOR_MAGNITUDE\", \"result\": \"acceleration_magnitude\"}, {\"column\": \"activity_label\", \"label\": \"dynamic\", \"op\": \"SPLIT_BY_VALUES\", \"values\": [\"Downstairs\", \"Jogging\", \"Upstairs\", \"Walking\"]}, {\"column\": \"activity_label\", \"label\": \"resting\", \"op\": \"SPLIT_BY_VALUES\", \"values\": [\"Sitting\", \"Standing\"]}, {\"aggregate\": \"mean\", \"column\": \"acceleration_magnitude\", \"op\": \"AGGREGATE_PARTITIONS\", \"partitions\": [\"dynamic\", \"resting\"]}, {\"mode\": \"difference\", \"op\": \"COMPARE_PARTITIONS\"}], \"version\": \"1\"}",
+              "typed_plan": {
+                "steps": [
+                  {
+                    "column": "activity_label",
+                    "op": "FILTER_NOT_EMPTY"
+                  },
+                  {
+                    "columns": [
+                      "x",
+                      "y",
+                      "z"
+                    ],
+                    "op": "DERIVE_VECTOR_MAGNITUDE",
+                    "result": "acceleration_magnitude"
+                  },
+                  {
+                    "column": "activity_label",
+                    "label": "dynamic",
+                    "op": "SPLIT_BY_VALUES",
+                    "values": [
+                      "Downstairs",
+                      "Jogging",
+                      "Upstairs",
+                      "Walking"
+                    ]
+                  },
+                  {
+                    "column": "activity_label",
+                    "label": "resting",
+                    "op": "SPLIT_BY_VALUES",
+                    "values": [
+                      "Sitting",
+                      "Standing"
+                    ]
+                  },
+                  {
+                    "aggregate": "mean",
+                    "column": "acceleration_magnitude",
+                    "op": "AGGREGATE_PARTITIONS",
+                    "partitions": [
+                      "dynamic",
+                      "resting"
+                    ]
+                  },
+                  {
+                    "mode": "difference",
+                    "op": "COMPARE_PARTITIONS"
+                  }
+                ],
+                "version": "1"
+              },
+              "support_count": 3,
+              "failure_support_count": 2,
+              "candidate_signature_count": 3
+            },
+            "v2": {
+              "typed_plan_signature": "{\"steps\": [{\"column\": \"activity_label\", \"op\": \"FILTER_NOT_EMPTY\"}, {\"columns\": [\"x\", \"y\", \"z\"], \"op\": \"DERIVE_VECTOR_MAGNITUDE\", \"result\": \"acceleration_magnitude\"}, {\"column\": \"activity_label\", \"label\": \"dynamic\", \"op\": \"SPLIT_BY_VALUES\", \"values\": [\"Downstairs\", \"Jogging\", \"Upstairs\", \"Walking\"]}, {\"column\": \"activity_label\", \"label\": \"resting\", \"op\": \"SPLIT_BY_VALUES\", \"values\": [\"Sitting\", \"Standing\"]}, {\"aggregate\": \"mean\", \"column\": \"acceleration_magnitude\", \"op\": \"AGGREGATE_PARTITIONS\", \"partitions\": [\"dynamic\", \"resting\"]}, {\"mode\": \"difference\", \"op\": \"COMPARE_PARTITIONS\"}], \"version\": \"1\"}",
+              "typed_plan": {
+                "steps": [
+                  {
+                    "column": "activity_label",
+                    "op": "FILTER_NOT_EMPTY"
+                  },
+                  {
+                    "columns": [
+                      "x",
+                      "y",
+                      "z"
+                    ],
+                    "op": "DERIVE_VECTOR_MAGNITUDE",
+                    "result": "acceleration_magnitude"
+                  },
+                  {
+                    "column": "activity_label",
+                    "label": "dynamic",
+                    "op": "SPLIT_BY_VALUES",
+                    "values": [
+                      "Downstairs",
+                      "Jogging",
+                      "Upstairs",
+                      "Walking"
+                    ]
+                  },
+                  {
+                    "column": "activity_label",
+                    "label": "resting",
+                    "op": "SPLIT_BY_VALUES",
+                    "values": [
+                      "Sitting",
+                      "Standing"
+                    ]
+                  },
+                  {
+                    "aggregate": "mean",
+                    "column": "acceleration_magnitude",
+                    "op": "AGGREGATE_PARTITIONS",
+                    "partitions": [
+                      "dynamic",
+                      "resting"
+                    ]
+                  },
+                  {
+                    "mode": "difference",
+                    "op": "COMPARE_PARTITIONS"
+                  }
+                ],
+                "version": "1"
+              },
+              "support_count": 3,
+              "failure_support_count": 2,
+              "candidate_signature_count": 3
+            },
+            "v3": {
+              "typed_plan_signature": "{\"steps\": [{\"column\": \"activity_label\", \"op\": \"FILTER_NOT_EMPTY\"}, {\"columns\": [\"x\", \"y\", \"z\"], \"op\": \"DERIVE_VECTOR_MAGNITUDE\", \"result\": \"acceleration_magnitude\"}, {\"column\": \"activity_label\", \"label\": \"dynamic\", \"op\": \"SPLIT_BY_VALUES\", \"values\": [\"Downstairs\", \"Jogging\", \"Upstairs\", \"Walking\"]}, {\"column\": \"activity_label\", \"label\": \"resting\", \"op\": \"SPLIT_BY_VALUES\", \"values\": [\"Sitting\", \"Standing\"]}, {\"aggregate\": \"mean\", \"column\": \"acceleration_magnitude\", \"op\": \"AGGREGATE_PARTITIONS\", \"partitions\": [\"dynamic\", \"resting\"]}, {\"mode\": \"difference\", \"op\": \"COMPARE_PARTITIONS\"}], \"version\": \"1\"}",
+              "typed_plan": {
+                "steps": [
+                  {
+                    "column": "activity_label",
+                    "op": "FILTER_NOT_EMPTY"
+                  },
+                  {
+                    "columns": [
+                      "x",
+                      "y",
+                      "z"
+                    ],
+                    "op": "DERIVE_VECTOR_MAGNITUDE",
+                    "result": "acceleration_magnitude"
+                  },
+                  {
+                    "column": "activity_label",
+                    "label": "dynamic",
+                    "op": "SPLIT_BY_VALUES",
+                    "values": [
+                      "Downstairs",
+                      "Jogging",
+                      "Upstairs",
+                      "Walking"
+                    ]
+                  },
+                  {
+                    "column": "activity_label",
+                    "label": "resting",
+                    "op": "SPLIT_BY_VALUES",
+                    "values": [
+                      "Sitting",
+                      "Standing"
+                    ]
+                  },
+                  {
+                    "aggregate": "mean",
+                    "column": "acceleration_magnitude",
+                    "op": "AGGREGATE_PARTITIONS",
+                    "partitions": [
+                      "dynamic",
+                      "resting"
+                    ]
+                  },
+                  {
+                    "mode": "difference",
+                    "op": "COMPARE_PARTITIONS"
+                  }
+                ],
+                "version": "1"
+              },
+              "support_count": 3,
+              "failure_support_count": 2,
+              "candidate_signature_count": 2
+            }
+          },
+          "canonical_typed_plan_signature": "{\"steps\": [{\"column\": \"activity_label\", \"op\": \"FILTER_NOT_EMPTY\"}, {\"columns\": [\"x\", \"y\", \"z\"], \"op\": \"DERIVE_VECTOR_MAGNITUDE\", \"result\": \"acceleration_magnitude\"}, {\"column\": \"activity_label\", \"label\": \"dynamic\", \"op\": \"SPLIT_BY_VALUES\", \"values\": [\"Downstairs\", \"Jogging\", \"Upstairs\", \"Walking\"]}, {\"column\": \"activity_label\", \"label\": \"resting\", \"op\": \"SPLIT_BY_VALUES\", \"values\": [\"Sitting\", \"Standing\"]}, {\"aggregate\": \"mean\", \"column\": \"acceleration_magnitude\", \"op\": \"AGGREGATE_PARTITIONS\", \"partitions\": [\"dynamic\", \"resting\"]}, {\"mode\": \"difference\", \"op\": \"COMPARE_PARTITIONS\"}], \"version\": \"1\"}",
+          "canonical_typed_plan": {
+            "steps": [
+              {
+                "column": "activity_label",
+                "op": "FILTER_NOT_EMPTY"
+              },
+              {
+                "columns": [
+                  "x",
+                  "y",
+                  "z"
+                ],
+                "op": "DERIVE_VECTOR_MAGNITUDE",
+                "result": "acceleration_magnitude"
+              },
+              {
+                "column": "activity_label",
+                "label": "dynamic",
+                "op": "SPLIT_BY_VALUES",
+                "values": [
+                  "Downstairs",
+                  "Jogging",
+                  "Upstairs",
+                  "Walking"
+                ]
+              },
+              {
+                "column": "activity_label",
+                "label": "resting",
+                "op": "SPLIT_BY_VALUES",
+                "values": [
+                  "Sitting",
+                  "Standing"
+                ]
+              },
+              {
+                "aggregate": "mean",
+                "column": "acceleration_magnitude",
+                "op": "AGGREGATE_PARTITIONS",
+                "partitions": [
+                  "dynamic",
+                  "resting"
+                ]
+              },
+              {
+                "mode": "difference",
+                "op": "COMPARE_PARTITIONS"
+              }
+            ],
+            "version": "1"
+          }
+        },
+        "6": {
+          "by_version": {
+            "v1": {
+              "typed_plan_signature": "{\"steps\": [{\"column\": \"activity_label\", \"op\": \"FILTER_NOT_EMPTY\"}, {\"clip_negative\": true, \"fill_first\": 0.0, \"group_by\": [\"subject_id\"], \"op\": \"DERIVE_DURATION_SECONDS\", \"result\": \"dt_s\", \"timestamp_column\": \"timestamp\"}, {\"branches\": [{\"aggregate\": \"sum\", \"column\": \"dt_s\", \"filter_column\": \"activity_label\", \"filter_values\": [\"Sitting\", \"Standing\"], \"group_by\": [\"subject_id\"], \"result_column\": \"resting_duration\"}, {\"aggregate\": \"sum\", \"column\": \"dt_s\", \"filter_column\": \"activity_label\", \"filter_values\": [\"Downstairs\", \"Jogging\", \"Upstairs\", \"Walking\"], \"group_by\": [\"subject_id\"], \"result_column\": \"dynamic_duration\"}], \"op\": \"PARALLEL_AGGREGATE\"}, {\"left\": \"resting_duration\", \"op\": \"DERIVE_BINARY\", \"operation\": \"subtract\", \"result\": \"duration_margin\", \"right\": \"dynamic_duration\"}, {\"column\": \"duration_margin\", \"comparator\": \"gt\", \"op\": \"FILTER_COMPARE\", \"value\": 0}, {\"column\": \"duration_margin\", \"direction\": \"max\", \"op\": \"RANK_ROWS\", \"return_columns\": [\"subject_id\", \"resting_duration\", \"dynamic_duration\", \"duration_margin\"]}], \"version\": \"1\"}",
+              "typed_plan": {
+                "steps": [
+                  {
+                    "column": "activity_label",
+                    "op": "FILTER_NOT_EMPTY"
+                  },
+                  {
+                    "clip_negative": true,
+                    "fill_first": 0.0,
+                    "group_by": [
+                      "subject_id"
+                    ],
+                    "op": "DERIVE_DURATION_SECONDS",
+                    "result": "dt_s",
+                    "timestamp_column": "timestamp"
+                  },
+                  {
+                    "branches": [
+                      {
+                        "aggregate": "sum",
+                        "column": "dt_s",
+                        "filter_column": "activity_label",
+                        "filter_values": [
+                          "Sitting",
+                          "Standing"
+                        ],
+                        "group_by": [
+                          "subject_id"
+                        ],
+                        "result_column": "resting_duration"
+                      },
+                      {
+                        "aggregate": "sum",
+                        "column": "dt_s",
+                        "filter_column": "activity_label",
+                        "filter_values": [
+                          "Downstairs",
+                          "Jogging",
+                          "Upstairs",
+                          "Walking"
+                        ],
+                        "group_by": [
+                          "subject_id"
+                        ],
+                        "result_column": "dynamic_duration"
+                      }
+                    ],
+                    "op": "PARALLEL_AGGREGATE"
+                  },
+                  {
+                    "left": "resting_duration",
+                    "op": "DERIVE_BINARY",
+                    "operation": "subtract",
+                    "result": "duration_margin",
+                    "right": "dynamic_duration"
+                  },
+                  {
+                    "column": "duration_margin",
+                    "comparator": "gt",
+                    "op": "FILTER_COMPARE",
+                    "value": 0
+                  },
+                  {
+                    "column": "duration_margin",
+                    "direction": "max",
+                    "op": "RANK_ROWS",
+                    "return_columns": [
+                      "subject_id",
+                      "resting_duration",
+                      "dynamic_duration",
+                      "duration_margin"
+                    ]
+                  }
+                ],
+                "version": "1"
+              },
+              "support_count": 5,
+              "failure_support_count": 5,
+              "candidate_signature_count": 1
+            },
+            "v2": {
+              "typed_plan_signature": "{\"steps\": [{\"column\": \"activity_label\", \"op\": \"FILTER_NOT_EMPTY\"}, {\"clip_negative\": true, \"fill_first\": 0.0, \"group_by\": [\"subject_id\"], \"op\": \"DERIVE_DURATION_SECONDS\", \"result\": \"dt_s\", \"timestamp_column\": \"timestamp\"}, {\"branches\": [{\"aggregate\": \"sum\", \"column\": \"dt_s\", \"filter_column\": \"activity_label\", \"filter_values\": [\"Sitting\", \"Standing\"], \"group_by\": [\"subject_id\"], \"result_column\": \"resting_duration\"}, {\"aggregate\": \"sum\", \"column\": \"dt_s\", \"filter_column\": \"activity_label\", \"filter_values\": [\"Downstairs\", \"Jogging\", \"Upstairs\", \"Walking\"], \"group_by\": [\"subject_id\"], \"result_column\": \"dynamic_duration\"}], \"op\": \"PARALLEL_AGGREGATE\"}, {\"left\": \"resting_duration\", \"op\": \"DERIVE_BINARY\", \"operation\": \"subtract\", \"result\": \"duration_margin\", \"right\": \"dynamic_duration\"}, {\"column\": \"duration_margin\", \"comparator\": \"gt\", \"op\": \"FILTER_COMPARE\", \"value\": 0}, {\"column\": \"duration_margin\", \"direction\": \"max\", \"op\": \"RANK_ROWS\", \"return_columns\": [\"subject_id\", \"resting_duration\", \"dynamic_duration\", \"duration_margin\"]}], \"version\": \"1\"}",
+              "typed_plan": {
+                "steps": [
+                  {
+                    "column": "activity_label",
+                    "op": "FILTER_NOT_EMPTY"
+                  },
+                  {
+                    "clip_negative": true,
+                    "fill_first": 0.0,
+                    "group_by": [
+                      "subject_id"
+                    ],
+                    "op": "DERIVE_DURATION_SECONDS",
+                    "result": "dt_s",
+                    "timestamp_column": "timestamp"
+                  },
+                  {
+                    "branches": [
+                      {
+                        "aggregate": "sum",
+                        "column": "dt_s",
+                        "filter_column": "activity_label",
+                        "filter_values": [
+                          "Sitting",
+                          "Standing"
+                        ],
+                        "group_by": [
+                          "subject_id"
+                        ],
+                        "result_column": "resting_duration"
+                      },
+                      {
+                        "aggregate": "sum",
+                        "column": "dt_s",
+                        "filter_column": "activity_label",
+                        "filter_values": [
+                          "Downstairs",
+                          "Jogging",
+                          "Upstairs",
+                          "Walking"
+                        ],
+                        "group_by": [
+                          "subject_id"
+                        ],
+                        "result_column": "dynamic_duration"
+                      }
+                    ],
+                    "op": "PARALLEL_AGGREGATE"
+                  },
+                  {
+                    "left": "resting_duration",
+                    "op": "DERIVE_BINARY",
+                    "operation": "subtract",
+                    "result": "duration_margin",
+                    "right": "dynamic_duration"
+                  },
+                  {
+                    "column": "duration_margin",
+                    "comparator": "gt",
+                    "op": "FILTER_COMPARE",
+                    "value": 0
+                  },
+                  {
+                    "column": "duration_margin",
+                    "direction": "max",
+                    "op": "RANK_ROWS",
+                    "return_columns": [
+                      "subject_id",
+                      "resting_duration",
+                      "dynamic_duration",
+                      "duration_margin"
+                    ]
+                  }
+                ],
+                "version": "1"
+              },
+              "support_count": 5,
+              "failure_support_count": 5,
+              "candidate_signature_count": 1
+            },
+            "v3": {
+              "typed_plan_signature": "{\"steps\": [{\"column\": \"activity_label\", \"op\": \"FILTER_NOT_EMPTY\"}, {\"clip_negative\": true, \"fill_first\": 0.0, \"group_by\": [\"subject_id\"], \"op\": \"DERIVE_DURATION_SECONDS\", \"result\": \"dt_s\", \"timestamp_column\": \"timestamp\"}, {\"branches\": [{\"aggregate\": \"sum\", \"column\": \"dt_s\", \"filter_column\": \"activity_label\", \"filter_values\": [\"Sitting\", \"Standing\"], \"group_by\": [\"subject_id\"], \"result_column\": \"resting_duration\"}, {\"aggregate\": \"sum\", \"column\": \"dt_s\", \"filter_column\": \"activity_label\", \"filter_values\": [\"Downstairs\", \"Jogging\", \"Upstairs\", \"Walking\"], \"group_by\": [\"subject_id\"], \"result_column\": \"dynamic_duration\"}], \"op\": \"PARALLEL_AGGREGATE\"}, {\"left\": \"resting_duration\", \"op\": \"DERIVE_BINARY\", \"operation\": \"subtract\", \"result\": \"duration_margin\", \"right\": \"dynamic_duration\"}, {\"column\": \"duration_margin\", \"comparator\": \"gt\", \"op\": \"FILTER_COMPARE\", \"value\": 0}, {\"column\": \"duration_margin\", \"direction\": \"max\", \"op\": \"RANK_ROWS\", \"return_columns\": [\"subject_id\", \"resting_duration\", \"dynamic_duration\", \"duration_margin\"]}], \"version\": \"1\"}",
+              "typed_plan": {
+                "steps": [
+                  {
+                    "column": "activity_label",
+                    "op": "FILTER_NOT_EMPTY"
+                  },
+                  {
+                    "clip_negative": true,
+                    "fill_first": 0.0,
+                    "group_by": [
+                      "subject_id"
+                    ],
+                    "op": "DERIVE_DURATION_SECONDS",
+                    "result": "dt_s",
+                    "timestamp_column": "timestamp"
+                  },
+                  {
+                    "branches": [
+                      {
+                        "aggregate": "sum",
+                        "column": "dt_s",
+                        "filter_column": "activity_label",
+                        "filter_values": [
+                          "Sitting",
+                          "Standing"
+                        ],
+                        "group_by": [
+                          "subject_id"
+                        ],
+                        "result_column": "resting_duration"
+                      },
+                      {
+                        "aggregate": "sum",
+                        "column": "dt_s",
+                        "filter_column": "activity_label",
+                        "filter_values": [
+                          "Downstairs",
+                          "Jogging",
+                          "Upstairs",
+                          "Walking"
+                        ],
+                        "group_by": [
+                          "subject_id"
+                        ],
+                        "result_column": "dynamic_duration"
+                      }
+                    ],
+                    "op": "PARALLEL_AGGREGATE"
+                  },
+                  {
+                    "left": "resting_duration",
+                    "op": "DERIVE_BINARY",
+                    "operation": "subtract",
+                    "result": "duration_margin",
+                    "right": "dynamic_duration"
+                  },
+                  {
+                    "column": "duration_margin",
+                    "comparator": "gt",
+                    "op": "FILTER_COMPARE",
+                    "value": 0
+                  },
+                  {
+                    "column": "duration_margin",
+                    "direction": "max",
+                    "op": "RANK_ROWS",
+                    "return_columns": [
+                      "subject_id",
+                      "resting_duration",
+                      "dynamic_duration",
+                      "duration_margin"
+                    ]
+                  }
+                ],
+                "version": "1"
+              },
+              "support_count": 5,
+              "failure_support_count": 5,
+              "candidate_signature_count": 1
+            }
+          },
+          "canonical_typed_plan_signature": "{\"steps\": [{\"column\": \"activity_label\", \"op\": \"FILTER_NOT_EMPTY\"}, {\"clip_negative\": true, \"fill_first\": 0.0, \"group_by\": [\"subject_id\"], \"op\": \"DERIVE_DURATION_SECONDS\", \"result\": \"dt_s\", \"timestamp_column\": \"timestamp\"}, {\"branches\": [{\"aggregate\": \"sum\", \"column\": \"dt_s\", \"filter_column\": \"activity_label\", \"filter_values\": [\"Sitting\", \"Standing\"], \"group_by\": [\"subject_id\"], \"result_column\": \"resting_duration\"}, {\"aggregate\": \"sum\", \"column\": \"dt_s\", \"filter_column\": \"activity_label\", \"filter_values\": [\"Downstairs\", \"Jogging\", \"Upstairs\", \"Walking\"], \"group_by\": [\"subject_id\"], \"result_column\": \"dynamic_duration\"}], \"op\": \"PARALLEL_AGGREGATE\"}, {\"left\": \"resting_duration\", \"op\": \"DERIVE_BINARY\", \"operation\": \"subtract\", \"result\": \"duration_margin\", \"right\": \"dynamic_duration\"}, {\"column\": \"duration_margin\", \"comparator\": \"gt\", \"op\": \"FILTER_COMPARE\", \"value\": 0}, {\"column\": \"duration_margin\", \"direction\": \"max\", \"op\": \"RANK_ROWS\", \"return_columns\": [\"subject_id\", \"resting_duration\", \"dynamic_duration\", \"duration_margin\"]}], \"version\": \"1\"}",
+          "canonical_typed_plan": {
+            "steps": [
+              {
+                "column": "activity_label",
+                "op": "FILTER_NOT_EMPTY"
+              },
+              {
+                "clip_negative": true,
+                "fill_first": 0.0,
+                "group_by": [
+                  "subject_id"
+                ],
+                "op": "DERIVE_DURATION_SECONDS",
+                "result": "dt_s",
+                "timestamp_column": "timestamp"
+              },
+              {
+                "branches": [
+                  {
+                    "aggregate": "sum",
+                    "column": "dt_s",
+                    "filter_column": "activity_label",
+                    "filter_values": [
+                      "Sitting",
+                      "Standing"
+                    ],
+                    "group_by": [
+                      "subject_id"
+                    ],
+                    "result_column": "resting_duration"
+                  },
+                  {
+                    "aggregate": "sum",
+                    "column": "dt_s",
+                    "filter_column": "activity_label",
+                    "filter_values": [
+                      "Downstairs",
+                      "Jogging",
+                      "Upstairs",
+                      "Walking"
+                    ],
+                    "group_by": [
+                      "subject_id"
+                    ],
+                    "result_column": "dynamic_duration"
+                  }
+                ],
+                "op": "PARALLEL_AGGREGATE"
+              },
+              {
+                "left": "resting_duration",
+                "op": "DERIVE_BINARY",
+                "operation": "subtract",
+                "result": "duration_margin",
+                "right": "dynamic_duration"
+              },
+              {
+                "column": "duration_margin",
+                "comparator": "gt",
+                "op": "FILTER_COMPARE",
+                "value": 0
+              },
+              {
+                "column": "duration_margin",
+                "direction": "max",
+                "op": "RANK_ROWS",
+                "return_columns": [
+                  "subject_id",
+                  "resting_duration",
+                  "dynamic_duration",
+                  "duration_margin"
+                ]
+              }
+            ],
+            "version": "1"
+          }
+        },
+        "7": {
+          "by_version": {
+            "v1": {
+              "typed_plan_signature": "{\"steps\": [{\"column\": \"subject_id\", \"comparator\": \"eq\", \"op\": \"FILTER_COMPARE\", \"value\": 20}, {\"column\": \"activity_label\", \"comparator\": \"eq\", \"op\": \"FILTER_COMPARE\", \"value\": \"Upstairs\"}, {\"columns\": [\"x\", \"y\", \"z\"], \"op\": \"DERIVE_VECTOR_MAGNITUDE\", \"result\": \"acceleration_magnitude\"}, {\"aggregate\": \"median\", \"column\": \"acceleration_magnitude\", \"op\": \"AGGREGATE_COLUMN\"}], \"version\": \"1\"}",
+              "typed_plan": {
+                "steps": [
+                  {
+                    "column": "subject_id",
+                    "comparator": "eq",
+                    "op": "FILTER_COMPARE",
+                    "value": 20
+                  },
+                  {
+                    "column": "activity_label",
+                    "comparator": "eq",
+                    "op": "FILTER_COMPARE",
+                    "value": "Upstairs"
+                  },
+                  {
+                    "columns": [
+                      "x",
+                      "y",
+                      "z"
+                    ],
+                    "op": "DERIVE_VECTOR_MAGNITUDE",
+                    "result": "acceleration_magnitude"
+                  },
+                  {
+                    "aggregate": "median",
+                    "column": "acceleration_magnitude",
+                    "op": "AGGREGATE_COLUMN"
+                  }
+                ],
+                "version": "1"
+              },
+              "support_count": 5,
+              "failure_support_count": 3,
+              "candidate_signature_count": 1
+            },
+            "v2": {
+              "typed_plan_signature": "{\"steps\": [{\"column\": \"subject_id\", \"comparator\": \"eq\", \"op\": \"FILTER_COMPARE\", \"value\": 20}, {\"column\": \"activity_label\", \"comparator\": \"eq\", \"op\": \"FILTER_COMPARE\", \"value\": \"Upstairs\"}, {\"columns\": [\"x\", \"y\", \"z\"], \"op\": \"DERIVE_VECTOR_MAGNITUDE\", \"result\": \"acceleration_magnitude\"}, {\"aggregate\": \"median\", \"column\": \"acceleration_magnitude\", \"op\": \"AGGREGATE_COLUMN\"}], \"version\": \"1\"}",
+              "typed_plan": {
+                "steps": [
+                  {
+                    "column": "subject_id",
+                    "comparator": "eq",
+                    "op": "FILTER_COMPARE",
+                    "value": 20
+                  },
+                  {
+                    "column": "activity_label",
+                    "comparator": "eq",
+                    "op": "FILTER_COMPARE",
+                    "value": "Upstairs"
+                  },
+                  {
+                    "columns": [
+                      "x",
+                      "y",
+                      "z"
+                    ],
+                    "op": "DERIVE_VECTOR_MAGNITUDE",
+                    "result": "acceleration_magnitude"
+                  },
+                  {
+                    "aggregate": "median",
+                    "column": "acceleration_magnitude",
+                    "op": "AGGREGATE_COLUMN"
+                  }
+                ],
+                "version": "1"
+              },
+              "support_count": 4,
+              "failure_support_count": 2,
+              "candidate_signature_count": 2
+            },
+            "v3": {
+              "typed_plan_signature": "{\"steps\": [{\"column\": \"subject_id\", \"comparator\": \"eq\", \"op\": \"FILTER_COMPARE\", \"value\": 20}, {\"column\": \"activity_label\", \"comparator\": \"eq\", \"op\": \"FILTER_COMPARE\", \"value\": \"Upstairs\"}, {\"columns\": [\"x\", \"y\", \"z\"], \"op\": \"DERIVE_VECTOR_MAGNITUDE\", \"result\": \"acceleration_magnitude\"}, {\"aggregate\": \"median\", \"column\": \"acceleration_magnitude\", \"op\": \"AGGREGATE_COLUMN\"}], \"version\": \"1\"}",
+              "typed_plan": {
+                "steps": [
+                  {
+                    "column": "subject_id",
+                    "comparator": "eq",
+                    "op": "FILTER_COMPARE",
+                    "value": 20
+                  },
+                  {
+                    "column": "activity_label",
+                    "comparator": "eq",
+                    "op": "FILTER_COMPARE",
+                    "value": "Upstairs"
+                  },
+                  {
+                    "columns": [
+                      "x",
+                      "y",
+                      "z"
+                    ],
+                    "op": "DERIVE_VECTOR_MAGNITUDE",
+                    "result": "acceleration_magnitude"
+                  },
+                  {
+                    "aggregate": "median",
+                    "column": "acceleration_magnitude",
+                    "op": "AGGREGATE_COLUMN"
+                  }
+                ],
+                "version": "1"
+              },
+              "support_count": 4,
+              "failure_support_count": 2,
+              "candidate_signature_count": 2
+            }
+          },
+          "canonical_typed_plan_signature": "{\"steps\": [{\"column\": \"subject_id\", \"comparator\": \"eq\", \"op\": \"FILTER_COMPARE\", \"value\": 20}, {\"column\": \"activity_label\", \"comparator\": \"eq\", \"op\": \"FILTER_COMPARE\", \"value\": \"Upstairs\"}, {\"columns\": [\"x\", \"y\", \"z\"], \"op\": \"DERIVE_VECTOR_MAGNITUDE\", \"result\": \"acceleration_magnitude\"}, {\"aggregate\": \"median\", \"column\": \"acceleration_magnitude\", \"op\": \"AGGREGATE_COLUMN\"}], \"version\": \"1\"}",
+          "canonical_typed_plan": {
+            "steps": [
+              {
+                "column": "subject_id",
+                "comparator": "eq",
+                "op": "FILTER_COMPARE",
+                "value": 20
+              },
+              {
+                "column": "activity_label",
+                "comparator": "eq",
+                "op": "FILTER_COMPARE",
+                "value": "Upstairs"
+              },
+              {
+                "columns": [
+                  "x",
+                  "y",
+                  "z"
+                ],
+                "op": "DERIVE_VECTOR_MAGNITUDE",
+                "result": "acceleration_magnitude"
+              },
+              {
+                "aggregate": "median",
+                "column": "acceleration_magnitude",
+                "op": "AGGREGATE_COLUMN"
+              }
+            ],
+            "version": "1"
+          }
+        },
+        "8": {
+          "by_version": {
+            "v1": {
+              "typed_plan_signature": "{\"steps\": [{\"column\": \"activity_label\", \"label\": \"upstairs\", \"op\": \"SPLIT_BY_VALUES\", \"values\": [\"Upstairs\"]}, {\"column\": \"activity_label\", \"label\": \"downstairs\", \"op\": \"SPLIT_BY_VALUES\", \"values\": [\"Downstairs\"]}, {\"aggregate\": \"mean\", \"column\": \"z\", \"op\": \"AGGREGATE_PARTITIONS\", \"partitions\": [\"upstairs\", \"downstairs\"]}, {\"mode\": \"abs_difference\", \"op\": \"COMPARE_PARTITIONS\"}], \"version\": \"1\"}",
+              "typed_plan": {
+                "steps": [
+                  {
+                    "column": "activity_label",
+                    "label": "upstairs",
+                    "op": "SPLIT_BY_VALUES",
+                    "values": [
+                      "Upstairs"
+                    ]
+                  },
+                  {
+                    "column": "activity_label",
+                    "label": "downstairs",
+                    "op": "SPLIT_BY_VALUES",
+                    "values": [
+                      "Downstairs"
+                    ]
+                  },
+                  {
+                    "aggregate": "mean",
+                    "column": "z",
+                    "op": "AGGREGATE_PARTITIONS",
+                    "partitions": [
+                      "upstairs",
+                      "downstairs"
+                    ]
+                  },
+                  {
+                    "mode": "abs_difference",
+                    "op": "COMPARE_PARTITIONS"
+                  }
+                ],
+                "version": "1"
+              },
+              "support_count": 3,
+              "failure_support_count": 3,
+              "candidate_signature_count": 3
+            },
+            "v2": {
+              "typed_plan_signature": "{\"steps\": [{\"column\": \"activity_label\", \"label\": \"upstairs\", \"op\": \"SPLIT_BY_VALUES\", \"values\": [\"Upstairs\"]}, {\"column\": \"activity_label\", \"label\": \"downstairs\", \"op\": \"SPLIT_BY_VALUES\", \"values\": [\"Downstairs\"]}, {\"aggregate\": \"mean\", \"column\": \"z\", \"op\": \"AGGREGATE_PARTITIONS\", \"partitions\": [\"upstairs\", \"downstairs\"]}, {\"mode\": \"abs_difference\", \"op\": \"COMPARE_PARTITIONS\"}], \"version\": \"1\"}",
+              "typed_plan": {
+                "steps": [
+                  {
+                    "column": "activity_label",
+                    "label": "upstairs",
+                    "op": "SPLIT_BY_VALUES",
+                    "values": [
+                      "Upstairs"
+                    ]
+                  },
+                  {
+                    "column": "activity_label",
+                    "label": "downstairs",
+                    "op": "SPLIT_BY_VALUES",
+                    "values": [
+                      "Downstairs"
+                    ]
+                  },
+                  {
+                    "aggregate": "mean",
+                    "column": "z",
+                    "op": "AGGREGATE_PARTITIONS",
+                    "partitions": [
+                      "upstairs",
+                      "downstairs"
+                    ]
+                  },
+                  {
+                    "mode": "abs_difference",
+                    "op": "COMPARE_PARTITIONS"
+                  }
+                ],
+                "version": "1"
+              },
+              "support_count": 3,
+              "failure_support_count": 3,
+              "candidate_signature_count": 3
+            },
+            "v3": {
+              "typed_plan_signature": "{\"steps\": [{\"column\": \"activity_label\", \"label\": \"upstairs\", \"op\": \"SPLIT_BY_VALUES\", \"values\": [\"Upstairs\"]}, {\"column\": \"activity_label\", \"label\": \"downstairs\", \"op\": \"SPLIT_BY_VALUES\", \"values\": [\"Downstairs\"]}, {\"aggregate\": \"mean\", \"column\": \"z\", \"op\": \"AGGREGATE_PARTITIONS\", \"partitions\": [\"upstairs\", \"downstairs\"]}, {\"mode\": \"abs_difference\", \"op\": \"COMPARE_PARTITIONS\"}], \"version\": \"1\"}",
+              "typed_plan": {
+                "steps": [
+                  {
+                    "column": "activity_label",
+                    "label": "upstairs",
+                    "op": "SPLIT_BY_VALUES",
+                    "values": [
+                      "Upstairs"
+                    ]
+                  },
+                  {
+                    "column": "activity_label",
+                    "label": "downstairs",
+                    "op": "SPLIT_BY_VALUES",
+                    "values": [
+                      "Downstairs"
+                    ]
+                  },
+                  {
+                    "aggregate": "mean",
+                    "column": "z",
+                    "op": "AGGREGATE_PARTITIONS",
+                    "partitions": [
+                      "upstairs",
+                      "downstairs"
+                    ]
+                  },
+                  {
+                    "mode": "abs_difference",
+                    "op": "COMPARE_PARTITIONS"
+                  }
+                ],
+                "version": "1"
+              },
+              "support_count": 3,
+              "failure_support_count": 3,
+              "candidate_signature_count": 3
+            }
+          },
+          "canonical_typed_plan_signature": "{\"steps\": [{\"column\": \"activity_label\", \"label\": \"upstairs\", \"op\": \"SPLIT_BY_VALUES\", \"values\": [\"Upstairs\"]}, {\"column\": \"activity_label\", \"label\": \"downstairs\", \"op\": \"SPLIT_BY_VALUES\", \"values\": [\"Downstairs\"]}, {\"aggregate\": \"mean\", \"column\": \"z\", \"op\": \"AGGREGATE_PARTITIONS\", \"partitions\": [\"upstairs\", \"downstairs\"]}, {\"mode\": \"abs_difference\", \"op\": \"COMPARE_PARTITIONS\"}], \"version\": \"1\"}",
+          "canonical_typed_plan": {
+            "steps": [
+              {
+                "column": "activity_label",
+                "label": "upstairs",
+                "op": "SPLIT_BY_VALUES",
+                "values": [
+                  "Upstairs"
+                ]
+              },
+              {
+                "column": "activity_label",
+                "label": "downstairs",
+                "op": "SPLIT_BY_VALUES",
+                "values": [
+                  "Downstairs"
+                ]
+              },
+              {
+                "aggregate": "mean",
+                "column": "z",
+                "op": "AGGREGATE_PARTITIONS",
+                "partitions": [
+                  "upstairs",
+                  "downstairs"
+                ]
+              },
+              {
+                "mode": "abs_difference",
+                "op": "COMPARE_PARTITIONS"
+              }
+            ],
+            "version": "1"
+          }
+        }
+      }
+    },
+    "mit_ecg": {
+      "queries": {
+        "1": {
+          "by_version": {
+            "v1": {
+              "typed_plan_signature": "{\"steps\": [{\"column\": \"record_id\", \"comparator\": \"eq\", \"op\": \"FILTER_COMPARE\", \"value\": 101}, {\"aggregate\": \"min\", \"column\": \"MLII\", \"op\": \"AGGREGATE_COLUMN\"}], \"version\": \"1\"}",
+              "typed_plan": {
+                "steps": [
+                  {
+                    "column": "record_id",
+                    "comparator": "eq",
+                    "op": "FILTER_COMPARE",
+                    "value": 101
+                  },
+                  {
+                    "aggregate": "min",
+                    "column": "MLII",
+                    "op": "AGGREGATE_COLUMN"
+                  }
+                ],
+                "version": "1"
+              },
+              "support_count": 1,
+              "failure_support_count": 0,
+              "candidate_signature_count": 1
+            },
+            "v2": {
+              "typed_plan_signature": "{\"steps\": [{\"column\": \"record_id\", \"comparator\": \"eq\", \"op\": \"FILTER_COMPARE\", \"value\": 101}, {\"aggregate\": \"min\", \"column\": \"MLII\", \"op\": \"AGGREGATE_COLUMN\"}], \"version\": \"1\"}",
+              "typed_plan": {
+                "steps": [
+                  {
+                    "column": "record_id",
+                    "comparator": "eq",
+                    "op": "FILTER_COMPARE",
+                    "value": 101
+                  },
+                  {
+                    "aggregate": "min",
+                    "column": "MLII",
+                    "op": "AGGREGATE_COLUMN"
+                  }
+                ],
+                "version": "1"
+              },
+              "support_count": 1,
+              "failure_support_count": 0,
+              "candidate_signature_count": 1
+            },
+            "v3": {
+              "typed_plan_signature": "{\"steps\": [{\"column\": \"record_id\", \"comparator\": \"eq\", \"op\": \"FILTER_COMPARE\", \"value\": 101}, {\"aggregate\": \"min\", \"column\": \"MLII\", \"op\": \"AGGREGATE_COLUMN\"}], \"version\": \"1\"}",
+              "typed_plan": {
+                "steps": [
+                  {
+                    "column": "record_id",
+                    "comparator": "eq",
+                    "op": "FILTER_COMPARE",
+                    "value": 101
+                  },
+                  {
+                    "aggregate": "min",
+                    "column": "MLII",
+                    "op": "AGGREGATE_COLUMN"
+                  }
+                ],
+                "version": "1"
+              },
+              "support_count": 1,
+              "failure_support_count": 0,
+              "candidate_signature_count": 1
+            }
+          },
+          "canonical_typed_plan_signature": "{\"steps\": [{\"column\": \"record_id\", \"comparator\": \"eq\", \"op\": \"FILTER_COMPARE\", \"value\": 101}, {\"aggregate\": \"min\", \"column\": \"MLII\", \"op\": \"AGGREGATE_COLUMN\"}], \"version\": \"1\"}",
+          "canonical_typed_plan": {
+            "steps": [
+              {
+                "column": "record_id",
+                "comparator": "eq",
+                "op": "FILTER_COMPARE",
+                "value": 101
+              },
+              {
+                "aggregate": "min",
+                "column": "MLII",
+                "op": "AGGREGATE_COLUMN"
+              }
+            ],
+            "version": "1"
+          }
+        },
+        "2": {
+          "by_version": {
+            "v1": {
+              "typed_plan_signature": "{\"steps\": [{\"column\": \"record_id\", \"comparator\": \"eq\", \"op\": \"FILTER_COMPARE\", \"value\": 234}, {\"aggregate\": \"max\", \"column\": \"time_s\", \"op\": \"AGGREGATE_COLUMN\"}], \"version\": \"1\"}",
+              "typed_plan": {
+                "steps": [
+                  {
+                    "column": "record_id",
+                    "comparator": "eq",
+                    "op": "FILTER_COMPARE",
+                    "value": 234
+                  },
+                  {
+                    "aggregate": "max",
+                    "column": "time_s",
+                    "op": "AGGREGATE_COLUMN"
+                  }
+                ],
+                "version": "1"
+              },
+              "support_count": 1,
+              "failure_support_count": 0,
+              "candidate_signature_count": 1
+            },
+            "v2": {
+              "typed_plan_signature": "{\"steps\": [{\"column\": \"record_id\", \"comparator\": \"eq\", \"op\": \"FILTER_COMPARE\", \"value\": 234}, {\"aggregate\": \"max\", \"column\": \"time_s\", \"op\": \"AGGREGATE_COLUMN\"}], \"version\": \"1\"}",
+              "typed_plan": {
+                "steps": [
+                  {
+                    "column": "record_id",
+                    "comparator": "eq",
+                    "op": "FILTER_COMPARE",
+                    "value": 234
+                  },
+                  {
+                    "aggregate": "max",
+                    "column": "time_s",
+                    "op": "AGGREGATE_COLUMN"
+                  }
+                ],
+                "version": "1"
+              },
+              "support_count": 1,
+              "failure_support_count": 0,
+              "candidate_signature_count": 1
+            },
+            "v3": {
+              "typed_plan_signature": "{\"steps\": [{\"column\": \"record_id\", \"comparator\": \"eq\", \"op\": \"FILTER_COMPARE\", \"value\": 234}, {\"aggregate\": \"max\", \"column\": \"time_s\", \"op\": \"AGGREGATE_COLUMN\"}], \"version\": \"1\"}",
+              "typed_plan": {
+                "steps": [
+                  {
+                    "column": "record_id",
+                    "comparator": "eq",
+                    "op": "FILTER_COMPARE",
+                    "value": 234
+                  },
+                  {
+                    "aggregate": "max",
+                    "column": "time_s",
+                    "op": "AGGREGATE_COLUMN"
+                  }
+                ],
+                "version": "1"
+              },
+              "support_count": 1,
+              "failure_support_count": 0,
+              "candidate_signature_count": 1
+            }
+          },
+          "canonical_typed_plan_signature": "{\"steps\": [{\"column\": \"record_id\", \"comparator\": \"eq\", \"op\": \"FILTER_COMPARE\", \"value\": 234}, {\"aggregate\": \"max\", \"column\": \"time_s\", \"op\": \"AGGREGATE_COLUMN\"}], \"version\": \"1\"}",
+          "canonical_typed_plan": {
+            "steps": [
+              {
+                "column": "record_id",
+                "comparator": "eq",
+                "op": "FILTER_COMPARE",
+                "value": 234
+              },
+              {
+                "aggregate": "max",
+                "column": "time_s",
+                "op": "AGGREGATE_COLUMN"
+              }
+            ],
+            "version": "1"
+          }
+        },
+        "3": {
+          "by_version": {
+            "v1": {
+              "typed_plan_signature": "{\"steps\": [{\"column\": \"record_id\", \"comparator\": \"eq\", \"op\": \"FILTER_COMPARE\", \"value\": 106}, {\"column\": \"MLII\", \"comparator\": \"gt\", \"op\": \"FILTER_COMPARE\", \"value\": 0}, {\"op\": \"COUNT_ROWS\"}], \"version\": \"1\"}",
+              "typed_plan": {
+                "steps": [
+                  {
+                    "column": "record_id",
+                    "comparator": "eq",
+                    "op": "FILTER_COMPARE",
+                    "value": 106
+                  },
+                  {
+                    "column": "MLII",
+                    "comparator": "gt",
+                    "op": "FILTER_COMPARE",
+                    "value": 0
+                  },
+                  {
+                    "op": "COUNT_ROWS"
+                  }
+                ],
+                "version": "1"
+              },
+              "support_count": 1,
+              "failure_support_count": 0,
+              "candidate_signature_count": 1
+            },
+            "v2": {
+              "typed_plan_signature": "{\"steps\": [{\"column\": \"record_id\", \"comparator\": \"eq\", \"op\": \"FILTER_COMPARE\", \"value\": 106}, {\"column\": \"MLII\", \"comparator\": \"gt\", \"op\": \"FILTER_COMPARE\", \"value\": 0}, {\"op\": \"COUNT_ROWS\"}], \"version\": \"1\"}",
+              "typed_plan": {
+                "steps": [
+                  {
+                    "column": "record_id",
+                    "comparator": "eq",
+                    "op": "FILTER_COMPARE",
+                    "value": 106
+                  },
+                  {
+                    "column": "MLII",
+                    "comparator": "gt",
+                    "op": "FILTER_COMPARE",
+                    "value": 0
+                  },
+                  {
+                    "op": "COUNT_ROWS"
+                  }
+                ],
+                "version": "1"
+              },
+              "support_count": 1,
+              "failure_support_count": 0,
+              "candidate_signature_count": 1
+            },
+            "v3": {
+              "typed_plan_signature": "{\"steps\": [{\"column\": \"record_id\", \"comparator\": \"eq\", \"op\": \"FILTER_COMPARE\", \"value\": 106}, {\"column\": \"MLII\", \"comparator\": \"gt\", \"op\": \"FILTER_COMPARE\", \"value\": 0}, {\"op\": \"COUNT_ROWS\"}], \"version\": \"1\"}",
+              "typed_plan": {
+                "steps": [
+                  {
+                    "column": "record_id",
+                    "comparator": "eq",
+                    "op": "FILTER_COMPARE",
+                    "value": 106
+                  },
+                  {
+                    "column": "MLII",
+                    "comparator": "gt",
+                    "op": "FILTER_COMPARE",
+                    "value": 0
+                  },
+                  {
+                    "op": "COUNT_ROWS"
+                  }
+                ],
+                "version": "1"
+              },
+              "support_count": 1,
+              "failure_support_count": 0,
+              "candidate_signature_count": 1
+            }
+          },
+          "canonical_typed_plan_signature": "{\"steps\": [{\"column\": \"record_id\", \"comparator\": \"eq\", \"op\": \"FILTER_COMPARE\", \"value\": 106}, {\"column\": \"MLII\", \"comparator\": \"gt\", \"op\": \"FILTER_COMPARE\", \"value\": 0}, {\"op\": \"COUNT_ROWS\"}], \"version\": \"1\"}",
+          "canonical_typed_plan": {
+            "steps": [
+              {
+                "column": "record_id",
+                "comparator": "eq",
+                "op": "FILTER_COMPARE",
+                "value": 106
+              },
+              {
+                "column": "MLII",
+                "comparator": "gt",
+                "op": "FILTER_COMPARE",
+                "value": 0
+              },
+              {
+                "op": "COUNT_ROWS"
+              }
+            ],
+            "version": "1"
+          }
+        },
+        "4": {
+          "by_version": {
+            "v1": {
+              "typed_plan_signature": "{\"steps\": [{\"column\": \"record_id\", \"comparator\": \"eq\", \"op\": \"FILTER_COMPARE\", \"value\": 221}, {\"column\": \"annotation\", \"op\": \"FILTER_NOT_EMPTY\"}, {\"aggregate\": \"max\", \"column\": \"time_s\", \"op\": \"AGGREGATE_COLUMN\"}], \"version\": \"1\"}",
+              "typed_plan": {
+                "steps": [
+                  {
+                    "column": "record_id",
+                    "comparator": "eq",
+                    "op": "FILTER_COMPARE",
+                    "value": 221
+                  },
+                  {
+                    "column": "annotation",
+                    "op": "FILTER_NOT_EMPTY"
+                  },
+                  {
+                    "aggregate": "max",
+                    "column": "time_s",
+                    "op": "AGGREGATE_COLUMN"
+                  }
+                ],
+                "version": "1"
+              },
+              "support_count": 1,
+              "failure_support_count": 0,
+              "candidate_signature_count": 1
+            },
+            "v2": {
+              "typed_plan_signature": "{\"steps\": [{\"column\": \"record_id\", \"comparator\": \"eq\", \"op\": \"FILTER_COMPARE\", \"value\": 221}, {\"column\": \"annotation\", \"op\": \"FILTER_NOT_EMPTY\"}, {\"aggregate\": \"max\", \"column\": \"time_s\", \"op\": \"AGGREGATE_COLUMN\"}], \"version\": \"1\"}",
+              "typed_plan": {
+                "steps": [
+                  {
+                    "column": "record_id",
+                    "comparator": "eq",
+                    "op": "FILTER_COMPARE",
+                    "value": 221
+                  },
+                  {
+                    "column": "annotation",
+                    "op": "FILTER_NOT_EMPTY"
+                  },
+                  {
+                    "aggregate": "max",
+                    "column": "time_s",
+                    "op": "AGGREGATE_COLUMN"
+                  }
+                ],
+                "version": "1"
+              },
+              "support_count": 1,
+              "failure_support_count": 0,
+              "candidate_signature_count": 1
+            },
+            "v3": {
+              "typed_plan_signature": "{\"steps\": [{\"column\": \"record_id\", \"comparator\": \"eq\", \"op\": \"FILTER_COMPARE\", \"value\": 221}, {\"column\": \"annotation\", \"op\": \"FILTER_NOT_EMPTY\"}, {\"aggregate\": \"max\", \"column\": \"time_s\", \"op\": \"AGGREGATE_COLUMN\"}], \"version\": \"1\"}",
+              "typed_plan": {
+                "steps": [
+                  {
+                    "column": "record_id",
+                    "comparator": "eq",
+                    "op": "FILTER_COMPARE",
+                    "value": 221
+                  },
+                  {
+                    "column": "annotation",
+                    "op": "FILTER_NOT_EMPTY"
+                  },
+                  {
+                    "aggregate": "max",
+                    "column": "time_s",
+                    "op": "AGGREGATE_COLUMN"
+                  }
+                ],
+                "version": "1"
+              },
+              "support_count": 1,
+              "failure_support_count": 0,
+              "candidate_signature_count": 1
+            }
+          },
+          "canonical_typed_plan_signature": "{\"steps\": [{\"column\": \"record_id\", \"comparator\": \"eq\", \"op\": \"FILTER_COMPARE\", \"value\": 221}, {\"column\": \"annotation\", \"op\": \"FILTER_NOT_EMPTY\"}, {\"aggregate\": \"max\", \"column\": \"time_s\", \"op\": \"AGGREGATE_COLUMN\"}], \"version\": \"1\"}",
+          "canonical_typed_plan": {
+            "steps": [
+              {
+                "column": "record_id",
+                "comparator": "eq",
+                "op": "FILTER_COMPARE",
+                "value": 221
+              },
+              {
+                "column": "annotation",
+                "op": "FILTER_NOT_EMPTY"
+              },
+              {
+                "aggregate": "max",
+                "column": "time_s",
+                "op": "AGGREGATE_COLUMN"
+              }
+            ],
+            "version": "1"
+          }
+        },
+        "5": {
+          "by_version": {
+            "v1": {
+              "typed_plan_signature": "{\"steps\": [{\"column\": \"record_id\", \"comparator\": \"eq\", \"op\": \"FILTER_COMPARE\", \"value\": 208}, {\"column\": \"annotation\", \"op\": \"FILTER_NOT_EMPTY\"}, {\"column\": \"time_s\", \"epoch_unit\": null, \"freq\": null, \"kind\": \"numeric\", \"op\": \"DERIVE_BIN\", \"result\": \"bin\", \"width\": 60.0}, {\"aggregate\": \"count\", \"column\": null, \"freq\": null, \"group_by\": [\"bin\"], \"op\": \"GROUP_AGGREGATE\"}, {\"aggregate\": \"mean\", \"op\": \"AGGREGATE_GROUPS\"}], \"version\": \"1\"}",
+              "typed_plan": {
+                "steps": [
+                  {
+                    "column": "record_id",
+                    "comparator": "eq",
+                    "op": "FILTER_COMPARE",
+                    "value": 208
+                  },
+                  {
+                    "column": "annotation",
+                    "op": "FILTER_NOT_EMPTY"
+                  },
+                  {
+                    "column": "time_s",
+                    "epoch_unit": null,
+                    "freq": null,
+                    "kind": "numeric",
+                    "op": "DERIVE_BIN",
+                    "result": "bin",
+                    "width": 60.0
+                  },
+                  {
+                    "aggregate": "count",
+                    "column": null,
+                    "freq": null,
+                    "group_by": [
+                      "bin"
+                    ],
+                    "op": "GROUP_AGGREGATE"
+                  },
+                  {
+                    "aggregate": "mean",
+                    "op": "AGGREGATE_GROUPS"
+                  }
+                ],
+                "version": "1"
+              },
+              "support_count": 1,
+              "failure_support_count": 0,
+              "candidate_signature_count": 1
+            },
+            "v2": {
+              "typed_plan_signature": "{\"steps\": [{\"column\": \"record_id\", \"comparator\": \"eq\", \"op\": \"FILTER_COMPARE\", \"value\": 208}, {\"column\": \"annotation\", \"op\": \"FILTER_NOT_EMPTY\"}, {\"column\": \"time_s\", \"epoch_unit\": null, \"freq\": null, \"kind\": \"numeric\", \"op\": \"DERIVE_BIN\", \"result\": \"bin\", \"width\": 60.0}, {\"aggregate\": \"count\", \"column\": null, \"freq\": null, \"group_by\": [\"bin\"], \"op\": \"GROUP_AGGREGATE\"}, {\"aggregate\": \"mean\", \"op\": \"AGGREGATE_GROUPS\"}], \"version\": \"1\"}",
+              "typed_plan": {
+                "steps": [
+                  {
+                    "column": "record_id",
+                    "comparator": "eq",
+                    "op": "FILTER_COMPARE",
+                    "value": 208
+                  },
+                  {
+                    "column": "annotation",
+                    "op": "FILTER_NOT_EMPTY"
+                  },
+                  {
+                    "column": "time_s",
+                    "epoch_unit": null,
+                    "freq": null,
+                    "kind": "numeric",
+                    "op": "DERIVE_BIN",
+                    "result": "bin",
+                    "width": 60.0
+                  },
+                  {
+                    "aggregate": "count",
+                    "column": null,
+                    "freq": null,
+                    "group_by": [
+                      "bin"
+                    ],
+                    "op": "GROUP_AGGREGATE"
+                  },
+                  {
+                    "aggregate": "mean",
+                    "op": "AGGREGATE_GROUPS"
+                  }
+                ],
+                "version": "1"
+              },
+              "support_count": 1,
+              "failure_support_count": 0,
+              "candidate_signature_count": 1
+            },
+            "v3": {
+              "typed_plan_signature": "{\"steps\": [{\"column\": \"record_id\", \"comparator\": \"eq\", \"op\": \"FILTER_COMPARE\", \"value\": 208}, {\"column\": \"annotation\", \"op\": \"FILTER_NOT_EMPTY\"}, {\"column\": \"time_s\", \"epoch_unit\": null, \"freq\": null, \"kind\": \"numeric\", \"op\": \"DERIVE_BIN\", \"result\": \"bin\", \"width\": 60.0}, {\"aggregate\": \"count\", \"column\": null, \"freq\": null, \"group_by\": [\"bin\"], \"op\": \"GROUP_AGGREGATE\"}, {\"aggregate\": \"mean\", \"op\": \"AGGREGATE_GROUPS\"}], \"version\": \"1\"}",
+              "typed_plan": {
+                "steps": [
+                  {
+                    "column": "record_id",
+                    "comparator": "eq",
+                    "op": "FILTER_COMPARE",
+                    "value": 208
+                  },
+                  {
+                    "column": "annotation",
+                    "op": "FILTER_NOT_EMPTY"
+                  },
+                  {
+                    "column": "time_s",
+                    "epoch_unit": null,
+                    "freq": null,
+                    "kind": "numeric",
+                    "op": "DERIVE_BIN",
+                    "result": "bin",
+                    "width": 60.0
+                  },
+                  {
+                    "aggregate": "count",
+                    "column": null,
+                    "freq": null,
+                    "group_by": [
+                      "bin"
+                    ],
+                    "op": "GROUP_AGGREGATE"
+                  },
+                  {
+                    "aggregate": "mean",
+                    "op": "AGGREGATE_GROUPS"
+                  }
+                ],
+                "version": "1"
+              },
+              "support_count": 1,
+              "failure_support_count": 0,
+              "candidate_signature_count": 1
+            }
+          },
+          "canonical_typed_plan_signature": "{\"steps\": [{\"column\": \"record_id\", \"comparator\": \"eq\", \"op\": \"FILTER_COMPARE\", \"value\": 208}, {\"column\": \"annotation\", \"op\": \"FILTER_NOT_EMPTY\"}, {\"column\": \"time_s\", \"epoch_unit\": null, \"freq\": null, \"kind\": \"numeric\", \"op\": \"DERIVE_BIN\", \"result\": \"bin\", \"width\": 60.0}, {\"aggregate\": \"count\", \"column\": null, \"freq\": null, \"group_by\": [\"bin\"], \"op\": \"GROUP_AGGREGATE\"}, {\"aggregate\": \"mean\", \"op\": \"AGGREGATE_GROUPS\"}], \"version\": \"1\"}",
+          "canonical_typed_plan": {
+            "steps": [
+              {
+                "column": "record_id",
+                "comparator": "eq",
+                "op": "FILTER_COMPARE",
+                "value": 208
+              },
+              {
+                "column": "annotation",
+                "op": "FILTER_NOT_EMPTY"
+              },
+              {
+                "column": "time_s",
+                "epoch_unit": null,
+                "freq": null,
+                "kind": "numeric",
+                "op": "DERIVE_BIN",
+                "result": "bin",
+                "width": 60.0
+              },
+              {
+                "aggregate": "count",
+                "column": null,
+                "freq": null,
+                "group_by": [
+                  "bin"
+                ],
+                "op": "GROUP_AGGREGATE"
+              },
+              {
+                "aggregate": "mean",
+                "op": "AGGREGATE_GROUPS"
+              }
+            ],
+            "version": "1"
+          }
+        },
+        "6": {
+          "by_version": {
+            "v1": {
+              "typed_plan_signature": "{\"steps\": [{\"branches\": [{\"aggregate\": \"max\", \"column\": \"MLII\", \"filter_column\": null, \"filter_values\": null, \"group_by\": [\"record_id\"], \"result_column\": \"MLII_max\"}, {\"aggregate\": \"min\", \"column\": \"MLII\", \"filter_column\": null, \"filter_values\": null, \"group_by\": [\"record_id\"], \"result_column\": \"MLII_min\"}], \"op\": \"PARALLEL_AGGREGATE\"}, {\"left\": \"MLII_max\", \"op\": \"DERIVE_BINARY\", \"operation\": \"subtract\", \"result\": \"MLII_diff\", \"right\": \"MLII_min\"}, {\"column\": \"MLII_diff\", \"direction\": \"max\", \"op\": \"RANK_ROWS\", \"return_columns\": [\"record_id\"]}], \"version\": \"1\"}",
+              "typed_plan": {
+                "steps": [
+                  {
+                    "branches": [
+                      {
+                        "aggregate": "max",
+                        "column": "MLII",
+                        "filter_column": null,
+                        "filter_values": null,
+                        "group_by": [
+                          "record_id"
+                        ],
+                        "result_column": "MLII_max"
+                      },
+                      {
+                        "aggregate": "min",
+                        "column": "MLII",
+                        "filter_column": null,
+                        "filter_values": null,
+                        "group_by": [
+                          "record_id"
+                        ],
+                        "result_column": "MLII_min"
+                      }
+                    ],
+                    "op": "PARALLEL_AGGREGATE"
+                  },
+                  {
+                    "left": "MLII_max",
+                    "op": "DERIVE_BINARY",
+                    "operation": "subtract",
+                    "result": "MLII_diff",
+                    "right": "MLII_min"
+                  },
+                  {
+                    "column": "MLII_diff",
+                    "direction": "max",
+                    "op": "RANK_ROWS",
+                    "return_columns": [
+                      "record_id"
+                    ]
+                  }
+                ],
+                "version": "1"
+              },
+              "support_count": 1,
+              "failure_support_count": 0,
+              "candidate_signature_count": 1
+            },
+            "v2": {
+              "typed_plan_signature": "{\"steps\": [{\"branches\": [{\"aggregate\": \"max\", \"column\": \"MLII\", \"filter_column\": null, \"filter_values\": null, \"group_by\": [\"record_id\"], \"result_column\": \"MLII_max\"}, {\"aggregate\": \"min\", \"column\": \"MLII\", \"filter_column\": null, \"filter_values\": null, \"group_by\": [\"record_id\"], \"result_column\": \"MLII_min\"}], \"op\": \"PARALLEL_AGGREGATE\"}, {\"left\": \"MLII_max\", \"op\": \"DERIVE_BINARY\", \"operation\": \"subtract\", \"result\": \"MLII_diff\", \"right\": \"MLII_min\"}, {\"column\": \"MLII_diff\", \"direction\": \"max\", \"op\": \"RANK_ROWS\", \"return_columns\": [\"record_id\"]}], \"version\": \"1\"}",
+              "typed_plan": {
+                "steps": [
+                  {
+                    "branches": [
+                      {
+                        "aggregate": "max",
+                        "column": "MLII",
+                        "filter_column": null,
+                        "filter_values": null,
+                        "group_by": [
+                          "record_id"
+                        ],
+                        "result_column": "MLII_max"
+                      },
+                      {
+                        "aggregate": "min",
+                        "column": "MLII",
+                        "filter_column": null,
+                        "filter_values": null,
+                        "group_by": [
+                          "record_id"
+                        ],
+                        "result_column": "MLII_min"
+                      }
+                    ],
+                    "op": "PARALLEL_AGGREGATE"
+                  },
+                  {
+                    "left": "MLII_max",
+                    "op": "DERIVE_BINARY",
+                    "operation": "subtract",
+                    "result": "MLII_diff",
+                    "right": "MLII_min"
+                  },
+                  {
+                    "column": "MLII_diff",
+                    "direction": "max",
+                    "op": "RANK_ROWS",
+                    "return_columns": [
+                      "record_id"
+                    ]
+                  }
+                ],
+                "version": "1"
+              },
+              "support_count": 1,
+              "failure_support_count": 0,
+              "candidate_signature_count": 1
+            },
+            "v3": {
+              "typed_plan_signature": "{\"steps\": [{\"branches\": [{\"aggregate\": \"max\", \"column\": \"MLII\", \"filter_column\": null, \"filter_values\": null, \"group_by\": [\"record_id\"], \"result_column\": \"MLII_max\"}, {\"aggregate\": \"min\", \"column\": \"MLII\", \"filter_column\": null, \"filter_values\": null, \"group_by\": [\"record_id\"], \"result_column\": \"MLII_min\"}], \"op\": \"PARALLEL_AGGREGATE\"}, {\"left\": \"MLII_max\", \"op\": \"DERIVE_BINARY\", \"operation\": \"subtract\", \"result\": \"MLII_diff\", \"right\": \"MLII_min\"}, {\"column\": \"MLII_diff\", \"direction\": \"max\", \"op\": \"RANK_ROWS\", \"return_columns\": [\"record_id\"]}], \"version\": \"1\"}",
+              "typed_plan": {
+                "steps": [
+                  {
+                    "branches": [
+                      {
+                        "aggregate": "max",
+                        "column": "MLII",
+                        "filter_column": null,
+                        "filter_values": null,
+                        "group_by": [
+                          "record_id"
+                        ],
+                        "result_column": "MLII_max"
+                      },
+                      {
+                        "aggregate": "min",
+                        "column": "MLII",
+                        "filter_column": null,
+                        "filter_values": null,
+                        "group_by": [
+                          "record_id"
+                        ],
+                        "result_column": "MLII_min"
+                      }
+                    ],
+                    "op": "PARALLEL_AGGREGATE"
+                  },
+                  {
+                    "left": "MLII_max",
+                    "op": "DERIVE_BINARY",
+                    "operation": "subtract",
+                    "result": "MLII_diff",
+                    "right": "MLII_min"
+                  },
+                  {
+                    "column": "MLII_diff",
+                    "direction": "max",
+                    "op": "RANK_ROWS",
+                    "return_columns": [
+                      "record_id"
+                    ]
+                  }
+                ],
+                "version": "1"
+              },
+              "support_count": 1,
+              "failure_support_count": 0,
+              "candidate_signature_count": 1
+            }
+          },
+          "canonical_typed_plan_signature": "{\"steps\": [{\"branches\": [{\"aggregate\": \"max\", \"column\": \"MLII\", \"filter_column\": null, \"filter_values\": null, \"group_by\": [\"record_id\"], \"result_column\": \"MLII_max\"}, {\"aggregate\": \"min\", \"column\": \"MLII\", \"filter_column\": null, \"filter_values\": null, \"group_by\": [\"record_id\"], \"result_column\": \"MLII_min\"}], \"op\": \"PARALLEL_AGGREGATE\"}, {\"left\": \"MLII_max\", \"op\": \"DERIVE_BINARY\", \"operation\": \"subtract\", \"result\": \"MLII_diff\", \"right\": \"MLII_min\"}, {\"column\": \"MLII_diff\", \"direction\": \"max\", \"op\": \"RANK_ROWS\", \"return_columns\": [\"record_id\"]}], \"version\": \"1\"}",
+          "canonical_typed_plan": {
+            "steps": [
+              {
+                "branches": [
+                  {
+                    "aggregate": "max",
+                    "column": "MLII",
+                    "filter_column": null,
+                    "filter_values": null,
+                    "group_by": [
+                      "record_id"
+                    ],
+                    "result_column": "MLII_max"
+                  },
+                  {
+                    "aggregate": "min",
+                    "column": "MLII",
+                    "filter_column": null,
+                    "filter_values": null,
+                    "group_by": [
+                      "record_id"
+                    ],
+                    "result_column": "MLII_min"
+                  }
+                ],
+                "op": "PARALLEL_AGGREGATE"
+              },
+              {
+                "left": "MLII_max",
+                "op": "DERIVE_BINARY",
+                "operation": "subtract",
+                "result": "MLII_diff",
+                "right": "MLII_min"
+              },
+              {
+                "column": "MLII_diff",
+                "direction": "max",
+                "op": "RANK_ROWS",
+                "return_columns": [
+                  "record_id"
+                ]
+              }
+            ],
+            "version": "1"
+          }
+        },
+        "7": {
+          "by_version": {
+            "v1": {
+              "typed_plan_signature": "{\"steps\": [{\"column\": \"record_id\", \"comparator\": \"eq\", \"op\": \"FILTER_COMPARE\", \"value\": 101}, {\"column\": \"annotation\", \"op\": \"FILTER_NOT_EMPTY\"}, {\"column\": \"time_s\", \"epoch_unit\": null, \"freq\": null, \"kind\": \"numeric\", \"op\": \"DERIVE_BIN\", \"result\": \"bin\", \"width\": 10.0}, {\"aggregate\": \"count\", \"column\": null, \"freq\": null, \"group_by\": [\"bin\"], \"op\": \"GROUP_AGGREGATE\"}, {\"direction\": \"max\", \"op\": \"RANK_GROUPS\"}], \"version\": \"1\"}",
+              "typed_plan": {
+                "steps": [
+                  {
+                    "column": "record_id",
+                    "comparator": "eq",
+                    "op": "FILTER_COMPARE",
+                    "value": 101
+                  },
+                  {
+                    "column": "annotation",
+                    "op": "FILTER_NOT_EMPTY"
+                  },
+                  {
+                    "column": "time_s",
+                    "epoch_unit": null,
+                    "freq": null,
+                    "kind": "numeric",
+                    "op": "DERIVE_BIN",
+                    "result": "bin",
+                    "width": 10.0
+                  },
+                  {
+                    "aggregate": "count",
+                    "column": null,
+                    "freq": null,
+                    "group_by": [
+                      "bin"
+                    ],
+                    "op": "GROUP_AGGREGATE"
+                  },
+                  {
+                    "direction": "max",
+                    "op": "RANK_GROUPS"
+                  }
+                ],
+                "version": "1"
+              },
+              "support_count": 1,
+              "failure_support_count": 0,
+              "candidate_signature_count": 1
+            },
+            "v2": {
+              "typed_plan_signature": "{\"steps\": [{\"column\": \"record_id\", \"comparator\": \"eq\", \"op\": \"FILTER_COMPARE\", \"value\": 101}, {\"column\": \"annotation\", \"op\": \"FILTER_NOT_EMPTY\"}, {\"column\": \"time_s\", \"epoch_unit\": null, \"freq\": null, \"kind\": \"numeric\", \"op\": \"DERIVE_BIN\", \"result\": \"bin\", \"width\": 10.0}, {\"aggregate\": \"count\", \"column\": null, \"freq\": null, \"group_by\": [\"bin\"], \"op\": \"GROUP_AGGREGATE\"}, {\"direction\": \"max\", \"op\": \"RANK_GROUPS\"}], \"version\": \"1\"}",
+              "typed_plan": {
+                "steps": [
+                  {
+                    "column": "record_id",
+                    "comparator": "eq",
+                    "op": "FILTER_COMPARE",
+                    "value": 101
+                  },
+                  {
+                    "column": "annotation",
+                    "op": "FILTER_NOT_EMPTY"
+                  },
+                  {
+                    "column": "time_s",
+                    "epoch_unit": null,
+                    "freq": null,
+                    "kind": "numeric",
+                    "op": "DERIVE_BIN",
+                    "result": "bin",
+                    "width": 10.0
+                  },
+                  {
+                    "aggregate": "count",
+                    "column": null,
+                    "freq": null,
+                    "group_by": [
+                      "bin"
+                    ],
+                    "op": "GROUP_AGGREGATE"
+                  },
+                  {
+                    "direction": "max",
+                    "op": "RANK_GROUPS"
+                  }
+                ],
+                "version": "1"
+              },
+              "support_count": 1,
+              "failure_support_count": 0,
+              "candidate_signature_count": 1
+            },
+            "v3": {
+              "typed_plan_signature": "{\"steps\": [{\"column\": \"record_id\", \"comparator\": \"eq\", \"op\": \"FILTER_COMPARE\", \"value\": 101}, {\"column\": \"annotation\", \"op\": \"FILTER_NOT_EMPTY\"}, {\"column\": \"time_s\", \"epoch_unit\": null, \"freq\": null, \"kind\": \"numeric\", \"op\": \"DERIVE_BIN\", \"result\": \"bin\", \"width\": 10.0}, {\"aggregate\": \"count\", \"column\": null, \"freq\": null, \"group_by\": [\"bin\"], \"op\": \"GROUP_AGGREGATE\"}, {\"direction\": \"max\", \"op\": \"RANK_GROUPS\"}], \"version\": \"1\"}",
+              "typed_plan": {
+                "steps": [
+                  {
+                    "column": "record_id",
+                    "comparator": "eq",
+                    "op": "FILTER_COMPARE",
+                    "value": 101
+                  },
+                  {
+                    "column": "annotation",
+                    "op": "FILTER_NOT_EMPTY"
+                  },
+                  {
+                    "column": "time_s",
+                    "epoch_unit": null,
+                    "freq": null,
+                    "kind": "numeric",
+                    "op": "DERIVE_BIN",
+                    "result": "bin",
+                    "width": 10.0
+                  },
+                  {
+                    "aggregate": "count",
+                    "column": null,
+                    "freq": null,
+                    "group_by": [
+                      "bin"
+                    ],
+                    "op": "GROUP_AGGREGATE"
+                  },
+                  {
+                    "direction": "max",
+                    "op": "RANK_GROUPS"
+                  }
+                ],
+                "version": "1"
+              },
+              "support_count": 1,
+              "failure_support_count": 0,
+              "candidate_signature_count": 1
+            }
+          },
+          "canonical_typed_plan_signature": "{\"steps\": [{\"column\": \"record_id\", \"comparator\": \"eq\", \"op\": \"FILTER_COMPARE\", \"value\": 101}, {\"column\": \"annotation\", \"op\": \"FILTER_NOT_EMPTY\"}, {\"column\": \"time_s\", \"epoch_unit\": null, \"freq\": null, \"kind\": \"numeric\", \"op\": \"DERIVE_BIN\", \"result\": \"bin\", \"width\": 10.0}, {\"aggregate\": \"count\", \"column\": null, \"freq\": null, \"group_by\": [\"bin\"], \"op\": \"GROUP_AGGREGATE\"}, {\"direction\": \"max\", \"op\": \"RANK_GROUPS\"}], \"version\": \"1\"}",
+          "canonical_typed_plan": {
+            "steps": [
+              {
+                "column": "record_id",
+                "comparator": "eq",
+                "op": "FILTER_COMPARE",
+                "value": 101
+              },
+              {
+                "column": "annotation",
+                "op": "FILTER_NOT_EMPTY"
+              },
+              {
+                "column": "time_s",
+                "epoch_unit": null,
+                "freq": null,
+                "kind": "numeric",
+                "op": "DERIVE_BIN",
+                "result": "bin",
+                "width": 10.0
+              },
+              {
+                "aggregate": "count",
+                "column": null,
+                "freq": null,
+                "group_by": [
+                  "bin"
+                ],
+                "op": "GROUP_AGGREGATE"
+              },
+              {
+                "direction": "max",
+                "op": "RANK_GROUPS"
+              }
+            ],
+            "version": "1"
+          }
+        },
+        "8": {
+          "by_version": {
+            "v1": {
+              "typed_plan_signature": "{\"steps\": [{\"column\": \"record_id\", \"comparator\": \"eq\", \"op\": \"FILTER_COMPARE\", \"value\": 106}, {\"aggregate\": \"rms\", \"column\": \"MLII\", \"op\": \"AGGREGATE_COLUMN\"}], \"version\": \"1\"}",
+              "typed_plan": {
+                "steps": [
+                  {
+                    "column": "record_id",
+                    "comparator": "eq",
+                    "op": "FILTER_COMPARE",
+                    "value": 106
+                  },
+                  {
+                    "aggregate": "rms",
+                    "column": "MLII",
+                    "op": "AGGREGATE_COLUMN"
+                  }
+                ],
+                "version": "1"
+              },
+              "support_count": 1,
+              "failure_support_count": 0,
+              "candidate_signature_count": 1
+            },
+            "v2": {
+              "typed_plan_signature": "{\"steps\": [{\"column\": \"record_id\", \"comparator\": \"eq\", \"op\": \"FILTER_COMPARE\", \"value\": 106}, {\"aggregate\": \"rms\", \"column\": \"MLII\", \"op\": \"AGGREGATE_COLUMN\"}], \"version\": \"1\"}",
+              "typed_plan": {
+                "steps": [
+                  {
+                    "column": "record_id",
+                    "comparator": "eq",
+                    "op": "FILTER_COMPARE",
+                    "value": 106
+                  },
+                  {
+                    "aggregate": "rms",
+                    "column": "MLII",
+                    "op": "AGGREGATE_COLUMN"
+                  }
+                ],
+                "version": "1"
+              },
+              "support_count": 1,
+              "failure_support_count": 0,
+              "candidate_signature_count": 1
+            },
+            "v3": {
+              "typed_plan_signature": "{\"steps\": [{\"column\": \"record_id\", \"comparator\": \"eq\", \"op\": \"FILTER_COMPARE\", \"value\": 106}, {\"aggregate\": \"rms\", \"column\": \"MLII\", \"op\": \"AGGREGATE_COLUMN\"}], \"version\": \"1\"}",
+              "typed_plan": {
+                "steps": [
+                  {
+                    "column": "record_id",
+                    "comparator": "eq",
+                    "op": "FILTER_COMPARE",
+                    "value": 106
+                  },
+                  {
+                    "aggregate": "rms",
+                    "column": "MLII",
+                    "op": "AGGREGATE_COLUMN"
+                  }
+                ],
+                "version": "1"
+              },
+              "support_count": 1,
+              "failure_support_count": 0,
+              "candidate_signature_count": 1
+            }
+          },
+          "canonical_typed_plan_signature": "{\"steps\": [{\"column\": \"record_id\", \"comparator\": \"eq\", \"op\": \"FILTER_COMPARE\", \"value\": 106}, {\"aggregate\": \"rms\", \"column\": \"MLII\", \"op\": \"AGGREGATE_COLUMN\"}], \"version\": \"1\"}",
+          "canonical_typed_plan": {
+            "steps": [
+              {
+                "column": "record_id",
+                "comparator": "eq",
+                "op": "FILTER_COMPARE",
+                "value": 106
+              },
+              {
+                "aggregate": "rms",
+                "column": "MLII",
+                "op": "AGGREGATE_COLUMN"
+              }
+            ],
+            "version": "1"
+          }
+        }
+      }
+    }
+  },
+  "flat_index": {
+    "bus|1|v1": "{\"steps\": [{\"aggregate\": \"max\", \"column\": \"accel_variance\", \"op\": \"AGGREGATE_COLUMN\"}], \"version\": \"1\"}",
+    "bus|1|v2": "{\"steps\": [{\"aggregate\": \"max\", \"column\": \"accel_variance\", \"op\": \"AGGREGATE_COLUMN\"}], \"version\": \"1\"}",
+    "bus|1|v3": "{\"steps\": [{\"aggregate\": \"max\", \"column\": \"accel_variance\", \"op\": \"AGGREGATE_COLUMN\"}], \"version\": \"1\"}",
+    "bus|2|v1": "{\"steps\": [{\"aggregate\": \"mean\", \"column\": \"accel_mean\", \"op\": \"AGGREGATE_COLUMN\"}], \"version\": \"1\"}",
+    "bus|2|v2": "{\"steps\": [{\"aggregate\": \"mean\", \"column\": \"accel_mean\", \"op\": \"AGGREGATE_COLUMN\"}], \"version\": \"1\"}",
+    "bus|2|v3": "{\"steps\": [{\"aggregate\": \"mean\", \"column\": \"accel_mean\", \"op\": \"AGGREGATE_COLUMN\"}], \"version\": \"1\"}",
+    "bus|3|v1": "{\"steps\": [{\"aggregate\": \"max\", \"column\": \"accel_stats_z_p99\", \"op\": \"FILTER_EQ_AGGREGATE\"}], \"version\": \"1\"}",
+    "bus|3|v2": "{\"steps\": [{\"aggregate\": \"max\", \"column\": \"accel_stats_z_p99\", \"op\": \"FILTER_EQ_AGGREGATE\"}, {\"column\": \"timestamp\", \"distinct\": false, \"op\": \"SELECT_COLUMN\"}], \"version\": \"1\"}",
+    "bus|3|v3": "{\"steps\": [{\"aggregate\": \"max\", \"column\": \"accel_stats_z_p99\", \"op\": \"FILTER_EQ_AGGREGATE\"}, {\"column\": \"timestamp\", \"distinct\": false, \"op\": \"SELECT_COLUMN\"}], \"version\": \"1\"}",
+    "bus|4|v1": "{\"steps\": [{\"column\": \"accel_variance\", \"comparator\": \"gt\", \"op\": \"FILTER_COMPARE\", \"value\": 0.2}, {\"op\": \"COUNT_ROWS\"}], \"version\": \"1\"}",
+    "bus|4|v2": "{\"steps\": [{\"column\": \"accel_variance\", \"comparator\": \"gt\", \"op\": \"FILTER_COMPARE\", \"value\": 0.2}, {\"op\": \"COUNT_ROWS\"}], \"version\": \"1\"}",
+    "bus|4|v3": "{\"steps\": [{\"column\": \"accel_variance\", \"comparator\": \"gt\", \"op\": \"FILTER_COMPARE\", \"value\": 0.2}, {\"op\": \"COUNT_ROWS\"}], \"version\": \"1\"}",
+    "bus|5|v1": "{\"steps\": [{\"column\": \"latitude\", \"comparator\": \"gt\", \"label\": \"north\", \"op\": \"SPLIT_BY_THRESHOLD\", \"threshold\": \"median\"}, {\"column\": \"latitude\", \"comparator\": \"lt\", \"label\": \"south\", \"op\": \"SPLIT_BY_THRESHOLD\", \"threshold\": \"median\"}, {\"aggregate\": \"mean\", \"column\": \"accel_variance\", \"op\": \"AGGREGATE_PARTITIONS\", \"partitions\": [\"north\", \"south\"]}, {\"mode\": \"difference\", \"op\": \"COMPARE_PARTITIONS\"}], \"version\": \"1\"}",
+    "bus|5|v2": "{\"steps\": [{\"column\": \"latitude\", \"comparator\": \"gt\", \"label\": \"north\", \"op\": \"SPLIT_BY_THRESHOLD\", \"threshold\": \"median\"}, {\"column\": \"latitude\", \"comparator\": \"lte\", \"label\": \"south\", \"op\": \"SPLIT_BY_THRESHOLD\", \"threshold\": \"median\"}, {\"aggregate\": \"mean\", \"column\": \"accel_variance\", \"op\": \"AGGREGATE_PARTITIONS\", \"partitions\": [\"north\", \"south\"]}, {\"mode\": \"difference\", \"op\": \"COMPARE_PARTITIONS\"}], \"version\": \"1\"}",
+    "bus|5|v3": "{\"steps\": [{\"column\": \"latitude\", \"comparator\": \"gt\", \"label\": \"north\", \"op\": \"SPLIT_BY_THRESHOLD\", \"threshold\": \"median\"}, {\"column\": \"latitude\", \"comparator\": \"lte\", \"label\": \"south\", \"op\": \"SPLIT_BY_THRESHOLD\", \"threshold\": \"median\"}, {\"aggregate\": \"mean\", \"column\": \"accel_variance\", \"op\": \"AGGREGATE_PARTITIONS\", \"partitions\": [\"north\", \"south\"]}, {\"mode\": \"difference\", \"op\": \"COMPARE_PARTITIONS\"}], \"version\": \"1\"}",
+    "bus|6|v1": "{\"steps\": [{\"left\": \"accel_stats_z_p99\", \"op\": \"DERIVE_BINARY\", \"operation\": \"subtract\", \"result\": \"z_accel_diff\", \"right\": \"accel_stats_z_p1\"}, {\"column\": \"z_accel_diff\", \"direction\": \"max\", \"op\": \"RANK_ROWS\", \"return_columns\": [\"latitude\", \"longitude\"]}], \"version\": \"1\"}",
+    "bus|6|v2": "{\"steps\": [{\"branches\": [{\"aggregate\": \"max\", \"column\": \"accel_stats_z_p99\", \"filter_column\": null, \"filter_values\": null, \"group_by\": [\"latitude\", \"longitude\"], \"result_column\": \"p99_z\"}, {\"aggregate\": \"min\", \"column\": \"accel_stats_z_p1\", \"filter_column\": null, \"filter_values\": null, \"group_by\": [\"latitude\", \"longitude\"], \"result_column\": \"p1_z\"}], \"op\": \"PARALLEL_AGGREGATE\"}, {\"left\": \"p99_z\", \"op\": \"DERIVE_BINARY\", \"operation\": \"subtract\", \"result\": \"z_diff\", \"right\": \"p1_z\"}, {\"column\": \"z_diff\", \"direction\": \"max\", \"op\": \"RANK_ROWS\", \"return_columns\": [\"latitude\", \"longitude\"]}], \"version\": \"1\"}",
+    "bus|6|v3": "{\"steps\": [{\"left\": \"accel_stats_z_p99\", \"op\": \"DERIVE_BINARY\", \"operation\": \"subtract\", \"result\": \"z_diff\", \"right\": \"accel_stats_z_p1\"}, {\"column\": \"z_diff\", \"direction\": \"max\", \"op\": \"RANK_ROWS\", \"return_columns\": [\"latitude\", \"longitude\", \"z_diff\"]}], \"version\": \"1\"}",
+    "bus|7|v1": "{\"steps\": [{\"columns\": [\"accel_stats_x_p99\", \"accel_stats_y_p99\", \"accel_stats_z_p99\"], \"op\": \"DERIVE_VECTOR_MAGNITUDE\", \"result\": \"peak_accel_magnitude\"}, {\"aggregate\": \"mean\", \"column\": \"peak_accel_magnitude\", \"op\": \"AGGREGATE_COLUMN\"}], \"version\": \"1\"}",
+    "bus|7|v2": "{\"steps\": [{\"columns\": [\"accel_stats_x_p99\", \"accel_stats_y_p99\", \"accel_stats_z_p99\"], \"op\": \"DERIVE_VECTOR_MAGNITUDE\", \"result\": \"peak_acceleration_magnitude\"}, {\"aggregate\": \"mean\", \"column\": \"peak_acceleration_magnitude\", \"op\": \"AGGREGATE_COLUMN\"}], \"version\": \"1\"}",
+    "bus|7|v3": "{\"steps\": [{\"columns\": [\"accel_stats_x_p99\", \"accel_stats_y_p99\", \"accel_stats_z_p99\"], \"op\": \"DERIVE_VECTOR_MAGNITUDE\", \"result\": \"peak_acceleration_magnitude\"}, {\"aggregate\": \"mean\", \"column\": \"peak_acceleration_magnitude\", \"op\": \"AGGREGATE_COLUMN\"}], \"version\": \"1\"}",
+    "bus|8|v1": "{\"steps\": [{\"column\": \"timestamp\", \"epoch_unit\": null, \"freq\": \"1min\", \"kind\": \"temporal\", \"op\": \"DERIVE_BIN\", \"result\": \"time_bin\", \"width\": null}, {\"aggregate\": \"mean\", \"column\": \"instability_score\", \"freq\": null, \"group_by\": [\"time_bin\"], \"op\": \"GROUP_AGGREGATE\"}, {\"direction\": \"max\", \"op\": \"RANK_GROUPS\"}], \"version\": \"1\"}",
+    "bus|8|v2": "{\"steps\": [{\"column\": \"timestamp\", \"epoch_unit\": null, \"freq\": \"1min\", \"kind\": \"temporal\", \"op\": \"DERIVE_BIN\", \"result\": \"minute_bin\", \"width\": null}, {\"aggregate\": \"mean\", \"column\": \"instability_score\", \"freq\": null, \"group_by\": [\"minute_bin\"], \"op\": \"GROUP_AGGREGATE\"}, {\"direction\": \"max\", \"op\": \"RANK_GROUPS\"}], \"version\": \"1\"}",
+    "bus|8|v3": "{\"steps\": [{\"column\": \"timestamp\", \"epoch_unit\": null, \"freq\": \"1min\", \"kind\": \"temporal\", \"op\": \"DERIVE_BIN\", \"result\": \"minute_bin\", \"width\": null}, {\"aggregate\": \"mean\", \"column\": \"instability_score\", \"freq\": null, \"group_by\": [\"minute_bin\"], \"op\": \"GROUP_AGGREGATE\"}, {\"direction\": \"max\", \"op\": \"RANK_GROUPS\"}], \"version\": \"1\"}",
+    "wisdm|1|v1": "{\"steps\": [{\"column\": \"subject_id\", \"comparator\": \"eq\", \"op\": \"FILTER_COMPARE\", \"value\": 15}, {\"aggregate\": \"max\", \"column\": \"x\", \"op\": \"AGGREGATE_COLUMN\"}], \"version\": \"1\"}",
+    "wisdm|1|v2": "{\"steps\": [{\"column\": \"subject_id\", \"comparator\": \"eq\", \"op\": \"FILTER_COMPARE\", \"value\": 15}, {\"aggregate\": \"max\", \"column\": \"x\", \"op\": \"AGGREGATE_COLUMN\"}], \"version\": \"1\"}",
+    "wisdm|1|v3": "{\"steps\": [{\"column\": \"subject_id\", \"comparator\": \"eq\", \"op\": \"FILTER_COMPARE\", \"value\": 15}, {\"aggregate\": \"max\", \"column\": \"x\", \"op\": \"AGGREGATE_COLUMN\"}], \"version\": \"1\"}",
+    "wisdm|2|v1": "{\"steps\": [{\"column\": \"activity_label\", \"op\": \"FILTER_NOT_EMPTY\"}, {\"column\": \"activity_label\", \"comparator\": \"eq\", \"op\": \"FILTER_COMPARE\", \"value\": \"Walking\"}, {\"column\": \"subject_id\", \"op\": \"COUNT_DISTINCT\"}], \"version\": \"1\"}",
+    "wisdm|2|v2": "{\"steps\": [{\"column\": \"activity_label\", \"op\": \"FILTER_NOT_EMPTY\"}, {\"column\": \"activity_label\", \"comparator\": \"eq\", \"op\": \"FILTER_COMPARE\", \"value\": \"Walking\"}, {\"column\": \"subject_id\", \"op\": \"COUNT_DISTINCT\"}], \"version\": \"1\"}",
+    "wisdm|2|v3": "{\"steps\": [{\"column\": \"activity_label\", \"op\": \"FILTER_NOT_EMPTY\"}, {\"column\": \"activity_label\", \"comparator\": \"eq\", \"op\": \"FILTER_COMPARE\", \"value\": \"Walking\"}, {\"column\": \"subject_id\", \"op\": \"COUNT_DISTINCT\"}], \"version\": \"1\"}",
+    "wisdm|3|v1": "{\"steps\": [{\"column\": \"subject_id\", \"comparator\": \"eq\", \"op\": \"FILTER_COMPARE\", \"value\": 5}, {\"column\": \"activity_label\", \"comparator\": \"eq\", \"op\": \"FILTER_COMPARE\", \"value\": \"Sitting\"}, {\"aggregate\": \"mean\", \"column\": \"y\", \"op\": \"AGGREGATE_COLUMN\"}], \"version\": \"1\"}",
+    "wisdm|3|v2": "{\"steps\": [{\"column\": \"subject_id\", \"comparator\": \"eq\", \"op\": \"FILTER_COMPARE\", \"value\": 5}, {\"column\": \"activity_label\", \"comparator\": \"eq\", \"op\": \"FILTER_COMPARE\", \"value\": \"Sitting\"}, {\"aggregate\": \"mean\", \"column\": \"y\", \"op\": \"AGGREGATE_COLUMN\"}], \"version\": \"1\"}",
+    "wisdm|3|v3": "{\"steps\": [{\"column\": \"subject_id\", \"comparator\": \"eq\", \"op\": \"FILTER_COMPARE\", \"value\": 5}, {\"column\": \"activity_label\", \"comparator\": \"eq\", \"op\": \"FILTER_COMPARE\", \"value\": \"Sitting\"}, {\"aggregate\": \"mean\", \"column\": \"y\", \"op\": \"AGGREGATE_COLUMN\"}], \"version\": \"1\"}",
+    "wisdm|4|v1": "{\"steps\": [{\"aggregate\": \"count\", \"column\": null, \"freq\": null, \"group_by\": [\"subject_id\"], \"op\": \"GROUP_AGGREGATE\"}, {\"direction\": \"max\", \"op\": \"RANK_GROUPS\"}], \"version\": \"1\"}",
+    "wisdm|4|v2": "{\"steps\": [{\"aggregate\": \"count\", \"column\": null, \"freq\": null, \"group_by\": [\"subject_id\"], \"op\": \"GROUP_AGGREGATE\"}, {\"direction\": \"max\", \"op\": \"RANK_GROUPS\"}], \"version\": \"1\"}",
+    "wisdm|4|v3": "{\"steps\": [{\"aggregate\": \"count\", \"column\": null, \"freq\": null, \"group_by\": [\"subject_id\"], \"op\": \"GROUP_AGGREGATE\"}, {\"direction\": \"max\", \"op\": \"RANK_GROUPS\"}], \"version\": \"1\"}",
+    "wisdm|5|v1": "{\"steps\": [{\"column\": \"activity_label\", \"op\": \"FILTER_NOT_EMPTY\"}, {\"columns\": [\"x\", \"y\", \"z\"], \"op\": \"DERIVE_VECTOR_MAGNITUDE\", \"result\": \"acceleration_magnitude\"}, {\"column\": \"activity_label\", \"label\": \"dynamic\", \"op\": \"SPLIT_BY_VALUES\", \"values\": [\"Downstairs\", \"Jogging\", \"Upstairs\", \"Walking\"]}, {\"column\": \"activity_label\", \"label\": \"resting\", \"op\": \"SPLIT_BY_VALUES\", \"values\": [\"Sitting\", \"Standing\"]}, {\"aggregate\": \"mean\", \"column\": \"acceleration_magnitude\", \"op\": \"AGGREGATE_PARTITIONS\", \"partitions\": [\"dynamic\", \"resting\"]}, {\"mode\": \"difference\", \"op\": \"COMPARE_PARTITIONS\"}], \"version\": \"1\"}",
+    "wisdm|5|v2": "{\"steps\": [{\"column\": \"activity_label\", \"op\": \"FILTER_NOT_EMPTY\"}, {\"columns\": [\"x\", \"y\", \"z\"], \"op\": \"DERIVE_VECTOR_MAGNITUDE\", \"result\": \"acceleration_magnitude\"}, {\"column\": \"activity_label\", \"label\": \"dynamic\", \"op\": \"SPLIT_BY_VALUES\", \"values\": [\"Downstairs\", \"Jogging\", \"Upstairs\", \"Walking\"]}, {\"column\": \"activity_label\", \"label\": \"resting\", \"op\": \"SPLIT_BY_VALUES\", \"values\": [\"Sitting\", \"Standing\"]}, {\"aggregate\": \"mean\", \"column\": \"acceleration_magnitude\", \"op\": \"AGGREGATE_PARTITIONS\", \"partitions\": [\"dynamic\", \"resting\"]}, {\"mode\": \"difference\", \"op\": \"COMPARE_PARTITIONS\"}], \"version\": \"1\"}",
+    "wisdm|5|v3": "{\"steps\": [{\"column\": \"activity_label\", \"op\": \"FILTER_NOT_EMPTY\"}, {\"columns\": [\"x\", \"y\", \"z\"], \"op\": \"DERIVE_VECTOR_MAGNITUDE\", \"result\": \"acceleration_magnitude\"}, {\"column\": \"activity_label\", \"label\": \"dynamic\", \"op\": \"SPLIT_BY_VALUES\", \"values\": [\"Downstairs\", \"Jogging\", \"Upstairs\", \"Walking\"]}, {\"column\": \"activity_label\", \"label\": \"resting\", \"op\": \"SPLIT_BY_VALUES\", \"values\": [\"Sitting\", \"Standing\"]}, {\"aggregate\": \"mean\", \"column\": \"acceleration_magnitude\", \"op\": \"AGGREGATE_PARTITIONS\", \"partitions\": [\"dynamic\", \"resting\"]}, {\"mode\": \"difference\", \"op\": \"COMPARE_PARTITIONS\"}], \"version\": \"1\"}",
+    "wisdm|6|v1": "{\"steps\": [{\"column\": \"activity_label\", \"op\": \"FILTER_NOT_EMPTY\"}, {\"clip_negative\": true, \"fill_first\": 0.0, \"group_by\": [\"subject_id\"], \"op\": \"DERIVE_DURATION_SECONDS\", \"result\": \"dt_s\", \"timestamp_column\": \"timestamp\"}, {\"branches\": [{\"aggregate\": \"sum\", \"column\": \"dt_s\", \"filter_column\": \"activity_label\", \"filter_values\": [\"Sitting\", \"Standing\"], \"group_by\": [\"subject_id\"], \"result_column\": \"resting_duration\"}, {\"aggregate\": \"sum\", \"column\": \"dt_s\", \"filter_column\": \"activity_label\", \"filter_values\": [\"Downstairs\", \"Jogging\", \"Upstairs\", \"Walking\"], \"group_by\": [\"subject_id\"], \"result_column\": \"dynamic_duration\"}], \"op\": \"PARALLEL_AGGREGATE\"}, {\"left\": \"resting_duration\", \"op\": \"DERIVE_BINARY\", \"operation\": \"subtract\", \"result\": \"duration_margin\", \"right\": \"dynamic_duration\"}, {\"column\": \"duration_margin\", \"comparator\": \"gt\", \"op\": \"FILTER_COMPARE\", \"value\": 0}, {\"column\": \"duration_margin\", \"direction\": \"max\", \"op\": \"RANK_ROWS\", \"return_columns\": [\"subject_id\", \"resting_duration\", \"dynamic_duration\", \"duration_margin\"]}], \"version\": \"1\"}",
+    "wisdm|6|v2": "{\"steps\": [{\"column\": \"activity_label\", \"op\": \"FILTER_NOT_EMPTY\"}, {\"clip_negative\": true, \"fill_first\": 0.0, \"group_by\": [\"subject_id\"], \"op\": \"DERIVE_DURATION_SECONDS\", \"result\": \"dt_s\", \"timestamp_column\": \"timestamp\"}, {\"branches\": [{\"aggregate\": \"sum\", \"column\": \"dt_s\", \"filter_column\": \"activity_label\", \"filter_values\": [\"Sitting\", \"Standing\"], \"group_by\": [\"subject_id\"], \"result_column\": \"resting_duration\"}, {\"aggregate\": \"sum\", \"column\": \"dt_s\", \"filter_column\": \"activity_label\", \"filter_values\": [\"Downstairs\", \"Jogging\", \"Upstairs\", \"Walking\"], \"group_by\": [\"subject_id\"], \"result_column\": \"dynamic_duration\"}], \"op\": \"PARALLEL_AGGREGATE\"}, {\"left\": \"resting_duration\", \"op\": \"DERIVE_BINARY\", \"operation\": \"subtract\", \"result\": \"duration_margin\", \"right\": \"dynamic_duration\"}, {\"column\": \"duration_margin\", \"comparator\": \"gt\", \"op\": \"FILTER_COMPARE\", \"value\": 0}, {\"column\": \"duration_margin\", \"direction\": \"max\", \"op\": \"RANK_ROWS\", \"return_columns\": [\"subject_id\", \"resting_duration\", \"dynamic_duration\", \"duration_margin\"]}], \"version\": \"1\"}",
+    "wisdm|6|v3": "{\"steps\": [{\"column\": \"activity_label\", \"op\": \"FILTER_NOT_EMPTY\"}, {\"clip_negative\": true, \"fill_first\": 0.0, \"group_by\": [\"subject_id\"], \"op\": \"DERIVE_DURATION_SECONDS\", \"result\": \"dt_s\", \"timestamp_column\": \"timestamp\"}, {\"branches\": [{\"aggregate\": \"sum\", \"column\": \"dt_s\", \"filter_column\": \"activity_label\", \"filter_values\": [\"Sitting\", \"Standing\"], \"group_by\": [\"subject_id\"], \"result_column\": \"resting_duration\"}, {\"aggregate\": \"sum\", \"column\": \"dt_s\", \"filter_column\": \"activity_label\", \"filter_values\": [\"Downstairs\", \"Jogging\", \"Upstairs\", \"Walking\"], \"group_by\": [\"subject_id\"], \"result_column\": \"dynamic_duration\"}], \"op\": \"PARALLEL_AGGREGATE\"}, {\"left\": \"resting_duration\", \"op\": \"DERIVE_BINARY\", \"operation\": \"subtract\", \"result\": \"duration_margin\", \"right\": \"dynamic_duration\"}, {\"column\": \"duration_margin\", \"comparator\": \"gt\", \"op\": \"FILTER_COMPARE\", \"value\": 0}, {\"column\": \"duration_margin\", \"direction\": \"max\", \"op\": \"RANK_ROWS\", \"return_columns\": [\"subject_id\", \"resting_duration\", \"dynamic_duration\", \"duration_margin\"]}], \"version\": \"1\"}",
+    "wisdm|7|v1": "{\"steps\": [{\"column\": \"subject_id\", \"comparator\": \"eq\", \"op\": \"FILTER_COMPARE\", \"value\": 20}, {\"column\": \"activity_label\", \"comparator\": \"eq\", \"op\": \"FILTER_COMPARE\", \"value\": \"Upstairs\"}, {\"columns\": [\"x\", \"y\", \"z\"], \"op\": \"DERIVE_VECTOR_MAGNITUDE\", \"result\": \"acceleration_magnitude\"}, {\"aggregate\": \"median\", \"column\": \"acceleration_magnitude\", \"op\": \"AGGREGATE_COLUMN\"}], \"version\": \"1\"}",
+    "wisdm|7|v2": "{\"steps\": [{\"column\": \"subject_id\", \"comparator\": \"eq\", \"op\": \"FILTER_COMPARE\", \"value\": 20}, {\"column\": \"activity_label\", \"comparator\": \"eq\", \"op\": \"FILTER_COMPARE\", \"value\": \"Upstairs\"}, {\"columns\": [\"x\", \"y\", \"z\"], \"op\": \"DERIVE_VECTOR_MAGNITUDE\", \"result\": \"acceleration_magnitude\"}, {\"aggregate\": \"median\", \"column\": \"acceleration_magnitude\", \"op\": \"AGGREGATE_COLUMN\"}], \"version\": \"1\"}",
+    "wisdm|7|v3": "{\"steps\": [{\"column\": \"subject_id\", \"comparator\": \"eq\", \"op\": \"FILTER_COMPARE\", \"value\": 20}, {\"column\": \"activity_label\", \"comparator\": \"eq\", \"op\": \"FILTER_COMPARE\", \"value\": \"Upstairs\"}, {\"columns\": [\"x\", \"y\", \"z\"], \"op\": \"DERIVE_VECTOR_MAGNITUDE\", \"result\": \"acceleration_magnitude\"}, {\"aggregate\": \"median\", \"column\": \"acceleration_magnitude\", \"op\": \"AGGREGATE_COLUMN\"}], \"version\": \"1\"}",
+    "wisdm|8|v1": "{\"steps\": [{\"column\": \"activity_label\", \"label\": \"upstairs\", \"op\": \"SPLIT_BY_VALUES\", \"values\": [\"Upstairs\"]}, {\"column\": \"activity_label\", \"label\": \"downstairs\", \"op\": \"SPLIT_BY_VALUES\", \"values\": [\"Downstairs\"]}, {\"aggregate\": \"mean\", \"column\": \"z\", \"op\": \"AGGREGATE_PARTITIONS\", \"partitions\": [\"upstairs\", \"downstairs\"]}, {\"mode\": \"abs_difference\", \"op\": \"COMPARE_PARTITIONS\"}], \"version\": \"1\"}",
+    "wisdm|8|v2": "{\"steps\": [{\"column\": \"activity_label\", \"label\": \"upstairs\", \"op\": \"SPLIT_BY_VALUES\", \"values\": [\"Upstairs\"]}, {\"column\": \"activity_label\", \"label\": \"downstairs\", \"op\": \"SPLIT_BY_VALUES\", \"values\": [\"Downstairs\"]}, {\"aggregate\": \"mean\", \"column\": \"z\", \"op\": \"AGGREGATE_PARTITIONS\", \"partitions\": [\"upstairs\", \"downstairs\"]}, {\"mode\": \"abs_difference\", \"op\": \"COMPARE_PARTITIONS\"}], \"version\": \"1\"}",
+    "wisdm|8|v3": "{\"steps\": [{\"column\": \"activity_label\", \"label\": \"upstairs\", \"op\": \"SPLIT_BY_VALUES\", \"values\": [\"Upstairs\"]}, {\"column\": \"activity_label\", \"label\": \"downstairs\", \"op\": \"SPLIT_BY_VALUES\", \"values\": [\"Downstairs\"]}, {\"aggregate\": \"mean\", \"column\": \"z\", \"op\": \"AGGREGATE_PARTITIONS\", \"partitions\": [\"upstairs\", \"downstairs\"]}, {\"mode\": \"abs_difference\", \"op\": \"COMPARE_PARTITIONS\"}], \"version\": \"1\"}",
+    "mit_ecg|1|v1": "{\"steps\": [{\"column\": \"record_id\", \"comparator\": \"eq\", \"op\": \"FILTER_COMPARE\", \"value\": 101}, {\"aggregate\": \"min\", \"column\": \"MLII\", \"op\": \"AGGREGATE_COLUMN\"}], \"version\": \"1\"}",
+    "mit_ecg|1|v2": "{\"steps\": [{\"column\": \"record_id\", \"comparator\": \"eq\", \"op\": \"FILTER_COMPARE\", \"value\": 101}, {\"aggregate\": \"min\", \"column\": \"MLII\", \"op\": \"AGGREGATE_COLUMN\"}], \"version\": \"1\"}",
+    "mit_ecg|1|v3": "{\"steps\": [{\"column\": \"record_id\", \"comparator\": \"eq\", \"op\": \"FILTER_COMPARE\", \"value\": 101}, {\"aggregate\": \"min\", \"column\": \"MLII\", \"op\": \"AGGREGATE_COLUMN\"}], \"version\": \"1\"}",
+    "mit_ecg|2|v1": "{\"steps\": [{\"column\": \"record_id\", \"comparator\": \"eq\", \"op\": \"FILTER_COMPARE\", \"value\": 234}, {\"aggregate\": \"max\", \"column\": \"time_s\", \"op\": \"AGGREGATE_COLUMN\"}], \"version\": \"1\"}",
+    "mit_ecg|2|v2": "{\"steps\": [{\"column\": \"record_id\", \"comparator\": \"eq\", \"op\": \"FILTER_COMPARE\", \"value\": 234}, {\"aggregate\": \"max\", \"column\": \"time_s\", \"op\": \"AGGREGATE_COLUMN\"}], \"version\": \"1\"}",
+    "mit_ecg|2|v3": "{\"steps\": [{\"column\": \"record_id\", \"comparator\": \"eq\", \"op\": \"FILTER_COMPARE\", \"value\": 234}, {\"aggregate\": \"max\", \"column\": \"time_s\", \"op\": \"AGGREGATE_COLUMN\"}], \"version\": \"1\"}",
+    "mit_ecg|3|v1": "{\"steps\": [{\"column\": \"record_id\", \"comparator\": \"eq\", \"op\": \"FILTER_COMPARE\", \"value\": 106}, {\"column\": \"MLII\", \"comparator\": \"gt\", \"op\": \"FILTER_COMPARE\", \"value\": 0}, {\"op\": \"COUNT_ROWS\"}], \"version\": \"1\"}",
+    "mit_ecg|3|v2": "{\"steps\": [{\"column\": \"record_id\", \"comparator\": \"eq\", \"op\": \"FILTER_COMPARE\", \"value\": 106}, {\"column\": \"MLII\", \"comparator\": \"gt\", \"op\": \"FILTER_COMPARE\", \"value\": 0}, {\"op\": \"COUNT_ROWS\"}], \"version\": \"1\"}",
+    "mit_ecg|3|v3": "{\"steps\": [{\"column\": \"record_id\", \"comparator\": \"eq\", \"op\": \"FILTER_COMPARE\", \"value\": 106}, {\"column\": \"MLII\", \"comparator\": \"gt\", \"op\": \"FILTER_COMPARE\", \"value\": 0}, {\"op\": \"COUNT_ROWS\"}], \"version\": \"1\"}",
+    "mit_ecg|4|v1": "{\"steps\": [{\"column\": \"record_id\", \"comparator\": \"eq\", \"op\": \"FILTER_COMPARE\", \"value\": 221}, {\"column\": \"annotation\", \"op\": \"FILTER_NOT_EMPTY\"}, {\"aggregate\": \"max\", \"column\": \"time_s\", \"op\": \"AGGREGATE_COLUMN\"}], \"version\": \"1\"}",
+    "mit_ecg|4|v2": "{\"steps\": [{\"column\": \"record_id\", \"comparator\": \"eq\", \"op\": \"FILTER_COMPARE\", \"value\": 221}, {\"column\": \"annotation\", \"op\": \"FILTER_NOT_EMPTY\"}, {\"aggregate\": \"max\", \"column\": \"time_s\", \"op\": \"AGGREGATE_COLUMN\"}], \"version\": \"1\"}",
+    "mit_ecg|4|v3": "{\"steps\": [{\"column\": \"record_id\", \"comparator\": \"eq\", \"op\": \"FILTER_COMPARE\", \"value\": 221}, {\"column\": \"annotation\", \"op\": \"FILTER_NOT_EMPTY\"}, {\"aggregate\": \"max\", \"column\": \"time_s\", \"op\": \"AGGREGATE_COLUMN\"}], \"version\": \"1\"}",
+    "mit_ecg|5|v1": "{\"steps\": [{\"column\": \"record_id\", \"comparator\": \"eq\", \"op\": \"FILTER_COMPARE\", \"value\": 208}, {\"column\": \"annotation\", \"op\": \"FILTER_NOT_EMPTY\"}, {\"column\": \"time_s\", \"epoch_unit\": null, \"freq\": null, \"kind\": \"numeric\", \"op\": \"DERIVE_BIN\", \"result\": \"bin\", \"width\": 60.0}, {\"aggregate\": \"count\", \"column\": null, \"freq\": null, \"group_by\": [\"bin\"], \"op\": \"GROUP_AGGREGATE\"}, {\"aggregate\": \"mean\", \"op\": \"AGGREGATE_GROUPS\"}], \"version\": \"1\"}",
+    "mit_ecg|5|v2": "{\"steps\": [{\"column\": \"record_id\", \"comparator\": \"eq\", \"op\": \"FILTER_COMPARE\", \"value\": 208}, {\"column\": \"annotation\", \"op\": \"FILTER_NOT_EMPTY\"}, {\"column\": \"time_s\", \"epoch_unit\": null, \"freq\": null, \"kind\": \"numeric\", \"op\": \"DERIVE_BIN\", \"result\": \"bin\", \"width\": 60.0}, {\"aggregate\": \"count\", \"column\": null, \"freq\": null, \"group_by\": [\"bin\"], \"op\": \"GROUP_AGGREGATE\"}, {\"aggregate\": \"mean\", \"op\": \"AGGREGATE_GROUPS\"}], \"version\": \"1\"}",
+    "mit_ecg|5|v3": "{\"steps\": [{\"column\": \"record_id\", \"comparator\": \"eq\", \"op\": \"FILTER_COMPARE\", \"value\": 208}, {\"column\": \"annotation\", \"op\": \"FILTER_NOT_EMPTY\"}, {\"column\": \"time_s\", \"epoch_unit\": null, \"freq\": null, \"kind\": \"numeric\", \"op\": \"DERIVE_BIN\", \"result\": \"bin\", \"width\": 60.0}, {\"aggregate\": \"count\", \"column\": null, \"freq\": null, \"group_by\": [\"bin\"], \"op\": \"GROUP_AGGREGATE\"}, {\"aggregate\": \"mean\", \"op\": \"AGGREGATE_GROUPS\"}], \"version\": \"1\"}",
+    "mit_ecg|6|v1": "{\"steps\": [{\"branches\": [{\"aggregate\": \"max\", \"column\": \"MLII\", \"filter_column\": null, \"filter_values\": null, \"group_by\": [\"record_id\"], \"result_column\": \"MLII_max\"}, {\"aggregate\": \"min\", \"column\": \"MLII\", \"filter_column\": null, \"filter_values\": null, \"group_by\": [\"record_id\"], \"result_column\": \"MLII_min\"}], \"op\": \"PARALLEL_AGGREGATE\"}, {\"left\": \"MLII_max\", \"op\": \"DERIVE_BINARY\", \"operation\": \"subtract\", \"result\": \"MLII_diff\", \"right\": \"MLII_min\"}, {\"column\": \"MLII_diff\", \"direction\": \"max\", \"op\": \"RANK_ROWS\", \"return_columns\": [\"record_id\"]}], \"version\": \"1\"}",
+    "mit_ecg|6|v2": "{\"steps\": [{\"branches\": [{\"aggregate\": \"max\", \"column\": \"MLII\", \"filter_column\": null, \"filter_values\": null, \"group_by\": [\"record_id\"], \"result_column\": \"MLII_max\"}, {\"aggregate\": \"min\", \"column\": \"MLII\", \"filter_column\": null, \"filter_values\": null, \"group_by\": [\"record_id\"], \"result_column\": \"MLII_min\"}], \"op\": \"PARALLEL_AGGREGATE\"}, {\"left\": \"MLII_max\", \"op\": \"DERIVE_BINARY\", \"operation\": \"subtract\", \"result\": \"MLII_diff\", \"right\": \"MLII_min\"}, {\"column\": \"MLII_diff\", \"direction\": \"max\", \"op\": \"RANK_ROWS\", \"return_columns\": [\"record_id\"]}], \"version\": \"1\"}",
+    "mit_ecg|6|v3": "{\"steps\": [{\"branches\": [{\"aggregate\": \"max\", \"column\": \"MLII\", \"filter_column\": null, \"filter_values\": null, \"group_by\": [\"record_id\"], \"result_column\": \"MLII_max\"}, {\"aggregate\": \"min\", \"column\": \"MLII\", \"filter_column\": null, \"filter_values\": null, \"group_by\": [\"record_id\"], \"result_column\": \"MLII_min\"}], \"op\": \"PARALLEL_AGGREGATE\"}, {\"left\": \"MLII_max\", \"op\": \"DERIVE_BINARY\", \"operation\": \"subtract\", \"result\": \"MLII_diff\", \"right\": \"MLII_min\"}, {\"column\": \"MLII_diff\", \"direction\": \"max\", \"op\": \"RANK_ROWS\", \"return_columns\": [\"record_id\"]}], \"version\": \"1\"}",
+    "mit_ecg|7|v1": "{\"steps\": [{\"column\": \"record_id\", \"comparator\": \"eq\", \"op\": \"FILTER_COMPARE\", \"value\": 101}, {\"column\": \"annotation\", \"op\": \"FILTER_NOT_EMPTY\"}, {\"column\": \"time_s\", \"epoch_unit\": null, \"freq\": null, \"kind\": \"numeric\", \"op\": \"DERIVE_BIN\", \"result\": \"bin\", \"width\": 10.0}, {\"aggregate\": \"count\", \"column\": null, \"freq\": null, \"group_by\": [\"bin\"], \"op\": \"GROUP_AGGREGATE\"}, {\"direction\": \"max\", \"op\": \"RANK_GROUPS\"}], \"version\": \"1\"}",
+    "mit_ecg|7|v2": "{\"steps\": [{\"column\": \"record_id\", \"comparator\": \"eq\", \"op\": \"FILTER_COMPARE\", \"value\": 101}, {\"column\": \"annotation\", \"op\": \"FILTER_NOT_EMPTY\"}, {\"column\": \"time_s\", \"epoch_unit\": null, \"freq\": null, \"kind\": \"numeric\", \"op\": \"DERIVE_BIN\", \"result\": \"bin\", \"width\": 10.0}, {\"aggregate\": \"count\", \"column\": null, \"freq\": null, \"group_by\": [\"bin\"], \"op\": \"GROUP_AGGREGATE\"}, {\"direction\": \"max\", \"op\": \"RANK_GROUPS\"}], \"version\": \"1\"}",
+    "mit_ecg|7|v3": "{\"steps\": [{\"column\": \"record_id\", \"comparator\": \"eq\", \"op\": \"FILTER_COMPARE\", \"value\": 101}, {\"column\": \"annotation\", \"op\": \"FILTER_NOT_EMPTY\"}, {\"column\": \"time_s\", \"epoch_unit\": null, \"freq\": null, \"kind\": \"numeric\", \"op\": \"DERIVE_BIN\", \"result\": \"bin\", \"width\": 10.0}, {\"aggregate\": \"count\", \"column\": null, \"freq\": null, \"group_by\": [\"bin\"], \"op\": \"GROUP_AGGREGATE\"}, {\"direction\": \"max\", \"op\": \"RANK_GROUPS\"}], \"version\": \"1\"}",
+    "mit_ecg|8|v1": "{\"steps\": [{\"column\": \"record_id\", \"comparator\": \"eq\", \"op\": \"FILTER_COMPARE\", \"value\": 106}, {\"aggregate\": \"rms\", \"column\": \"MLII\", \"op\": \"AGGREGATE_COLUMN\"}], \"version\": \"1\"}",
+    "mit_ecg|8|v2": "{\"steps\": [{\"column\": \"record_id\", \"comparator\": \"eq\", \"op\": \"FILTER_COMPARE\", \"value\": 106}, {\"aggregate\": \"rms\", \"column\": \"MLII\", \"op\": \"AGGREGATE_COLUMN\"}], \"version\": \"1\"}",
+    "mit_ecg|8|v3": "{\"steps\": [{\"column\": \"record_id\", \"comparator\": \"eq\", \"op\": \"FILTER_COMPARE\", \"value\": 106}, {\"aggregate\": \"rms\", \"column\": \"MLII\", \"op\": \"AGGREGATE_COLUMN\"}], \"version\": \"1\"}"
+  }
+}
