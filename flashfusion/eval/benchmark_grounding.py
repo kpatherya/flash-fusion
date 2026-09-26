@@ -84,6 +84,7 @@ import csv
 import json
 import math
 import os
+import random
 import signal
 import time
 from collections import Counter, defaultdict
@@ -589,6 +590,95 @@ def _load_existing_granite_rows(
     return loaded
 
 
+def _missing_reused_grounding_rows(
+    rows: list[dict[str, Any]],
+    *,
+    dataset: str,
+    runs: int,
+    query_versions: list[str],
+    query_ids: set[int] | None,
+) -> list[tuple[int, str, int]]:
+    expected = {
+        (run_index, query_version, query_id)
+        for run_index in range(1, runs + 1)
+        for query_version in [query_versions[(run_index - 1) % len(query_versions)]]
+        for query_id in _inscope_query_defs(dataset, query_version, query_ids)
+    }
+    actual = {
+        (
+            int(row.get("run_index", 0)),
+            str(row.get("query_version", "")).strip().lower(),
+            int(row.get("query_id", 0)),
+        )
+        for row in rows
+    }
+    return sorted(expected - actual)
+
+
+def _run_log_path(run_log_root: Path | None, dataset: str, stage12_model: str, run_index: int) -> Path | None:
+    if run_log_root is None:
+        return None
+    return run_log_root / dataset / stage12_model / f"run_{run_index}.log"
+
+
+def _emit_run_log(prefix: str, message: str, log_path: Path | None = None) -> None:
+    line = f"[{prefix}] {message}"
+    if log_path is not None:
+        log_path.parent.mkdir(parents=True, exist_ok=True)
+        with log_path.open("a", encoding="utf-8") as f:
+            f.write(line + "\n")
+
+
+def _print_run_progress(
+    *,
+    dataset: str,
+    stage12_model: str,
+    run_index: int,
+    runs: int,
+    grounded: int,
+    completed: int,
+    total: int,
+    failures: int,
+    final: bool = False,
+) -> None:
+    bar_width = 20
+    filled = int(bar_width * grounded / total) if total else bar_width
+    bar = "#" * filled + "-" * (bar_width - filled)
+    line = (
+        f"[{dataset}] {stage12_model} run {run_index}/{runs} "
+        f"grounded [{bar}] {grounded}/{total} "
+        f"completed {completed}/{total} failures {failures}"
+    )
+    print(f"\r{line}", end="\n" if final else "", flush=True)
+
+
+def _print_run_alert(dataset: str, stage12_model: str, run_index: int, message: str) -> None:
+    print(f"\n[{dataset}] ALERT {stage12_model} run {run_index}: {message}", flush=True)
+
+
+def _emit_reused_run_logs(
+    rows: list[dict[str, Any]],
+    *,
+    dataset: str,
+    stage12_model: str,
+    run_log_root: Path | None,
+) -> None:
+    per_run_counts = Counter(int(row["run_index"]) for row in rows)
+    for run_index, count in sorted(per_run_counts.items()):
+        prefix = f"{dataset}/{stage12_model}/{run_index}"
+        _emit_run_log(
+            prefix,
+            f"complete reused_existing_granite completed_queries={count}",
+            _run_log_path(run_log_root, dataset, stage12_model, run_index),
+        )
+
+
+def _shuffled_query_ids(inscope: dict[int, dict[str, Any]], rng: random.Random) -> list[int]:
+    query_ids = list(inscope)
+    rng.shuffle(query_ids)
+    return query_ids
+
+
 def _run_live_model(
     *,
     dataset: str,
@@ -600,16 +690,36 @@ def _run_live_model(
     cache_path: str | None,
     semantic_cache_path: str | None,
     query_ids: set[int] | None,
+    run_log_root: Path | None,
+    schedule_rng: random.Random,
 ) -> list[dict[str, Any]]:
     rows: list[dict[str, Any]] = []
 
     for run_index in range(1, runs + 1):
         query_version = query_versions[(run_index - 1) % len(query_versions)]
         inscope = _inscope_query_defs(dataset, query_version, query_ids)
-        print(
-            f"[benchmark_grounding] model={stage12_model} run={run_index}/{runs} "
-            f"query_version={query_version} n_in_scope={len(inscope)}",
-            flush=True,
+        prefix = f"{dataset}/{stage12_model}/{run_index}"
+        log_path = _run_log_path(run_log_root, dataset, stage12_model, run_index)
+        if log_path is not None:
+            log_path.parent.mkdir(parents=True, exist_ok=True)
+            log_path.write_text("", encoding="utf-8")
+        _emit_run_log(
+            prefix,
+            f"starting query_version={query_version} n_in_scope={len(inscope)}",
+            log_path,
+        )
+        grounded = 0
+        completed = 0
+        failures = 0
+        _print_run_progress(
+            dataset=dataset,
+            stage12_model=stage12_model,
+            run_index=run_index,
+            runs=runs,
+            grounded=grounded,
+            completed=completed,
+            total=len(inscope),
+            failures=failures,
         )
 
         primary_key, light_key = _resolve_api_keys(planner_model, stage12_model)
@@ -629,14 +739,10 @@ def _run_live_model(
             copy_dataframe=False,
         )
 
-        for query_id in sorted(inscope):
+        for query_id in _shuffled_query_ids(inscope, schedule_rng):
             query_def = inscope[query_id]
             query_text = str(query_def["text"])
-            print(
-                f"[benchmark_grounding] model={stage12_model} run={run_index}/{runs} "
-                f"query_id={query_id} starting",
-                flush=True,
-            )
+            _emit_run_log(prefix, f"query_id={query_id} starting", log_path)
             query_started = time.perf_counter()
             result: RunResult | None = None
             for attempt in range(GROUNDING_RATE_LIMIT_MAX_ATTEMPTS):
@@ -668,11 +774,18 @@ def _run_live_model(
                 except Exception as exc:  # Model output and provider failures must not abort the benchmark.
                     if _is_rate_limited_error(exc) and attempt + 1 < GROUNDING_RATE_LIMIT_MAX_ATTEMPTS:
                         retry_delay_s = _rate_limit_retry_delay_s(exc, attempt)
-                        print(
-                            f"[benchmark_grounding] query_id={query_id} rate limited; "
-                            f"retrying attempt {attempt + 2}/{GROUNDING_RATE_LIMIT_MAX_ATTEMPTS} "
+                        _emit_run_log(
+                            prefix,
+                            f"query_id={query_id} rate limited; retrying attempt "
+                            f"{attempt + 2}/{GROUNDING_RATE_LIMIT_MAX_ATTEMPTS} "
                             f"in {retry_delay_s:.1f}s",
-                            flush=True,
+                            log_path,
+                        )
+                        _print_run_alert(
+                            dataset,
+                            stage12_model,
+                            run_index,
+                            f"query_id={query_id} rate limited; retrying in {retry_delay_s:.1f}s",
                         )
                         time.sleep(retry_delay_s)
                         client = LLMClient(
@@ -708,10 +821,10 @@ def _run_live_model(
             result.input_tokens = client.total_input_tokens() - input_tokens_before
             result.output_tokens = client.total_output_tokens() - output_tokens_before
             result.cost_usd = client.total_cost_usd() - cost_usd_before
-            print(
-                f"[benchmark_grounding] model={stage12_model} run={run_index}/{runs} "
+            _emit_run_log(
+                prefix,
                 f"query_id={query_id} complete elapsed_s={time.perf_counter() - query_started:.2f}",
-                flush=True,
+                log_path,
             )
             result.query_id = int(query_id)
 
@@ -727,6 +840,39 @@ def _run_live_model(
                 source="live",
             )
             rows.append(row)
+            completed += 1
+            if row["failure_for_grounding_loss"]:
+                failures += 1
+                _print_run_alert(
+                    dataset,
+                    stage12_model,
+                    run_index,
+                    f"query_id={query_id} was not grounded: {row['failure_stage_excerpt']}",
+                )
+            else:
+                grounded += 1
+            _print_run_progress(
+                dataset=dataset,
+                stage12_model=stage12_model,
+                run_index=run_index,
+                runs=runs,
+                grounded=grounded,
+                completed=completed,
+                total=len(inscope),
+                failures=failures,
+            )
+        _emit_run_log(prefix, f"complete completed_queries={len(inscope)}", log_path)
+        _print_run_progress(
+            dataset=dataset,
+            stage12_model=stage12_model,
+            run_index=run_index,
+            runs=runs,
+            grounded=grounded,
+            completed=completed,
+            total=len(inscope),
+            failures=failures,
+            final=True,
+        )
     return rows
 
 
@@ -946,6 +1092,12 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--runs", type=int, default=3)
     parser.add_argument("--query-versions", default="v1,v2,v3")
     parser.add_argument(
+        "--random-seed",
+        type=int,
+        default=None,
+        help="Optional seed for randomized model and query execution order.",
+    )
+    parser.add_argument(
         "--query-ids",
         default=None,
         help="Optional comma-separated query ids to benchmark (for example, cached skeleton ids).",
@@ -956,6 +1108,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--output-dir",
         default="flashfusion/results/ff_hybrid_cache/grounding_benchmark",
+    )
+    parser.add_argument(
+        "--run-log-root",
+        default=None,
+        help="Optional root for per-run logs at <root>/<dataset>/<model>/run_<n>.log.",
     )
     parser.add_argument("--save-traces", action="store_true")
     parser.add_argument("--max-rows", type=int, default=None)
@@ -1051,6 +1208,11 @@ def main() -> None:
         stage12_models,
         key=lambda m: float(MODEL_SIZE_META.get(m, {}).get("params_b") or 1e9),
     )
+    schedule_seed = args.random_seed if args.random_seed is not None else random.SystemRandom().randrange(2**63)
+    schedule_rng = random.Random(schedule_seed)
+    execution_models = list(model_order)
+    schedule_rng.shuffle(execution_models)
+    print(f"[benchmark_grounding] randomized execution order seed={schedule_seed}", flush=True)
 
     data_path = args.data or DEFAULT_DATA_PATHS[args.dataset]
     _validate_data_path(str(data_path))
@@ -1073,20 +1235,45 @@ def main() -> None:
             query_ids=query_ids,
         )
         if existing_rows:
-            print(
-                "[benchmark_grounding] reusing existing granite artifacts "
-                f"from {args.existing_granite_root} ({len(existing_rows)} rows)",
-                flush=True,
+            missing_rows = _missing_reused_grounding_rows(
+                existing_rows,
+                dataset=args.dataset,
+                runs=args.runs,
+                query_versions=query_versions,
+                query_ids=query_ids,
             )
-            all_rows.extend(existing_rows)
-            reused_granite = True
+            if not missing_rows:
+                print(
+                    "[benchmark_grounding] reusing existing granite artifacts "
+                    f"from {args.existing_granite_root} ({len(existing_rows)} rows)",
+                    flush=True,
+                )
+                all_rows.extend(existing_rows)
+                reused_granite = True
+                _emit_reused_run_logs(
+                    existing_rows,
+                    dataset=args.dataset,
+                    stage12_model=granite_model,
+                    run_log_root=Path(args.run_log_root) if args.run_log_root else None,
+                )
+            else:
+                preview = ", ".join(
+                    f"run={run_index},version={query_version},query_id={query_id}"
+                    for run_index, query_version, query_id in missing_rows[:4]
+                )
+                suffix = " ..." if len(missing_rows) > 4 else ""
+                print(
+                    f"[{args.dataset}] ALERT existing Granite artifacts are incomplete; "
+                    f"granite will run live (missing={len(missing_rows)}: {preview}{suffix})",
+                    flush=True,
+                )
         else:
             print(
                 "[benchmark_grounding] no reusable granite rows found; granite will run live",
                 flush=True,
             )
 
-    for stage12_model in model_order:
+    for stage12_model in execution_models:
         if reused_granite and stage12_model == granite_model:
             continue
         rows = _run_live_model(
@@ -1099,6 +1286,8 @@ def main() -> None:
             cache_path=args.cache_path,
             semantic_cache_path=args.semantic_cache_path,
             query_ids=query_ids,
+            run_log_root=Path(args.run_log_root) if args.run_log_root else None,
+            schedule_rng=schedule_rng,
         )
         all_rows.extend(rows)
 

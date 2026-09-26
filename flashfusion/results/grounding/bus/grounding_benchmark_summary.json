@@ -1,60 +1,716 @@
 {
   "benchmark": {
     "name": "ff_cache_grounding_loss_vs_model_size",
-    "timestamp_utc": "2026-09-23T01:01:35.626506+00:00",
+    "timestamp_utc": "2026-09-23T16:14:50.935225+00:00",
     "fallback_stage": "cache_miss_or_validation_failure",
     "runs": 3
   },
   "model_order": [
-    "meta-llama/llama-3.2-3b-instruct"
+    "meta-llama/llama-3.2-1b-instruct",
+    "meta-llama/llama-3.2-3b-instruct",
+    "google/gemma-3-4b-it",
+    "mistralai/ministral-8b-2512",
+    "qwen/qwen3-8b",
+    "meta-llama/llama-3.1-8b-instruct",
+    "ibm-granite/granite-4.2-8b",
+    "google/gemma-3-12b-it",
+    "microsoft/phi-4",
+    "qwen/qwen3-14b"
   ],
   "x_axis_size_labels": [
-    "3b"
+    "1b",
+    "3b",
+    "4b",
+    "8b",
+    "8b",
+    "8b",
+    "8b",
+    "12b",
+    "14b",
+    "14b"
   ],
   "model_label_map": {
-    "3b": "meta-llama/llama-3.2-3b-instruct"
+    "1b": "meta-llama/llama-3.2-1b-instruct",
+    "3b": "meta-llama/llama-3.2-3b-instruct",
+    "4b": "google/gemma-3-4b-it",
+    "8b": "ibm-granite/granite-4.2-8b",
+    "12b": "google/gemma-3-12b-it",
+    "14b": "qwen/qwen3-14b"
   },
   "per_model": {
-    "meta-llama/llama-3.2-3b-instruct": {
-      "size_label": "3b",
-      "params_b": 3.0,
-      "n_queries_total": 24,
-      "n_failures": 17,
-      "grounding_loss_mean_pct": 70.83333333333333,
-      "grounding_loss_std_pct": 7.216878364870322,
-      "grounding_loss_ci95_pct": 8.166666666666666,
+    "meta-llama/llama-3.2-1b-instruct": {
+      "size_label": "1b",
+      "params_b": 1.0,
+      "n_queries_total": 48,
+      "n_failures": 44,
+      "grounding_loss_mean_pct": 91.66666666666667,
+      "grounding_loss_std_pct": 14.433756729740644,
+      "grounding_loss_ci95_pct": 16.333333333333332,
       "per_run_loss_pct": [
         75.0,
-        75.0,
-        62.5
+        100.0,
+        100.0
       ],
-      "per_run_counts": {
+      "grounding_accuracy_mean_pct": 8.333333333333334,
+      "grounding_accuracy_std_pct": 14.433756729740644,
+      "latency_mean_s": 0.17200842710067832,
+      "latency_std_s": 0.04702825334781546,
+      "cost_mean_usd": 0.0,
+      "cost_std_usd": 0.0,
+      "input_tokens_mean": 0.0,
+      "input_tokens_std": 0.0,
+      "output_tokens_mean": 0.0,
+      "output_tokens_std": 0.0,
+      "per_run_metrics": {
         "1": {
-          "n_queries": 8,
-          "n_failures": 6
+          "n_queries": 16,
+          "n_failures": 12,
+          "grounding_loss_pct": 75.0,
+          "grounding_accuracy_pct": 25.0,
+          "mean_latency_s": 0.15303958855210453,
+          "mean_cost_usd": 0.0,
+          "mean_input_tokens": 0.0,
+          "mean_output_tokens": 0.0
         },
         "2": {
-          "n_queries": 8,
-          "n_failures": 6
+          "n_queries": 16,
+          "n_failures": 16,
+          "grounding_loss_pct": 100.0,
+          "grounding_accuracy_pct": 0.0,
+          "mean_latency_s": 0.2255586379375245,
+          "mean_cost_usd": 0.0,
+          "mean_input_tokens": 0.0,
+          "mean_output_tokens": 0.0
         },
         "3": {
-          "n_queries": 8,
-          "n_failures": 5
+          "n_queries": 16,
+          "n_failures": 16,
+          "grounding_loss_pct": 100.0,
+          "grounding_accuracy_pct": 0.0,
+          "mean_latency_s": 0.1374270548124059,
+          "mean_cost_usd": 0.0,
+          "mean_input_tokens": 0.0,
+          "mean_output_tokens": 0.0
         }
       },
       "failure_reason_breakdown": {
-        "cache: Grounding step count mismatch: expected 2 for skeleton ['FILTER_EQ_AGGREGATE', 'SELECT_COLUMN'], got 1": 2,
-        "cache: Grounding step count mismatch: expected 2 for skeleton ['FILTER_COMPARE', 'COUNT_ROWS'], got 1": 1,
+        "cache: UnauthorizedResponseError: Provider returned error": 44
+      },
+      "cache_plan_source_breakdown": {
+        "benchmark_failed_grounding_attempt": 44,
+        "exact_query_cache_light_grounded": 4
+      }
+    },
+    "meta-llama/llama-3.2-3b-instruct": {
+      "size_label": "3b",
+      "params_b": 3.0,
+      "n_queries_total": 48,
+      "n_failures": 37,
+      "grounding_loss_mean_pct": 77.08333333333333,
+      "grounding_loss_std_pct": 13.01041249666333,
+      "grounding_loss_ci95_pct": 14.722667708144623,
+      "per_run_loss_pct": [
+        62.5,
+        81.25,
+        87.5
+      ],
+      "grounding_accuracy_mean_pct": 22.916666666666668,
+      "grounding_accuracy_std_pct": 13.01041249666333,
+      "latency_mean_s": 5.072167748652295,
+      "latency_std_s": 1.0291751147867514,
+      "cost_mean_usd": 0.00167045201875,
+      "cost_std_usd": 0.00023256382973600397,
+      "input_tokens_mean": 5577.604166666667,
+      "input_tokens_std": 829.805493806882,
+      "output_tokens_mean": 220.77083333333334,
+      "output_tokens_std": 45.9564303398701,
+      "per_run_metrics": {
+        "1": {
+          "n_queries": 16,
+          "n_failures": 10,
+          "grounding_loss_pct": 62.5,
+          "grounding_accuracy_pct": 37.5,
+          "mean_latency_s": 3.974530190229416,
+          "mean_cost_usd": 0.0014778955875,
+          "mean_input_tokens": 4974.0625,
+          "mean_output_tokens": 173.625
+        },
+        "2": {
+          "n_queries": 16,
+          "n_failures": 13,
+          "grounding_loss_pct": 81.25,
+          "grounding_accuracy_pct": 18.75,
+          "mean_latency_s": 5.226530878074158,
+          "mean_cost_usd": 0.001604627025,
+          "mean_input_tokens": 5234.875,
+          "mean_output_tokens": 223.25
+        },
+        "3": {
+          "n_queries": 16,
+          "n_failures": 14,
+          "grounding_loss_pct": 87.5,
+          "grounding_accuracy_pct": 12.5,
+          "mean_latency_s": 6.015442177653313,
+          "mean_cost_usd": 0.0019288334437499999,
+          "mean_input_tokens": 6523.875,
+          "mean_output_tokens": 265.4375
+        }
+      },
+      "failure_reason_breakdown": {
+        "cache: light model JSON repair failed: Extra data": 5,
+        "cache: Grounding step count mismatch: expected 2 for skeleton ['DERIVE_VECTOR_MAGNITUDE', 'AGGREGATE_COLUMN'], got 1": 3,
+        "cache: light model JSON repair failed: Expecting ',' delimiter": 11,
+        "cache: 4 validation errors for DeterministicPlan\nsteps.0.DERIVE_BINARY.left\n  Field required [type=missing, input_value={'column': 'accel_stats_z..., 'op': 'DERIVE_BINARY'}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nsteps.0.DERIVE_BINARY.result\n  Field required [type=missing, input_value={'column': 'accel_stats_z..., 'op': 'DERIVE_BINARY'}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nsteps.0.DERIVE_BINARY.column\n  Extra inputs are not permitted [type=extra_forbidden, input_value='accel_stats_z_p99', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.13/v/extra_forbidden\nsteps.4.RANK_GROUPS.column\n  Extra inputs are not permitted [type=extra_forbidden, input_value='accel_stats_z_p99', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.13/v/extra_forbidden": 1,
+        "cache: Grounding step count mismatch: expected 3 for skeleton ['DERIVE_BIN', 'GROUP_AGGREGATE', 'RANK_GROUPS'], got 2": 2,
         "cache: light model JSON repair failed: Expecting ':' delimiter": 4,
-        "cache: Grounding step count mismatch: expected 2 for skeleton ['DERIVE_VECTOR_MAGNITUDE', 'AGGREGATE_COLUMN'], got 1": 2,
-        "cache: Grounding step count mismatch: expected 3 for skeleton ['DERIVE_BIN', 'GROUP_AGGREGATE', 'RANK_GROUPS'], got 2": 1,
-        "cache: light model JSON repair failed: Extra data": 4,
-        "cache: light model JSON repair failed: Expecting ',' delimiter": 2,
+        "cache: Grounding step count mismatch: expected 1 for skeleton ['PREDICTIVE_PIPELINE'], got 4": 1,
+        "cache: Grounding step count mismatch: expected 6 for skeleton ['DERIVE_BIN', 'DERIVE_BINARY', 'PARALLEL_AGGREGATE', 'AGGREGATE_COLUMN', 'AGGREGATE_COLUMN', 'COMPARE_VALUES'], got 1": 1,
+        "cache: UnauthorizedResponseError: Provider returned error": 2,
+        "cache: Grounding step count mismatch: expected 1 for skeleton ['PREDICTIVE_PIPELINE'], got 6": 3,
+        "cache: Grounding step count mismatch: expected 2 for skeleton ['FILTER_COMPARE', 'COUNT_ROWS'], got 1": 2,
+        "cache: semantic: semantic_ambiguous_candidates": 1,
+        "cache: Grounding step count mismatch: expected 4 for skeleton ['FILTER_IN', 'DERIVE_BIN', 'GROUP_AGGREGATE', 'RANK_GROUPS'], got 5": 1
+      },
+      "cache_plan_source_breakdown": {
+        "exact_query_cache_light_grounded": 11,
+        "llm": 35,
+        "benchmark_failed_grounding_attempt": 2
+      }
+    },
+    "google/gemma-3-4b-it": {
+      "size_label": "4b",
+      "params_b": 4.0,
+      "n_queries_total": 48,
+      "n_failures": 44,
+      "grounding_loss_mean_pct": 91.66666666666667,
+      "grounding_loss_std_pct": 14.433756729740644,
+      "grounding_loss_ci95_pct": 16.333333333333332,
+      "per_run_loss_pct": [
+        75.0,
+        100.0,
+        100.0
+      ],
+      "grounding_accuracy_mean_pct": 8.333333333333334,
+      "grounding_accuracy_std_pct": 14.433756729740644,
+      "latency_mean_s": 6.320120445219241,
+      "latency_std_s": 0.9030754649431897,
+      "cost_mean_usd": 0.0,
+      "cost_std_usd": 0.0,
+      "input_tokens_mean": 0.0,
+      "input_tokens_std": 0.0,
+      "output_tokens_mean": 0.0,
+      "output_tokens_std": 0.0,
+      "per_run_metrics": {
+        "1": {
+          "n_queries": 16,
+          "n_failures": 12,
+          "grounding_loss_pct": 75.0,
+          "grounding_accuracy_pct": 25.0,
+          "mean_latency_s": 5.277877192282716,
+          "mean_cost_usd": 0.0,
+          "mean_input_tokens": 0.0,
+          "mean_output_tokens": 0.0
+        },
+        "2": {
+          "n_queries": 16,
+          "n_failures": 16,
+          "grounding_loss_pct": 100.0,
+          "grounding_accuracy_pct": 0.0,
+          "mean_latency_s": 6.812224031375024,
+          "mean_cost_usd": 0.0,
+          "mean_input_tokens": 0.0,
+          "mean_output_tokens": 0.0
+        },
+        "3": {
+          "n_queries": 16,
+          "n_failures": 16,
+          "grounding_loss_pct": 100.0,
+          "grounding_accuracy_pct": 0.0,
+          "mean_latency_s": 6.870260111999983,
+          "mean_cost_usd": 0.0,
+          "mean_input_tokens": 0.0,
+          "mean_output_tokens": 0.0
+        }
+      },
+      "failure_reason_breakdown": {
+        "cache: TooManyRequestsResponseError: Provider returned error": 44
+      },
+      "cache_plan_source_breakdown": {
+        "benchmark_failed_grounding_attempt": 44,
+        "exact_query_cache_light_grounded": 4
+      }
+    },
+    "mistralai/ministral-8b-2512": {
+      "size_label": "8b",
+      "params_b": 8.0,
+      "n_queries_total": 48,
+      "n_failures": 1,
+      "grounding_loss_mean_pct": 2.0833333333333335,
+      "grounding_loss_std_pct": 3.608439182435161,
+      "grounding_loss_ci95_pct": 4.083333333333333,
+      "per_run_loss_pct": [
+        0.0,
+        0.0,
+        6.25
+      ],
+      "grounding_accuracy_mean_pct": 97.91666666666667,
+      "grounding_accuracy_std_pct": 3.608439182435161,
+      "latency_mean_s": 3.3704542020956674,
+      "latency_std_s": 0.78385810507107,
+      "cost_mean_usd": 0.000215197125,
+      "cost_std_usd": 0.00011892099448609777,
+      "input_tokens_mean": 1507.8333333333333,
+      "input_tokens_std": 454.78586278553485,
+      "output_tokens_mean": 155.58333333333334,
+      "output_tokens_std": 47.898914283972374,
+      "per_run_metrics": {
+        "1": {
+          "n_queries": 16,
+          "n_failures": 0,
+          "grounding_loss_pct": 0.0,
+          "grounding_accuracy_pct": 100.0,
+          "mean_latency_s": 2.4681381434202194,
+          "mean_cost_usd": 0.000147073125,
+          "mean_input_tokens": 1101.4375,
+          "mean_output_tokens": 102.25
+        },
+        "2": {
+          "n_queries": 16,
+          "n_failures": 0,
+          "grounding_loss_pct": 0.0,
+          "grounding_accuracy_pct": 100.0,
+          "mean_latency_s": 3.7599451690912247,
+          "mean_cost_usd": 0.000146004375,
+          "mean_input_tokens": 1423.0,
+          "mean_output_tokens": 169.5625
+        },
+        "3": {
+          "n_queries": 16,
+          "n_failures": 1,
+          "grounding_loss_pct": 6.25,
+          "grounding_accuracy_pct": 93.75,
+          "mean_latency_s": 3.8832792937755585,
+          "mean_cost_usd": 0.00035251387499999996,
+          "mean_input_tokens": 1999.0625,
+          "mean_output_tokens": 194.9375
+        }
+      },
+      "failure_reason_breakdown": {
+        "cache: 2 validation errors for DeterministicPlan\nsteps.3.DERIVE_BINARY.right\n  Field required [type=missing, input_value={'op': 'DERIVE_BINARY', '...ult': 'shock_range_abs'}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nsteps.4.AGGREGATE_COLUMN.group_by\n  Extra inputs are not permitted [type=extra_forbidden, input_value=['behavior', 'time_window'], input_type=list]\n    For further information visit https://errors.pydantic.dev/2.13/v/extra_forbidden": 1
+      },
+      "cache_plan_source_breakdown": {
+        "exact_query_cache_light_grounded": 47,
+        "llm": 1
+      }
+    },
+    "qwen/qwen3-8b": {
+      "size_label": "8b",
+      "params_b": 8.0,
+      "n_queries_total": 48,
+      "n_failures": 10,
+      "grounding_loss_mean_pct": 20.833333333333332,
+      "grounding_loss_std_pct": 3.608439182435161,
+      "grounding_loss_ci95_pct": 4.083333333333333,
+      "per_run_loss_pct": [
+        18.75,
+        18.75,
+        25.0
+      ],
+      "grounding_accuracy_mean_pct": 79.16666666666667,
+      "grounding_accuracy_std_pct": 3.608439182435161,
+      "latency_mean_s": 21.804994881153107,
+      "latency_std_s": 6.983229637206677,
+      "cost_mean_usd": 0.0013341380000000001,
+      "cost_std_usd": 0.00044118541938983387,
+      "input_tokens_mean": 2853.9166666666665,
+      "input_tokens_std": 377.560375621679,
+      "output_tokens_mean": 944.7083333333334,
+      "output_tokens_std": 272.43465625188605,
+      "per_run_metrics": {
+        "1": {
+          "n_queries": 16,
+          "n_failures": 3,
+          "grounding_loss_pct": 18.75,
+          "grounding_accuracy_pct": 81.25,
+          "mean_latency_s": 13.871741712093353,
+          "mean_cost_usd": 0.0008401014375,
+          "mean_input_tokens": 2501.5625,
+          "mean_output_tokens": 630.75
+        },
+        "2": {
+          "n_queries": 16,
+          "n_failures": 3,
+          "grounding_loss_pct": 18.75,
+          "grounding_accuracy_pct": 81.25,
+          "mean_latency_s": 27.021868154406548,
+          "mean_cost_usd": 0.0014734971875,
+          "mean_input_tokens": 2807.75,
+          "mean_output_tokens": 1118.8125
+        },
+        "3": {
+          "n_queries": 16,
+          "n_failures": 4,
+          "grounding_loss_pct": 25.0,
+          "grounding_accuracy_pct": 75.0,
+          "mean_latency_s": 24.52137477695942,
+          "mean_cost_usd": 0.001688815375,
+          "mean_input_tokens": 3252.4375,
+          "mean_output_tokens": 1084.5625
+        }
+      },
+      "failure_reason_breakdown": {
+        "cache: DERIVE_BIN: ValueError: Invalid frequency: 5m. Failed to parse with error message: ValueError(\"'m' is no longer supported for offsets. Please use 'ME' instead.\")": 6,
+        "cache: Grounding step count mismatch: expected 7 for skeleton ['DERIVE_BIN', 'PARALLEL_AGGREGATE', 'DERIVE_BINARY', 'DERIVE_BINARY', 'AGGREGATE_COLUMN', 'AGGREGATE_COLUMN', 'COMPARE_VALUES'], got 8": 1,
+        "cache: 17 validation errors for DeterministicPlan\nsteps.1.PARALLEL_AGGREGATE.branches\n  Field required [type=missing, input_value={'filter_column': 'behavi...': 'PARALLEL_AGGREGATE'}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nsteps.1.PARALLEL_AGGREGATE.filter_column\n  Extra inputs are not permitted [type=extra_forbidden, input_value='behavior', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.13/v/extra_forbidden\nsteps.1.PARALLEL_AGGREGATE.filter_values\n  Extra inputs are not permitted [type=extra_forbidden, input_value=['aggressive'], input_type=list]\n    For further information visit https://errors.pydantic.dev/2.13/v/extra_forbidden\nsteps.1.PARALLEL_AGGREGATE.group_by\n  Extra inputs are not permitted [type=extra_forbidden, input_value=['bin'], input_type=list]\n    For further information visit https://errors.pydantic.dev/2.13/v/extra_forbidden\nsteps.1.PARALLEL_AGGREGATE.aggregate\n  Extra inputs are not permitted [type=extra_forbidden, input_value='mean', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.13/v/extra_forbidden\nsteps.1.PARALLEL_AGGREGATE.column\n  Extra inputs are not permitted [type=extra_forbidden, input_value='accel_stats_z_p99', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.13/v/extra_forbidden\nsteps.1.PARALLEL_AGGREGATE.result_column\n  Extra inputs are not permitted [type=extra_forbidden, input_value='aggressive_mean', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.13/v/extra_forbidden\nsteps.2.DERIVE_BINARY.left\n  Field required [type=missing, input_value={'filter_column': 'behavi..., 'op': 'DERIVE_BINARY'}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nsteps.2.DERIVE_BINARY.right\n  Field required [type=missing, input_value={'filter_column': 'behavi..., 'op': 'DERIVE_BINARY'}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nsteps.2.DERIVE_BINARY.operation\n  Field required [type=missing, input_value={'filter_column': 'behavi..., 'op': 'DERIVE_BINARY'}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nsteps.2.DERIVE_BINARY.result\n  Field required [type=missing, input_value={'filter_column': 'behavi..., 'op': 'DERIVE_BINARY'}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nsteps.2.DERIVE_BINARY.filter_column\n  Extra inputs are not permitted [type=extra_forbidden, input_value='behavior', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.13/v/extra_forbidden\nsteps.2.DERIVE_BINARY.filter_values\n  Extra inputs are not permitted [type=extra_forbidden, input_value=['calm'], input_type=list]\n    For further information visit https://errors.pydantic.dev/2.13/v/extra_forbidden\nsteps.2.DERIVE_BINARY.group_by\n  Extra inputs are not permitted [type=extra_forbidden, input_value=['bin'], input_type=list]\n    For further information visit https://errors.pydantic.dev/2.13/v/extra_forbidden\nsteps.2.DERIVE_BINARY.aggregate\n  Extra inputs are not permitted [type=extra_forbidden, input_value='mean', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.13/v/extra_forbidden\nsteps.2.DERIVE_BINARY.column\n  Extra inputs are not permitted [type=extra_forbidden, input_value='accel_stats_z_p99', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.13/v/extra_forbidden\nsteps.2.DERIVE_BINARY.result_column\n  Extra inputs are not permitted [type=extra_forbidden, input_value='calm_mean', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.13/v/extra_forbidden": 1,
+        "cache: 2 validation errors for DeterministicPlan\nsteps.3.DERIVE_BINARY.right\n  Field required [type=missing, input_value={'left': 'vertical_shock_..., 'op': 'DERIVE_BINARY'}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nsteps.3.DERIVE_BINARY.operation\n  Input should be 'add', 'subtract', 'multiply', 'divide' or 'abs_difference' [type=literal_error, input_value='mean', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.13/v/literal_error": 1,
+        "cache: DERIVE_BIN: ValueError: Invalid frequency: 1m. Failed to parse with error message: ValueError(\"'m' is no longer supported for offsets. Please use 'ME' instead.\")": 1
+      },
+      "cache_plan_source_breakdown": {
+        "exact_query_cache_light_grounded": 38,
+        "llm": 10
+      }
+    },
+    "meta-llama/llama-3.1-8b-instruct": {
+      "size_label": "8b",
+      "params_b": 8.0,
+      "n_queries_total": 48,
+      "n_failures": 16,
+      "grounding_loss_mean_pct": 33.333333333333336,
+      "grounding_loss_std_pct": 7.216878364870322,
+      "grounding_loss_ci95_pct": 8.166666666666666,
+      "per_run_loss_pct": [
+        37.5,
+        25.0,
+        37.5
+      ],
+      "grounding_accuracy_mean_pct": 66.66666666666667,
+      "grounding_accuracy_std_pct": 7.216878364870322,
+      "latency_mean_s": 3.644769082466761,
+      "latency_std_s": 2.0049906900281163,
+      "cost_mean_usd": 0.000951390625,
+      "cost_std_usd": 6.78415745966004e-05,
+      "input_tokens_mean": 3249.6041666666665,
+      "input_tokens_std": 485.2137992571762,
+      "output_tokens_mean": 164.72916666666666,
+      "output_tokens_std": 8.132768721864242,
+      "per_run_metrics": {
+        "1": {
+          "n_queries": 16,
+          "n_failures": 6,
+          "grounding_loss_pct": 37.5,
+          "grounding_accuracy_pct": 62.5,
+          "mean_latency_s": 5.957391455769539,
+          "mean_cost_usd": 0.0010293978125,
+          "mean_input_tokens": 3731.875,
+          "mean_output_tokens": 168.6875
+        },
+        "2": {
+          "n_queries": 16,
+          "n_failures": 4,
+          "grounding_loss_pct": 25.0,
+          "grounding_accuracy_pct": 75.0,
+          "mean_latency_s": 2.394537791609764,
+          "mean_cost_usd": 0.0009061710625,
+          "mean_input_tokens": 2761.5,
+          "mean_output_tokens": 155.375
+        },
+        "3": {
+          "n_queries": 16,
+          "n_failures": 6,
+          "grounding_loss_pct": 37.5,
+          "grounding_accuracy_pct": 62.5,
+          "mean_latency_s": 2.582378000020981,
+          "mean_cost_usd": 0.000918603,
+          "mean_input_tokens": 3255.4375,
+          "mean_output_tokens": 170.125
+        }
+      },
+      "failure_reason_breakdown": {
+        "cache: DERIVE_BIN kind='temporal' with numeric timestamp requires epoch_unit (s|ms|us|ns)": 1,
+        "cache: DERIVE_BIN kind='temporal' with datetime source must not set epoch_unit": 1,
+        "cache: Grounding step count mismatch: expected 2 for skeleton ['DERIVE_VECTOR_MAGNITUDE', 'AGGREGATE_COLUMN'], got 1": 1,
+        "cache: 1 validation error for DeterministicPlan\nsteps.4.COMPARE_PARTITIONS.partitions\n  Extra inputs are not permitted [type=extra_forbidden, input_value=['north', 'south'], input_type=list]\n    For further information visit https://errors.pydantic.dev/2.13/v/extra_forbidden": 1,
+        "cache: Grounding step count mismatch: expected 4 for skeleton ['SPLIT_BY_THRESHOLD', 'SPLIT_BY_THRESHOLD', 'AGGREGATE_PARTITIONS', 'COMPARE_PARTITIONS'], got 3": 1,
+        "cache: 2 validation errors for DeterministicPlan\nsteps.0.DERIVE_BINARY.left\n  Field required [type=missing, input_value={'column': 'accel_stats_z..., 'op': 'DERIVE_BINARY'}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nsteps.0.DERIVE_BINARY.column\n  Extra inputs are not permitted [type=extra_forbidden, input_value='accel_stats_z_p99', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.13/v/extra_forbidden": 1,
+        "cache: light model JSON repair failed: Extra data": 2,
+        "cache: DERIVE_BIN references unknown column 'time_s'": 2,
+        "cache: semantic: semantic_ambiguous_candidates": 3,
+        "cache: 1 validation error for DeterministicPlan\nsteps.0.PREDICTIVE_PIPELINE.model\n  Field required [type=missing, input_value={'feature_columns': ['acc...: 'PREDICTIVE_PIPELINE'}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing": 1,
+        "cache: Grounding step count mismatch: expected 7 for skeleton ['DERIVE_BIN', 'PARALLEL_AGGREGATE', 'DERIVE_BINARY', 'DERIVE_BINARY', 'AGGREGATE_COLUMN', 'AGGREGATE_COLUMN', 'COMPARE_VALUES'], got 9": 1,
+        "cache: 1 validation error for DeterministicPlan\nsteps.1.COUNT_ROWS.column\n  Extra inputs are not permitted [type=extra_forbidden, input_value='count', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.13/v/extra_forbidden": 1
+      },
+      "cache_plan_source_breakdown": {
+        "llm": 16,
+        "exact_query_cache_light_grounded": 28,
+        "semantic_cache_light_grounded": 4
+      }
+    },
+    "ibm-granite/granite-4.2-8b": {
+      "size_label": "8b",
+      "params_b": 8.0,
+      "n_queries_total": 48,
+      "n_failures": 42,
+      "grounding_loss_mean_pct": 87.5,
+      "grounding_loss_std_pct": 10.825317547305483,
+      "grounding_loss_ci95_pct": 12.25,
+      "per_run_loss_pct": [
+        75.0,
+        93.75,
+        93.75
+      ],
+      "grounding_accuracy_mean_pct": 12.5,
+      "grounding_accuracy_std_pct": 10.825317547305483,
+      "latency_mean_s": 6.529745042324066,
+      "latency_std_s": 1.2759949725199753,
+      "cost_mean_usd": 0.002118590125,
+      "cost_std_usd": 0.00020146314248834047,
+      "input_tokens_mean": 6805.104166666667,
+      "input_tokens_std": 745.1446019831207,
+      "output_tokens_mean": 309.75,
+      "output_tokens_std": 65.23332521610408,
+      "per_run_metrics": {
+        "1": {
+          "n_queries": 16,
+          "n_failures": 12,
+          "grounding_loss_pct": 75.0,
+          "grounding_accuracy_pct": 25.0,
+          "mean_latency_s": 5.061236202716827,
+          "mean_cost_usd": 0.0019106455625,
+          "mean_input_tokens": 5944.6875,
+          "mean_output_tokens": 234.625
+        },
+        "2": {
+          "n_queries": 16,
+          "n_failures": 15,
+          "grounding_loss_pct": 93.75,
+          "grounding_accuracy_pct": 6.25,
+          "mean_latency_s": 7.160199120640755,
+          "mean_cost_usd": 0.0023128768125,
+          "mean_input_tokens": 7233.625,
+          "mean_output_tokens": 342.5625
+        },
+        "3": {
+          "n_queries": 16,
+          "n_failures": 15,
+          "grounding_loss_pct": 93.75,
+          "grounding_accuracy_pct": 6.25,
+          "mean_latency_s": 7.367799803614616,
+          "mean_cost_usd": 0.0021322479999999998,
+          "mean_input_tokens": 7237.0,
+          "mean_output_tokens": 352.0625
+        }
+      },
+      "failure_reason_breakdown": {
+        "cache: light model JSON repair failed: Unterminated string starting at": 22,
+        "cache: Model response missing 'params' list.": 3,
+        "cache: light model JSON repair failed: Expecting ':' delimiter": 1,
+        "cache: light model JSON repair failed: Expecting ',' delimiter": 14,
+        "cache: light model JSON repair failed: Expecting property name enclosed in double quotes": 2
+      },
+      "cache_plan_source_breakdown": {
+        "llm": 42,
+        "exact_query_cache_light_grounded": 6
+      }
+    },
+    "google/gemma-3-12b-it": {
+      "size_label": "12b",
+      "params_b": 12.0,
+      "n_queries_total": 48,
+      "n_failures": 16,
+      "grounding_loss_mean_pct": 33.333333333333336,
+      "grounding_loss_std_pct": 13.01041249666333,
+      "grounding_loss_ci95_pct": 14.722667708144623,
+      "per_run_loss_pct": [
+        18.75,
+        43.75,
+        37.5
+      ],
+      "grounding_accuracy_mean_pct": 66.66666666666667,
+      "grounding_accuracy_std_pct": 13.01041249666333,
+      "latency_mean_s": 6.175532393010276,
+      "latency_std_s": 1.9324751021826367,
+      "cost_mean_usd": 0.000613164625,
+      "cost_std_usd": 0.0004160958205060577,
+      "input_tokens_mean": 2579.375,
+      "input_tokens_std": 1217.6696942828955,
+      "output_tokens_mean": 140.5,
+      "output_tokens_std": 75.67557709558614,
+      "per_run_metrics": {
+        "1": {
+          "n_queries": 16,
+          "n_failures": 3,
+          "grounding_loss_pct": 18.75,
+          "grounding_accuracy_pct": 81.25,
+          "mean_latency_s": 3.9533055838580253,
+          "mean_cost_usd": 0.000215788875,
+          "mean_input_tokens": 1512.125,
+          "mean_output_tokens": 66.9375
+        },
+        "2": {
+          "n_queries": 16,
+          "n_failures": 7,
+          "grounding_loss_pct": 43.75,
+          "grounding_accuracy_pct": 56.25,
+          "mean_latency_s": 7.111314605069083,
+          "mean_cost_usd": 0.00057796125,
+          "mean_input_tokens": 2320.25,
+          "mean_output_tokens": 136.4375
+        },
+        "3": {
+          "n_queries": 16,
+          "n_failures": 6,
+          "grounding_loss_pct": 37.5,
+          "grounding_accuracy_pct": 62.5,
+          "mean_latency_s": 7.461976990103722,
+          "mean_cost_usd": 0.00104574375,
+          "mean_input_tokens": 3905.75,
+          "mean_output_tokens": 218.125
+        }
+      },
+      "failure_reason_breakdown": {
+        "cache: TooManyRequestsResponseError: Provider returned error": 6,
+        "cache: light model JSON repair failed: Expecting ',' delimiter": 4,
+        "cache: light model JSON repair failed: Unterminated string starting at": 6
+      },
+      "cache_plan_source_breakdown": {
+        "exact_query_cache_light_grounded": 32,
+        "benchmark_failed_grounding_attempt": 6,
+        "llm": 10
+      }
+    },
+    "microsoft/phi-4": {
+      "size_label": "14b",
+      "params_b": 14.0,
+      "n_queries_total": 48,
+      "n_failures": 8,
+      "grounding_loss_mean_pct": 16.666666666666668,
+      "grounding_loss_std_pct": 9.547032697824667,
+      "grounding_loss_ci95_pct": 10.803484520180412,
+      "per_run_loss_pct": [
+        6.25,
+        25.0,
+        18.75
+      ],
+      "grounding_accuracy_mean_pct": 83.33333333333333,
+      "grounding_accuracy_std_pct": 9.547032697824667,
+      "latency_mean_s": 5.511283298333486,
+      "latency_std_s": 2.266464278951708,
+      "cost_mean_usd": 0.0008207520625,
+      "cost_std_usd": 0.00032786954437182756,
+      "input_tokens_mean": 2487.7916666666665,
+      "input_tokens_std": 813.3250626607319,
+      "output_tokens_mean": 176.625,
+      "output_tokens_std": 47.065985926675324,
+      "per_run_metrics": {
+        "1": {
+          "n_queries": 16,
+          "n_failures": 1,
+          "grounding_loss_pct": 6.25,
+          "grounding_accuracy_pct": 93.75,
+          "mean_latency_s": 3.4296794831752777,
+          "mean_cost_usd": 0.00070160625,
+          "mean_input_tokens": 1616.25,
+          "mean_output_tokens": 122.375
+        },
+        "2": {
+          "n_queries": 16,
+          "n_failures": 4,
+          "grounding_loss_pct": 25.0,
+          "grounding_accuracy_pct": 75.0,
+          "mean_latency_s": 7.925786226987839,
+          "mean_cost_usd": 0.0011915349375,
+          "mean_input_tokens": 3226.5625,
+          "mean_output_tokens": 206.5625
+        },
+        "3": {
+          "n_queries": 16,
+          "n_failures": 3,
+          "grounding_loss_pct": 18.75,
+          "grounding_accuracy_pct": 81.25,
+          "mean_latency_s": 5.178384184837341,
+          "mean_cost_usd": 0.000569115,
+          "mean_input_tokens": 2620.5625,
+          "mean_output_tokens": 200.9375
+        }
+      },
+      "failure_reason_breakdown": {
+        "cache: operator: 'percentile' is not an aggregate. Percentiles are not computed by this vocabulary; reference the pre-computed percentile column directly (e.g. accel_stats_z_p99) and combine columns with DERIVE_BINARY.": 1,
+        "cache: operator: 'percentile_99' is not an aggregate. Percentiles are not computed by this vocabulary; reference the pre-computed percentile column directly (e.g. accel_stats_z_p99) and combine columns with DERIVE_BINARY.": 1,
+        "cache: DERIVE_BIN: ValueError: Invalid frequency: 5T. Failed to parse with error message: ValueError(\"Invalid frequency: T. Failed to parse with error message: KeyError('T'). Did you mean min?\")": 2,
+        "cache: 2 validation errors for DeterministicPlan\nsteps.4.AGGREGATE_COLUMN.result_column\n  Extra inputs are not permitted [type=extra_forbidden, input_value='mean_aggressive_range', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.13/v/extra_forbidden\nsteps.5.AGGREGATE_COLUMN.result_column\n  Extra inputs are not permitted [type=extra_forbidden, input_value='mean_calm_range', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.13/v/extra_forbidden": 2,
+        "cache: 1 validation error for DeterministicPlan\nsteps.0.FILTER_EQ_AGGREGATE.aggregate\n  Input should be 'min', 'max', 'mean', 'median', 'sum', 'count', 'std', 'var', 'nunique' or 'rms' [type=literal_error, input_value='accel_stats_z_p99', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.13/v/literal_error": 2
+      },
+      "cache_plan_source_breakdown": {
+        "exact_query_cache_light_grounded": 36,
+        "llm": 8,
+        "semantic_cache_light_grounded": 4
+      }
+    },
+    "qwen/qwen3-14b": {
+      "size_label": "14b",
+      "params_b": 14.0,
+      "n_queries_total": 48,
+      "n_failures": 20,
+      "grounding_loss_mean_pct": 41.666666666666664,
+      "grounding_loss_std_pct": 15.728821740147396,
+      "grounding_loss_ci95_pct": 17.798837352791086,
+      "per_run_loss_pct": [
+        25.0,
+        56.25,
+        43.75
+      ],
+      "grounding_accuracy_mean_pct": 58.333333333333336,
+      "grounding_accuracy_std_pct": 15.728821740147396,
+      "latency_mean_s": 17.496388564507168,
+      "latency_std_s": 3.0697008405504254,
+      "cost_mean_usd": 0.0013637504791666668,
+      "cost_std_usd": 0.00034761461936605204,
+      "input_tokens_mean": 3778.1666666666665,
+      "input_tokens_std": 830.8336183027762,
+      "output_tokens_mean": 620.2083333333334,
+      "output_tokens_std": 139.85930895754967,
+      "per_run_metrics": {
+        "1": {
+          "n_queries": 16,
+          "n_failures": 4,
+          "grounding_loss_pct": 25.0,
+          "grounding_accuracy_pct": 75.0,
+          "mean_latency_s": 14.069685831665993,
+          "mean_cost_usd": 0.0009709150625,
+          "mean_input_tokens": 2879.9375,
+          "mean_output_tokens": 585.1875
+        },
+        "2": {
+          "n_queries": 16,
+          "n_failures": 9,
+          "grounding_loss_pct": 56.25,
+          "grounding_accuracy_pct": 43.75,
+          "mean_latency_s": 18.424663797020912,
+          "mean_cost_usd": 0.0014887806875,
+          "mean_input_tokens": 4519.125,
+          "mean_output_tokens": 501.1875
+        },
+        "3": {
+          "n_queries": 16,
+          "n_failures": 7,
+          "grounding_loss_pct": 43.75,
+          "grounding_accuracy_pct": 56.25,
+          "mean_latency_s": 19.994816064834595,
+          "mean_cost_usd": 0.0016315556875,
+          "mean_input_tokens": 3935.4375,
+          "mean_output_tokens": 774.25
+        }
+      },
+      "failure_reason_breakdown": {
+        "cache: light model returned empty content": 17,
+        "cache: DERIVE_BINARY references unknown column 'accel_stats_z_p99'": 1,
+        "cache: PARALLEL_AGGREGATE references unknown column 'vertical_shock_range'": 1,
         "cache: semantic: semantic_ambiguous_candidates": 1
       },
       "cache_plan_source_breakdown": {
-        "exact_query_cache_light_grounded": 7,
-        "llm": 17
+        "exact_query_cache_light_grounded": 27,
+        "llm": 20,
+        "semantic_cache_light_grounded": 1
       }
     }
   }

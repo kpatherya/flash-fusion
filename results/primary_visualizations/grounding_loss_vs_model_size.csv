@@ -1,0 +1,11 @@
+model,size_label,params_b,grounding_loss_mean_pct,grounding_loss_std_pct,grounding_loss_ci95_pct
+meta-llama/llama-3.2-1b-instruct,1b,1.0,75.0,0.0,0.0
+meta-llama/llama-3.2-3b-instruct,3b,3.0,75.0,0.0,0.0
+google/gemma-3-4b-it,4b,4.0,66.66666666666667,9.547032697824667,10.803484520180412
+mistralai/ministral-8b-2512,8b,8.0,6.25,0.0,0.0
+qwen/qwen3-8b,8b,8.0,18.75,0.0,0.0
+meta-llama/llama-3.1-8b-instruct,8b,8.0,43.75,6.25,7.072540797572916
+ibm-granite/granite-4.2-8b,8b,8.0,75.0,0.0,0.0
+google/gemma-3-12b-it,12b,12.0,6.25,0.0,0.0
+microsoft/phi-4,14b,14.0,6.25,0.0,0.0
+qwen/qwen3-14b,14b,14.0,39.583333333333336,7.216878364870322,8.166666666666666

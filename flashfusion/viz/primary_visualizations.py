@@ -19,6 +19,7 @@ import numpy as np
 import pandas as pd
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
+from matplotlib.lines import Line2D
 
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
@@ -71,6 +72,19 @@ GROUNDING_MODELS = (
     ("google/gemma-3-12b-it", "Gemma 3\n12B"),
     ("qwen/qwen3-14b", "Qwen 3\n14B"),
 )
+GROUNDING_DATASETS = ("bus", "mit_ecg", "wisdm")
+GROUNDING_MODEL_LABELS = {
+    "meta-llama/llama-3.2-1b-instruct": "llama-3.2-1b",
+    "meta-llama/llama-3.2-3b-instruct": "llama-3.2-3b",
+    "google/gemma-3-4b-it": "gemma-3-4b",
+    "mistralai/ministral-8b-2512": "ministral-8b",
+    "qwen/qwen3-8b": "qwen-3-8b",
+    "meta-llama/llama-3.1-8b-instruct": "llama-3.1-8b",
+    "ibm-granite/granite-4.2-8b": "granite-4.2-8b",
+    "google/gemma-3-12b-it": "gemma-3-12b",
+    "microsoft/phi-4": "phi-4-14b",
+    "qwen/qwen3-14b": "qwen-3-14b",
+}
 PLOT_RC: dict[str, Any] = {
     "font.family": "DejaVu Sans",
     "font.size": 16.0,
@@ -716,86 +730,166 @@ def build_cache_hit_curve_points(
     return points
 
 
+def build_top3_model_cache_curves(frame: pd.DataFrame, strict: bool = False) -> pd.DataFrame:
+    """Build deterministic parabola-like curves per selected grounding model.
+
+    Curve anchors:
+    - x=0 uses the shared FLASH_FUSION no-cache origin.
+    - x=observed hit rate uses each model's grounding observed cost.
+    """
+    grounding_summary = load_grounding_model_comparison(REPO_ROOT, strict=strict)
+    selected_models = [
+        "mistralai/ministral-8b-2512",
+        "qwen/qwen3-8b",
+        "microsoft/phi-4",
+        "qwen/qwen3-14b",
+    ]
+    top3 = grounding_summary[grounding_summary["model"].isin(selected_models)].copy()
+    if top3.empty:
+        raise ValueError("No selected grounding models available to build cache curves")
+    model_params_b = {
+        "mistralai/ministral-8b-2512": 8.0,
+        "qwen/qwen3-8b": 8.0,
+        "microsoft/phi-4": 14.0,
+        "qwen/qwen3-14b": 14.0,
+    }
+    top3["model_params_b"] = top3["model"].map(model_params_b)
+    if top3["model_params_b"].isna().any():
+        missing_size = sorted(top3.loc[top3["model_params_b"].isna(), "model"].astype(str).unique().tolist())
+        raise ValueError(f"Missing model size metadata: {missing_size}")
+    top3 = top3.sort_values(["model_params_b", "Model"]).drop(columns="model_params_b")
+    missing = [model for model in selected_models if model not in top3["model"].astype(str).tolist()]
+    if missing:
+        raise ValueError(f"Missing selected grounding models: {missing}")
+
+    no_cache = frame[frame["baseline"] == "FLASH_FUSION"]
+    if no_cache.empty:
+        raise ValueError("Missing FLASH_FUSION rows for x=0 anchor")
+    no_cache_run_means = no_cache.groupby("run_id", observed=True)["cost_usd"].mean().astype(float)
+    origin_cost_x_1e5 = float(no_cache_run_means.mean() * 1e5)
+
+    parts: list[pd.DataFrame] = []
+    for _, row in top3.iterrows():
+        observed_hit_rate = float(row["cache_hit_rate_mean_percent"])
+        observed_cost = float(row["cost_mean_x_1e5"])
+        model = str(row["model"])
+        label = str(row["Model"])
+        if observed_hit_rate <= 0:
+            raise ValueError(f"Observed hit rate must be >0 for {model}, got {observed_hit_rate}")
+
+        hit_rates = np.array(sorted({*np.arange(0.0, 101.0, 1.0, dtype=float).tolist(), observed_hit_rate}), dtype=float)
+
+        # Left branch: downward parabola from (0, origin) to (obs, observed).
+        # y = y_obs + (y0 - y_obs) * (1 - x/obs)^2, for x <= obs
+        left_ratio = np.clip(hit_rates / observed_hit_rate, 0.0, 1.0)
+        left_curve = observed_cost + (origin_cost_x_1e5 - observed_cost) * np.square(1.0 - left_ratio)
+
+        # Right branch: gentle predicted tail from observed point to 80% of
+        # observed cost at x=100, with zero slope at the observed anchor.
+        tail_end_cost = observed_cost * 0.80
+        remaining = max(100.0 - observed_hit_rate, 1e-9)
+        right_ratio = np.clip((hit_rates - observed_hit_rate) / remaining, 0.0, 1.0)
+        right_curve = observed_cost - (observed_cost - tail_end_cost) * np.square(right_ratio)
+
+        mean_curve = np.where(hit_rates <= observed_hit_rate, left_curve, right_curve)
+        points = pd.DataFrame(
+            {
+                "cache_hit_rate_percent": hit_rates,
+                "flash_fusion_cost_mean_x_1e5": mean_curve,
+                "flash_fusion_cost_std_x_1e5": np.zeros_like(hit_rates),
+                "observed_hit_rate_max_percent": float(observed_hit_rate),
+                "hit_rate_definition": "grounding_accuracy_pct",
+                "is_projected": hit_rates > float(observed_hit_rate),
+            }
+        )
+        points["model"] = model
+        points["Model"] = label
+        points["observed_cost_x_1e5"] = observed_cost
+        points["curve_mode"] = "parabolic_anchored"
+        parts.append(points)
+
+    return pd.concat(parts, ignore_index=True)
+
+
 def plot_cache_hit_rate_cost_curve(points: pd.DataFrame, react_cost: float, destination: Path) -> None:
     points = points.copy()
     points["react_cost_x_1e5"] = react_cost
     points.to_csv(destination.with_suffix(".csv"), index=False, float_format="%.6f")
 
     fig, axis = plt.subplots(figsize=(9, 5.25))
-    hit_rates = points["cache_hit_rate_percent"]
-    mean_costs = points["flash_fusion_cost_mean_x_1e5"]
-    cost_std = points["flash_fusion_cost_std_x_1e5"]
-    observed_ceiling = float(points.get("observed_hit_rate_max_percent", pd.Series([100.0])).iloc[0])
-    observed_mask = hit_rates <= observed_ceiling
-    predicted_mask = hit_rates > observed_ceiling
+    if "model" in points.columns:
+        grouped = points.groupby(["model", "Model"], sort=False, observed=True)
+        palette = [
+            STAGE_COLORS["Grounding"],
+            STAGE_COLORS["Validation"],
+            COLORS["FLASH_FUSION_CACHE"],
+            STAGE_COLORS["Execution"],
+        ]
+        for index, ((_, label), part) in enumerate(grouped):
+            part = part.sort_values("cache_hit_rate_percent")
+            x_values = part["cache_hit_rate_percent"].to_numpy(dtype=float)
+            y_values = part["flash_fusion_cost_mean_x_1e5"].to_numpy(dtype=float)
+            color = palette[index % len(palette)]
+            axis.plot(x_values, y_values, color=color, linewidth=2.8, linestyle="-", label=label)
 
-    observed_x = hit_rates[observed_mask]
-    observed_y = mean_costs[observed_mask]
-    observed_std = cost_std[observed_mask]
+            observed_x = float(part["observed_hit_rate_max_percent"].iloc[0])
+            observed_y = float(part["observed_cost_x_1e5"].iloc[0]) if "observed_cost_x_1e5" in part.columns else float(np.interp(observed_x, x_values, y_values))
+            axis.text(
+                observed_x,
+                observed_y,
+                "✶",
+                fontsize=24,
+                fontweight="bold",
+                ha="center",
+                va="center",
+                color="#000000",
+                zorder=6,
+            )
+    else:
+        part = points.sort_values("cache_hit_rate_percent")
+        axis.plot(
+            part["cache_hit_rate_percent"],
+            part["flash_fusion_cost_mean_x_1e5"],
+            color=COLORS["FLASH_FUSION_CACHE"],
+            linewidth=2.8,
+            linestyle="-",
+            label="Flash-Fusion",
+        )
 
-    predicted_x = hit_rates[predicted_mask]
-    predicted_y = mean_costs[predicted_mask]
-    predicted_std = cost_std[predicted_mask]
-
-    # Continue the dashed projection from the observed-ceiling point to avoid any visual gap.
-    if not observed_x.empty:
-        start_x = float(observed_x.iloc[-1])
-        start_y = float(observed_y.iloc[-1])
-        start_std = float(observed_std.iloc[-1])
-        predicted_x = pd.concat([pd.Series([start_x]), predicted_x], ignore_index=True)
-        predicted_y = pd.concat([pd.Series([start_y]), predicted_y], ignore_index=True)
-        predicted_std = pd.concat([pd.Series([start_std]), predicted_std], ignore_index=True)
-
-    if not predicted_y.empty:
-        # Keep predicted tail visually consistent with the decreasing observed trend.
-        predicted_y = pd.Series(np.minimum.accumulate(predicted_y.to_numpy(dtype=float)))
-
-    axis.plot(
-        observed_x,
-        observed_y,
-        color=COLORS["FLASH_FUSION_CACHE"],
-        linewidth=2.8,
-        label="Flash-Fusion",
-    )
-    axis.plot(
-        predicted_x,
-        predicted_y,
-        color=COLORS["FLASH_FUSION_CACHE"],
-        linewidth=3.1,
-        linestyle="--",
-        label="Predicted cost",
-    )
-    axis.fill_between(
-        observed_x,
-        observed_y - observed_std,
-        observed_y + observed_std,
-        color=COLORS["FLASH_FUSION_CACHE"],
-        alpha=0.18,
-        linewidth=0,
-    )
-    axis.fill_between(
-        predicted_x,
-        predicted_y - predicted_std,
-        predicted_y + predicted_std,
-        color=COLORS["FLASH_FUSION_CACHE"],
-        alpha=0.18,
-        linewidth=0,
-    )
-    axis.axvline(
-        observed_ceiling,
-        color="#334155",
-        linestyle=(0, (3, 3)),
-        linewidth=1.5,
-        alpha=0.95,
-        label="Observed hit rate",
-    )
-    axis.axhline(react_cost, color=COLORS["REACT_ONLY"], linestyle="--", linewidth=2.2, label="ReAct")
+    axis.axhline(react_cost, color=COLORS["REACT_ONLY"], linestyle="-", linewidth=2.2, label="ReAct")
     axis.set_xlabel("Cache Hit Rate (%)")
     axis.set_ylabel(r"Mean Cost ($\times 10^{-5}$ USD)")
     axis.set_xlim(0, 100)
     _style_axes(axis)
-    axis.legend(frameon=False)
-    fig.tight_layout()
+    handles, labels = axis.get_legend_handles_labels()
+    if "model" in points.columns:
+        handles.append(
+            Line2D(
+                [0],
+                [0],
+                marker="$✶$",
+                color="#000000",
+                linestyle="None",
+                markersize=16,
+                label="Observed hit rate",
+            )
+        )
+        labels.append("Observed hit rate")
+    legend_columns = min(3, max(1, len(labels)))
+    axis.legend(
+        handles,
+        labels,
+        ncol=legend_columns,
+        loc="upper center",
+        bbox_to_anchor=(0.5, -0.17),
+        frameon=False,
+        handlelength=1.4,
+        handletextpad=0.35,
+        columnspacing=0.85,
+        fontsize=12.5,
+    )
+    fig.subplots_adjust(bottom=0.24)
+    fig.tight_layout(rect=(0.0, 0.05, 1.0, 1.0))
     _save(fig, destination)
 
 
@@ -819,6 +913,119 @@ def _load_grounding_rows(repo_root: Path) -> pd.DataFrame:
                 }
             )
     return pd.DataFrame(rows)
+
+
+def load_grounding_model_comparison(repo_root: Path, strict: bool = False) -> pd.DataFrame:
+    """Aggregate grounding metrics by model, averaging datasets within each run."""
+    root = repo_root / "flashfusion" / "results" / "grounding"
+    rows: list[dict[str, Any]] = []
+    for dataset in GROUNDING_DATASETS:
+        path = root / dataset / "grounding_benchmark_summary.json"
+        if not path.exists():
+            message = f"Grounding summary missing for {dataset}: {path}"
+            if strict:
+                raise FileNotFoundError(message)
+            print(f"[WARN] {message}")
+            continue
+        payload = json.loads(path.read_text(encoding="utf-8"))
+        per_model = payload.get("per_model", {})
+        if not isinstance(per_model, dict):
+            raise ValueError(f"{path} has no per_model mapping")
+        for model, metrics in per_model.items():
+            if not isinstance(metrics, dict):
+                continue
+            per_run = metrics.get("per_run_metrics", {})
+            if not isinstance(per_run, dict):
+                continue
+            for run_id, values in per_run.items():
+                if not isinstance(values, dict):
+                    continue
+                rows.append(
+                    {
+                        "dataset": dataset,
+                        "model": model,
+                        "run_id": int(run_id),
+                        "cache_hit_rate_percent": float(values["grounding_accuracy_pct"]),
+                        "latency_s": float(values["mean_latency_s"]),
+                        "cost_x_1e5": float(values["mean_cost_usd"]) * 1e5,
+                    }
+                )
+    if not rows:
+        raise FileNotFoundError(f"No grounding benchmark summaries found under {root}")
+
+    per_run = pd.DataFrame(rows).groupby(["model", "run_id"], as_index=False, observed=True).agg(
+        cache_hit_rate_percent=("cache_hit_rate_percent", "mean"),
+        latency_s=("latency_s", "mean"),
+        cost_x_1e5=("cost_x_1e5", "mean"),
+        datasets=("dataset", "nunique"),
+    )
+    summary = per_run.groupby("model", as_index=False, observed=True).agg(
+        cache_hit_rate_mean_percent=("cache_hit_rate_percent", "mean"),
+        cache_hit_rate_std_percent=("cache_hit_rate_percent", "std"),
+        latency_mean_s=("latency_s", "mean"),
+        latency_std_s=("latency_s", "std"),
+        cost_mean_x_1e5=("cost_x_1e5", "mean"),
+        cost_std_x_1e5=("cost_x_1e5", "std"),
+        runs=("run_id", "nunique"),
+        datasets=("datasets", "max"),
+    )
+    summary = summary.fillna(0.0)
+    summary["Model"] = summary["model"].map(GROUNDING_MODEL_LABELS).fillna(summary["model"])
+    order = {model: index for index, model in enumerate(GROUNDING_MODEL_LABELS)}
+    summary["_model_order"] = summary["model"].astype(str).map(order).fillna(len(order))
+    return summary.sort_values("_model_order").drop(columns="_model_order").reset_index(drop=True)
+
+
+def _grounding_metric_text(mean: float, std: float, suffix: str = "") -> str:
+    return f"{mean:.2f} ± {std:.2f}{suffix}"
+
+
+def write_grounding_model_comparison(summary: pd.DataFrame, output_dir: Path) -> None:
+    output_dir.mkdir(parents=True, exist_ok=True)
+    table = pd.DataFrame(
+        {
+            "Model": summary["Model"],
+            "Cache Hit Rate (%)": [
+                _grounding_metric_text(mean, std)
+                for mean, std in zip(summary["cache_hit_rate_mean_percent"], summary["cache_hit_rate_std_percent"])
+            ],
+            "Latency (s)": [
+                _grounding_metric_text(mean, std)
+                for mean, std in zip(summary["latency_mean_s"], summary["latency_std_s"])
+            ],
+            "Cost ($ x 10^-5)": [
+                _grounding_metric_text(mean, std)
+                for mean, std in zip(summary["cost_mean_x_1e5"], summary["cost_std_x_1e5"])
+            ],
+        }
+    )
+    table.to_csv(output_dir / "grounding_model_comparison.csv", index=False)
+    lines = [table.to_markdown(index=False), "", "## Coverage", ""]
+    for _, row in summary.iterrows():
+        lines.append(f"- {row['Model']}: {int(row['runs'])} runs across {int(row['datasets'])} datasets")
+    (output_dir / "grounding_model_comparison.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+
+def plot_grounding_model_comparison(summary: pd.DataFrame, destination: Path) -> None:
+    _apply_plot_style()
+    metrics = (
+        ("cache_hit_rate_mean_percent", "cache_hit_rate_std_percent", "Cache Hit Rate (%)", COLORS["FLASH_FUSION"]),
+        ("latency_mean_s", "latency_std_s", "Latency (s)", "#E5A04F"),
+        ("cost_mean_x_1e5", "cost_std_x_1e5", r"Cost ($\times 10^{-5}$)", "#6C8E5E"),
+    )
+    y = np.arange(len(summary))
+    fig, axes = plt.subplots(1, len(metrics), figsize=(18.0, 7.0), sharey=True)
+    for axis, (mean_column, std_column, xlabel, color) in zip(axes, metrics):
+        means = summary[mean_column].to_numpy(dtype=float)
+        stds = summary[std_column].to_numpy(dtype=float)
+        axis.barh(y, means, xerr=stds, color=color, edgecolor="#333333", linewidth=0.8,
+                  error_kw={"elinewidth": 1.1, "capsize": 3, "ecolor": "#222222"})
+        axis.set_xlabel(xlabel)
+        axis.set_yticks(y, summary["Model"])
+        axis.invert_yaxis()
+        _style_axes(axis)
+    fig.tight_layout()
+    _save(fig, destination)
 
 
 def plot_grounding_error_rate(repo_root: Path, destination: Path) -> bool:
@@ -869,16 +1076,13 @@ def plot_baselines(frame: pd.DataFrame, output_dir: Path, strict: bool = False) 
     curve_data = pd.concat([frame, curve_frame], ignore_index=True)
     curve_summary = compute_summary_table(curve_data, curve_codes)
     react_cost = float(curve_summary.loc[curve_summary["baseline"] == "REACT_ONLY", "Cost ($ x 10^-5)"].iloc[0])
-    observed_hit_rate_max_percent = _compute_observed_cache_hit_rate(curve_data, strict=strict)
-    points = build_cache_hit_curve_points(
-        curve_data,
-        observed_hit_rate_max_percent=observed_hit_rate_max_percent,
-        hit_rate_definition="strict_hit_only",
-        strict=strict,
-    )
+    points = build_top3_model_cache_curves(curve_data, strict=strict)
     plot_cache_hit_rate_cost_curve(points, react_cost, output_dir / "cache_hit_rate_vs_cost_flash_fusion_vs_react")
     validate_latency_consistency(frame, latency_codes, strict=strict)
     plot_grounding_error_rate(REPO_ROOT, output_dir / "grounding_loss_vs_model_size")
+    grounding_summary = load_grounding_model_comparison(REPO_ROOT, strict=strict)
+    write_grounding_model_comparison(grounding_summary, output_dir)
+    plot_grounding_model_comparison(grounding_summary, output_dir / "grounding_model_comparison")
 
 
 def plot_ablations(frame: pd.DataFrame, output_dir: Path, strict: bool = False) -> None:

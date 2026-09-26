@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # Run the grounding smoke benchmark across all datasets.
 # Smoke test before a full run (three API calls, one query/run per dataset):
-# RUNS=1 QUERY_VERSIONS=v1 QUERY_IDS=2 OUTPUT_ROOT=flashfusion/results/grounding_smoke \
-#   bash flashfusion/eval/run_grounding_benchmark.sh
+#   RUNS=1 QUERY_VERSIONS=v1 QUERY_IDS=2 OUTPUT_ROOT=flashfusion/results/grounding_smoke \
+#     bash flashfusion/eval/run_grounding_benchmark.sh
 #
 # The default configuration produces 16 skeleton-bearing query ids x 3 query
 # versions x 3 datasets = 144 result rows for one stage12 model. Out-of-scope
@@ -35,11 +35,13 @@ else
 fi
 
 PRIMARY_MODEL="${PRIMARY_MODEL:-qwen/qwen3-max}"
-LIGHT_MODEL="${LIGHT_MODEL:-meta-llama/llama-3.2-3b-instruct}"
-LIGHT_MODELS="${LIGHT_MODELS:-${LIGHT_MODEL}}"
+# Match the light-model ladder used by flashfusion/eval/benchmark_grounding.py
+LIGHT_MODEL="${LIGHT_MODEL:-meta-llama/llama-3.2-1b-instruct}"
+LIGHT_MODELS="${LIGHT_MODELS:-meta-llama/llama-3.2-1b-instruct,meta-llama/llama-3.2-3b-instruct,google/gemma-3-4b-it,mistralai/ministral-8b-2512,qwen/qwen3-8b,meta-llama/llama-3.1-8b-instruct,ibm-granite/granite-4.2-8b,google/gemma-3-12b-it,microsoft/phi-4,qwen/qwen3-14b}"
 RUNS="${RUNS:-3}"
 QUERY_VERSIONS="${QUERY_VERSIONS:-v1,v2,v3}"
 OUTPUT_ROOT="${OUTPUT_ROOT:-flashfusion/results/grounding}"
+RUN_LOG_ROOT="${RUN_LOG_ROOT:-${OUTPUT_ROOT}/logs}"
 CACHE_PATH="${CACHE_PATH:-flashfusion/eval/cache/cache_registry.json}"
 
 QUERY_IDS="${QUERY_IDS:-1,2,3,4,5,6,7,8,13,14,15,16,17,18,19,20}"
@@ -56,7 +58,7 @@ for dataset in bus wisdm mit_ecg; do
         wisdm) query_ids="${QUERY_IDS_WISDM}" ;;
         mit_ecg) query_ids="${QUERY_IDS_MIT_ECG}" ;;
     esac
-    echo "[grounding] dataset=${dataset} models=${LIGHT_MODELS} runs=${RUNS}"
+    echo "[grounding] dataset=${dataset} starting; logs=${RUN_LOG_ROOT}/${dataset}/<model>/run_<n>.log"
     "${PYTHON}" -u -m flashfusion.eval.benchmark_grounding \
         --dataset "${dataset}" \
         --model "${PRIMARY_MODEL}" \
@@ -68,6 +70,7 @@ for dataset in bus wisdm mit_ecg; do
         --require-typed-plan-ground-truth \
         --cache-path "${CACHE_PATH}" \
         --output-dir "${output_dir}" \
+        --run-log-root "${RUN_LOG_ROOT}" \
         --save-traces
 done
 

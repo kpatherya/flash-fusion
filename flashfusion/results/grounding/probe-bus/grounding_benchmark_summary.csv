@@ -1,2 +1,0 @@
-model,size_label,params_b,n_queries_total,n_failures,grounding_loss_mean_pct,grounding_loss_std_pct,grounding_loss_ci95_pct
-qwen/qwen3-4b,4b,4.0,20,16,80.0,0.0,0.0
