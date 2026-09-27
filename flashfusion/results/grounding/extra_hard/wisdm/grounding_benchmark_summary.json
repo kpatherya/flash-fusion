@@ -1,0 +1,683 @@
+{
+  "benchmark": {
+    "name": "ff_cache_grounding_loss_vs_model_size",
+    "timestamp_utc": "2026-09-27T14:27:44.519922+00:00",
+    "fallback_stage": "cache_miss_or_validation_failure",
+    "runs": 3
+  },
+  "model_order": [
+    "meta-llama/llama-3.2-1b-instruct",
+    "meta-llama/llama-3.2-3b-instruct",
+    "google/gemma-3-4b-it",
+    "mistralai/ministral-8b-2512",
+    "qwen/qwen3-8b",
+    "meta-llama/llama-3.1-8b-instruct",
+    "ibm-granite/granite-4.2-8b",
+    "google/gemma-3-12b-it",
+    "microsoft/phi-4",
+    "qwen/qwen3-14b"
+  ],
+  "x_axis_size_labels": [
+    "1b",
+    "3b",
+    "4b",
+    "8b",
+    "8b",
+    "8b",
+    "8b",
+    "12b",
+    "14b",
+    "14b"
+  ],
+  "model_label_map": {
+    "1b": "meta-llama/llama-3.2-1b-instruct",
+    "3b": "meta-llama/llama-3.2-3b-instruct",
+    "4b": "google/gemma-3-4b-it",
+    "8b": "ibm-granite/granite-4.2-8b",
+    "12b": "google/gemma-3-12b-it",
+    "14b": "qwen/qwen3-14b"
+  },
+  "per_model": {
+    "meta-llama/llama-3.2-1b-instruct": {
+      "size_label": "1b",
+      "params_b": 1.0,
+      "n_queries_total": 12,
+      "n_failures": 12,
+      "grounding_loss_mean_pct": 100.0,
+      "grounding_loss_std_pct": 0.0,
+      "grounding_loss_ci95_pct": 0.0,
+      "per_run_loss_pct": [
+        100.0,
+        100.0,
+        100.0
+      ],
+      "grounding_accuracy_mean_pct": 0.0,
+      "grounding_accuracy_std_pct": 0.0,
+      "latency_mean_s": 11.877683798472086,
+      "latency_std_s": 1.0592048892058394,
+      "cost_mean_usd": 0.00242323,
+      "cost_std_usd": 6.109900175483648e-05,
+      "input_tokens_mean": 7023.75,
+      "input_tokens_std": 391.8764952124585,
+      "output_tokens_mean": 619.9166666666666,
+      "output_tokens_std": 53.375048789985506,
+      "per_run_metrics": {
+        "1": {
+          "n_queries": 4,
+          "n_failures": 4,
+          "grounding_loss_pct": 100.0,
+          "grounding_accuracy_pct": 0.0,
+          "mean_latency_s": 10.89815378189087,
+          "mean_cost_usd": 0.00235668675,
+          "mean_input_tokens": 6797.5,
+          "mean_output_tokens": 571.25
+        },
+        "2": {
+          "n_queries": 4,
+          "n_failures": 4,
+          "grounding_loss_pct": 100.0,
+          "grounding_accuracy_pct": 0.0,
+          "mean_latency_s": 11.733173072338104,
+          "mean_cost_usd": 0.0024768015,
+          "mean_input_tokens": 7476.25,
+          "mean_output_tokens": 611.5
+        },
+        "3": {
+          "n_queries": 4,
+          "n_failures": 4,
+          "grounding_loss_pct": 100.0,
+          "grounding_accuracy_pct": 0.0,
+          "mean_latency_s": 13.001724541187286,
+          "mean_cost_usd": 0.00243620175,
+          "mean_input_tokens": 6797.5,
+          "mean_output_tokens": 677.0
+        }
+      },
+      "failure_reason_breakdown": {
+        "cache: light model JSON repair failed: Expecting value": 9,
+        "structural: 1 validation error for GuardrailAndPlan\nplan.steps.2.DERIVE_BINARY.operation\n  Input should be 'add', 'subtract', 'multiply', 'divide' or 'abs_difference' [type=literal_error, input_value='difference', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.13/v/literal_error": 3
+      },
+      "cache_plan_source_breakdown": {
+        "llm": 12
+      }
+    },
+    "meta-llama/llama-3.2-3b-instruct": {
+      "size_label": "3b",
+      "params_b": 3.0,
+      "n_queries_total": 12,
+      "n_failures": 12,
+      "grounding_loss_mean_pct": 100.0,
+      "grounding_loss_std_pct": 0.0,
+      "grounding_loss_ci95_pct": 0.0,
+      "per_run_loss_pct": [
+        100.0,
+        100.0,
+        100.0
+      ],
+      "grounding_accuracy_mean_pct": 0.0,
+      "grounding_accuracy_std_pct": 0.0,
+      "latency_mean_s": 10.45746499300003,
+      "latency_std_s": 0.6144206498633769,
+      "cost_mean_usd": 0.0024268561,
+      "cost_std_usd": 8.134353936725692e-05,
+      "input_tokens_mean": 7885.083333333333,
+      "input_tokens_std": 376.432375511636,
+      "output_tokens_mean": 479.0,
+      "output_tokens_std": 16.023420358962067,
+      "per_run_metrics": {
+        "1": {
+          "n_queries": 4,
+          "n_failures": 4,
+          "grounding_loss_pct": 100.0,
+          "grounding_accuracy_pct": 0.0,
+          "mean_latency_s": 9.944592475891113,
+          "mean_cost_usd": 0.0023380731500000002,
+          "mean_input_tokens": 7667.75,
+          "mean_output_tokens": 460.5
+        },
+        "2": {
+          "n_queries": 4,
+          "n_failures": 4,
+          "grounding_loss_pct": 100.0,
+          "grounding_accuracy_pct": 0.0,
+          "mean_latency_s": 10.289361417293549,
+          "mean_cost_usd": 0.0024977987,
+          "mean_input_tokens": 8319.75,
+          "mean_output_tokens": 488.5
+        },
+        "3": {
+          "n_queries": 4,
+          "n_failures": 4,
+          "grounding_loss_pct": 100.0,
+          "grounding_accuracy_pct": 0.0,
+          "mean_latency_s": 11.13844108581543,
+          "mean_cost_usd": 0.0024446964499999996,
+          "mean_input_tokens": 7667.75,
+          "mean_output_tokens": 488.0
+        }
+      },
+      "failure_reason_breakdown": {
+        "cache: light model JSON repair failed: Expecting ':' delimiter": 3,
+        "cache: light model JSON repair failed: Expecting value": 2,
+        "structural: 1 validation error for GuardrailAndPlan\nplan.steps.2.DERIVE_BINARY.operation\n  Input should be 'add', 'subtract', 'multiply', 'divide' or 'abs_difference' [type=literal_error, input_value='difference', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.13/v/literal_error": 3,
+        "cache: light model JSON repair failed: Expecting ',' delimiter": 4
+      },
+      "cache_plan_source_breakdown": {
+        "llm": 12
+      }
+    },
+    "google/gemma-3-4b-it": {
+      "size_label": "4b",
+      "params_b": 4.0,
+      "n_queries_total": 12,
+      "n_failures": 12,
+      "grounding_loss_mean_pct": 100.0,
+      "grounding_loss_std_pct": 0.0,
+      "grounding_loss_ci95_pct": 0.0,
+      "per_run_loss_pct": [
+        100.0,
+        100.0,
+        100.0
+      ],
+      "grounding_accuracy_mean_pct": 0.0,
+      "grounding_accuracy_std_pct": 0.0,
+      "latency_mean_s": 9.907509183738663,
+      "latency_std_s": 1.956313600739908,
+      "cost_mean_usd": 0.0006296159999999999,
+      "cost_std_usd": 7.677486549646305e-05,
+      "input_tokens_mean": 1111.25,
+      "input_tokens_std": 0.0,
+      "output_tokens_mean": 105.5,
+      "output_tokens_std": 11.5,
+      "per_run_metrics": {
+        "1": {
+          "n_queries": 4,
+          "n_failures": 4,
+          "grounding_loss_pct": 100.0,
+          "grounding_accuracy_pct": 0.0,
+          "mean_latency_s": 12.164806215293765,
+          "mean_cost_usd": 0.00054483,
+          "mean_input_tokens": 1111.25,
+          "mean_output_tokens": 94.0
+        },
+        "2": {
+          "n_queries": 4,
+          "n_failures": 4,
+          "grounding_loss_pct": 100.0,
+          "grounding_accuracy_pct": 0.0,
+          "mean_latency_s": 8.703890754400163,
+          "mean_cost_usd": 0.000649584,
+          "mean_input_tokens": 1111.25,
+          "mean_output_tokens": 105.5
+        },
+        "3": {
+          "n_queries": 4,
+          "n_failures": 4,
+          "grounding_loss_pct": 100.0,
+          "grounding_accuracy_pct": 0.0,
+          "mean_latency_s": 8.853830581522061,
+          "mean_cost_usd": 0.000694434,
+          "mean_input_tokens": 1111.25,
+          "mean_output_tokens": 117.0
+        }
+      },
+      "failure_reason_breakdown": {
+        "structural: 1 validation error for GuardrailAndPlan\nplan.steps.2.DERIVE_BINARY.operation\n  Input should be 'add', 'subtract', 'multiply', 'divide' or 'abs_difference' [type=literal_error, input_value='difference', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.13/v/literal_error": 3,
+        "cache: TooManyRequestsResponseError: Provider returned error": 9
+      },
+      "cache_plan_source_breakdown": {
+        "llm": 3,
+        "benchmark_failed_grounding_attempt": 9
+      }
+    },
+    "mistralai/ministral-8b-2512": {
+      "size_label": "8b",
+      "params_b": 8.0,
+      "n_queries_total": 12,
+      "n_failures": 3,
+      "grounding_loss_mean_pct": 25.0,
+      "grounding_loss_std_pct": 0.0,
+      "grounding_loss_ci95_pct": 0.0,
+      "per_run_loss_pct": [
+        25.0,
+        25.0,
+        25.0
+      ],
+      "grounding_accuracy_mean_pct": 75.0,
+      "grounding_accuracy_std_pct": 0.0,
+      "latency_mean_s": 5.161063810189565,
+      "latency_std_s": 0.03477697305460783,
+      "cost_mean_usd": 0.0007615514999999999,
+      "cost_std_usd": 5.343833104616944e-05,
+      "input_tokens_mean": 2374.0,
+      "input_tokens_std": 29.08070666266554,
+      "output_tokens_mean": 298.0833333333333,
+      "output_tokens_std": 17.529142401536173,
+      "per_run_metrics": {
+        "1": {
+          "n_queries": 4,
+          "n_failures": 1,
+          "grounding_loss_pct": 25.0,
+          "grounding_accuracy_pct": 75.0,
+          "mean_latency_s": 5.162938714027405,
+          "mean_cost_usd": 0.0008037914999999999,
+          "mean_input_tokens": 2343.75,
+          "mean_output_tokens": 285.0
+        },
+        "2": {
+          "n_queries": 4,
+          "n_failures": 1,
+          "grounding_loss_pct": 25.0,
+          "grounding_accuracy_pct": 75.0,
+          "mean_latency_s": 5.1253873109817505,
+          "mean_cost_usd": 0.0007014765,
+          "mean_input_tokens": 2376.5,
+          "mean_output_tokens": 291.25
+        },
+        "3": {
+          "n_queries": 4,
+          "n_failures": 1,
+          "grounding_loss_pct": 25.0,
+          "grounding_accuracy_pct": 75.0,
+          "mean_latency_s": 5.19486540555954,
+          "mean_cost_usd": 0.0007793864999999999,
+          "mean_input_tokens": 2401.75,
+          "mean_output_tokens": 318.0
+        }
+      },
+      "failure_reason_breakdown": {
+        "structural: 1 validation error for GuardrailAndPlan\nplan.steps.2.DERIVE_BINARY.operation\n  Input should be 'add', 'subtract', 'multiply', 'divide' or 'abs_difference' [type=literal_error, input_value='difference', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.13/v/literal_error": 3
+      },
+      "cache_plan_source_breakdown": {
+        "exact_query_cache_light_grounded": 9,
+        "llm": 3
+      }
+    },
+    "qwen/qwen3-8b": {
+      "size_label": "8b",
+      "params_b": 8.0,
+      "n_queries_total": 12,
+      "n_failures": 3,
+      "grounding_loss_mean_pct": 25.0,
+      "grounding_loss_std_pct": 0.0,
+      "grounding_loss_ci95_pct": 0.0,
+      "per_run_loss_pct": [
+        25.0,
+        25.0,
+        25.0
+      ],
+      "grounding_accuracy_mean_pct": 75.0,
+      "grounding_accuracy_std_pct": 0.0,
+      "latency_mean_s": 26.1004332502683,
+      "latency_std_s": 2.000444157367946,
+      "cost_mean_usd": 0.00121465825,
+      "cost_std_usd": 2.598376056910356e-05,
+      "input_tokens_mean": 2265.6666666666665,
+      "input_tokens_std": 16.743157806499145,
+      "output_tokens_mean": 1038.5833333333333,
+      "output_tokens_std": 89.33865811245059,
+      "per_run_metrics": {
+        "1": {
+          "n_queries": 4,
+          "n_failures": 1,
+          "grounding_loss_pct": 25.0,
+          "grounding_accuracy_pct": 75.0,
+          "mean_latency_s": 28.392051219940186,
+          "mean_cost_usd": 0.0012402585000000001,
+          "mean_input_tokens": 2256.0,
+          "mean_output_tokens": 1141.5
+        },
+        "2": {
+          "n_queries": 4,
+          "n_failures": 1,
+          "grounding_loss_pct": 25.0,
+          "grounding_accuracy_pct": 75.0,
+          "mean_latency_s": 24.703343272209167,
+          "mean_cost_usd": 0.001215409,
+          "mean_input_tokens": 2285.0,
+          "mean_output_tokens": 981.0
+        },
+        "3": {
+          "n_queries": 4,
+          "n_failures": 1,
+          "grounding_loss_pct": 25.0,
+          "grounding_accuracy_pct": 75.0,
+          "mean_latency_s": 25.205905258655548,
+          "mean_cost_usd": 0.00118830725,
+          "mean_input_tokens": 2256.0,
+          "mean_output_tokens": 993.25
+        }
+      },
+      "failure_reason_breakdown": {
+        "structural: 1 validation error for GuardrailAndPlan\nplan.steps.2.DERIVE_BINARY.operation\n  Input should be 'add', 'subtract', 'multiply', 'divide' or 'abs_difference' [type=literal_error, input_value='difference', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.13/v/literal_error": 3
+      },
+      "cache_plan_source_breakdown": {
+        "llm": 3,
+        "exact_query_cache_light_grounded": 9
+      }
+    },
+    "meta-llama/llama-3.1-8b-instruct": {
+      "size_label": "8b",
+      "params_b": 8.0,
+      "n_queries_total": 12,
+      "n_failures": 11,
+      "grounding_loss_mean_pct": 91.66666666666667,
+      "grounding_loss_std_pct": 14.433756729740644,
+      "grounding_loss_ci95_pct": 16.333333333333332,
+      "per_run_loss_pct": [
+        100.0,
+        75.0,
+        100.0
+      ],
+      "grounding_accuracy_mean_pct": 8.333333333333334,
+      "grounding_accuracy_std_pct": 14.433756729740644,
+      "latency_mean_s": 31.430715044339497,
+      "latency_std_s": 15.325203608652613,
+      "cost_mean_usd": 0.0037756703333333332,
+      "cost_std_usd": 0.0011930450238455306,
+      "input_tokens_mean": 7088.333333333333,
+      "input_tokens_std": 910.4813745120398,
+      "output_tokens_mean": 19907.916666666668,
+      "output_tokens_std": 16669.910815098363,
+      "per_run_metrics": {
+        "1": {
+          "n_queries": 4,
+          "n_failures": 4,
+          "grounding_loss_pct": 100.0,
+          "grounding_accuracy_pct": 0.0,
+          "mean_latency_s": 40.655544340610504,
+          "mean_cost_usd": 0.004662130499999999,
+          "mean_input_tokens": 7614.0,
+          "mean_output_tokens": 29582.75
+        },
+        "2": {
+          "n_queries": 4,
+          "n_failures": 3,
+          "grounding_loss_pct": 75.0,
+          "grounding_accuracy_pct": 25.0,
+          "mean_latency_s": 39.89647912979126,
+          "mean_cost_usd": 0.004245675,
+          "mean_input_tokens": 6037.0,
+          "mean_output_tokens": 29481.75
+        },
+        "3": {
+          "n_queries": 4,
+          "n_failures": 4,
+          "grounding_loss_pct": 100.0,
+          "grounding_accuracy_pct": 0.0,
+          "mean_latency_s": 13.74012166261673,
+          "mean_cost_usd": 0.0024192055,
+          "mean_input_tokens": 7614.0,
+          "mean_output_tokens": 659.25
+        }
+      },
+      "failure_reason_breakdown": {
+        "structural: 1 validation error for GuardrailAndPlan\nplan.steps.2.DERIVE_BINARY.operation\n  Input should be 'add', 'subtract', 'multiply', 'divide' or 'abs_difference' [type=literal_error, input_value='difference', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.13/v/literal_error": 3,
+        "cache: light model JSON repair failed: Expecting ',' delimiter": 2,
+        "cache: 1 validation error for DeterministicPlan\nsteps.4.FILTER_COMPARE.filter_column\n  Extra inputs are not permitted [type=extra_forbidden, input_value='locomotion_minus_resting', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.13/v/extra_forbidden": 3,
+        "cache: 2 validation errors for DeterministicPlan\nsteps.2.PARALLEL_AGGREGATE.branches.4.aggregate\n  Input should be 'min', 'max', 'mean', 'median', 'sum', 'count', 'std', 'var', 'nunique' or 'rms' [type=literal_error, input_value='rank', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.13/v/literal_error\nsteps.2.PARALLEL_AGGREGATE.branches.5.aggregate\n  Input should be 'min', 'max', 'mean', 'median', 'sum', 'count', 'std', 'var', 'nunique' or 'rms' [type=literal_error, input_value='rank', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.13/v/literal_error": 1,
+        "cache: Grounding step count mismatch: expected 5 for skeleton ['FILTER_NOT_EMPTY', 'DERIVE_VECTOR_MAGNITUDE', 'PARALLEL_AGGREGATE', 'DERIVE_BINARY', 'RANK_ROWS'], got 3": 1,
+        "cache: 30 validation errors for DeterministicPlan\nsteps.2.PARALLEL_AGGREGATE.branches.6.group_by\n  Field required [type=missing, input_value={'left': 'jog_mean_x', 'r...mn': 'jog_minus_walk_x'}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nsteps.2.PARALLEL_AGGREGATE.branches.6.aggregate\n  Field required [type=missing, input_value={'left': 'jog_mean_x', 'r...mn': 'jog_minus_walk_x'}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nsteps.2.PARALLEL_AGGREGATE.branches.6.left\n  Extra inputs are not permitted [type=extra_forbidden, input_value='jog_mean_x', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.13/v/extra_forbidden\nsteps.2.PARALLEL_AGGREGATE.branches.6.right\n  Extra inputs are not permitted [type=extra_forbidden, input_value='walk_mean_x', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.13/v/extra_forbidden\nsteps.2.PARALLEL_AGGREGATE.branches.6.operation\n  Extra inputs are not permitted [type=extra_forbidden, input_value='subtract', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.13/v/extra_forbidden\nsteps.2.PARALLEL_AGGREGATE.branches.7.group_by\n  Field required [type=missing, input_value={'left': 'jog_mean_y', 'r...mn': 'jog_minus_walk_y'}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nsteps.2.PARALLEL_AGGREGATE.branches.7.aggregate\n  Field required [type=missing, input_value={'left': 'jog_mean_y', 'r...mn': 'jog_minus_walk_y'}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nsteps.2.PARALLEL_AGGREGATE.branches.7.left\n  Extra inputs are not permitted [type=extra_forbidden, input_value='jog_mean_y', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.13/v/extra_forbidden\nsteps.2.PARALLEL_AGGREGATE.branches.7.right\n  Extra inputs are not permitted [type=extra_forbidden, input_value='walk_mean_y', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.13/v/extra_forbidden\nsteps.2.PARALLEL_AGGREGATE.branches.7.operation\n  Extra inputs are not permitted [type=extra_forbidden, input_value='subtract', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.13/v/extra_forbidden\nsteps.2.PARALLEL_AGGREGATE.branches.8.group_by\n  Field required [type=missing, input_value={'left': 'jog_mean_z', 'r...mn': 'jog_minus_walk_z'}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nsteps.2.PARALLEL_AGGREGATE.branches.8.aggregate\n  Field required [type=missing, input_value={'left': 'jog_mean_z', 'r...mn': 'jog_minus_walk_z'}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nsteps.2.PARALLEL_AGGREGATE.branches.8.left\n  Extra inputs are not permitted [type=extra_forbidden, input_value='jog_mean_z', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.13/v/extra_forbidden\nsteps.2.PARALLEL_AGGREGATE.branches.8.right\n  Extra inputs are not permitted [type=extra_forbidden, input_value='walk_mean_z', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.13/v/extra_forbidden\nsteps.2.PARALLEL_AGGREGATE.branches.8.operation\n  Extra inputs are not permitted [type=extra_forbidden, input_value='subtract', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.13/v/extra_forbidden\nsteps.2.PARALLEL_AGGREGATE.branches.9.group_by\n  Field required [type=missing, input_value={'column': 'jog_minus_wal...olumns': ['subject_id']}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nsteps.2.PARALLEL_AGGREGATE.branches.9.aggregate\n  Field required [type=missing, input_value={'column': 'jog_minus_wal...olumns': ['subject_id']}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nsteps.2.PARALLEL_AGGREGATE.branches.9.result_column\n  Field required [type=missing, input_value={'column': 'jog_minus_wal...olumns': ['subject_id']}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nsteps.2.PARALLEL_AGGREGATE.branches.9.direction\n  Extra inputs are not permitted [type=extra_forbidden, input_value='max', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.13/v/extra_forbidden\nsteps.2.PARALLEL_AGGREGATE.branches.9.return_columns\n  Extra inputs are not permitted [type=extra_forbidden, input_value=['subject_id'], input_type=list]\n    For further information visit https://errors.pydantic.dev/2.13/v/extra_forbidden\nsteps.2.PARALLEL_AGGREGATE.branches.10.group_by\n  Field required [type=missing, input_value={'column': 'jog_minus_wal...olumns': ['subject_id']}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nsteps.2.PARALLEL_AGGREGATE.branches.10.aggregate\n  Field required [type=missing, input_value={'column': 'jog_minus_wal...olumns': ['subject_id']}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nsteps.2.PARALLEL_AGGREGATE.branches.10.result_column\n  Field required [type=missing, input_value={'column': 'jog_minus_wal...olumns': ['subject_id']}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nsteps.2.PARALLEL_AGGREGATE.branches.10.direction\n  Extra inputs are not permitted [type=extra_forbidden, input_value='max', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.13/v/extra_forbidden\nsteps.2.PARALLEL_AGGREGATE.branches.10.return_columns\n  Extra inputs are not permitted [type=extra_forbidden, input_value=['subject_id'], input_type=list]\n    For further information visit https://errors.pydantic.dev/2.13/v/extra_forbidden\nsteps.2.PARALLEL_AGGREGATE.branches.11.group_by\n  Field required [type=missing, input_value={'column': 'jog_minus_wal...olumns': ['subject_id']}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nsteps.2.PARALLEL_AGGREGATE.branches.11.aggregate\n  Field required [type=missing, input_value={'column': 'jog_minus_wal...olumns': ['subject_id']}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nsteps.2.PARALLEL_AGGREGATE.branches.11.result_column\n  Field required [type=missing, input_value={'column': 'jog_minus_wal...olumns': ['subject_id']}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nsteps.2.PARALLEL_AGGREGATE.branches.11.direction\n  Extra inputs are not permitted [type=extra_forbidden, input_value='max', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.13/v/extra_forbidden\nsteps.2.PARALLEL_AGGREGATE.branches.11.return_columns\n  Extra inputs are not permitted [type=extra_forbidden, input_value=['subject_id'], input_type=list]\n    For further information visit https://errors.pydantic.dev/2.13/v/extra_forbidden": 1
+      },
+      "cache_plan_source_breakdown": {
+        "llm": 11,
+        "exact_query_cache_light_grounded": 1
+      }
+    },
+    "ibm-granite/granite-4.2-8b": {
+      "size_label": "8b",
+      "params_b": 8.0,
+      "n_queries_total": 12,
+      "n_failures": 12,
+      "grounding_loss_mean_pct": 100.0,
+      "grounding_loss_std_pct": 0.0,
+      "grounding_loss_ci95_pct": 0.0,
+      "per_run_loss_pct": [
+        100.0,
+        100.0,
+        100.0
+      ],
+      "grounding_accuracy_mean_pct": 0.0,
+      "grounding_accuracy_std_pct": 0.0,
+      "latency_mean_s": 11.53434145450592,
+      "latency_std_s": 0.6768592886476292,
+      "cost_mean_usd": 0.0033556590000000004,
+      "cost_std_usd": 0.0009961437724293365,
+      "input_tokens_mean": 7997.916666666667,
+      "input_tokens_std": 374.41164956947233,
+      "output_tokens_mean": 487.25,
+      "output_tokens_std": 12.779377919132058,
+      "per_run_metrics": {
+        "1": {
+          "n_queries": 4,
+          "n_failures": 4,
+          "grounding_loss_pct": 100.0,
+          "grounding_accuracy_pct": 0.0,
+          "mean_latency_s": 11.26948070526123,
+          "mean_cost_usd": 0.0031857015000000006,
+          "mean_input_tokens": 7781.75,
+          "mean_output_tokens": 474.0
+        },
+        "2": {
+          "n_queries": 4,
+          "n_failures": 4,
+          "grounding_loss_pct": 100.0,
+          "grounding_accuracy_pct": 0.0,
+          "mean_latency_s": 11.029963314533234,
+          "mean_cost_usd": 0.0044258475,
+          "mean_input_tokens": 8430.25,
+          "mean_output_tokens": 488.25
+        },
+        "3": {
+          "n_queries": 4,
+          "n_failures": 4,
+          "grounding_loss_pct": 100.0,
+          "grounding_accuracy_pct": 0.0,
+          "mean_latency_s": 12.303580343723297,
+          "mean_cost_usd": 0.002455428,
+          "mean_input_tokens": 7781.75,
+          "mean_output_tokens": 499.5
+        }
+      },
+      "failure_reason_breakdown": {
+        "cache: light model returned empty content": 9,
+        "structural: 1 validation error for GuardrailAndPlan\nplan.steps.2.DERIVE_BINARY.operation\n  Input should be 'add', 'subtract', 'multiply', 'divide' or 'abs_difference' [type=literal_error, input_value='difference', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.13/v/literal_error": 3
+      },
+      "cache_plan_source_breakdown": {
+        "llm": 12
+      }
+    },
+    "google/gemma-3-12b-it": {
+      "size_label": "12b",
+      "params_b": 12.0,
+      "n_queries_total": 12,
+      "n_failures": 10,
+      "grounding_loss_mean_pct": 83.33333333333333,
+      "grounding_loss_std_pct": 14.433756729740644,
+      "grounding_loss_ci95_pct": 16.333333333333332,
+      "per_run_loss_pct": [
+        75.0,
+        75.0,
+        100.0
+      ],
+      "grounding_accuracy_mean_pct": 16.666666666666668,
+      "grounding_accuracy_std_pct": 14.433756729740644,
+      "latency_mean_s": 10.645617961883545,
+      "latency_std_s": 1.93871813186833,
+      "cost_mean_usd": 0.0026356795,
+      "cost_std_usd": 0.0008983134269698131,
+      "input_tokens_mean": 6656.833333333333,
+      "input_tokens_std": 951.5994868290616,
+      "output_tokens_mean": 422.3333333333333,
+      "output_tokens_std": 53.57374201353993,
+      "per_run_metrics": {
+        "1": {
+          "n_queries": 4,
+          "n_failures": 3,
+          "grounding_loss_pct": 75.0,
+          "grounding_accuracy_pct": 25.0,
+          "mean_latency_s": 9.89154577255249,
+          "mean_cost_usd": 0.003624343,
+          "mean_input_tokens": 6092.0,
+          "mean_output_tokens": 387.25
+        },
+        "2": {
+          "n_queries": 4,
+          "n_failures": 3,
+          "grounding_loss_pct": 75.0,
+          "grounding_accuracy_pct": 25.0,
+          "mean_latency_s": 9.197233736515045,
+          "mean_cost_usd": 0.0018695475000000002,
+          "mean_input_tokens": 6123.0,
+          "mean_output_tokens": 395.75
+        },
+        "3": {
+          "n_queries": 4,
+          "n_failures": 4,
+          "grounding_loss_pct": 100.0,
+          "grounding_accuracy_pct": 0.0,
+          "mean_latency_s": 12.8480743765831,
+          "mean_cost_usd": 0.002413148,
+          "mean_input_tokens": 7755.5,
+          "mean_output_tokens": 484.0
+        }
+      },
+      "failure_reason_breakdown": {
+        "cache: light model JSON repair failed: Expecting ',' delimiter": 6,
+        "structural: 1 validation error for GuardrailAndPlan\nplan.steps.2.DERIVE_BINARY.operation\n  Input should be 'add', 'subtract', 'multiply', 'divide' or 'abs_difference' [type=literal_error, input_value='difference', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.13/v/literal_error": 3,
+        "cache: RANK_ROWS references unknown column 'acceleration_magnitude'": 1
+      },
+      "cache_plan_source_breakdown": {
+        "llm": 10,
+        "exact_query_cache_light_grounded": 2
+      }
+    },
+    "microsoft/phi-4": {
+      "size_label": "14b",
+      "params_b": 14.0,
+      "n_queries_total": 12,
+      "n_failures": 3,
+      "grounding_loss_mean_pct": 25.0,
+      "grounding_loss_std_pct": 0.0,
+      "grounding_loss_ci95_pct": 0.0,
+      "per_run_loss_pct": [
+        25.0,
+        25.0,
+        25.0
+      ],
+      "grounding_accuracy_mean_pct": 75.0,
+      "grounding_accuracy_std_pct": 0.0,
+      "latency_mean_s": 6.153550406297048,
+      "latency_std_s": 0.15510454244337402,
+      "cost_mean_usd": 0.0007603989999999998,
+      "cost_std_usd": 4.402315647758573e-05,
+      "input_tokens_mean": 2275.5833333333335,
+      "input_tokens_std": 26.902989301067144,
+      "output_tokens_mean": 305.9166666666667,
+      "output_tokens_std": 16.260253175560745,
+      "per_run_metrics": {
+        "1": {
+          "n_queries": 4,
+          "n_failures": 1,
+          "grounding_loss_pct": 25.0,
+          "grounding_accuracy_pct": 75.0,
+          "mean_latency_s": 5.988364219665527,
+          "mean_cost_usd": 0.0007113614999999999,
+          "mean_input_tokens": 2248.0,
+          "mean_output_tokens": 287.25
+        },
+        "2": {
+          "n_queries": 4,
+          "n_failures": 1,
+          "grounding_loss_pct": 25.0,
+          "grounding_accuracy_pct": 75.0,
+          "mean_latency_s": 6.296081483364105,
+          "mean_cost_usd": 0.0007965164999999999,
+          "mean_input_tokens": 2277.0,
+          "mean_output_tokens": 317.0
+        },
+        "3": {
+          "n_queries": 4,
+          "n_failures": 1,
+          "grounding_loss_pct": 25.0,
+          "grounding_accuracy_pct": 75.0,
+          "mean_latency_s": 6.176205515861511,
+          "mean_cost_usd": 0.000773319,
+          "mean_input_tokens": 2301.75,
+          "mean_output_tokens": 313.5
+        }
+      },
+      "failure_reason_breakdown": {
+        "structural: 1 validation error for GuardrailAndPlan\nplan.steps.2.DERIVE_BINARY.operation\n  Input should be 'add', 'subtract', 'multiply', 'divide' or 'abs_difference' [type=literal_error, input_value='difference', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.13/v/literal_error": 3
+      },
+      "cache_plan_source_breakdown": {
+        "exact_query_cache_light_grounded": 9,
+        "llm": 3
+      }
+    },
+    "qwen/qwen3-14b": {
+      "size_label": "14b",
+      "params_b": 14.0,
+      "n_queries_total": 12,
+      "n_failures": 9,
+      "grounding_loss_mean_pct": 75.0,
+      "grounding_loss_std_pct": 25.0,
+      "grounding_loss_ci95_pct": 28.290163190291665,
+      "per_run_loss_pct": [
+        50.0,
+        75.0,
+        100.0
+      ],
+      "grounding_accuracy_mean_pct": 25.0,
+      "grounding_accuracy_std_pct": 25.0,
+      "latency_mean_s": 20.7451229095459,
+      "latency_std_s": 7.97929127318543,
+      "cost_mean_usd": 0.00247777025,
+      "cost_std_usd": 0.0009322674058433757,
+      "input_tokens_mean": 6006.416666666667,
+      "input_tokens_std": 1607.9738091254264,
+      "output_tokens_mean": 716.3333333333334,
+      "output_tokens_std": 284.81949693329165,
+      "per_run_metrics": {
+        "1": {
+          "n_queries": 4,
+          "n_failures": 2,
+          "grounding_loss_pct": 50.0,
+          "grounding_accuracy_pct": 50.0,
+          "mean_latency_s": 27.540582716464996,
+          "mean_cost_usd": 0.0015413570000000001,
+          "mean_input_tokens": 4388.25,
+          "mean_output_tokens": 1033.25
+        },
+        "2": {
+          "n_queries": 4,
+          "n_failures": 3,
+          "grounding_loss_pct": 75.0,
+          "grounding_accuracy_pct": 25.0,
+          "mean_latency_s": 22.7358421087265,
+          "mean_cost_usd": 0.00340583575,
+          "mean_input_tokens": 6027.0,
+          "mean_output_tokens": 634.0
+        },
+        "3": {
+          "n_queries": 4,
+          "n_failures": 4,
+          "grounding_loss_pct": 100.0,
+          "grounding_accuracy_pct": 0.0,
+          "mean_latency_s": 11.958943903446198,
+          "mean_cost_usd": 0.0024861180000000003,
+          "mean_input_tokens": 7604.0,
+          "mean_output_tokens": 481.75
+        }
+      },
+      "failure_reason_breakdown": {
+        "structural: 1 validation error for GuardrailAndPlan\nplan.steps.2.DERIVE_BINARY.operation\n  Input should be 'add', 'subtract', 'multiply', 'divide' or 'abs_difference' [type=literal_error, input_value='difference', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.13/v/literal_error": 3,
+        "cache: light model returned empty content": 6
+      },
+      "cache_plan_source_breakdown": {
+        "exact_query_cache_light_grounded": 3,
+        "llm": 9
+      }
+    }
+  }
+}

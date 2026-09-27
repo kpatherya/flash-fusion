@@ -1,5 +1,18 @@
 """Flash-Fusion baseline with exact-match typed-plan skeleton caching.
 
+Run command (FF-full with cache, qwen3-max planner, Ministral cache-grounding):
+
+        for dataset in bus wisdm mit_ecg; do
+            python -m flashfusion.eval.benchmark \
+                --dataset "$dataset" \
+                --baselines FLASH_FUSION_CACHE \
+                --queries all \
+                --runs 3 \
+                --model qwen/qwen3-max \
+                --stage12-model mistralai/ministral-8b-2512 \
+                --output "flashfusion/results/ff_full_mistral/$dataset"
+        done
+
 A cache hit never returns a stored answer.  It retrieves only a previously
 validated operator sequence, asks ``client.light`` to ground a new typed plan
 with the SAME sequence against the live DataFrame schema, validates that plan

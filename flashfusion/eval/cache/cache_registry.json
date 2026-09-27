@@ -2594,7 +2594,7 @@
       "query_text": "Which location (latitude, longitude) recorded the largest difference between the 99th and 1st percentile of the z-axis acceleration?",
       "query_text_source": "raw_results",
       "reasons": [],
-      "schema_fingerprint": "1d29adee7efb7ed4",
+      "schema_fingerprint": "1856b7e244a7940d",
       "semantic_signature": {
         "admissibility": "in_scope",
         "aggregate": "max",
@@ -3953,7 +3953,7 @@
         "RANK_ROWS"
       ],
       "query_text": "Tell me which location (latitude, longitude) recorded the largest difference between the 99th and 1st percentile of the z-axis acceleration?",
-      "schema_fingerprint": "1d29adee7efb7ed4",
+      "schema_fingerprint": "1856b7e244a7940d",
       "semantic_signature": {
         "admissibility": "in_scope",
         "aggregate": "max",
@@ -4349,7 +4349,7 @@
         "RANK_GROUPS"
       ],
       "query_text": "Derive the vertical shock range as accel_stats_z_p99 minus accel_stats_z_p1. Restrict to aggressive behavior, group rows into 5-minute timestamp windows, and return the window with the highest mean vertical shock range.",
-      "schema_fingerprint": "1d29adee7efb7ed4",
+      "schema_fingerprint": "1856b7e244a7940d",
       "semantic_signature": {
         "admissibility": "in_scope",
         "aggregate": "max",
@@ -4392,7 +4392,7 @@
         "RANK_GROUPS"
       ],
       "query_text": "Restrict the route to rows labeled aggressive, group them into 5-minute timestamp windows, and return the window with the highest mean instability_score.",
-      "schema_fingerprint": "1d29adee7efb7ed4",
+      "schema_fingerprint": "1856b7e244a7940d",
       "semantic_signature": {
         "admissibility": "in_scope",
         "aggregate": "max",
@@ -4560,7 +4560,7 @@
         "RANK_ROWS"
       ],
       "query_text": "For every subject_id, derive elapsed seconds from timestamp, then Calculate total locomotion duration (Walking, Jogging, Upstairs, Downstairs) and total resting duration (Sitting, Standing). Among subjects with more locomotion than resting time, return the subject_id with the largest locomotion-minus-resting duration.",
-      "schema_fingerprint": "7ad69ccf7f729a4d",
+      "schema_fingerprint": "b927f02262d7702e",
       "semantic_signature": {
         "admissibility": "in_scope",
         "aggregate": "max",
@@ -4602,7 +4602,7 @@
         "RANK_ROWS"
       ],
       "query_text": "For every subject_id, Calculate mean acceleration magnitude separately for dynamic activities (Walking, Jogging, Upstairs, Downstairs) and resting activities (Sitting, Standing). Return the subject_id with the largest dynamic-minus-resting mean magnitude.",
-      "schema_fingerprint": "7ad69ccf7f729a4d",
+      "schema_fingerprint": "b927f02262d7702e",
       "semantic_signature": {
         "admissibility": "in_scope",
         "aggregate": "max",
@@ -4725,7 +4725,7 @@
         "RANK_ROWS"
       ],
       "query_text": "For every subject_id, Determine mean acceleration magnitude separately for dynamic activities (Walking, Jogging, Upstairs, Downstairs) and resting activities (Sitting, Standing). Return the subject_id with the largest dynamic-minus-resting mean magnitude.",
-      "schema_fingerprint": "7ad69ccf7f729a4d",
+      "schema_fingerprint": "b927f02262d7702e",
       "semantic_signature": {
         "admissibility": "in_scope",
         "aggregate": "max",
@@ -4767,7 +4767,7 @@
         "RANK_ROWS"
       ],
       "query_text": "For every subject_id, derive elapsed seconds from timestamp, then Determine total locomotion duration (Walking, Jogging, Upstairs, Downstairs) and total resting duration (Sitting, Standing). Among subjects with more locomotion than resting time, return the subject_id with the largest locomotion-minus-resting duration.",
-      "schema_fingerprint": "7ad69ccf7f729a4d",
+      "schema_fingerprint": "b927f02262d7702e",
       "semantic_signature": {
         "admissibility": "in_scope",
         "aggregate": "max",
@@ -4809,7 +4809,7 @@
         "CORRELATE_COLUMNS"
       ],
       "query_text": "For record_id 101, divide time_s into 10-second bins. For every bin, Calculate annotated-row rate as rows with an annotation in the known annotation-code list divided by all rows in the bin. Return the Pearson correlation between bin index and annotated-row rate.",
-      "schema_fingerprint": "3e2dc640c05be9c3",
+      "schema_fingerprint": "8a468207a2c8d18a",
       "semantic_signature": {
         "admissibility": "in_scope",
         "aggregate": null,
@@ -4854,7 +4854,7 @@
         "RANK_ROWS"
       ],
       "query_text": "For every record_id, independently Calculate MLII variance and V1 variance. Define total lead variability as their sum. Return the record_id with the largest total lead variability.",
-      "schema_fingerprint": "3e2dc640c05be9c3",
+      "schema_fingerprint": "8a468207a2c8d18a",
       "semantic_signature": {
         "admissibility": "in_scope",
         "aggregate": "max",
@@ -4933,14 +4933,14 @@
     {
       "dataset": "ecg",
       "operator_skeleton": [
-        "FILTER_COMPARE",
+        "FILTER_IN",
         "DERIVE_BIN",
         "PARALLEL_AGGREGATE",
         "DERIVE_BINARY",
         "CORRELATE_COLUMNS"
       ],
       "query_text": "For record_id 101, divide time_s into 10-second bins. For every bin, Determine annotated-row rate as rows with an annotation in the known annotation-code list divided by all rows in the bin. Return the Pearson correlation between bin index and annotated-row rate.",
-      "schema_fingerprint": "3e2dc640c05be9c3",
+      "schema_fingerprint": "8a468207a2c8d18a",
       "semantic_signature": {
         "admissibility": "in_scope",
         "aggregate": null,
@@ -5028,7 +5028,7 @@
         "RANK_ROWS"
       ],
       "query_text": "For every record_id, independently Determine MLII variance and V1 variance. Define total lead variability as their sum. Return the record_id with the largest total lead variability.",
-      "schema_fingerprint": "3e2dc640c05be9c3",
+      "schema_fingerprint": "8a468207a2c8d18a",
       "semantic_signature": {
         "admissibility": "in_scope",
         "aggregate": "max",
@@ -5118,7 +5118,7 @@
       "query_text": "Filter the route to rows labeled aggressive, group them into 5-minute timestamp windows, and return the window with the highest mean instability_score.",
       "query_text_source": "query_def_seed",
       "reasons": [],
-      "schema_fingerprint": "1d29adee7efb7ed4",
+      "schema_fingerprint": "1856b7e244a7940d",
       "semantic_signature": {
         "admissibility": "in_scope",
         "aggregate": "max",
@@ -5213,7 +5213,7 @@
       "query_text": "For each recorded latitude reading, derive peak acceleration magnitude from accel_stats_x_p99, accel_stats_y_p99, and accel_stats_z_p99. Report the absolute difference between the mean peak magnitude north versus south of the median latitude.",
       "query_text_source": "query_def_seed",
       "reasons": [],
-      "schema_fingerprint": "1d29adee7efb7ed4",
+      "schema_fingerprint": "1856b7e244a7940d",
       "semantic_signature": {
         "admissibility": "in_scope",
         "aggregate": "median",
@@ -5320,7 +5320,7 @@
       "query_text": "For each 5-minute timestamp window, derive the vertical shock range as accel_stats_z_p99 minus accel_stats_z_p1 and compute its mean separately for aggressive and calm behavior labels. Report the overall aggressive-minus-calm difference across the route.",
       "query_text_source": "query_def_seed",
       "reasons": [],
-      "schema_fingerprint": "1d29adee7efb7ed4",
+      "schema_fingerprint": "1856b7e244a7940d",
       "semantic_signature": {
         "admissibility": "in_scope",
         "aggregate": "mean",
@@ -5421,7 +5421,7 @@
       "query_text": "Derive the vertical shock range as accel_stats_z_p99 minus accel_stats_z_p1. Filter to aggressive behavior, group rows into 5-minute timestamp windows, and return the window with the highest mean vertical shock range.",
       "query_text_source": "query_def_seed",
       "reasons": [],
-      "schema_fingerprint": "1d29adee7efb7ed4",
+      "schema_fingerprint": "1856b7e244a7940d",
       "semantic_signature": {
         "admissibility": "in_scope",
         "aggregate": "max",
@@ -5509,7 +5509,7 @@
       "query_text": "For every subject_id, compute mean acceleration magnitude separately for dynamic activities (Walking, Jogging, Upstairs, Downstairs) and resting activities (Sitting, Standing). Return the subject_id with the largest dynamic-minus-resting mean magnitude.",
       "query_text_source": "query_def_seed",
       "reasons": [],
-      "schema_fingerprint": "7ad69ccf7f729a4d",
+      "schema_fingerprint": "b927f02262d7702e",
       "semantic_signature": {
         "admissibility": "in_scope",
         "aggregate": "max",
@@ -5580,8 +5580,7 @@
       "operator_skeleton": [
         "FILTER_NOT_EMPTY",
         "DERIVE_VECTOR_MAGNITUDE",
-        "PARALLEL_AGGREGATE",
-        "RANK_ROWS"
+        "PARALLEL_AGGREGATE"
       ],
       "plan_source_modes": [
         "query_def_seed"
@@ -5590,7 +5589,7 @@
       "query_text": "For every subject_id, compute mean acceleration magnitude while Jogging and while Walking. Report whether subjects who jog harder also walk harder, ranking subjects consistently across both activities.",
       "query_text_source": "query_def_seed",
       "reasons": [],
-      "schema_fingerprint": "7ad69ccf7f729a4d",
+      "schema_fingerprint": "b927f02262d7702e",
       "semantic_signature": {
         "admissibility": "in_scope",
         "aggregate": "mean",
@@ -5687,7 +5686,7 @@
       "query_text": "For every subject_id, derive elapsed seconds from timestamp, then compute total locomotion duration (Walking, Jogging, Upstairs, Downstairs) and total resting duration (Sitting, Standing). Among subjects with more locomotion than resting time, return the subject_id with the largest locomotion-minus-resting duration.",
       "query_text_source": "query_def_seed",
       "reasons": [],
-      "schema_fingerprint": "7ad69ccf7f729a4d",
+      "schema_fingerprint": "b927f02262d7702e",
       "semantic_signature": {
         "admissibility": "in_scope",
         "aggregate": "max",
@@ -5774,7 +5773,7 @@
       "query_text": "Among rows whose annotation is one of the known MIT-ECG annotation codes, partition each record_id's time_s values into consecutive groups of width 10. For each group, compute MLII RMS. Return the group with the greatest RMS.",
       "query_text_source": "query_def_seed",
       "reasons": [],
-      "schema_fingerprint": "3e2dc640c05be9c3",
+      "schema_fingerprint": "8a468207a2c8d18a",
       "semantic_signature": {
         "admissibility": "in_scope",
         "aggregate": "max",
@@ -5908,7 +5907,7 @@
       "n_runs_observed": 0,
       "operator_contract_hash": "2be2d0b165f22ee01479bee3042b9568475c1f3b99a8aa028e2d2f5b4c5d0240",
       "operator_skeleton": [
-        "FILTER_IN",
+        "FILTER_COMPARE",
         "DERIVE_BIN",
         "PARALLEL_AGGREGATE",
         "DERIVE_BINARY",
@@ -5921,7 +5920,7 @@
       "query_text": "For record_id 101, divide time_s into 10-second bins. For each bin, compute annotated-row rate as rows with an annotation in the known annotation-code list divided by all rows in the bin. Return the Pearson correlation between bin index and annotated-row rate.",
       "query_text_source": "query_def_seed",
       "reasons": [],
-      "schema_fingerprint": "3e2dc640c05be9c3",
+      "schema_fingerprint": "8a468207a2c8d18a",
       "semantic_signature": {
         "admissibility": "in_scope",
         "aggregate": null,
@@ -6003,7 +6002,7 @@
       "query_text": "For every record_id, independently compute MLII variance and V1 variance. Define total lead variability as their sum. Return the record_id with the largest total lead variability.",
       "query_text_source": "query_def_seed",
       "reasons": [],
-      "schema_fingerprint": "3e2dc640c05be9c3",
+      "schema_fingerprint": "8a468207a2c8d18a",
       "semantic_signature": {
         "admissibility": "in_scope",
         "aggregate": "max",
@@ -6046,7 +6045,7 @@
         "COMPARE_PARTITIONS"
       ],
       "query_text": "For every recorded latitude reading, derive peak acceleration magnitude from accel_stats_x_p99, accel_stats_y_p99, and accel_stats_z_p99. Report the absolute difference between the mean peak magnitude north versus south of the median latitude.",
-      "schema_fingerprint": "1d29adee7efb7ed4",
+      "schema_fingerprint": "1856b7e244a7940d",
       "semantic_signature": {
         "admissibility": "in_scope",
         "aggregate": "median",
@@ -6092,7 +6091,7 @@
         "COMPARE_VALUES"
       ],
       "query_text": "For every 5-minute timestamp window, derive the vertical shock range as accel_stats_z_p99 minus accel_stats_z_p1 and Determine its mean separately for aggressive and calm behavior labels. Report the overall aggressive-minus-calm difference across the route.",
-      "schema_fingerprint": "1d29adee7efb7ed4",
+      "schema_fingerprint": "1856b7e244a7940d",
       "semantic_signature": {
         "admissibility": "in_scope",
         "aggregate": "mean",
@@ -6135,7 +6134,7 @@
         "CORRELATE_COLUMNS"
       ],
       "query_text": "For every subject_id, Calculate mean acceleration magnitude while Jogging and while Walking. Report whether subjects who jog harder also walk harder, ranking subjects consistently across both activities.",
-      "schema_fingerprint": "7ad69ccf7f729a4d",
+      "schema_fingerprint": "b927f02262d7702e",
       "semantic_signature": {
         "admissibility": "in_scope",
         "aggregate": "mean",
@@ -6175,7 +6174,7 @@
         "RANK_ROWS"
       ],
       "query_text": "For every subject_id, Determine mean acceleration magnitude while Jogging and while Walking. Report whether subjects who jog harder also walk harder, ranking subjects consistently across both activities.",
-      "schema_fingerprint": "7ad69ccf7f729a4d",
+      "schema_fingerprint": "b927f02262d7702e",
       "semantic_signature": {
         "admissibility": "in_scope",
         "aggregate": "mean",
@@ -6209,13 +6208,13 @@
     {
       "dataset": "ecg",
       "operator_skeleton": [
-        "FILTER_NOT_EMPTY",
+        "FILTER_IN",
         "DERIVE_BIN",
         "GROUP_AGGREGATE",
         "RANK_GROUPS"
       ],
       "query_text": "Among rows whose annotation is one of the known MIT-ECG annotation codes, partition each record_id's time_s values into consecutive groups of width 10. For every group, Calculate MLII RMS. Return the group with the greatest RMS.",
-      "schema_fingerprint": "3e2dc640c05be9c3",
+      "schema_fingerprint": "8a468207a2c8d18a",
       "semantic_signature": {
         "admissibility": "in_scope",
         "aggregate": "max",
@@ -6258,7 +6257,7 @@
         "RANK_GROUPS"
       ],
       "query_text": "Among rows whose annotation is one of the known MIT-ECG annotation codes, partition each record_id's time_s values into consecutive groups of width 10. For every group, Determine MLII RMS. Return the group with the greatest RMS.",
-      "schema_fingerprint": "3e2dc640c05be9c3",
+      "schema_fingerprint": "8a468207a2c8d18a",
       "semantic_signature": {
         "admissibility": "in_scope",
         "aggregate": "max",
@@ -6456,7 +6455,7 @@
         "COMPARE_VALUES"
       ],
       "query_text": "For every 5-minute timestamp window, derive the vertical shock range as accel_stats_z_p99 minus accel_stats_z_p1 and Calculate its mean separately for aggressive and calm behavior labels. Report the overall aggressive-minus-calm difference across the route.",
-      "schema_fingerprint": "1d29adee7efb7ed4",
+      "schema_fingerprint": "1856b7e244a7940d",
       "semantic_signature": {
         "admissibility": "in_scope",
         "aggregate": "mean",

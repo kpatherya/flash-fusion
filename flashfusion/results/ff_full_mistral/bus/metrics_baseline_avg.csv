@@ -1,0 +1,2 @@
+baseline,gt_score,latency_s,cost_usd,input_tokens,output_tokens,runs
+FF_FULL,0.9166666666666666,1.8994576056798298,0.0002051714,1511.1166666666668,130.98333333333332,3

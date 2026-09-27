@@ -1,0 +1,475 @@
+run_id,source_file,baseline,query_id,query_id_source,query_text,expected_rejection,gt_reference_answer,candidate_answer,candidate_rejected,candidate_executed,candidate_code,llm_verdict,llm_score,llm_reason,gt_sanity,gt_sanity_note,llm_parse_status,llm_attempts,llm_override_applied,llm_raw
+1,[in_memory_benchmark_run],FF_FULL,1,explicit,What is the maximum recorded x-acceleration for user 15?,False,Maximum x-acceleration for user 15 is 19.5700.,The result is 19.57,False,True,"df = df[df['subject_id'] == 15]
+result = df['x'].max()",PASS,1.0,The candidate answer matches the ground truth value exactly.,SOUND,Clear and precise numeric answer consistent with the query.,json,1,False,"{
+  ""verdict"": ""PASS"",
+  ""reason"": ""The candidate answer matches the ground truth value exactly."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Clear and precise numeric answer consistent with the query.""
+}"
+1,[in_memory_benchmark_run],FF_FULL,2,explicit,How many users have the activity label walking?,False,Total users Walking in the dataset: 36.,The result is 36,False,True,"df = df[df['activity_label'].notna() & df['activity_label'].astype(str).str.strip().ne('')]
+df = df[df['activity_label'] == 'Walking']
+result = df['subject_id'].nunique()",PASS,1.0,The candidate answer '36' matches the ground truth '36' in both value and context.,SOUND,Clear and consistent with the query.,json,1,False,"{
+  ""verdict"": ""PASS"",
+  ""reason"": ""The candidate answer '36' matches the ground truth '36' in both value and context."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Clear and consistent with the query.""
+}"
+1,[in_memory_benchmark_run],FF_FULL,3,explicit,What is the average y-acceleration of user 5 with activity label Sitting?,False,Average y-acceleration for user 5 during Sitting is 3.0414.,The result is 3.0414423076923076,False,True,"df = df[df['subject_id'] == 5]
+df = df[df['activity_label'] == 'Sitting']
+result = df['y'].mean()",PASS,1.0,The candidate answer matches the ground truth value exactly.,SOUND,Value is consistent with query context.,json,1,False,"{
+  ""verdict"": ""PASS"",
+  ""reason"": ""The candidate answer matches the ground truth value exactly."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Value is consistent with query context.""
+}"
+1,[in_memory_benchmark_run],FF_FULL,4,explicit,Which user has the highest total number of recorded data samples?,False,User with the highest sample count is 20 with 56632 samples.,"The result is {'subject_id': 20, 'count': 56632}",False,True,"result = df.groupby('subject_id').size()
+result = result.idxmax()",PASS,1.0,"The candidate answer identifies user 20 with 56632 samples, matching the ground truth.",SOUND,Clear and consistent with typical data summarization.,json,1,False,"{
+  ""verdict"": ""PASS"",
+  ""reason"": ""The candidate answer identifies user 20 with 56632 samples, matching the ground truth."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Clear and consistent with typical data summarization.""
+}"
+1,[in_memory_benchmark_run],FF_FULL,5,explicit,"Compare the overall acceleration magnitude between dynamic (walking,jogging,upstairs,downstairs) and resting (sitting,standing) states.",False,"Average magnitude for dynamic activities (walking,jogging,upstairs,downstairs) is 11.9625; resting activities (sitting,standing) is 9.8328; difference (dynamic-resting) is 2.1297.","The result is {'higher': 'dynamic', 'lower': 'resting', 'metric': 'mean acceleration_magnitude', 'dynamic': 11.962538760453763, 'resting': 9.832791762650903, 'difference': 2.12974699780286}",False,True,"df = df[df['x'].notna() & df['x'].astype(str).str.strip().ne('')]
+df['acceleration_magnitude'] = (df['x']**2 + df['y']**2 + df['z']**2)**0.5
+dynamic = df[df['activity_label'].isin(['Downstairs', 'Jogging', 'Upstairs', 'Walking'])]
+resting = df[df['activity_label'].isin(['Sitting', 'Standing'])]
+result = {label: agg(partition) for label in partitions}
+result = compare(dynamic, resting, mode='difference')",PASS,1.0,The candidate answer provides the same numerical values and correctly identifies dynamic activities as having higher acceleration magnitude than resting activities.,SOUND,Ground truth contains consistent and plausible numeric comparisons.,json,1,False,"{
+  ""verdict"": ""PASS"",
+  ""reason"": ""The candidate answer provides the same numerical values and correctly identifies dynamic activities as having higher acceleration magnitude than resting activities."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Ground truth contains consistent and plausible numeric comparisons.""
+}"
+1,[in_memory_benchmark_run],FF_FULL,6,explicit,"Identify the user whose total recorded duration of resting states (sitting,standing) exceeds their duration of dynamic movements (walking,jogging,upstairs,downstairs) by the largest margin.",False,"Users [20, 6, 16] have total stationary duration (sitting, standing) exceeding locomotion duration (walking, jogging, upstairs, downstairs). User 20 has the largest margin (delta=54004.34s).","The result is {'subject_id': 20, 'duration_margin': 54004.33781899999}",False,True,"df = df[df['activity_label'].notna() & df['activity_label'].astype(str).str.strip().ne('')]
+df = df.sort_values(['subject_id', 'timestamp']); df['duration_seconds'] = df.groupby(['subject_id'])['timestamp'].diff().dt.total_seconds().clip(lower=0).fillna(0.0)
+# PARALLEL_AGGREGATE branches:
+branch_0 = df[df['activity_label'].isin(['Sitting', 'Standing'])].groupby(['subject_id'])['duration_seconds'].sum()
+branch_1 = df[df['activity_label'].isin(['Downstairs', 'Jogging', 'Upstairs', 'Walking'])].groupby(['subject_id'])['duration_seconds'].sum()
+merged = branch_0.merge(branch_1, on=['subject_id'], how='outer')
+merged[['resting_duration', 'dynamic_duration']] = merged[['resting_duration', 'dynamic_duration']].fillna(0)
+df['duration_margin'] = df['resting_duration'] - df['dynamic_duration']
+df = df[df['duration_margin'] > 0]
+idx = df['duration_margin'].idxmax(); result = df.loc[idx, ['subject_id']].to_dict()",PASS,1.0,"The candidate correctly identifies user 20 with a margin of approximately 54004.34 seconds, matching the ground truth.",SOUND,Ground truth is consistent and precise.,json,1,False,"{
+  ""verdict"": ""PASS"",
+  ""reason"": ""The candidate correctly identifies user 20 with a margin of approximately 54004.34 seconds, matching the ground truth."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Ground truth is consistent and precise.""
+}"
+1,[in_memory_benchmark_run],FF_FULL,7,explicit,What is the median acceleration magnitude for user 20 with activity label Upstairs?,False,Median net acceleration vector length for user 20 while ascending steps is 9.8931.,The result is 9.893086174221672,False,True,"df = df[df['subject_id'] == 20]
+df = df[df['activity_label'] == 'Upstairs']
+df['acceleration_magnitude'] = (df['x']**2 + df['y']**2 + df['z']**2)**0.5
+result = df['acceleration_magnitude'].median()",PASS,1.0,The candidate answer matches the ground truth value exactly.,SOUND,Clear and consistent with the query.,json,1,False,"{
+  ""verdict"": ""PASS"",
+  ""reason"": ""The candidate answer matches the ground truth value exactly."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Clear and consistent with the query.""
+}"
+1,[in_memory_benchmark_run],FF_FULL,8,explicit,Calculate the absolute difference between the mean z-axis acceleration of activity labels Upstairs and Downstairs.,False,Average z for ascending elevation changes is 0.3235; descending is 0.6841; absolute difference (ascending-descending) is 0.3605.,"The result is {'higher': 'Downstairs', 'lower': 'Upstairs', 'metric': 'mean z', 'Upstairs': 0.323542237509624, 'Downstairs': 0.6840876229507197, 'abs_difference': 0.36054538544109566}",False,True,"df = df[df['z'].notna() & df['z'].astype(str).str.strip().ne('')]
+Upstairs = df[df['activity_label'].isin(['Upstairs'])]
+Downstairs = df[df['activity_label'].isin(['Downstairs'])]
+result = {label: agg(partition) for label in partitions}
+result = compare(Upstairs, Downstairs, mode='abs_difference')",PASS,1.0,The candidate provides the same mean z values and an absolute difference (0.361) that is within rounding tolerance of the ground truth (0.36).,SOUND,Values and logic are consistent with the query.,json,1,False,"{
+  ""verdict"": ""PASS"",
+  ""reason"": ""The candidate provides the same mean z values and an absolute difference (0.361) that is within rounding tolerance of the ground truth (0.36)."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Values and logic are consistent with the query.""
+}"
+1,[in_memory_benchmark_run],FF_FULL,13,explicit,"Sort all WISDM rows by timestamp in ascending order, using subject_id as the tie-breaker. Use the first 80% of rows for training and the final 20% as the chronological holdout. Train a logistic regression model using the features x, y and z. Predict the activity label for the first row in the holdout set.",False,Logistic regression predicts activity 'Jogging' for the first holdout row.,The result is Logistic regression predicts label 'Jogging' for the first holdout row.,False,True,"# sort_by=['timestamp', 'subject_id'] split=878558/1098198 model='logistic_regression' features=['x', 'y', 'z']
+result = ""Logistic regression predicts label 'Jogging' for the first holdout row.""",PASS,1.0,The candidate answer is semantically and factually equivalent to the ground truth.,SOUND,Clear and consistent with the query's requirements.,json,1,False,"{
+  ""verdict"": ""PASS"",
+  ""reason"": ""The candidate answer is semantically and factually equivalent to the ground truth."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Clear and consistent with the query's requirements.""
+}"
+1,[in_memory_benchmark_run],FF_FULL,14,explicit,"Sort all WISDM rows by timestamp in ascending order, using subject_id as the tie-breaker. Use the first 80% of rows for training and the final 20% as the chronological holdout. Train a random forest model using the features x, y and z. Predict the activity label for the first row in the holdout set.",False,Random forest predicts activity 'Sitting' for the first holdout row.,The result is Random forest predicts label 'Sitting' for the first holdout row.,False,True,"# sort_by=['timestamp', 'subject_id'] split=878558/1098198 model='random_forest' features=['x', 'y', 'z']
+result = ""Random forest predicts label 'Sitting' for the first holdout row.""",PASS,1.0,The candidate answer is semantically and factually equivalent to the ground truth.,SOUND,Clear and consistent with the query's requirements.,json,1,False,"{
+  ""verdict"": ""PASS"",
+  ""reason"": ""The candidate answer is semantically and factually equivalent to the ground truth."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Clear and consistent with the query's requirements.""
+}"
+1,[in_memory_benchmark_run],FF_FULL,15,explicit,"Sort all WISDM rows by timestamp in ascending order, using subject_id as the tie-breaker. Use the first 80% of rows for training and the final 20% as the chronological holdout. Train a 1-nearest-neighbor model using the features x, y and z. Predict the activity label for the first row in the holdout set.",False,1-nearest-neighbor predicts activity 'Sitting' for the first holdout row.,The result is 1-nearest-neighbor predicts label 'Sitting' for the first holdout row.,False,True,"# sort_by=['timestamp', 'subject_id'] split=878558/1098198 model='one_nearest_neighbor' features=['x', 'y', 'z']
+result = ""1-nearest-neighbor predicts label 'Sitting' for the first holdout row.""",PASS,1.0,The candidate answer is semantically and factually equivalent to the ground truth.,SOUND,Clear and consistent with the task description.,json,1,False,"{
+  ""verdict"": ""PASS"",
+  ""reason"": ""The candidate answer is semantically and factually equivalent to the ground truth."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Clear and consistent with the task description.""
+}"
+1,[in_memory_benchmark_run],FF_FULL,16,explicit,"Sort all WISDM rows by timestamp in ascending order, using subject_id as the tie-breaker. Use the first 80% of rows for training and the final 20% as the chronological holdout. Train a hist gradient boosting model using the features x, y and z. Predict the activity label for the first row in the holdout set.",False,Hist gradient boosting predicts activity 'Sitting' for the first holdout row.,The result is Hist gradient boosting predicts label 'Sitting' for the first holdout row.,False,True,"# sort_by=['timestamp', 'subject_id'] split=878558/1098198 model='hist_gradient_boosting' features=['x', 'y', 'z']
+result = ""Hist gradient boosting predicts label 'Sitting' for the first holdout row.""",PASS,1.0,The candidate answer is semantically and factually equivalent to the ground truth.,SOUND,Clear and consistent with the query's requirements.,json,1,False,"{
+  ""verdict"": ""PASS"",
+  ""reason"": ""The candidate answer is semantically and factually equivalent to the ground truth."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Clear and consistent with the query's requirements.""
+}"
+1,[in_memory_benchmark_run],FF_FULL,17,explicit,"For every subject_id, compute mean acceleration magnitude separately for dynamic activities (Walking, Jogging, Upstairs, Downstairs) and resting activities (Sitting, Standing). Return the subject_id with the largest dynamic-minus-resting mean magnitude.",False,subject_id 24 has the largest dynamic-minus-resting mean magnitude: 4.739240077985.,"The result is {'subject_id': 24, 'magnitude_diff': 4.739240077985189}",False,True,"df = df[df['x'].notna() & df['x'].astype(str).str.strip().ne('')]
+df['accel_magnitude'] = (df['x']**2 + df['y']**2 + df['z']**2)**0.5
+# PARALLEL_AGGREGATE branches:
+branch_0 = df[df['activity_label'].isin(['Downstairs', 'Jogging', 'Upstairs', 'Walking'])].groupby(['subject_id'])['accel_magnitude'].mean()
+branch_1 = df[df['activity_label'].isin(['Sitting', 'Standing'])].groupby(['subject_id'])['accel_magnitude'].mean()
+merged = branch_0.merge(branch_1, on=['subject_id'], how='outer')
+df['magnitude_diff'] = df['dynamic_mean'] - df['resting_mean']
+idx = df['magnitude_diff'].idxmax(); result = df.loc[idx, ['subject_id']].to_dict()",PASS,1.0,"The candidate answer identifies subject_id 24 with a magnitude difference of 4.739, matching the ground truth.",SOUND,Clear and consistent with the query.,json,1,False,"{
+  ""verdict"": ""PASS"",
+  ""reason"": ""The candidate answer identifies subject_id 24 with a magnitude difference of 4.739, matching the ground truth."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Clear and consistent with the query.""
+}"
+1,[in_memory_benchmark_run],FF_FULL,18,explicit,"For every subject_id, compute x-acceleration variance separately while Jogging and while Walking. Return the subject_id for whom Jogging pulls furthest ahead of Walking.",False,subject_id 12 has the most negative Jogging-minus-Walking x-variance difference (Walking exceeds Jogging by the largest margin): -16.746789937351.,The result is: 31,False,True,"df = df[df['activity_label'] != '']
+jogging_var = df[df['activity_label'] == 'Jogging'].groupby('subject_id')['x'].var()
+walking_var = df[df['activity_label'] == 'Walking'].groupby('subject_id')['x'].var()
+diff = jogging_var - walking_var
+result = diff.idxmax()",FAIL,0.0,Candidate answer (31) does not match the ground truth (subject_id 12).,SOUND,Ground truth correctly identifies subject 12 with the most negative difference.,json,1,False,"{
+  ""verdict"": ""FAIL"",
+  ""reason"": ""Candidate answer (31) does not match the ground truth (subject_id 12)."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Ground truth correctly identifies subject 12 with the most negative difference.""
+}"
+1,[in_memory_benchmark_run],FF_FULL,19,explicit,"For every subject_id, compute mean acceleration magnitude while Jogging and while Walking. Report whether subjects who jog harder also walk harder, ranking subjects consistently across both activities.",False,Yes — subjects who jog harder also tend to walk harder: the Spearman rank correlation between per-subject Jogging and Walking mean magnitudes is 0.703812316716.,"The result is {'groups': 36, 'columns': ['subject_id', 'mean_acceleration_jogging', 'mean_acceleration_walking']}",False,True,"df = df[df['subject_id'].notna() & df['subject_id'].astype(str).str.strip().ne('')]
+df['acceleration_magnitude'] = (df['x']**2 + df['y']**2 + df['z']**2)**0.5
+# PARALLEL_AGGREGATE branches:
+branch_0 = df[df['activity_label'].isin(['Jogging'])].groupby(['subject_id'])['acceleration_magnitude'].mean()
+branch_1 = df[df['activity_label'].isin(['Walking'])].groupby(['subject_id'])['acceleration_magnitude'].mean()
+merged = branch_0.merge(branch_1, on=['subject_id'], how='outer')",FAIL,0.0,Candidate answer provides only a data structure description without computing or reporting the required correlation or conclusion.,SOUND,Ground truth correctly interprets the query by computing per-subject means and assessing rank consistency via Spearman correlation.,json,1,False,"{
+  ""verdict"": ""FAIL"",
+  ""reason"": ""Candidate answer provides only a data structure description without computing or reporting the required correlation or conclusion."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Ground truth correctly interprets the query by computing per-subject means and assessing rank consistency via Spearman correlation.""
+}"
+1,[in_memory_benchmark_run],FF_FULL,20,explicit,"For every subject_id, derive elapsed seconds from timestamp, then compute total locomotion duration (Walking, Jogging, Upstairs, Downstairs) and total resting duration (Sitting, Standing). Among subjects with more locomotion than resting time, return the subject_id with the largest locomotion-minus-resting duration.",False,subject_id 19 has the largest positive locomotion-minus-resting duration: 131091.171906999982 seconds.,"The result is {'subject_id': 19, 'duration_diff': 131091.17190699998}",False,True,"df = df[df['timestamp'].notna() & df['timestamp'].astype(str).str.strip().ne('')]
+df = df.sort_values(['subject_id', 'timestamp']); df['dt_s'] = df.groupby(['subject_id'])['timestamp'].diff().dt.total_seconds().clip(lower=0).fillna(0.0)
+# PARALLEL_AGGREGATE branches:
+branch_0 = df[df['activity_label'].isin(['Downstairs', 'Jogging', 'Upstairs', 'Walking'])].groupby(['subject_id'])['dt_s'].sum()
+branch_1 = df[df['activity_label'].isin(['Sitting', 'Standing'])].groupby(['subject_id'])['dt_s'].sum()
+merged = branch_0.merge(branch_1, on=['subject_id'], how='outer')
+merged[['locomotion_duration', 'resting_duration']] = merged[['locomotion_duration', 'resting_duration']].fillna(0)
+df['duration_diff'] = df['locomotion_duration'] - df['resting_duration']
+df = df[df['duration_diff'] > 0]
+idx = df['duration_diff'].idxmax(); result = df.loc[idx, ['subject_id']].to_dict()",PASS,1.0,"The candidate answer identifies subject_id 19 with the correct locomotion-minus-resting duration of 131091.172 seconds, matching the ground truth.",SOUND,The ground truth is consistent and plausible given the query.,json,1,False,"{
+  ""verdict"": ""PASS"",
+  ""reason"": ""The candidate answer identifies subject_id 19 with the correct locomotion-minus-resting duration of 131091.172 seconds, matching the ground truth."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""The ground truth is consistent and plausible given the query.""
+}"
+2,[in_memory_benchmark_run],FF_FULL,1,explicit,What is the maximum recorded x-acceleration for user 15?,False,Maximum x-acceleration for user 15 is 19.5700.,The result is 19.57,False,True,"df = df[df['subject_id'] == 15]
+result = df['x'].max()",PASS,1.0,The candidate answer matches the ground truth value exactly.,SOUND,Clear and precise numeric answer consistent with the query.,json,1,False,"{
+  ""verdict"": ""PASS"",
+  ""reason"": ""The candidate answer matches the ground truth value exactly."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Clear and precise numeric answer consistent with the query.""
+}"
+2,[in_memory_benchmark_run],FF_FULL,2,explicit,How many users have the activity label walking?,False,Total users Walking in the dataset: 36.,The result is 36,False,True,"df = df[df['activity_label'].notna() & df['activity_label'].astype(str).str.strip().ne('')]
+df = df[df['activity_label'] == 'Walking']
+result = df['subject_id'].nunique()",PASS,1.0,The candidate answer '36' matches the ground truth '36' in both value and context.,SOUND,Clear and consistent with the query.,json,1,False,"{
+  ""verdict"": ""PASS"",
+  ""reason"": ""The candidate answer '36' matches the ground truth '36' in both value and context."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Clear and consistent with the query.""
+}"
+2,[in_memory_benchmark_run],FF_FULL,3,explicit,What is the average y-acceleration of user 5 with activity label Sitting?,False,Average y-acceleration for user 5 during Sitting is 3.0414.,The result is 3.0414423076923076,False,True,"df = df[df['subject_id'] == 5]
+df = df[df['activity_label'] == 'Sitting']
+result = df['y'].mean()",PASS,1.0,The candidate answer matches the ground truth value exactly.,SOUND,Value is consistent with a plausible average y-acceleration.,json,1,False,"{
+  ""verdict"": ""PASS"",
+  ""reason"": ""The candidate answer matches the ground truth value exactly."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Value is consistent with a plausible average y-acceleration.""
+}"
+2,[in_memory_benchmark_run],FF_FULL,4,explicit,Which user has the highest total number of recorded data samples?,False,User with the highest sample count is 20 with 56632 samples.,"The result is {'subject_id': 20, 'count': 56632}",False,True,"df = df[df['subject_id'].notna() & df['subject_id'].astype(str).str.strip().ne('')]
+result = df.groupby('subject_id').size()
+result = result.idxmax()",PASS,1.0,"The candidate answer identifies user 20 with 56632 samples, matching the ground truth.",SOUND,Clear and consistent with typical data summarization.,json,1,False,"{
+  ""verdict"": ""PASS"",
+  ""reason"": ""The candidate answer identifies user 20 with 56632 samples, matching the ground truth."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Clear and consistent with typical data summarization.""
+}"
+2,[in_memory_benchmark_run],FF_FULL,5,explicit,"Compare the overall acceleration magnitude between dynamic (walking,jogging,upstairs,downstairs) and resting (sitting,standing) states.",False,"Average magnitude for dynamic activities (walking,jogging,upstairs,downstairs) is 11.9625; resting activities (sitting,standing) is 9.8328; difference (dynamic-resting) is 2.1297.","The result is {'higher': 'dynamic', 'lower': 'resting', 'metric': 'mean acceleration_magnitude', 'dynamic': 11.962538760453763, 'resting': 9.832791762650903, 'difference': 2.12974699780286}",False,True,"df = df[df['x'].notna() & df['x'].astype(str).str.strip().ne('')]
+df['acceleration_magnitude'] = (df['x']**2 + df['y']**2 + df['z']**2)**0.5
+dynamic = df[df['activity_label'].isin(['Downstairs', 'Jogging', 'Upstairs', 'Walking'])]
+resting = df[df['activity_label'].isin(['Sitting', 'Standing'])]
+result = {label: agg(partition) for label in partitions}
+result = compare(dynamic, resting, mode='difference')",PASS,1.0,The candidate answer provides the same numerical values and correctly identifies dynamic activities as having higher acceleration magnitude than resting activities.,SOUND,Values and interpretation are consistent with typical accelerometer data analysis.,json,1,False,"{
+  ""verdict"": ""PASS"",
+  ""reason"": ""The candidate answer provides the same numerical values and correctly identifies dynamic activities as having higher acceleration magnitude than resting activities."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Values and interpretation are consistent with typical accelerometer data analysis.""
+}"
+2,[in_memory_benchmark_run],FF_FULL,6,explicit,"Identify the user whose total recorded duration of resting states (sitting,standing) exceeds their duration of dynamic movements (walking,jogging,upstairs,downstairs) by the largest margin.",False,"Users [20, 6, 16] have total stationary duration (sitting, standing) exceeding locomotion duration (walking, jogging, upstairs, downstairs). User 20 has the largest margin (delta=54004.34s).","The result is {'subject_id': 20, 'duration_margin': 54004.33781899999}",False,True,"df = df[df['activity_label'].notna() & df['activity_label'].astype(str).str.strip().ne('')]
+df = df.sort_values(['subject_id', 'timestamp']); df['duration_seconds'] = df.groupby(['subject_id'])['timestamp'].diff().dt.total_seconds().clip(lower=0).fillna(0.0)
+# PARALLEL_AGGREGATE branches:
+branch_0 = df[df['activity_label'].isin(['Sitting', 'Standing'])].groupby(['subject_id'])['duration_seconds'].sum()
+branch_1 = df[df['activity_label'].isin(['Downstairs', 'Jogging', 'Upstairs', 'Walking'])].groupby(['subject_id'])['duration_seconds'].sum()
+merged = branch_0.merge(branch_1, on=['subject_id'], how='outer')
+merged[['resting_duration', 'dynamic_duration']] = merged[['resting_duration', 'dynamic_duration']].fillna(0)
+df['duration_margin'] = df['resting_duration'] - df['dynamic_duration']
+df = df[df['duration_margin'] > 0]
+idx = df['duration_margin'].idxmax(); result = df.loc[idx, ['subject_id']].to_dict()",PASS,1.0,"The candidate correctly identifies user 20 with a margin of approximately 54004.34 seconds, matching the ground truth.",SOUND,Ground truth is consistent and precise.,json,1,False,"{
+  ""verdict"": ""PASS"",
+  ""reason"": ""The candidate correctly identifies user 20 with a margin of approximately 54004.34 seconds, matching the ground truth."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Ground truth is consistent and precise.""
+}"
+2,[in_memory_benchmark_run],FF_FULL,7,explicit,What is the median acceleration magnitude for user 20 with activity label Upstairs?,False,Median net acceleration vector length for user 20 while ascending steps is 9.8931.,The result is 9.893086174221672,False,True,"df = df[df['subject_id'] == 20]
+df = df[df['activity_label'] == 'Upstairs']
+df['accel_magnitude'] = (df['x']**2 + df['y']**2 + df['z']**2)**0.5
+result = df['accel_magnitude'].median()",PASS,1.0,The candidate answer matches the ground truth value exactly.,SOUND,Clear and precise numeric answer consistent with the query.,json,1,False,"{
+  ""verdict"": ""PASS"",
+  ""reason"": ""The candidate answer matches the ground truth value exactly."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Clear and precise numeric answer consistent with the query.""
+}"
+2,[in_memory_benchmark_run],FF_FULL,8,explicit,Calculate the absolute difference between the mean z-axis acceleration of activity labels Upstairs and Downstairs.,False,Average z for ascending elevation changes is 0.3235; descending is 0.6841; absolute difference (ascending-descending) is 0.3605.,"The result is {'higher': 'Downstairs', 'lower': 'Upstairs', 'metric': 'mean z', 'Upstairs': 0.323542237509624, 'Downstairs': 0.6840876229507197, 'abs_difference': 0.36054538544109566}",False,True,"df = df[df['z'].notna() & df['z'].astype(str).str.strip().ne('')]
+Upstairs = df[df['activity_label'].isin(['Upstairs'])]
+Downstairs = df[df['activity_label'].isin(['Downstairs'])]
+result = {label: agg(partition) for label in partitions}
+result = compare(Upstairs, Downstairs, mode='abs_difference')",PASS,1.0,The candidate provides the same mean z values and an absolute difference (0.361) that is within rounding tolerance of the ground truth (0.36).,SOUND,Values and logic are consistent with the query.,json,1,False,"{
+  ""verdict"": ""PASS"",
+  ""reason"": ""The candidate provides the same mean z values and an absolute difference (0.361) that is within rounding tolerance of the ground truth (0.36)."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Values and logic are consistent with the query.""
+}"
+2,[in_memory_benchmark_run],FF_FULL,13,explicit,"Sort all WISDM rows by timestamp in ascending order, using subject_id as the tie-breaker. Use the first 80% of rows for training and the final 20% as the chronological holdout. Train a logistic regression model using the features x, y and z. Predict the activity label for the first row in the holdout set.",False,Logistic regression predicts activity 'Jogging' for the first holdout row.,The result is Logistic regression predicts activity_label 'Jogging' for the first holdout row.,False,True,"# sort_by=['timestamp', 'subject_id'] split=878558/1098198 model='logistic_regression' features=['x', 'y', 'z']
+result = ""Logistic regression predicts activity_label 'Jogging' for the first holdout row.""",PASS,1.0,The candidate answer is semantically and factually equivalent to the ground truth.,SOUND,Clear and consistent with the query's requirements.,json,1,False,"{
+  ""verdict"": ""PASS"",
+  ""reason"": ""The candidate answer is semantically and factually equivalent to the ground truth."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Clear and consistent with the query's requirements.""
+}"
+2,[in_memory_benchmark_run],FF_FULL,14,explicit,"Sort all WISDM rows by timestamp in ascending order, using subject_id as the tie-breaker. Use the first 80% of rows for training and the final 20% as the chronological holdout. Train a random forest model using the features x, y and z. Predict the activity label for the first row in the holdout set.",False,Random forest predicts activity 'Sitting' for the first holdout row.,The result is Random forest predicts activity_label 'Sitting' for the first holdout row.,False,True,"# sort_by=['timestamp', 'subject_id'] split=878558/1098198 model='random_forest' features=['x', 'y', 'z']
+result = ""Random forest predicts activity_label 'Sitting' for the first holdout row.""",PASS,1.0,The candidate answer is factually and semantically equivalent to the ground truth.,SOUND,The ground truth is clear and consistent with the query.,json,1,False,"{
+  ""verdict"": ""PASS"",
+  ""reason"": ""The candidate answer is factually and semantically equivalent to the ground truth."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""The ground truth is clear and consistent with the query.""
+}"
+2,[in_memory_benchmark_run],FF_FULL,15,explicit,"Sort all WISDM rows by timestamp in ascending order, using subject_id as the tie-breaker. Use the first 80% of rows for training and the final 20% as the chronological holdout. Train a 1-nearest-neighbor model using the features x, y and z. Predict the activity label for the first row in the holdout set.",False,1-nearest-neighbor predicts activity 'Sitting' for the first holdout row.,The result is 1-nearest-neighbor predicts activity_label 'Sitting' for the first holdout row.,False,True,"# sort_by=['timestamp', 'subject_id'] split=878558/1098198 model='one_nearest_neighbor' features=['x', 'y', 'z']
+result = ""1-nearest-neighbor predicts activity_label 'Sitting' for the first holdout row.""",PASS,1.0,The candidate answer is semantically and factually equivalent to the ground truth.,SOUND,Clear and consistent with the query's requirements.,json,1,False,"{
+  ""verdict"": ""PASS"",
+  ""reason"": ""The candidate answer is semantically and factually equivalent to the ground truth."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Clear and consistent with the query's requirements.""
+}"
+2,[in_memory_benchmark_run],FF_FULL,16,explicit,"Sort all WISDM rows by timestamp in ascending order, using subject_id as the tie-breaker. Use the first 80% of rows for training and the final 20% as the chronological holdout. Train a hist gradient boosting model using the features x, y and z. Predict the activity label for the first row in the holdout set.",False,Hist gradient boosting predicts activity 'Sitting' for the first holdout row.,The result is Hist gradient boosting predicts activity_label 'Sitting' for the first holdout row.,False,True,"# sort_by=['timestamp', 'subject_id'] split=878558/1098198 model='hist_gradient_boosting' features=['x', 'y', 'z']
+result = ""Hist gradient boosting predicts activity_label 'Sitting' for the first holdout row.""",PASS,1.0,The candidate answer is semantically and factually equivalent to the ground truth.,SOUND,Clear and consistent with the query's requirements.,json,1,False,"{
+  ""verdict"": ""PASS"",
+  ""reason"": ""The candidate answer is semantically and factually equivalent to the ground truth."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Clear and consistent with the query's requirements.""
+}"
+2,[in_memory_benchmark_run],FF_FULL,17,explicit,"For every subject_id, compute mean acceleration magnitude separately for dynamic activities (Walking, Jogging, Upstairs, Downstairs) and resting activities (Sitting, Standing). Return the subject_id with the largest dynamic-minus-resting mean magnitude.",False,subject_id 24 has the largest dynamic-minus-resting mean magnitude: 4.739240077985.,"The result is {'subject_id': 24, 'dynamic_minus_resting': 4.739240077985189}",False,True,"df = df[df['x'].notna() & df['x'].astype(str).str.strip().ne('')]
+df['acceleration_magnitude'] = (df['x']**2 + df['y']**2 + df['z']**2)**0.5
+# PARALLEL_AGGREGATE branches:
+branch_0 = df[df['activity_label'].isin(['Downstairs', 'Jogging', 'Upstairs', 'Walking'])].groupby(['subject_id'])['acceleration_magnitude'].mean()
+branch_1 = df[df['activity_label'].isin(['Sitting', 'Standing'])].groupby(['subject_id'])['acceleration_magnitude'].mean()
+merged = branch_0.merge(branch_1, on=['subject_id'], how='outer')
+df['dynamic_minus_resting'] = df['dynamic_mean_magnitude'] - df['resting_mean_magnitude']
+idx = df['dynamic_minus_resting'].idxmax(); result = df.loc[idx, ['subject_id']].to_dict()",PASS,1.0,"The candidate answer identifies subject_id 24 with a dynamic-minus-resting mean magnitude of 4.739, matching the ground truth.",SOUND,The ground truth is consistent and plausible.,json,1,False,"{
+  ""verdict"": ""PASS"",
+  ""reason"": ""The candidate answer identifies subject_id 24 with a dynamic-minus-resting mean magnitude of 4.739, matching the ground truth."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""The ground truth is consistent and plausible.""
+}"
+2,[in_memory_benchmark_run],FF_FULL,18,explicit,"For every subject_id, compute x-acceleration variance separately while Jogging and while Walking. Return the subject_id for whom Jogging pulls furthest ahead of Walking.",False,subject_id 12 has the most negative Jogging-minus-Walking x-variance difference (Walking exceeds Jogging by the largest margin): -16.746789937351.,The result is: 31,False,True,"# Filter out rows with empty activity_label
+df = df[df['activity_label'] != '']
+
+# Calculate variance of x-acceleration for Jogging and Walking per subject_id
+jogging_var = df[df['activity_label'] == 'Jogging'].groupby('subject_id')['x'].var()
+walking_var = df[df['activity_label'] == 'Walking'].groupby('subject_id')['x'].var()
+
+# Merge the two series to compute the difference
+var_diff = jogging_var - walking_var
+
+# Find the subject_id with the maximum difference (Jogging furthest ahead of Walking)
+result = var_diff.idxmax()",FAIL,0.0,Candidate answer (31) does not match the ground truth (subject_id 12).,SOUND,Ground truth correctly identifies subject 12 with the most negative difference.,json,1,False,"{
+  ""verdict"": ""FAIL"",
+  ""reason"": ""Candidate answer (31) does not match the ground truth (subject_id 12)."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Ground truth correctly identifies subject 12 with the most negative difference.""
+}"
+2,[in_memory_benchmark_run],FF_FULL,19,explicit,"For every subject_id, compute mean acceleration magnitude while Jogging and while Walking. Report whether subjects who jog harder also walk harder, ranking subjects consistently across both activities.",False,Yes — subjects who jog harder also tend to walk harder: the Spearman rank correlation between per-subject Jogging and Walking mean magnitudes is 0.703812316716.,The result is 0.7491948405475497,False,True,"df = df[df['subject_id'].notna() & df['subject_id'].astype(str).str.strip().ne('')]
+df['acceleration_magnitude'] = (df['x']**2 + df['y']**2 + df['z']**2)**0.5
+# PARALLEL_AGGREGATE branches:
+branch_0 = df[df['activity_label'].isin(['Jogging'])].groupby(['subject_id'])['acceleration_magnitude'].mean()
+branch_1 = df[df['activity_label'].isin(['Walking'])].groupby(['subject_id'])['acceleration_magnitude'].mean()
+merged = branch_0.merge(branch_1, on=['subject_id'], how='outer')
+result = df['mean_acceleration_jogging'].corr(df['mean_acceleration_walking'], method='pearson')",FAIL,0.0,The candidate answer provides a different correlation value (0.749 vs 0.704) that exceeds the allowed rounding tolerance.,SOUND,The ground truth provides a precise Spearman correlation consistent with the query.,json,1,False,"{
+  ""verdict"": ""FAIL"",
+  ""reason"": ""The candidate answer provides a different correlation value (0.749 vs 0.704) that exceeds the allowed rounding tolerance."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""The ground truth provides a precise Spearman correlation consistent with the query.""
+}"
+2,[in_memory_benchmark_run],FF_FULL,20,explicit,"For every subject_id, derive elapsed seconds from timestamp, then compute total locomotion duration (Walking, Jogging, Upstairs, Downstairs) and total resting duration (Sitting, Standing). Among subjects with more locomotion than resting time, return the subject_id with the largest locomotion-minus-resting duration.",False,subject_id 19 has the largest positive locomotion-minus-resting duration: 131091.171906999982 seconds.,"The result is {'subject_id': 19, 'duration_diff': 131091.17190699998}",False,True,"df = df[df['timestamp'].notna() & df['timestamp'].astype(str).str.strip().ne('')]
+df = df.sort_values(['subject_id', 'timestamp']); df['dt_s'] = df.groupby(['subject_id'])['timestamp'].diff().dt.total_seconds().clip(lower=0).fillna(0.0)
+# PARALLEL_AGGREGATE branches:
+branch_0 = df[df['activity_label'].isin(['Downstairs', 'Jogging', 'Upstairs', 'Walking'])].groupby(['subject_id'])['dt_s'].sum()
+branch_1 = df[df['activity_label'].isin(['Sitting', 'Standing'])].groupby(['subject_id'])['dt_s'].sum()
+merged = branch_0.merge(branch_1, on=['subject_id'], how='outer')
+merged[['locomotion_duration', 'resting_duration']] = merged[['locomotion_duration', 'resting_duration']].fillna(0)
+df['duration_diff'] = df['locomotion_duration'] - df['resting_duration']
+df = df[df['duration_diff'] > 0]
+idx = df['duration_diff'].idxmax(); result = df.loc[idx, ['subject_id']].to_dict()",PASS,1.0,"The candidate answer identifies subject_id 19 with the correct locomotion-minus-resting duration of 131091.172 seconds, matching the ground truth.",SOUND,The ground truth is consistent and plausible given the query.,json,1,False,"{
+  ""verdict"": ""PASS"",
+  ""reason"": ""The candidate answer identifies subject_id 19 with the correct locomotion-minus-resting duration of 131091.172 seconds, matching the ground truth."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""The ground truth is consistent and plausible given the query.""
+}"
+3,[in_memory_benchmark_run],FF_FULL,1,explicit,What is the maximum recorded x-acceleration for user 15?,False,Maximum x-acceleration for user 15 is 19.5700.,"The result is [19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57, 19.57]",False,True,"df = df[df['subject_id'] == 15]
+_v = df['x'].max(); df = df[df['x'] == _v]
+result = df['x'].tolist()",PASS,1.0,"The candidate answer consistently reports 19.57 as the maximum x-acceleration, matching the ground truth value.",SOUND,The ground truth provides a clear and plausible numeric answer.,json,1,False,"{
+  ""verdict"": ""PASS"",
+  ""reason"": ""The candidate answer consistently reports 19.57 as the maximum x-acceleration, matching the ground truth value."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""The ground truth provides a clear and plausible numeric answer.""
+}"
+3,[in_memory_benchmark_run],FF_FULL,2,explicit,How many users have the activity label walking?,False,Total users Walking in the dataset: 36.,The result is 36,False,True,"df = df[df['activity_label'].notna() & df['activity_label'].astype(str).str.strip().ne('')]
+df = df[df['activity_label'] == 'Walking']
+result = df['subject_id'].nunique()",PASS,1.0,The candidate answer '36' matches the ground truth 'Total users Walking in the dataset: 36' in both fact and meaning.,SOUND,Clear and consistent with the query.,json,1,False,"{
+  ""verdict"": ""PASS"",
+  ""reason"": ""The candidate answer '36' matches the ground truth 'Total users Walking in the dataset: 36' in both fact and meaning."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Clear and consistent with the query.""
+}"
+3,[in_memory_benchmark_run],FF_FULL,3,explicit,What is the average y-acceleration of user 5 with activity label Sitting?,False,Average y-acceleration for user 5 during Sitting is 3.0414.,The result is 3.0414423076923076,False,True,"df = df[df['subject_id'] == 5]
+df = df[df['activity_label'] == 'Sitting']
+result = df['y'].mean()",PASS,1.0,The candidate answer matches the ground truth value exactly.,SOUND,Value is specific and plausible for the given context.,json,1,False,"{
+  ""verdict"": ""PASS"",
+  ""reason"": ""The candidate answer matches the ground truth value exactly."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Value is specific and plausible for the given context.""
+}"
+3,[in_memory_benchmark_run],FF_FULL,4,explicit,Which user has the highest total number of recorded data samples?,False,User with the highest sample count is 20 with 56632 samples.,"The result is {'subject_id': 20, 'count': 56632}",False,True,"result = df.groupby('subject_id').size()
+result = result.idxmax()",PASS,1.0,"The candidate answer identifies user 20 with 56632 samples, matching the ground truth.",SOUND,Clear and consistent with typical data summarization.,json,1,False,"{
+  ""verdict"": ""PASS"",
+  ""reason"": ""The candidate answer identifies user 20 with 56632 samples, matching the ground truth."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Clear and consistent with typical data summarization.""
+}"
+3,[in_memory_benchmark_run],FF_FULL,5,explicit,"Compare the overall acceleration magnitude between dynamic (walking,jogging,upstairs,downstairs) and resting (sitting,standing) states.",False,"Average magnitude for dynamic activities (walking,jogging,upstairs,downstairs) is 11.9625; resting activities (sitting,standing) is 9.8328; difference (dynamic-resting) is 2.1297.","The result is {'higher': 'dynamic', 'lower': 'resting', 'metric': 'mean acceleration_magnitude', 'dynamic': 11.962538760453763, 'resting': 9.832791762650903, 'difference': 2.12974699780286}",False,True,"df = df[df['x'].notna() & df['x'].astype(str).str.strip().ne('')]
+df['acceleration_magnitude'] = (df['x']**2 + df['y']**2 + df['z']**2)**0.5
+dynamic = df[df['activity_label'].isin(['Downstairs', 'Jogging', 'Upstairs', 'Walking'])]
+resting = df[df['activity_label'].isin(['Sitting', 'Standing'])]
+result = {label: agg(partition) for label in partitions}
+result = compare(dynamic, resting, mode='difference')",PASS,1.0,The candidate answer provides the same numerical values and correctly identifies dynamic activities as having higher acceleration magnitude than resting activities.,SOUND,Ground truth contains consistent and plausible numeric values for the described comparison.,json,1,False,"{
+  ""verdict"": ""PASS"",
+  ""reason"": ""The candidate answer provides the same numerical values and correctly identifies dynamic activities as having higher acceleration magnitude than resting activities."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Ground truth contains consistent and plausible numeric values for the described comparison.""
+}"
+3,[in_memory_benchmark_run],FF_FULL,6,explicit,"Identify the user whose total recorded duration of resting states (sitting,standing) exceeds their duration of dynamic movements (walking,jogging,upstairs,downstairs) by the largest margin.",False,"Users [20, 6, 16] have total stationary duration (sitting, standing) exceeding locomotion duration (walking, jogging, upstairs, downstairs). User 20 has the largest margin (delta=54004.34s).","The result is {'subject_id': 20, 'duration_margin': 54004.33781899999}",False,True,"df = df[df['activity_label'].notna() & df['activity_label'].astype(str).str.strip().ne('')]
+df = df.sort_values(['subject_id', 'timestamp']); df['duration_seconds'] = df.groupby(['subject_id'])['timestamp'].diff().dt.total_seconds().clip(lower=0).fillna(0.0)
+# PARALLEL_AGGREGATE branches:
+branch_0 = df[df['activity_label'].isin(['Sitting', 'Standing'])].groupby(['subject_id'])['duration_seconds'].sum()
+branch_1 = df[df['activity_label'].isin(['Downstairs', 'Jogging', 'Upstairs', 'Walking'])].groupby(['subject_id'])['duration_seconds'].sum()
+merged = branch_0.merge(branch_1, on=['subject_id'], how='outer')
+merged[['resting_duration', 'dynamic_duration']] = merged[['resting_duration', 'dynamic_duration']].fillna(0)
+df['duration_margin'] = df['resting_duration'] - df['dynamic_duration']
+df = df[df['duration_margin'] > 0]
+idx = df['duration_margin'].idxmax(); result = df.loc[idx, ['subject_id']].to_dict()",PASS,1.0,"The candidate correctly identifies user 20 with a margin of approximately 54004.34 seconds, matching the ground truth.",SOUND,Ground truth is consistent and precise.,json,1,False,"{
+  ""verdict"": ""PASS"",
+  ""reason"": ""The candidate correctly identifies user 20 with a margin of approximately 54004.34 seconds, matching the ground truth."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Ground truth is consistent and precise.""
+}"
+3,[in_memory_benchmark_run],FF_FULL,7,explicit,What is the median acceleration magnitude for user 20 with activity label Upstairs?,False,Median net acceleration vector length for user 20 while ascending steps is 9.8931.,The result is 9.893086174221672,False,True,"df = df[df['subject_id'] == 20]
+df = df[df['activity_label'] == 'Upstairs']
+df['acceleration_magnitude'] = (df['x']**2 + df['y']**2 + df['z']**2)**0.5
+result = df['acceleration_magnitude'].median()",PASS,1.0,The candidate answer matches the ground truth value exactly.,SOUND,Clear and consistent with the query.,json,1,False,"{
+  ""verdict"": ""PASS"",
+  ""reason"": ""The candidate answer matches the ground truth value exactly."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Clear and consistent with the query.""
+}"
+3,[in_memory_benchmark_run],FF_FULL,8,explicit,Calculate the absolute difference between the mean z-axis acceleration of activity labels Upstairs and Downstairs.,False,Average z for ascending elevation changes is 0.3235; descending is 0.6841; absolute difference (ascending-descending) is 0.3605.,"The result is {'higher': 'Downstairs', 'lower': 'Upstairs', 'metric': 'mean z', 'Upstairs': 0.323542237509624, 'Downstairs': 0.6840876229507197, 'abs_difference': 0.36054538544109566}",False,True,"df = df[df['z'].notna() & df['z'].astype(str).str.strip().ne('')]
+Upstairs = df[df['activity_label'].isin(['Upstairs'])]
+Downstairs = df[df['activity_label'].isin(['Downstairs'])]
+result = {label: agg(partition) for label in partitions}
+result = compare(Upstairs, Downstairs, mode='abs_difference')",PASS,1.0,The candidate provides the same mean z values and an absolute difference (0.361) that is within rounding tolerance of the ground truth (0.36).,SOUND,Values are consistent and correctly interpreted.,json,1,False,"{
+  ""verdict"": ""PASS"",
+  ""reason"": ""The candidate provides the same mean z values and an absolute difference (0.361) that is within rounding tolerance of the ground truth (0.36)."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Values are consistent and correctly interpreted.""
+}"
+3,[in_memory_benchmark_run],FF_FULL,13,explicit,"Sort all WISDM rows by timestamp in ascending order, using subject_id as the tie-breaker. Use the first 80% of rows for training and the final 20% as the chronological holdout. Train a logistic regression model using the features x, y and z. Predict the activity label for the first row in the holdout set.",False,Logistic regression predicts activity 'Jogging' for the first holdout row.,The result is Logistic regression predicts activity label 'Jogging' for the first holdout row.,False,True,"# sort_by=['timestamp', 'subject_id'] split=878558/1098198 model='logistic_regression' features=['x', 'y', 'z']
+result = ""Logistic regression predicts activity label 'Jogging' for the first holdout row.""",PASS,1.0,The candidate answer matches the ground truth in both activity label and context.,SOUND,Clear and consistent with the query's requirements.,json,1,False,"{
+  ""verdict"": ""PASS"",
+  ""reason"": ""The candidate answer matches the ground truth in both activity label and context."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Clear and consistent with the query's requirements.""
+}"
+3,[in_memory_benchmark_run],FF_FULL,14,explicit,"Sort all WISDM rows by timestamp in ascending order, using subject_id as the tie-breaker. Use the first 80% of rows for training and the final 20% as the chronological holdout. Train a random forest model using the features x, y and z. Predict the activity label for the first row in the holdout set.",False,Random forest predicts activity 'Sitting' for the first holdout row.,The result is Random forest predicts activity label 'Sitting' for the first holdout row.,False,True,"# sort_by=['timestamp', 'subject_id'] split=878558/1098198 model='random_forest' features=['x', 'y', 'z']
+result = ""Random forest predicts activity label 'Sitting' for the first holdout row.""",PASS,1.0,The candidate answer matches the ground truth in both activity label and context.,SOUND,Clear and consistent with the query's requirements.,json,1,False,"{
+  ""verdict"": ""PASS"",
+  ""reason"": ""The candidate answer matches the ground truth in both activity label and context."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Clear and consistent with the query's requirements.""
+}"
+3,[in_memory_benchmark_run],FF_FULL,15,explicit,"Sort all WISDM rows by timestamp in ascending order, using subject_id as the tie-breaker. Use the first 80% of rows for training and the final 20% as the chronological holdout. Train a 1-nearest-neighbor model using the features x, y and z. Predict the activity label for the first row in the holdout set.",False,1-nearest-neighbor predicts activity 'Sitting' for the first holdout row.,The result is 1-nearest-neighbor predicts activity label 'Sitting' for the first holdout row.,False,True,"# sort_by=['timestamp', 'subject_id'] split=878558/1098198 model='one_nearest_neighbor' features=['x', 'y', 'z']
+result = ""1-nearest-neighbor predicts activity label 'Sitting' for the first holdout row.""",PASS,1.0,The candidate answer matches the ground truth in both prediction and activity label.,SOUND,The ground truth is consistent with the described procedure and expected output.,json,1,False,"{
+  ""verdict"": ""PASS"",
+  ""reason"": ""The candidate answer matches the ground truth in both prediction and activity label."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""The ground truth is consistent with the described procedure and expected output.""
+}"
+3,[in_memory_benchmark_run],FF_FULL,16,explicit,"Sort all WISDM rows by timestamp in ascending order, using subject_id as the tie-breaker. Use the first 80% of rows for training and the final 20% as the chronological holdout. Train a hist gradient boosting model using the features x, y and z. Predict the activity label for the first row in the holdout set.",False,Hist gradient boosting predicts activity 'Sitting' for the first holdout row.,The result is Hist gradient boosting predicts activity label 'Sitting' for the first holdout row.,False,True,"# sort_by=['timestamp', 'subject_id'] split=878558/1098198 model='hist_gradient_boosting' features=['x', 'y', 'z']
+result = ""Hist gradient boosting predicts activity label 'Sitting' for the first holdout row.""",PASS,1.0,The candidate answer matches the ground truth in both activity label and context.,SOUND,Clear and consistent with the query's requirements.,json,1,False,"{
+  ""verdict"": ""PASS"",
+  ""reason"": ""The candidate answer matches the ground truth in both activity label and context."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Clear and consistent with the query's requirements.""
+}"
+3,[in_memory_benchmark_run],FF_FULL,17,explicit,"For every subject_id, compute mean acceleration magnitude separately for dynamic activities (Walking, Jogging, Upstairs, Downstairs) and resting activities (Sitting, Standing). Return the subject_id with the largest dynamic-minus-resting mean magnitude.",False,subject_id 24 has the largest dynamic-minus-resting mean magnitude: 4.739240077985.,"The result is {'subject_id': 24, 'dynamic_minus_resting': 4.739240077985189}",False,True,"df = df[df['x'].notna() & df['x'].astype(str).str.strip().ne('')]
+df['acceleration_magnitude'] = (df['x']**2 + df['y']**2 + df['z']**2)**0.5
+# PARALLEL_AGGREGATE branches:
+branch_0 = df[df['activity_label'].isin(['Downstairs', 'Jogging', 'Upstairs', 'Walking'])].groupby(['subject_id'])['acceleration_magnitude'].mean()
+branch_1 = df[df['activity_label'].isin(['Sitting', 'Standing'])].groupby(['subject_id'])['acceleration_magnitude'].mean()
+merged = branch_0.merge(branch_1, on=['subject_id'], how='outer')
+df['dynamic_minus_resting'] = df['dynamic_mean_magnitude'] - df['resting_mean_magnitude']
+idx = df['dynamic_minus_resting'].idxmax(); result = df.loc[idx, ['subject_id']].to_dict()",PASS,1.0,"The candidate answer identifies subject_id 24 with a dynamic-minus-resting mean magnitude of 4.739, matching the ground truth.",SOUND,"The ground truth is clear, specific, and consistent with the query.",json,1,False,"{
+  ""verdict"": ""PASS"",
+  ""reason"": ""The candidate answer identifies subject_id 24 with a dynamic-minus-resting mean magnitude of 4.739, matching the ground truth."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""The ground truth is clear, specific, and consistent with the query.""
+}"
+3,[in_memory_benchmark_run],FF_FULL,18,explicit,"For every subject_id, compute x-acceleration variance separately while Jogging and while Walking. Return the subject_id for whom Jogging pulls furthest ahead of Walking.",False,subject_id 12 has the most negative Jogging-minus-Walking x-variance difference (Walking exceeds Jogging by the largest margin): -16.746789937351.,The result is: 31,False,True,"# Filter out rows with empty activity_label
+df = df[df['activity_label'] != '']
+
+# Compute variance of x-acceleration for Jogging and Walking per subject_id
+jogging_var = df[df['activity_label'] == 'Jogging'].groupby('subject_id')['x'].var()
+walking_var = df[df['activity_label'] == 'Walking'].groupby('subject_id')['x'].var()
+
+# Align both series on subject_id and compute the difference (Jogging - Walking)
+diff = jogging_var.subtract(walking_var, fill_value=0)
+
+# Find the subject_id with the maximum difference
+result = diff.idxmax()",FAIL,0.0,Candidate answer (31) does not match the ground truth (subject_id 12).,SOUND,"Ground truth provides a clear, specific answer consistent with the query.",json,1,False,"{
+  ""verdict"": ""FAIL"",
+  ""reason"": ""Candidate answer (31) does not match the ground truth (subject_id 12)."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Ground truth provides a clear, specific answer consistent with the query.""
+}"
+3,[in_memory_benchmark_run],FF_FULL,19,explicit,"For every subject_id, compute mean acceleration magnitude while Jogging and while Walking. Report whether subjects who jog harder also walk harder, ranking subjects consistently across both activities.",False,Yes — subjects who jog harder also tend to walk harder: the Spearman rank correlation between per-subject Jogging and Walking mean magnitudes is 0.703812316716.,"The result is {'subject_id': 23, 'mean_acceleration_jogging': 17.04236300315029, 'mean_acceleration_walking': 12.89231971710706}",False,True,"df = df[df['subject_id'].notna() & df['subject_id'].astype(str).str.strip().ne('')]
+df['acceleration_magnitude'] = (df['x']**2 + df['y']**2 + df['z']**2)**0.5
+# PARALLEL_AGGREGATE branches:
+branch_0 = df[df['activity_label'].isin(['Jogging'])].groupby(['subject_id'])['acceleration_magnitude'].mean()
+branch_1 = df[df['activity_label'].isin(['Walking'])].groupby(['subject_id'])['acceleration_magnitude'].mean()
+merged = branch_0.merge(branch_1, on=['subject_id'], how='outer')
+idx = df['mean_acceleration_jogging'].idxmax(); result = df.loc[idx, ['subject_id', 'mean_acceleration_jogging', 'mean_acceleration_walking']].to_dict()",FAIL,0.0,Candidate provides data for only one subject instead of analyzing all subjects and computing a correlation as required.,SOUND,Ground truth correctly interprets the query by computing per-subject means and assessing rank correlation.,json,1,False,"{
+  ""verdict"": ""FAIL"",
+  ""reason"": ""Candidate provides data for only one subject instead of analyzing all subjects and computing a correlation as required."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""Ground truth correctly interprets the query by computing per-subject means and assessing rank correlation.""
+}"
+3,[in_memory_benchmark_run],FF_FULL,20,explicit,"For every subject_id, derive elapsed seconds from timestamp, then compute total locomotion duration (Walking, Jogging, Upstairs, Downstairs) and total resting duration (Sitting, Standing). Among subjects with more locomotion than resting time, return the subject_id with the largest locomotion-minus-resting duration.",False,subject_id 19 has the largest positive locomotion-minus-resting duration: 131091.171906999982 seconds.,"The result is {'subject_id': 19, 'duration_diff_s': 131091.17190699998}",False,True,"df = df[df['timestamp'].notna() & df['timestamp'].astype(str).str.strip().ne('')]
+df = df.sort_values(['subject_id', 'timestamp']); df['dt_s'] = df.groupby(['subject_id'])['timestamp'].diff().dt.total_seconds().clip(lower=0).fillna(0.0)
+# PARALLEL_AGGREGATE branches:
+branch_0 = df[df['activity_label'].isin(['Downstairs', 'Jogging', 'Upstairs', 'Walking'])].groupby(['subject_id'])['dt_s'].sum()
+branch_1 = df[df['activity_label'].isin(['Sitting', 'Standing'])].groupby(['subject_id'])['dt_s'].sum()
+merged = branch_0.merge(branch_1, on=['subject_id'], how='outer')
+merged[['locomotion_duration_s', 'resting_duration_s']] = merged[['locomotion_duration_s', 'resting_duration_s']].fillna(0)
+df['duration_diff_s'] = df['locomotion_duration_s'] - df['resting_duration_s']
+df = df[df['duration_diff_s'] > 0]
+idx = df['duration_diff_s'].idxmax(); result = df.loc[idx, ['subject_id']].to_dict()",PASS,1.0,"The candidate answer identifies subject_id 19 with the correct locomotion-minus-resting duration of 131091.172 seconds, matching the ground truth.",SOUND,"The ground truth is consistent with the query and provides a specific, plausible result.",json,1,False,"{
+  ""verdict"": ""PASS"",
+  ""reason"": ""The candidate answer identifies subject_id 19 with the correct locomotion-minus-resting duration of 131091.172 seconds, matching the ground truth."",
+  ""ground_truth_sanity"": ""SOUND"",
+  ""ground_truth_note"": ""The ground truth is consistent with the query and provides a specific, plausible result.""
+}"
