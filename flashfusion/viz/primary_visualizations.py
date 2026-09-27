@@ -73,6 +73,10 @@ GROUNDING_MODELS = (
     ("qwen/qwen3-14b", "Qwen 3\n14B"),
 )
 GROUNDING_DATASETS = ("bus", "mit_ecg", "wisdm")
+FF_FULL_ALIGN_DEFAULT_MODEL = "mistralai/ministral-8b-2512"
+FF_FULL_ALIGN_KEYS = ("dataset", "run_id", "query_id")
+FF_FULL_MAIN_QUERY_IDS = tuple(range(1, 17))
+FF_FULL_EXTRA_HARD_QUERY_IDS = tuple(range(17, 21))
 GROUNDING_MODEL_LABELS = {
     "meta-llama/llama-3.2-1b-instruct": "llama-3.2-1b",
     "meta-llama/llama-3.2-3b-instruct": "llama-3.2-3b",
@@ -115,8 +119,9 @@ def build_source_registry(repo_root: Path = REPO_ROOT) -> dict[str, SourceSpec]:
     return {
         "FLASH_FUSION_CACHE": SourceSpec(
             code="FLASH_FUSION_CACHE",
-            root=results / "ff_hybrid_cache" / "FLASH_FUSION_CACHE",
-            include_extra_hard=True,
+            root=results / "ff_full_mistral",
+            baseline="FF_FULL",
+            include_extra_hard=False,
         ),
         "FLASH_FUSION": SourceSpec(
             code="FLASH_FUSION",
@@ -142,6 +147,13 @@ def _dataset_from_path(path: Path) -> str:
         if name in {"bus", "wisdm", "mit_ecg", "ecg"}:
             return "ecg" if name == "mit_ecg" else name
     raise ValueError(f"Cannot infer dataset from {path}")
+
+
+def _canonical_dataset_name(raw: str) -> str:
+    name = str(raw).strip().lower()
+    if name == "mit_ecg":
+        return "ecg"
+    return name
 
 
 def _metrics_paths(root: Path) -> list[Path]:
@@ -234,14 +246,243 @@ def merge_extra_hard_queries(frame: pd.DataFrame, code: str, repo_root: Path, st
     return pd.concat([frame, *extra], ignore_index=True)
 
 
-def load_collection(codes: Iterable[str], strict: bool) -> pd.DataFrame:
+def _load_grounding_miss_mask(
+    model: str,
+    grounding_root: Path,
+    query_ids: set[int],
+    strict: bool,
+) -> set[tuple[str, int, int]]:
+    """Load miss keys (dataset, run_id, query_id) for one grounding model."""
+    keys: set[tuple[str, int, int]] = set()
+    run_versions: dict[tuple[str, int], set[str]] = {}
+    found_any = False
+    for dataset in GROUNDING_DATASETS:
+        path = grounding_root / dataset / "grounding_benchmark_raw.jsonl"
+        if not path.exists():
+            continue
+        found_any = True
+        canonical_dataset = _canonical_dataset_name(dataset)
+        with path.open("r", encoding="utf-8") as fh:
+            for line in fh:
+                row = line.strip()
+                if not row:
+                    continue
+                payload = json.loads(row)
+                if str(payload.get("stage12_model", "")).strip() != model:
+                    continue
+                query_id = int(payload.get("query_id", 0) or 0)
+                if query_id not in query_ids:
+                    continue
+                run_id = int(payload.get("run_index", 0) or 0)
+                query_version = str(payload.get("query_version", "")).strip().lower()
+                if run_id <= 0:
+                    continue
+                run_key = (canonical_dataset, run_id)
+                run_versions.setdefault(run_key, set()).add(query_version)
+                failed = bool(payload.get("failure_for_grounding_loss", False))
+                if failed:
+                    keys.add((canonical_dataset, run_id, query_id))
+
+    if not found_any:
+        message = f"No grounding raw files under {grounding_root}"
+        if strict:
+            raise FileNotFoundError(message)
+        print(f"[WARN] {message}")
+        return keys
+
+    invalid = [
+        (dataset, run_id, sorted(list(versions)))
+        for (dataset, run_id), versions in run_versions.items()
+        if len(versions) > 1
+    ]
+    if invalid:
+        details = ", ".join(f"{ds}/run_{rid}:{vers}" for ds, rid, vers in invalid[:5])
+        message = f"Grounding run/version mapping is not one-to-one: {details}"
+        if strict:
+            raise ValueError(message)
+        print(f"[WARN] {message}")
+    return keys
+
+
+def _replace_rows_by_keys(
+    base_df: pd.DataFrame,
+    replacement_df: pd.DataFrame,
+    replace_keys: set[tuple[str, int, int]],
+    cols_to_replace: list[str],
+) -> tuple[pd.DataFrame, set[tuple[str, int, int]]]:
+    """Replace selected columns for exact key matches and return missing keys."""
+    if not replace_keys:
+        return base_df, set()
+
+    out = base_df.copy()
+    repl = replacement_df.copy()
+    idx_cols = list(FF_FULL_ALIGN_KEYS)
+    available_cols = [c for c in cols_to_replace if c in out.columns and c in repl.columns]
+    if not available_cols:
+        return out, set(replace_keys)
+
+    repl_cols = idx_cols + available_cols
+    # Source files may contain duplicate key rows (aggregate + run folders).
+    # Collapse to one replacement row per key for deterministic overlay.
+    repl_unique = repl[repl_cols].groupby(idx_cols, as_index=False, observed=True).first()
+    repl_keys = {
+        (str(row[0]), int(row[1]), int(row[2]))
+        for row in repl_unique[idx_cols].itertuples(index=False, name=None)
+    }
+    missing = set(replace_keys) - repl_keys
+
+    merged = out.merge(repl_unique, on=idx_cols, how="left", suffixes=("", "_repl"))
+    key_series = list(zip(merged["dataset"].astype(str), merged["run_id"].astype(int), merged["query_id"].astype(int)))
+    replace_mask = pd.Series([key in replace_keys for key in key_series], index=merged.index)
+
+    for column in available_cols:
+        repl_col = f"{column}_repl"
+        if repl_col not in merged.columns:
+            continue
+        merged.loc[replace_mask, column] = merged.loc[replace_mask, repl_col]
+        merged = merged.drop(columns=[repl_col])
+    return merged, missing
+
+
+def load_flash_fusion_cache_aligned(
+    strict: bool,
+    align_ff_full_model: str,
+) -> pd.DataFrame:
+    """Load FF-full rows and align misses to planner fallback rows."""
+    registry = build_source_registry()
+    cache_spec = registry["FLASH_FUSION_CACHE"]
+    cache_frame = load_metrics(cache_spec, strict)
+    if cache_spec.include_extra_hard:
+        cache_frame = merge_extra_hard_queries(cache_frame, "FLASH_FUSION_CACHE", REPO_ROOT, strict)
+
+    planner_spec = registry["FLASH_FUSION"]
+    planner_frame = load_metrics(planner_spec, strict)
+    planner_frame = merge_extra_hard_queries(planner_frame, "FLASH_FUSION", REPO_ROOT, strict)
+
+    main_miss_keys = _load_grounding_miss_mask(
+        align_ff_full_model,
+        REPO_ROOT / "flashfusion" / "results" / "grounding",
+        set(FF_FULL_MAIN_QUERY_IDS),
+        strict,
+    )
+    extra_hard_miss_keys = _load_grounding_miss_mask(
+        align_ff_full_model,
+        REPO_ROOT / "flashfusion" / "results" / "grounding" / "extra_hard",
+        set(FF_FULL_EXTRA_HARD_QUERY_IDS),
+        strict=False,
+    )
+
+    fallback_extra_hard_miss_keys: set[tuple[str, int, int]] = set()
+    if not extra_hard_miss_keys:
+        extra_rows = cache_frame[cache_frame["query_id"].isin(FF_FULL_EXTRA_HARD_QUERY_IDS)].copy()
+        outcomes = extra_rows.get("cache_outcome", pd.Series("", index=extra_rows.index)).astype(str).str.strip().str.lower()
+        miss_rows = extra_rows[outcomes.eq("miss")]
+        fallback_extra_hard_miss_keys = set(
+            zip(
+                miss_rows["dataset"].astype(str),
+                miss_rows["run_id"].astype(int),
+                miss_rows["query_id"].astype(int),
+            )
+        )
+        if fallback_extra_hard_miss_keys:
+            print(
+                "[WARN] No extra-hard grounding mask found; "
+                f"falling back to cache_outcome misses ({len(fallback_extra_hard_miss_keys)} rows)"
+            )
+
+    replace_keys = set(main_miss_keys) | set(extra_hard_miss_keys) | set(fallback_extra_hard_miss_keys)
+    columns_to_replace = [
+        "gt_score",
+        "accuracy_percent",
+        "latency_s",
+        "cost_usd",
+        "input_tokens",
+        "output_tokens",
+        "guardrail_latency_s",
+        "ff_planner_latency_s",
+        "typed_exec_latency_s",
+        "agent_latency_s",
+        "cache_lookup_latency_s",
+        "cache_grounding_latency_s",
+        "cache_validation_latency_s",
+        "cache_rejection_latency_s",
+        "cache_retry_overhead_s",
+        "execution_path",
+        "plan_source",
+        "stages_run",
+        "cache_outcome",
+    ]
+    aligned, missing = _replace_rows_by_keys(cache_frame, planner_frame, replace_keys, columns_to_replace)
+
+    if missing:
+        message = f"Missing planner replacements for {len(missing)} FF-full miss keys"
+        if strict:
+            preview = ", ".join(str(x) for x in sorted(list(missing))[:8])
+            raise ValueError(f"{message}: {preview}")
+        print(f"[WARN] {message}")
+
+    aligned["ff_full_alignment_model"] = align_ff_full_model
+    aligned["ff_full_alignment_source"] = "cache_row"
+    aligned["ff_full_alignment_reason"] = ""
+    main_present = {key for key in main_miss_keys if key not in missing}
+    extra_present = {key for key in extra_hard_miss_keys if key not in missing}
+    fallback_present = {key for key in fallback_extra_hard_miss_keys if key not in missing}
+
+    if replace_keys:
+        key_series = list(zip(aligned["dataset"].astype(str), aligned["run_id"].astype(int), aligned["query_id"].astype(int)))
+        is_replaced = pd.Series([key in (replace_keys - missing) for key in key_series], index=aligned.index)
+        aligned.loc[is_replaced, "ff_full_alignment_source"] = "planner_fallback_row"
+        aligned.loc[[key in main_present for key in key_series], "ff_full_alignment_reason"] = "grounding_miss"
+        aligned.loc[[key in extra_present for key in key_series], "ff_full_alignment_reason"] = "grounding_miss"
+        aligned.loc[[key in fallback_present for key in key_series], "ff_full_alignment_reason"] = "extra_hard_cache_miss"
+
+    aligned["baseline"] = "FLASH_FUSION_CACHE"
+    replaced_count = int((aligned["ff_full_alignment_source"] == "planner_fallback_row").sum())
+    print(
+        "[INFO] FF-full alignment "
+        f"model={align_ff_full_model} "
+        f"main_misses={len(main_miss_keys)} "
+        f"extra_hard_misses={len(extra_hard_miss_keys) or len(fallback_extra_hard_miss_keys)} "
+        f"replaced={replaced_count}"
+    )
+    return aligned
+
+
+def write_ff_full_alignment_audit(frame: pd.DataFrame, output_dir: Path) -> None:
+    if not {"ff_full_alignment_source", "ff_full_alignment_model"}.issubset(frame.columns):
+        return
+    part = frame[frame["baseline"] == "FLASH_FUSION_CACHE"].copy()
+    if part.empty:
+        return
+    audit = part[["dataset", "run_id", "query_id", "ff_full_alignment_source", "ff_full_alignment_reason", "ff_full_alignment_model"]].copy()
+    audit["was_replaced"] = audit["ff_full_alignment_source"].eq("planner_fallback_row")
+    audit = audit.rename(
+        columns={
+            "ff_full_alignment_reason": "replace_reason",
+            "ff_full_alignment_model": "alignment_model",
+        }
+    )
+    audit = audit[["dataset", "run_id", "query_id", "was_replaced", "replace_reason", "alignment_model"]]
+    audit = audit.sort_values(["dataset", "run_id", "query_id"]).reset_index(drop=True)
+    output_dir.mkdir(parents=True, exist_ok=True)
+    audit.to_csv(output_dir / "ff_full_alignment_audit.csv", index=False)
+
+
+def load_collection(
+    codes: Iterable[str],
+    strict: bool,
+    align_ff_full_model: str | None = FF_FULL_ALIGN_DEFAULT_MODEL,
+) -> pd.DataFrame:
     registry = build_source_registry()
     frames: list[pd.DataFrame] = []
     for code in codes:
-        spec = registry[code]
-        frame = load_metrics(spec, strict)
-        if spec.include_extra_hard:
-            frame = merge_extra_hard_queries(frame, code, REPO_ROOT, strict)
+        if code == "FLASH_FUSION_CACHE" and align_ff_full_model:
+            frame = load_flash_fusion_cache_aligned(strict=strict, align_ff_full_model=align_ff_full_model)
+        else:
+            spec = registry[code]
+            frame = load_metrics(spec, strict)
+            if spec.include_extra_hard:
+                frame = merge_extra_hard_queries(frame, code, REPO_ROOT, strict)
         frames.append(frame)
         coverage = sorted(frame["query_id"].unique().tolist()) if not frame.empty else []
         print(f"[INFO] {code}: {len(frame)} rows, query ids={coverage}")
@@ -292,6 +533,11 @@ def compute_query_type_summary(frame: pd.DataFrame, codes: list[str], value: str
 def compute_query_type_latency_summary(frame: pd.DataFrame, codes: list[str]) -> pd.DataFrame:
     """Return row means for each displayed query type after folding extra-hard rows."""
     return compute_query_type_summary(frame, codes, "latency_s")
+
+
+def compute_query_type_accuracy_summary(frame: pd.DataFrame, codes: list[str]) -> pd.DataFrame:
+    """Return row means for each displayed query type after folding extra-hard rows."""
+    return compute_query_type_summary(frame, codes, "accuracy_percent")
 
 
 def compute_balanced_metric_summary(frame: pd.DataFrame, codes: list[str], value: str) -> pd.DataFrame:
@@ -507,7 +753,7 @@ def plot_latency_by_query_type(frame: pd.DataFrame, codes: list[str], destinatio
         bars = axis.barh(y - 0.4 + width * (index + 0.5), means, width, label=LABELS[code], color=COLORS[code], edgecolor="#333333", linewidth=0.8)
         for bar, mean in zip(bars, means):
             if mean > 0:
-                axis.text(mean * 1.08, bar.get_y() + bar.get_height() / 2, f"{mean:.2f}", va="center", ha="left", fontsize=12.5, fontweight="bold")
+                axis.text(mean * 1.08, bar.get_y() + bar.get_height() / 2, f"{mean:.2f}s", va="center", ha="left", fontsize=12.5, fontweight="bold")
     axis.set_yticks(y, qtypes)
     axis.invert_yaxis()
     axis.set_xlabel(
@@ -516,6 +762,47 @@ def plot_latency_by_query_type(frame: pd.DataFrame, codes: list[str], destinatio
     )
     if log_scale:
         axis.set_xscale("log")
+    _style_axes(axis)
+    axis.legend(ncol=len(codes), frameon=False, loc="upper center", bbox_to_anchor=(0.5, -0.16))
+    fig.tight_layout()
+    _save(fig, destination)
+
+
+def plot_accuracy_by_query_type(frame: pd.DataFrame, codes: list[str], destination: Path) -> None:
+    _apply_plot_style()
+    summary = compute_query_type_accuracy_summary(frame, codes)
+    qtypes = [query_type for query_type in PLOTTED_QUERY_TYPES if query_type in set(summary["query_type"])]
+    y = np.arange(len(qtypes), dtype=float)
+    width = 0.8 / len(codes)
+    fig, axis = plt.subplots(figsize=(11.5, 6.0))
+    for index, code in enumerate(codes):
+        values = [summary.loc[(summary["baseline"] == code) & (summary["query_type"] == query_type), "accuracy_percent"] for query_type in qtypes]
+        means = [float(value.iloc[0]) if not value.empty else 0.0 for value in values]
+        bars = axis.barh(
+            y - 0.4 + width * (index + 0.5),
+            means,
+            width,
+            label=LABELS[code],
+            color=COLORS[code],
+            edgecolor="#333333",
+            linewidth=0.8,
+        )
+        for bar, mean in zip(bars, means):
+            if mean >= 0:
+                axis.text(
+                    mean + 1.2,
+                    bar.get_y() + bar.get_height() / 2,
+                    f"{mean:.1f}%",
+                    va="center",
+                    ha="left",
+                    fontsize=12.5,
+                    fontweight="bold",
+                )
+    axis.set_yticks(y, qtypes)
+    axis.invert_yaxis()
+    axis.set_xlim(0, 112)
+    axis.set_xticks(range(0, 101, 20))
+    axis.set_xlabel("Query Accuracy (%)", labelpad=8)
     _style_axes(axis)
     axis.legend(ncol=len(codes), frameon=False, loc="upper center", bbox_to_anchor=(0.5, -0.16))
     fig.tight_layout()
@@ -918,43 +1205,58 @@ def _load_grounding_rows(repo_root: Path) -> pd.DataFrame:
 def load_grounding_model_comparison(repo_root: Path, strict: bool = False) -> pd.DataFrame:
     """Aggregate grounding metrics by model, averaging datasets within each run."""
     root = repo_root / "flashfusion" / "results" / "grounding"
+    extra_hard_root = root / "extra_hard"
     rows: list[dict[str, Any]] = []
+
+    search_roots = (
+        (root, set(FF_FULL_MAIN_QUERY_IDS)),
+        (extra_hard_root, set(FF_FULL_EXTRA_HARD_QUERY_IDS)),
+    )
+    found_any = False
     for dataset in GROUNDING_DATASETS:
-        path = root / dataset / "grounding_benchmark_summary.json"
-        if not path.exists():
-            message = f"Grounding summary missing for {dataset}: {path}"
-            if strict:
-                raise FileNotFoundError(message)
-            print(f"[WARN] {message}")
-            continue
-        payload = json.loads(path.read_text(encoding="utf-8"))
-        per_model = payload.get("per_model", {})
-        if not isinstance(per_model, dict):
-            raise ValueError(f"{path} has no per_model mapping")
-        for model, metrics in per_model.items():
-            if not isinstance(metrics, dict):
+        for source_root, allowed_queries in search_roots:
+            path = source_root / dataset / "grounding_benchmark_raw.jsonl"
+            if not path.exists():
                 continue
-            per_run = metrics.get("per_run_metrics", {})
-            if not isinstance(per_run, dict):
-                continue
-            for run_id, values in per_run.items():
-                if not isinstance(values, dict):
-                    continue
-                rows.append(
-                    {
-                        "dataset": dataset,
-                        "model": model,
-                        "run_id": int(run_id),
-                        "cache_hit_rate_percent": float(values["grounding_accuracy_pct"]),
-                        "latency_s": float(values["mean_latency_s"]),
-                        "cost_x_1e5": float(values["mean_cost_usd"]) * 1e5,
-                    }
-                )
+            found_any = True
+            canonical_dataset = _canonical_dataset_name(dataset)
+            with path.open("r", encoding="utf-8") as fh:
+                for line in fh:
+                    row = line.strip()
+                    if not row:
+                        continue
+                    payload = json.loads(row)
+                    model = str(payload.get("stage12_model", "")).strip()
+                    if not model:
+                        continue
+                    query_id = int(payload.get("query_id", 0) or 0)
+                    if query_id not in allowed_queries:
+                        continue
+                    run_id = int(payload.get("run_index", 0) or 0)
+                    if run_id <= 0:
+                        continue
+                    failed = bool(payload.get("failure_for_grounding_loss", False))
+                    rows.append(
+                        {
+                            "dataset": canonical_dataset,
+                            "model": model,
+                            "run_id": run_id,
+                            "hit": 0.0 if failed else 1.0,
+                            "latency_s": float(payload.get("total_latency_s", 0.0) or 0.0),
+                            "cost_x_1e5": float(payload.get("cost_usd", 0.0) or 0.0) * 1e5,
+                        }
+                    )
+
+    if not found_any:
+        message = f"No grounding benchmark raw files found under {root}"
+        if strict:
+            raise FileNotFoundError(message)
+        raise FileNotFoundError(message)
     if not rows:
         raise FileNotFoundError(f"No grounding benchmark summaries found under {root}")
 
     per_run = pd.DataFrame(rows).groupby(["model", "run_id"], as_index=False, observed=True).agg(
-        cache_hit_rate_percent=("cache_hit_rate_percent", "mean"),
+        cache_hit_rate_percent=("hit", lambda s: float(np.mean(s) * 100.0)),
         latency_s=("latency_s", "mean"),
         cost_x_1e5=("cost_x_1e5", "mean"),
         datasets=("dataset", "nunique"),
@@ -1065,8 +1367,11 @@ def plot_grounding_error_rate(repo_root: Path, destination: Path) -> bool:
 def plot_baselines(frame: pd.DataFrame, output_dir: Path, strict: bool = False) -> None:
     all_codes = ["FLASH_FUSION_CACHE", "REACT_ONLY", "AUTOIOT_PAPER", "HARGPT_PAPER", "LLMSENSE_PAPER"]
     latency_codes = ["FLASH_FUSION_CACHE", "REACT_ONLY", "AUTOIOT_PAPER"]
+    query_type_codes = ["FLASH_FUSION_CACHE", "REACT_ONLY", "AUTOIOT_PAPER"]
+    write_ff_full_alignment_audit(frame, output_dir)
     plot_accuracy(frame, all_codes, output_dir / "query_accuracy_across_baselines")
     plot_accuracy_by_dataset(frame, all_codes, output_dir / "query_accuracy_by_dataset_across_baselines", legend_ncol=len(all_codes))
+    plot_accuracy_by_query_type(frame, query_type_codes, output_dir / "accuracy_by_query_type")
     plot_cost(frame, all_codes, output_dir / "cost_vs_baselines_across_datasets")
     plot_stage_latency(frame, latency_codes, output_dir / "latency_by_semantic_stage", log_scale=True)
     plot_latency_by_query_type(frame, latency_codes, output_dir / "cumulative_latency_comparison_log_by_baseline_n3", log_scale=True)
@@ -1100,17 +1405,36 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--mode", choices=("baselines", "ablations", "all"), default="all")
     parser.add_argument("--output-root", type=Path, default=REPO_ROOT / "results" / "primary_visualizations")
     parser.add_argument("--strict", action="store_true", help="Fail when an expected source is missing.")
+    parser.add_argument(
+        "--align-ff-full-model",
+        default=FF_FULL_ALIGN_DEFAULT_MODEL,
+        help="Grounding model id used to align FF-full cache misses to planner fallback rows.",
+    )
+    parser.add_argument(
+        "--no-align-ff-full",
+        action="store_true",
+        help="Disable FF-full alignment and load raw FLASH_FUSION_CACHE rows as-is.",
+    )
     return parser
 
 
 def main() -> None:
     args = build_parser().parse_args()
+    align_model = None if args.no_align_ff_full else args.align_ff_full_model
     if args.mode in {"baselines", "all"}:
         baseline_codes = ["FLASH_FUSION_CACHE", "REACT_ONLY", "AUTOIOT_PAPER", "HARGPT_PAPER", "LLMSENSE_PAPER"]
-        plot_baselines(load_collection(baseline_codes, args.strict), args.output_root / "baselines", args.strict)
+        plot_baselines(
+            load_collection(baseline_codes, args.strict, align_ff_full_model=align_model),
+            args.output_root / "baselines",
+            args.strict,
+        )
     if args.mode in {"ablations", "all"}:
         ablation_codes = ["FLASH_FUSION_CACHE", "FLASH_FUSION", "FF_NO_PRUNE", "FF_NO_PROMPT"]
-        plot_ablations(load_collection(ablation_codes, args.strict), args.output_root / "ablations", args.strict)
+        plot_ablations(
+            load_collection(ablation_codes, args.strict, align_ff_full_model=align_model),
+            args.output_root / "ablations",
+            args.strict,
+        )
 
 
 if __name__ == "__main__":
