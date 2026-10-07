@@ -115,7 +115,7 @@ MODEL_RATE_PER_1M_TOKENS: dict[str, dict[str, float]] = {
 
 # Default model used when --model is not supplied to the CLI
 DEFAULT_MODEL = "qwen/qwen3-max"
-DEFAULT_LIGHT_MODEL = "ibm-granite/granite-4.2-8b"
+DEFAULT_LIGHT_MODEL = "ministralai/ministral-8b-2512"
 
 # ---------------------------------------------------------------------------
 # Per-model invocation overrides passed to the chat-model constructor.

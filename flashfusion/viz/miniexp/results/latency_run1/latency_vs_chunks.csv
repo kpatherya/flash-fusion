@@ -1,102 +1,15 @@
-chunk_count,effective_chunks,chunk_token_target,context_window_tokens,query,model,success,error,ttft_ms,ttlt_ms,context_tokens_est,data_tokens_est,prompt_overhead_tokens_est,context_pct_window,crosses_context_window,answer
-50,50,200,128000,What is the average MLII observed in this dataset?,meta-llama/llama-3.3-70b-instruct,True,,4929.708624999876,8078.750874999969,10697,10622,75,8.357031249999999,False,"To calculate the average MLII, we need to sum all the MLII values and divide by the total number of values.
+run_id,chunk_count,effective_chunks,total_chunks_available,chunk_token_target,context_window_tokens,max_tokens,query,model,provider_pinned,provider,success,error,error_type,ttft_ms,ttlt_ms,context_tokens_est,data_tokens_est,prompt_overhead_tokens_est,context_pct_window,crosses_context_window,predicted_overflow,input_tokens,output_tokens,cost_usd,token_ratio_obs,generation_id,finish_reason,rows_covered,pct_rows_covered,truth_value,parsed_answer,abs_error,answer,prefill_tok_per_s,decode_ms_per_token,input_cost_usd,output_cost_usd,computed_cost_usd,cost_per_1k_input_usd,cost_mismatch
+1,50,50,34448,200,128000,128,What is the average MLII observed in this dataset?,meta-llama/llama-3.3-70b-instruct,,,True,,,4509.610124999654,4513.029457999892,10698,10622,76,8.3578125,False,False,21577,8,0.002916095,2.016919050289774,gen-1791248978-2PNoBFKhFTAP1VencNQm,stop,1010,0.1553846153846154,-0.3126089108910891,-0.1045,0.20810891089108913,ANSWER=-0.1045,4784.67082561858,0.42741662502976396,0.01273043,6.3200000000000005e-06,0.01273675,0.00013514830606664504,True
+1,100,100,34448,200,128000,128,What is the average MLII observed in this dataset?,meta-llama/llama-3.3-70b-instruct,,,True,,,11463.476417000038,12228.16870800034,21202,21126,76,16.564062500000002,False,False,42984,39,0.00947598,2.0273559098198284,gen-1791248982-PBry0zfcmLSnI3KNUZMg,stop,1991,0.30630769230769234,-0.3178126569563034,-0.1267,0.1911126569563034,"To calculate the average MLII, we need to sum all the MLII values and divide by the total number of values.
 
-After examining the provided CSV chunks, we can see that there are 1000 rows of data (from sample_idx 0 to 999). 
+After calculating, we get:
 
-To calculate the average, we would need to sum all the MLII values, but since the actual values are not provided in a format that can be easily summed, and the data is split into multiple chunks, we cannot directly calculate the sum here.
-
-However, we can provide a general approach to calculate the average MLII:
-
-1. Extract all MLII values from the CSV chunks.
-2. Sum all the MLII values.
-3. Divide the sum by the total number of values (1000).
-
-Since we cannot perform the actual calculation here due to the format constraints, the answer would be:
-
-UNKNOWN 
-
-If you provide the sum of MLII values or a more convenient format, I can help you calculate the average."
-100,100,200,128000,What is the average MLII observed in this dataset?,meta-llama/llama-3.3-70b-instruct,True,,619.8843749998559,31319.751375000124,21201,21126,75,16.56328125,False,"To calculate the average MLII, we need to sum all the MLII values and divide by the total number of values.
-
-Here is a Python code snippet to calculate the average MLII:
-
-```python
-import pandas as pd
-
-# Initialize sum of MLII values
-sum_MLII = 0
-
-# Initialize count of MLII values
-count_MLII = 0
-
-# Iterate over all chunks
-for i in range(1, 101):
-    # Load chunk
-    chunk = pd.read_csv(f'chunk_{i}.csv')
-    
-    # Add MLII values to sum
-    sum_MLII += chunk['MLII'].sum()
-    
-    # Increment count
-    count_MLII += len(chunk)
-
-# Calculate average MLII
-average_MLII = sum_MLII / count_MLII
-
-print(""The final answer is $\boxed{"" + str(average_MLII) + ""}$"")
-```
-
-However, since the actual CSV files are not provided, we cannot run this code. 
-
-Assuming the data is provided in the format you specified, the average MLII can be calculated manually or using a programming language like Python.
-
-After manually calculating the average MLII using the provided data, I get:
-
-The final answer is $\boxed{-0.039}$"
-150,150,200,128000,What is the average MLII observed in this dataset?,meta-llama/llama-3.3-70b-instruct,True,,22727.50704200007,29383.070750000115,31812,31737,75,24.853125000000002,False,"To calculate the average MLII observed in the dataset, we need to sum up all the MLII values and divide by the total number of observations.
-
-Here is a Python code snippet that calculates the average MLII:
-
-```python
-import pandas as pd
-
-# Assuming the data is in a CSV file named 'data.csv'
-# Load the data into a pandas DataFrame
-df = pd.concat([pd.read_csv(f'chunk_{i}.csv') for i in range(1, 151)])
-
-# Calculate the average MLII
-average_MLII = df['MLII'].mean()
-
-print(""The final answer is: $\boxed{"" + str(average_MLII) + ""}$"")
-```
-
-However, since the actual data is not provided and the code above is just a representation, let's assume we have calculated the average MLII.
-
-The final answer is: $\boxed{-0.027}$"
-200,200,200,128000,What is the average MLII observed in this dataset?,meta-llama/llama-3.3-70b-instruct,True,,16202.692166999896,45359.9345839998,42370,42295,75,33.1015625,False,"To calculate the average MLII observed in the dataset, we need to sum all the MLII values and divide by the total number of observations.
-
-Here is a Python code snippet to calculate the average MLII:
-
-```python
-import pandas as pd
-
-# Assuming the data is in a CSV file
-df = pd.read_csv('your_file.csv')
-
-# Calculate the average MLII
-average_MLII = df['MLII'].mean()
-
-print(""The average MLII is: "", average_MLII)
-```
-
-However, since the actual CSV file is not provided, I will give a general answer based on the given chunks.
-
-The average MLII observed in the dataset can be calculated by summing all the MLII values and dividing by the total number of observations. 
-
-Given the provided chunks, the sum of MLII values is approximately -1411.11 and the total number of observations is 200. 
-
-So, the average MLII is approximately -7.05555. 
-
-MAX_ACCEL_VARIANCE=-7.05555"
-250,250,200,128000,What is the average MLII observed in this dataset?,meta-llama/llama-3.3-70b-instruct,True,,15025.86433400029,17603.334625000116,52816,52741,75,41.2625,False,### MAX_ACCEL_VARIANCE=0.0
-300,300,200,128000,What is the average MLII observed in this dataset?,meta-llama/llama-3.3-70b-instruct,True,,15567.89312500041,18664.184458000364,63276,63201,75,49.434375,False,The average MLII observed in this dataset is -0.145.
+ANSWER=-0.1267",3749.647876123847,19.607494641033366,0.025360559999999997,3.0810000000000005e-05,0.025391369999999996,0.00022045365717476273,True
+1,150,150,34448,200,128000,128,What is the average MLII observed in this dataset?,meta-llama/llama-3.3-70b-instruct,,,True,,,20146.007457999985,20188.59462499995,31813,31737,76,24.853906249999998,False,False,64542,7,0.01420274,2.028793260616729,gen-1791248995-n9BLCVDMUxST4HO5nK0a,stop,2987,0.45953846153846156,-0.32528121861399395,-0.145,0.18028121861399396,ANSWER=-0.145,3203.7117098539716,6.083880999995017,0.03807978,5.53e-06,0.03808531,0.00022005422825446995,True
+1,200,200,34448,200,128000,128,What is the average MLII observed in this dataset?,meta-llama/llama-3.3-70b-instruct,,,True,,,17465.160624999953,17469.38399999999,42371,42295,76,33.10234375,False,False,85815,7,0.01716344,2.0253239243822425,gen-1791249015-Cfe6JcIVNcTj0derJKth,stop,3972,0.6110769230769231,-0.3198489425981873,-0.145,0.1748489425981873,ANSWER=-0.145,4913.496179197048,0.6033392857196824,0.05063085,5.53e-06,0.050636379999999995,0.00020000512730874553,True
+1,250,250,34448,200,128000,128,What is the average MLII observed in this dataset?,meta-llama/llama-3.3-70b-instruct,,,True,,,8493.603832999725,8498.256874999697,52817,52741,76,41.26328125,False,False,106571,7,0.01273864,2.017740500217733,gen-1791249032-AwOaKHZsD66A3WKyZYq6,stop,4933,0.7589230769230769,-0.3200668964119197,-0.145,0.17506689641191972,ANSWER=-0.145,12547.20635614598,0.6647202857103756,0.06287689,5.53e-06,0.06288242000000001,0.00011953195522234005,True
+1,260,260,34448,200,128000,128,What is the average MLII observed in this dataset?,meta-llama/llama-3.3-70b-instruct,,,True,,,24441.51229199997,24447.38624999991,54917,54841,76,42.90390625,False,False,110741,7,0.02214864,2.0165158329843216,gen-1791249041-yGJw4V8ls7XrV8ILahDZ,stop,5126,0.7886153846153846,-0.3198673429574717,-0.145,0.17486734295747172,ANSWER=-0.145,4530.857120336494,0.8391368571340406,0.06533718999999999,5.53e-06,0.06534271999999999,0.00020000397323484528,True
+1,270,270,34448,200,128000,128,What is the average MLII observed in this dataset?,meta-llama/llama-3.3-70b-instruct,,,True,,,47852.49912500012,47898.66858400001,57009,56933,76,44.53828125,False,False,114865,7,0.0252738,2.014857303232823,gen-1791249069-o3wItOVsIFqYXYfFUPgD,stop,5318,0.8181538461538462,-0.31925253854832647,-0.145,0.17425253854832648,ANSWER=-0.145,2400.397097337593,6.595636999983981,0.06777035,5.53e-06,0.06777588,0.0002200304705523876,True
+1,280,280,34448,200,128000,128,What is the average MLII observed in this dataset?,meta-llama/llama-3.3-70b-instruct,,,True,,,56331.020208000155,56336.24708300021,59099,59023,76,46.17109375,False,False,119010,7,0.0261857,2.013739657185401,gen-1791249117-wNnhB4z1K3A7WWUupV8k,stop,5510,0.8476923076923076,-0.3189745916515427,-0.145,0.1739745916515427,ANSWER:-0.145,2112.6903003098487,0.7466964285797856,0.0702159,5.53e-06,0.07022143,0.0002200294092933367,True
+1,290,290,34448,200,128000,128,What is the average MLII observed in this dataset?,meta-llama/llama-3.3-70b-instruct,,,True,,,4683.2873749999635,4689.063999999689,61176,61100,76,47.79375,False,False,123138,5,0.0140055,2.012848175755198,gen-1791249173-uv6vyH4U9BgeGujZaFq0,stop,5701,0.8770769230769231,-0.3181459393088932,,,ANSWER:UNKNOWN,26293.069406188417,1.155324999945151,0.07265142,3.95e-06,0.07265537,0.00011373824489597038,True
+1,300,300,34448,200,128000,128,What is the average MLII observed in this dataset?,meta-llama/llama-3.3-70b-instruct,,,True,,,4857.100749999972,7273.898791000192,63277,63201,76,49.43515625,False,False,127307,128,0.0145301,2.011900058473063,gen-1791249178-rWUwsIoP5OWENdxSJove,length,5894,0.9067692307692308,-0.3189667458432304,0.67,0.9889667458432305,"-0.145,-0.065,0.04,0.135,0.185,0.295,0.335,0.345,0.39,0.4,0.41,0.42,0.43,0.44,0.45,0.46,0.47,0.48,0.49,0.5,0.52,0.53,0.55,0.56,0.57,0.58,0.59,0.6,0.62,0.65,0.66,0.67",26210.49192772061,18.88123469531422,0.07511112999999998,0.00010112000000000001,0.07521224999999998,0.00011413433668219345,True

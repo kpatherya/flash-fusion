@@ -1,4 +1,0 @@
-dataset,model_under_test,judge_model,avg_accuracy,avg_latency_s,avg_cost_usd,execution_rate,query_count
-bus,google/gemma-4-31b-it,meta-llama/llama-3.3-70b-instruct,0.8333333333333334,18.4587508837382,0.00010031166666666666,0.6666666666666666,12
-mit_ecg,google/gemma-4-31b-it,meta-llama/llama-3.3-70b-instruct,0.9166666666666666,27.22528413931529,0.00010025083333333334,0.6666666666666666,12
-wisdm,google/gemma-4-31b-it,meta-llama/llama-3.3-70b-instruct,1.0,15.137871980667114,0.00011169583333333332,0.6666666666666666,12
