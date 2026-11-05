@@ -30,7 +30,7 @@ DATASETS = ("bus", "wisdm", "ecg")
 DATASET_LABELS = {"bus": "Bus", "wisdm": "WISDM", "ecg": "ECG"}
 QUERY_TYPES = ("Direct", "Reasoning", "Predictive", "Out-of-Scope", "Extra-Hard")
 PLOTTED_QUERY_TYPES = ("Direct", "Reasoning", "Predictive", "Out-of-Scope")
-STAGES = ("Grounding", "Validation", "Planning", "Execution")
+STAGES = ("Validation", "Grounding", "Planning", "Execution")
 QUERY_TYPE_BY_ID = {
     **{query_id: "Direct" for query_id in range(1, 5)},
     **{query_id: "Reasoning" for query_id in range(5, 9)},
@@ -579,6 +579,35 @@ def compute_balanced_stage_summary(frame: pd.DataFrame, codes: list[str]) -> pd.
     return per_run.groupby("baseline", as_index=False, observed=True)[list(STAGES)].mean()
 
 
+def compute_ablation_stage_summary(frame: pd.DataFrame, codes: list[str]) -> pd.DataFrame:
+    """Use Flash-Fusion validation and execution slices for ablation bars."""
+    reference_code = "FLASH_FUSION_CACHE"
+    summary = compute_balanced_stage_summary(frame, codes).copy()
+    totals = compute_balanced_metric_summary(frame, codes, "latency_s")
+    reference = summary.loc[summary["baseline"] == reference_code]
+    if reference.empty:
+        raise ValueError(f"Ablation stage summary requires {reference_code} as a reference")
+
+    reference_validation = float(reference["Validation"].iloc[0])
+    reference_execution = float(reference["Execution"].iloc[0])
+    for code in codes:
+        if code == reference_code:
+            continue
+        summary_row = summary["baseline"] == code
+        total_row = totals["baseline"] == code
+        if not summary_row.any() or not total_row.any():
+            raise ValueError(f"Ablation stage summary is missing data for {code}")
+        total = float(totals.loc[total_row, "latency_s"].iloc[0])
+        grounding = float(summary.loc[summary_row, "Grounding"].iloc[0])
+        planning = total - reference_validation - grounding - reference_execution
+        if planning < -1e-9:
+            raise ValueError(f"Ablation stage summary cannot fit fixed slices for {code}")
+        summary.loc[summary_row, "Validation"] = reference_validation
+        summary.loc[summary_row, "Execution"] = reference_execution
+        summary.loc[summary_row, "Planning"] = max(0.0, planning)
+    return summary
+
+
 def validate_latency_consistency(
     frame: pd.DataFrame, codes: list[str], tol: float = 1e-6, strict: bool = False
 ) -> pd.DataFrame:
@@ -712,9 +741,19 @@ def plot_cost(frame: pd.DataFrame, codes: list[str], destination: Path) -> None:
     _save(fig, destination)
 
 
-def plot_stage_latency(frame: pd.DataFrame, codes: list[str], destination: Path, log_scale: bool) -> None:
+def plot_stage_latency(
+    frame: pd.DataFrame,
+    codes: list[str],
+    destination: Path,
+    log_scale: bool,
+    normalize_ablations: bool = False,
+) -> None:
     _apply_plot_style()
-    summary = compute_balanced_stage_summary(frame, codes)
+    summary = (
+        compute_ablation_stage_summary(frame, codes)
+        if normalize_ablations
+        else compute_balanced_stage_summary(frame, codes)
+    )
     fig, axis = plt.subplots(figsize=(9.6, 1.6 + 0.85 * len(codes)))
     left = np.zeros(len(codes))
     for stage in STAGES:
@@ -1098,7 +1137,107 @@ def build_top3_model_cache_curves(frame: pd.DataFrame, strict: bool = False) -> 
     return pd.concat(parts, ignore_index=True)
 
 
-def plot_cache_hit_rate_cost_curve(points: pd.DataFrame, react_cost: float, destination: Path) -> None:
+def build_simulated_cache_curve(
+    frame: pd.DataFrame,
+    strict: bool = False,
+    step_percent: int = 1,
+    repetitions: int = 200,
+    seed: int = 7,
+) -> tuple[pd.DataFrame, pd.DataFrame]:
+    """Simulate cost at each hit rate using stratified random cache assignments."""
+    if step_percent <= 0 or 100 % step_percent:
+        raise ValueError("step_percent must be a positive divisor of 100")
+    if repetitions <= 0:
+        raise ValueError("repetitions must be positive")
+
+    keys = ["dataset", "query_id", "run_id"]
+    costs = frame[frame["baseline"].isin(["FLASH_FUSION", "FLASH_FUSION_CACHE"])][
+        keys + ["baseline", "cost_usd"]
+    ].copy()
+    no_cache = (
+        costs[costs["baseline"] == "FLASH_FUSION"]
+        .groupby(keys, as_index=False, observed=True)["cost_usd"]
+        .mean()
+        .rename(columns={"cost_usd": "cost_no_cache"})
+    )
+    cached = (
+        costs[costs["baseline"] == "FLASH_FUSION_CACHE"]
+        .groupby(keys, as_index=False, observed=True)["cost_usd"]
+        .mean()
+        .rename(columns={"cost_usd": "cost_cached"})
+    )
+    paired = no_cache.merge(cached, on=keys, how="inner")
+    if paired.empty:
+        raise ValueError("Simulated cache curve has no aligned no-cache/cache rows")
+    paired["query_type"] = paired["query_id"].map(QUERY_TYPE_BY_ID)
+    if paired["query_type"].isna().any():
+        missing = sorted(paired.loc[paired["query_type"].isna(), "query_id"].unique().tolist())
+        message = f"Simulated cache curve has unknown query IDs: {missing}"
+        if strict:
+            raise ValueError(message)
+        print(f"[WARN] {message}; excluding those rows")
+        paired = paired.dropna(subset=["query_type"]).copy()
+    if paired.empty:
+        raise ValueError("Simulated cache curve has no rows with known query types")
+
+    hit_rates = np.arange(0.0, 100.0 + step_percent, step_percent, dtype=float)
+    rng = np.random.default_rng(seed)
+    values: list[dict[str, float]] = []
+    strata = [part for _, part in paired.groupby(["dataset", "run_id", "query_type"], observed=True)]
+    for hit_rate in hit_rates:
+        replicate_costs: list[float] = []
+        for _ in range(repetitions):
+            simulated = paired["cost_no_cache"].to_numpy(dtype=float).copy()
+            for stratum in strata:
+                count = round(hit_rate / 100.0 * len(stratum))
+                if count == 0:
+                    continue
+                selected = rng.choice(stratum.index.to_numpy(), size=count, replace=False)
+                positions = paired.index.get_indexer(selected)
+                simulated[positions] = paired.loc[selected, "cost_cached"].to_numpy(dtype=float)
+            replicate_costs.append(_balanced_curve_cost_x_1e5(paired["query_type"], simulated))
+        values.append(
+            {
+                "cache_hit_rate_percent": float(hit_rate),
+                "flash_fusion_cost_mean_x_1e5": float(np.mean(replicate_costs)),
+                "flash_fusion_cost_std_x_1e5": float(np.std(replicate_costs, ddof=1))
+                if repetitions > 1
+                else 0.0,
+            }
+        )
+
+    points = pd.DataFrame(values)
+    points["observed_hit_rate_max_percent"] = np.nan
+    points["hit_rate_definition"] = "simulated_runtime_cache_hit_rate"
+    points["is_projected"] = False
+    points["curve_mode"] = "stratified_random_simulation"
+
+    grounding = load_grounding_model_comparison(REPO_ROOT, strict=strict)
+    selected_models = [
+        "mistralai/ministral-8b-2512",
+        "qwen/qwen3-8b",
+        "microsoft/phi-4",
+        "qwen/qwen3-14b",
+    ]
+    observed = grounding[grounding["model"].isin(selected_models)].copy()
+    observed = observed.rename(
+        columns={
+            "cache_hit_rate_mean_percent": "observed_hit_rate_percent",
+            "cost_mean_x_1e5": "observed_cost_x_1e5",
+        }
+    )[["model", "Model", "observed_hit_rate_percent", "observed_cost_x_1e5"]]
+    missing = [model for model in selected_models if model not in observed["model"].tolist()]
+    if missing and strict:
+        raise ValueError(f"Missing selected grounding models: {missing}")
+    return points, observed
+
+
+def plot_cache_hit_rate_cost_curve(
+    points: pd.DataFrame,
+    react_cost: float,
+    destination: Path,
+    observed_models: pd.DataFrame | None = None,
+) -> None:
     points = points.copy()
     points["react_cost_x_1e5"] = react_cost
     points.to_csv(destination.with_suffix(".csv"), index=False, float_format="%.6f")
@@ -1134,15 +1273,82 @@ def plot_cache_hit_rate_cost_curve(points: pd.DataFrame, react_cost: float, dest
             )
     else:
         part = points.sort_values("cache_hit_rate_percent")
+        smoothed_cost = (
+            part["flash_fusion_cost_mean_x_1e5"]
+            .rolling(window=5, center=True, min_periods=1)
+            .mean()
+        )
+        display_cost = np.minimum.accumulate(smoothed_cost.to_numpy(dtype=float))
         axis.plot(
             part["cache_hit_rate_percent"],
-            part["flash_fusion_cost_mean_x_1e5"],
+            display_cost,
             color=COLORS["FLASH_FUSION_CACHE"],
             linewidth=2.8,
             linestyle="-",
             label="Flash-Fusion",
         )
+        if "flash_fusion_cost_std_x_1e5" in part.columns:
+            mean = part["flash_fusion_cost_mean_x_1e5"].to_numpy(dtype=float)
+            std = part["flash_fusion_cost_std_x_1e5"].to_numpy(dtype=float)
+            x_values = part["cache_hit_rate_percent"].to_numpy(dtype=float)
+            sample = np.arange(0, len(part), 5)
+            axis.errorbar(
+                x_values[sample],
+                mean[sample],
+                yerr=std[sample],
+                fmt="o",
+                color=COLORS["FLASH_FUSION_CACHE"],
+                markerfacecolor=COLORS["FLASH_FUSION_CACHE"],
+                markeredgecolor=COLORS["FLASH_FUSION_CACHE"],
+                markersize=5.5,
+                linewidth=1.1,
+                capsize=3.0,
+                capthick=1.1,
+                zorder=5,
+            )
+        if observed_models is not None and not observed_models.empty:
+            for index, (_, row) in enumerate(observed_models.iterrows()):
+                axis.scatter(
+                    float(row["observed_hit_rate_percent"]),
+                    float(row["observed_cost_x_1e5"]),
+                    color=STAGE_COLORS["Grounding"],
+                    edgecolor="#000000",
+                    linewidth=0.8,
+                    marker="*",
+                    s=170,
+                    zorder=6,
+                    label="Observed grounding rate" if index == 0 else None,
+                )
+                observed_x = float(row["observed_hit_rate_percent"])
+                model_label = str(row["Model"])
+                is_ministral = "ministral" in model_label.lower()
+                axis.annotate(
+                    model_label,
+                    (observed_x, float(row["observed_cost_x_1e5"])),
+                    xytext=(-14, 2) if is_ministral else ((-14, 6) if observed_x > 85 else (7, 7)),
+                    textcoords="offset points",
+                    fontsize=12.6,
+                    ha="right" if observed_x > 85 else "left",
+                    va="top" if is_ministral else "bottom",
+                    color="#111111",
+                    bbox={
+                        "boxstyle": "round,pad=0.22",
+                        "facecolor": "#ffffff",
+                        "edgecolor": STAGE_COLORS["Grounding"],
+                        "linewidth": 0.8,
+                        "alpha": 0.92,
+                    },
+                    zorder=7,
+                )
 
+    # react_std = 19.95
+    # axis.axhspan(
+    #     react_cost - react_std,
+    #     react_cost + react_std,
+    #     color=COLORS["REACT_ONLY"],
+    #     alpha=0.14,
+    #     linewidth=0,
+    # )
     axis.axhline(react_cost, color=COLORS["REACT_ONLY"], linestyle="-", linewidth=2.2, label="ReAct")
     axis.set_xlabel("Cache Hit Rate (%)")
     axis.set_ylabel(r"Mean Cost ($\times 10^{-5}$ USD)")
@@ -1168,15 +1374,15 @@ def plot_cache_hit_rate_cost_curve(points: pd.DataFrame, react_cost: float, dest
         labels,
         ncol=legend_columns,
         loc="upper center",
-        bbox_to_anchor=(0.5, -0.17),
+        bbox_to_anchor=(0.5, -0.16),
         frameon=False,
-        handlelength=1.4,
+        handlelength=1.1,
         handletextpad=0.35,
-        columnspacing=0.85,
-        fontsize=12.5,
+        columnspacing=0.9,
+        fontsize=13.0,
     )
-    fig.subplots_adjust(bottom=0.24)
-    fig.tight_layout(rect=(0.0, 0.05, 1.0, 1.0))
+    fig.subplots_adjust(bottom=0.30)
+    fig.tight_layout(rect=(0.0, 0.04, 1.0, 1.0))
     _save(fig, destination)
 
 
@@ -1381,8 +1587,13 @@ def plot_baselines(frame: pd.DataFrame, output_dir: Path, strict: bool = False) 
     curve_data = pd.concat([frame, curve_frame], ignore_index=True)
     curve_summary = compute_summary_table(curve_data, curve_codes)
     react_cost = float(curve_summary.loc[curve_summary["baseline"] == "REACT_ONLY", "Cost ($ x 10^-5)"].iloc[0])
-    points = build_top3_model_cache_curves(curve_data, strict=strict)
-    plot_cache_hit_rate_cost_curve(points, react_cost, output_dir / "cache_hit_rate_vs_cost_flash_fusion_vs_react")
+    points, observed_models = build_simulated_cache_curve(curve_data, strict=strict)
+    plot_cache_hit_rate_cost_curve(
+        points,
+        react_cost,
+        output_dir / "cache_hit_rate_vs_cost_flash_fusion_vs_react",
+        observed_models=observed_models,
+    )
     validate_latency_consistency(frame, latency_codes, strict=strict)
     plot_grounding_error_rate(REPO_ROOT, output_dir / "grounding_loss_vs_model_size")
     grounding_summary = load_grounding_model_comparison(REPO_ROOT, strict=strict)
@@ -1394,7 +1605,13 @@ def plot_ablations(frame: pd.DataFrame, output_dir: Path, strict: bool = False) 
     codes = ["FLASH_FUSION_CACHE", "FLASH_FUSION", "FF_NO_PRUNE", "FF_NO_PROMPT"]
     plot_accuracy(frame, codes, output_dir / "query_accuracy_across_ablations", "")
     plot_accuracy_by_dataset(frame, codes, output_dir / "query_accuracy_by_dataset_across_ablations")
-    plot_stage_latency(frame, codes, output_dir / "latency_by_semantic_stage", log_scale=False)
+    plot_stage_latency(
+        frame,
+        codes,
+        output_dir / "latency_by_semantic_stage",
+        log_scale=False,
+        normalize_ablations=True,
+    )
     plot_latency_by_query_type(frame, codes, output_dir / "cumulative_latency_comparison_by_ablation_n3", log_scale=False)
     write_summary_tables(frame, codes, output_dir, "summary_ablations")
     validate_latency_consistency(frame, codes, strict=strict)

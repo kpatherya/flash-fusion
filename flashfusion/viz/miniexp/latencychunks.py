@@ -1,4 +1,4 @@
-"""Mini-experiment: OpenRouter latency and cost vs chunk count (direct prompting).
+"""Mini-experiment: OpenRouter latency and input cost vs chunk count (direct prompting).
 
 This script benchmarks a direct single-call prompt (no multi-stage Flash-Fusion)
 to isolate context-length effects on:
@@ -952,7 +952,7 @@ def _plot_main(
     x_label = f"Fraction of {dataset_label} Data (%)" if use_pct_axis else "Number of Chunks"
     _apply_style(st)
     fig, ax_lat = plt.subplots(1, 1, figsize=st["figsize"], layout="constrained")
-    ax_cost = ax_lat.twinx()  # single plot: TTFT on left axis, cost on right axis
+    ax_cost = ax_lat.twinx()  # single plot: TTFT on left axis, input cost on right axis
     _tight_layout(fig, st)
 
     xs = xmap(ok_summary["chunk_count"])
@@ -975,14 +975,15 @@ def _plot_main(
     _band(ax_lat, "ttft_ms", 1000.0, COLOR_TTFT, "o", "TTFT", 0.18)
     ax_lat.set_ylabel("Time to First Token (s)")
 
-    # Right: cost
-    _band(ax_cost, "cost_usd", 1e-5, COLOR_COST, "^", "Cost", 0.18)
+    # Right: input cost. Output is capped and small; input cost is the scaling
+    # pressure this figure is intended to make visible.
+    _band(ax_cost, "input_cost_usd", 1e-5, COLOR_COST, "^", "Estimated input cost", 0.18)
     ax_cost.set_ylabel(r"Cost (\$ $\times$ 10$^{-5}$)")
     if multi_run and not compact:
         for _, r in ok_summary.iterrows():
             ax_cost.annotate(
                 f"{int(r['n_success'])}/{int(r['n_runs'])}",
-                (float(xmap(r["chunk_count"])), float(r["cost_usd"])),
+                (float(xmap(r["chunk_count"])), float(r["input_cost_usd"])),
                 textcoords="offset points", xytext=(0, 6), ha="center", fontsize=st["note"] * 0.7, color="#475569",
             )
 
@@ -991,7 +992,7 @@ def _plot_main(
         if log_y:
             ax.set_yscale("log")
     if not log_y:
-        # Cost spans several orders of magnitude, so show it on a true log scale.
+        # Input cost spans several orders of magnitude, so show it on a true log scale.
         from matplotlib.ticker import MaxNLocator
 
         def _ticks(top: float) -> np.ndarray:
@@ -1075,6 +1076,12 @@ def _plot_main(
             )
 
     fig.supxlabel(x_label, fontsize=st["label"], fontweight="bold")
+    # fig.text(
+    #     0.5, 0.005,
+    #     "Input cost grows with every token, even when the data is streamed",
+    #     ha="center", va="bottom", fontsize=st["note"], color="#475569",
+    #     style="italic",
+    # )
     _fig_legend(fig, (ax_lat, ax_cost), st)
 
     if threshold_x is not None:
@@ -1107,6 +1114,109 @@ def plot_results(trials_df: pd.DataFrame, **kwargs: Any) -> None:
     _plot_main(trials_df, filename_prefix=f"{prefix}_variance", show_variance=True, extras=False, **kwargs)
 
 
+def plot_cost_only(
+    trials_df: pd.DataFrame,
+    output_dir: str = "flashfusion/viz/miniexp/results",
+    context_window_tokens: int = DEFAULT_CONTEXT_WINDOW_TOKENS,
+    max_tokens: int = DEFAULT_MAX_TOKENS,
+    total_rows: int | None = None,
+    rows_per_chunk: int | None = None,
+    total_chunks: int | None = None,
+    dataset_label: str = "Dataset",
+    layout: str = "single",
+    xscale: str = "log",
+    filename_prefix: str = "cost_vs_chunks",
+) -> None:
+    """Plot average total request cost against context size with one left y-axis."""
+    trials = _normalize_trials(trials_df)
+    summary = summarize_trials(trials)
+    ok_summary = summary[
+        (summary["n_success"] > 0) & summary["cost_usd"].notna()
+    ].sort_values("chunk_count")
+    if ok_summary.empty or ok_summary["cost_usd"].notna().sum() == 0:
+        print("No successful cost rows to plot.")
+        return
+
+    total_chunks_n = _resolve_total_chunks(summary, total_chunks, total_rows, rows_per_chunk)
+    if total_chunks_n:
+        def xmap(c: Any) -> Any:
+            return np.asarray(c, dtype=float) * 100.0 / total_chunks_n
+    elif total_rows and rows_per_chunk:
+        def xmap(c: Any) -> Any:
+            return np.asarray(c, dtype=float) * rows_per_chunk / total_rows * 100.0
+    else:
+        def xmap(c: Any) -> Any:
+            return np.asarray(c, dtype=float)
+
+    use_pct_axis = total_chunks_n is not None or (total_rows is not None and rows_per_chunk is not None)
+    st = STYLES[layout]
+    compact = bool(st["compact"])
+    log_x = xscale == "log"
+    x_label = f"Fraction of {dataset_label} Data (%)" if use_pct_axis else "Number of Chunks"
+    xs = xmap(ok_summary["chunk_count"])
+    mean = ok_summary["cost_usd"].astype(float) / 1e-5
+    y_min = float(mean.min())
+    y_max = float(mean.max())
+    y_span = max(y_max - y_min, max(abs(y_max), 1.0) * 0.05)
+
+    _apply_style(st)
+    fig, ax = plt.subplots(1, 1, figsize=st["figsize"], layout="constrained")
+    _tight_layout(fig, st)
+    ax.plot(
+        xs, mean, marker="^", color=COLOR_COST, linewidth=st["lw"], markersize=st["ms"],
+        alpha=0.95, label="Average cost",
+    )
+    ax.set_xscale("log" if log_x else "linear")
+    x_left = float(xs.min()) / 1.2 if log_x else float(xs.min()) - 0.03 * max(float(xs.max() - xs.min()), 1.0)
+    x_right = float(xs.max()) * 1.12 if log_x else float(xs.max()) + 0.03 * max(float(xs.max() - xs.min()), 1.0)
+    fit = fit_input_tokens(summary)
+    threshold_x: float | None = None
+    if fit is not None:
+        slope, intercept = fit
+        threshold_chunks = (context_window_tokens - max_tokens - intercept) / slope
+        if threshold_chunks > 0:
+            threshold_x = float(xmap(threshold_chunks))
+            x_right = max(
+                x_right,
+                threshold_x * 1.25 if log_x else threshold_x + (x_right - x_left) * 0.1,
+            )
+    ax.set_xlim(x_left, x_right)
+    ax.set_ylim(max(0.0, y_min - 0.05 * y_span), y_max + 0.05 * y_span)
+    ax.set_ylabel(r"Cost (\$ $\times$ 10$^{-5}$)")
+    ax.set_xlabel(x_label, fontweight="bold")
+    ax.grid(True, which="major", axis="both" if log_x else "y")
+    ax.set_axisbelow(True)
+    if threshold_x is not None and threshold_x <= x_right:
+        ax.axvline(threshold_x, linestyle="--", color="#64748b", linewidth=st["lw"] * 0.7)
+        ax.axvspan(threshold_x, x_right, color=COLOR_FAIL, alpha=0.10, linewidth=0)
+        ax.text(
+            threshold_x * 1.04 if log_x else threshold_x + (x_right - x_left) * 0.01,
+            0.55,
+            (
+                f"{context_window_tokens / 1_000_000:g}M token limit"
+                if context_window_tokens >= 1_000_000
+                else f"{context_window_tokens / 1_000:g}k token limit"
+            ),
+            rotation=90, ha="left", va="center", fontsize=st["note"], color="#991b1b",
+            style="italic", fontweight="bold", transform=ax.get_xaxis_transform(),
+        )
+    measured_x = [float(v) for v in xmap(sorted(summary["chunk_count"].astype(int).unique().tolist()))]
+    x_left, x_right = ax.get_xlim()
+    ticks = _nice_x_ticks(x_left, x_right, log_x, use_pct_axis, measured_x, compact)
+    ax.set_xticks(ticks)
+    ax.set_xticklabels([_fmt_tick(t) if use_pct_axis or log_x else f"{int(t)}" for t in ticks])
+    ax.xaxis.set_minor_locator(plt.NullLocator())
+    _fig_legend(fig, (ax,), st)
+
+    os.makedirs(output_dir, exist_ok=True)
+    out_png = Path(output_dir) / f"{filename_prefix}.png"
+    out_pdf = Path(output_dir) / f"{filename_prefix}.pdf"
+    _save(fig, out_png, out_pdf, st)
+    print(f"Cost plot saved to {out_png}")
+    print(f"Cost plot saved to {out_pdf}")
+    plt.close(fig)
+
+
 def plot_extrapolation(
     summary: pd.DataFrame,
     total_chunks: int,
@@ -1117,7 +1227,7 @@ def plot_extrapolation(
     dataset_label: str = "Dataset",
     layout: str = "single",
 ) -> None:
-    """Project input tokens and per-query cost to 100% of the dataset (log-log)."""
+    """Project input tokens and input cost to 100% of the dataset (log-log)."""
     fit = fit_input_tokens(summary)
     ok = summary[summary["n_success"] > 0]
     if fit is None or ok.empty:
@@ -1126,24 +1236,18 @@ def plot_extrapolation(
     slope, intercept = fit
     model = str(ok["model"].iloc[0]) if "model" in ok.columns else DEFAULT_BENCHMARK_MODEL
     rates = get_rates(model)
-    mean_out_tokens = float(ok["output_tokens"].mean()) if ok["output_tokens"].notna().any() else 0.0
-
     c_min = max(1.0, float(ok["chunk_count"].min()))
     cs = np.logspace(math.log10(c_min), math.log10(total_chunks), 300)
     tokens = slope * cs + intercept
     cfg_rate = rates.get("input", 0.0) / 1e6
-    # Effective $/prompt-token implied by the provider-reported cost (may differ from config rates).
-    valid = ok.dropna(subset=["cost_usd", "input_tokens"])
-    eff_rate = float(valid["cost_usd"].sum() / valid["input_tokens"].sum()) if len(valid) else cfg_rate
-    cost = tokens * eff_rate
-    cost_cfg = tokens * cfg_rate + mean_out_tokens * rates.get("output", 0.0) / 1e6
+    # Use input cost so the figure isolates the cost that grows with context.
+    input_cost = tokens * cfg_rate
     budget = context_window_tokens - max_tokens
     feasible = tokens <= budget
     pct = cs * 100.0 / total_chunks
 
     full_tokens = slope * total_chunks + intercept
-    full_cost = full_tokens * eff_rate
-    full_cost_cfg = full_tokens * cfg_rate + mean_out_tokens * rates.get("output", 0.0) / 1e6
+    full_input_cost = full_tokens * cfg_rate
     limit_chunks = (budget - intercept) / slope
     limit_pct = limit_chunks * 100.0 / total_chunks
 
@@ -1156,15 +1260,15 @@ def plot_extrapolation(
 
     for ax, ys, meas, ylabel, color in (
         (ax_t, tokens, ok["input_tokens"], "Prompt tokens" if compact else "Prompt Tokens per Query", COLOR_TTFT),
-        (ax_c, cost, ok["cost_usd"], "Cost (USD)" if compact else "Projected Query Cost (USD)", COLOR_COST),
+        (ax_c, input_cost, ok["input_cost_usd"], "Input cost (USD)" if compact else "Projected Input Cost (USD)", COLOR_COST),
     ):
         ax.plot(pct[feasible], ys[feasible], color=color, linewidth=st["lw"], label="Fits")
         ax.plot(pct[~feasible], ys[~feasible], color=COLOR_FAIL, linewidth=st["lw"], linestyle="--", label="Exceeds window")
         ax.scatter(okx, meas, s=st["scatter"] * 3, color=color, edgecolor="black", linewidth=0.5, zorder=4, label="Measured")
-        if ys is cost:
+        if ys is input_cost:
             ax.plot(
-                pct, cost_cfg, color="#94a3b8", linewidth=st["lw"] * 0.8, linestyle=":",
-                label=f"Config rate (\\${rates.get('input', 0.0):.2f}/M)",
+                pct, tokens * cfg_rate, color="#94a3b8", linewidth=st["lw"] * 0.8, linestyle=":",
+                label=f"Input rate (\\${rates.get('input', 0.0):.2f}/M)",
             )
         ax.set_xscale("log")
         ax.set_yscale("log")
@@ -1187,9 +1291,9 @@ def plot_extrapolation(
         va="bottom", fontsize=st["note"], fontweight="bold",
     )
     ax_c.annotate(
-        f"100%: \\${full_cost:,.2f}/query" if compact
-        else f"100% of data: ~\\${full_cost:,.2f}/query (reported \\${eff_rate * 1e6:.2f}/M)\n(hypothetical, cannot be sent)",
-        (100.0, full_cost), xycoords="data", textcoords="axes fraction", xytext=(0.97, 0.05), ha="right",
+        f"100%: \\${full_input_cost:,.2f}/query" if compact
+        else f"100% of data: ~\\${full_input_cost:,.2f}/query (configured input rate \\${cfg_rate * 1e6:.2f}/M)\n(hypothetical, cannot be sent)",
+        (100.0, full_input_cost), xycoords="data", textcoords="axes fraction", xytext=(0.97, 0.05), ha="right",
         va="bottom", fontsize=st["note"], fontweight="bold",
     )
     fig.supxlabel(f"Fraction of {dataset_label} Data (%)", fontsize=st["label"], fontweight="bold")
@@ -1201,7 +1305,8 @@ def plot_extrapolation(
     print(f"Extrapolation plot saved to {out_png}")
     print(
         f"Full dataset ~{full_tokens:,.0f} tokens ({full_tokens / context_window_tokens:.0f}x window), "
-        f"~${full_cost:,.2f}/query at reported rate (~${full_cost_cfg:,.2f} at config rate); window reached at ~{limit_chunks:.0f} chunks ({limit_pct:.2f}%)."
+        f"~${full_input_cost:,.2f}/query input cost at configured rate; "
+        f"window reached at ~{limit_chunks:.0f} chunks ({limit_pct:.2f}%)."
     )
     plt.close(fig)
 
@@ -1318,6 +1423,10 @@ def main() -> None:
     parser.add_argument("--dry-run", action="store_true", help="Compute chunk/context stats without API calls")
     parser.add_argument("--plot", action="store_true", help="Generate plots")
     parser.add_argument(
+        "--cost-only", action="store_true",
+        help="Generate only cost_vs_chunks.png/.pdf with cost on a single left y-axis",
+    )
+    parser.add_argument(
         "--ttft-only", action=argparse.BooleanOptionalAction, default=False,
         help="Plot only TTFT (omit TTLT line). Default: show both TTFT and TTLT.",
     )
@@ -1366,13 +1475,27 @@ def main() -> None:
         summary.to_csv(out_csv, index=False)
         print(f"Combined trials saved to {out_trials}")
         print(f"Averaged results saved to {out_csv}")
-        if args.plot:
+        if args.cost_only:
+            plot_cost_only(
+                trials, output_dir=args.output_dir, context_window_tokens=args.context_window_tokens,
+                max_tokens=args.max_tokens, total_rows=args.total_rows,
+                rows_per_chunk=args.rows_per_chunk, total_chunks=args.total_chunks,
+                dataset_label=args.dataset_label, layout=args.layout, xscale=args.xscale,
+            )
+        elif args.plot:
             plot_results(trials, **plot_kwargs)
         return
 
     if args.csv_input:
         trials = pd.read_csv(args.csv_input)
-        if args.plot:
+        if args.cost_only:
+            plot_cost_only(
+                trials, output_dir=args.output_dir, context_window_tokens=args.context_window_tokens,
+                max_tokens=args.max_tokens, total_rows=args.total_rows,
+                rows_per_chunk=args.rows_per_chunk, total_chunks=args.total_chunks,
+                dataset_label=args.dataset_label, layout=args.layout, xscale=args.xscale,
+            )
+        elif args.plot:
             plot_results(trials, **plot_kwargs)
         else:
             print(f"Loaded {len(trials)} rows from {args.csv_input}")
@@ -1401,7 +1524,14 @@ def main() -> None:
         truth_column=args.truth_column or None,
     )
 
-    if args.plot:
+    if args.cost_only:
+        plot_cost_only(
+            trials, output_dir=args.output_dir, context_window_tokens=args.context_window_tokens,
+            max_tokens=args.max_tokens, total_rows=args.total_rows,
+            rows_per_chunk=args.rows_per_chunk, total_chunks=args.total_chunks,
+            dataset_label=args.dataset_label, layout=args.layout, xscale=args.xscale,
+        )
+    elif args.plot:
         plot_results(trials, **plot_kwargs)
 
 

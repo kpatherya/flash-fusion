@@ -2,7 +2,7 @@
 This directory contains scaffold scripts for three mini-experiments designed to evaluate different aspects of the Flash-Fusion pipeline.
 ## Experiments
 ### 1. Latency vs. Chunks (`latencychunks.py`)
-**Purpose:** Measure how TTFT (Time To First Token) and E2E (End-to-End) latency change as the number of data chunks in the input prompt increases.
+**Purpose:** Measure how TTFT (Time To First Token) and input cost change as the number of data chunks in the input prompt increases.
 **Hypothesis:** As chunk count increases, both TTFT and E2E latency should increase linearly due to increased context length.
 **Usage:**
 ```bash
@@ -22,6 +22,7 @@ python -m flashfusion.miniexp.latencychunks --model meta-llama/llama-3.1-8b-inst
 - `results/latency_vs_chunks.png` - Visualization (if --plot is used)
 **Key Metrics:**
 - TTFT (Time To First Token) in milliseconds
+- Input cost (USD), which increases with every prompt token
 - E2E (End-to-End) latency in milliseconds
 - Number of rows per chunk
 - Number of LLM calls
@@ -35,7 +36,40 @@ That would conclude your latency stage mini-experiment as well! Shooting two bir
 **Purpose:** Investigate how query accuracy changes as we vary the dataset size.
 **Hypothesis:** Accuracy should remain relatively stable across different dataset sizes for well-grounded queries, though latency may increase.
 **Usage:**
+```
+
+OpenRouter's Auto Router can be used for a larger-context comparison. Set the
+context budget to the model's advertised limit and keep the provider/model
+configuration recorded with the CSV:
+
 ```bash
+python -m flashfusion.viz.miniexp.latencychunks \
+  --model openrouter/auto \
+  --context-window-tokens 2000000 \
+  --chunks 100 500 1000 2000 4000 \
+  --dataset ecg \
+  --data-path data/AutoIOT_dataset/ECG.0/tmp_csv/100.csv \
+  --plot
+```
+
+The main figure reports estimated input cost separately from TTFT. This makes the
+streaming point explicit: streaming can reduce peak memory or time-to-first
+token, but it does not remove the per-token input charge.bash
+
+To generate only a single-axis cost figure from saved trials:
+
+```bash
+MPLBACKEND=Agg python -m flashfusion.viz.miniexp.latencychunks \
+  --csv-input flashfusion/viz/miniexp/results/latency_trials.csv \
+  --output-dir flashfusion/viz/miniexp/results \
+  --cost-only --context-window-tokens 2000000 \
+  --layout single --xscale log --dataset-label ECG \
+  --total-rows 650000 --rows-per-chunk 19
+```
+
+This writes `cost_vs_chunks.png` and `cost_vs_chunks.pdf`, showing average
+cost only, scaled as `Cost ($ x 10^-5)`. The red shaded region begins at the
+configured context limit.bash
 # Basic run with default settings (wisdm dataset, query 1, fractions [0.1,0.25,0.5,0.75,1.0])
 python -m flashfusion.miniexp.accuracysize
 # Custom sample fractions

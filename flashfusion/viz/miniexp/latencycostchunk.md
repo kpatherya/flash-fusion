@@ -1,8 +1,50 @@
-# Direct prompting: latency and cost vs. chunks (ECG 100.csv)
+# Direct prompting: latency and input cost vs. chunks (ECG 100.csv)
 
 ECG 100.csv: 650,000 rows -> 34,448 chunks at `--chunk-token-target 200` (~19 rows/chunk).
 Real tokens are ~2.02x the chars/4 estimate (~430 tokens/chunk), so the 128k window is
 exhausted between 250 and 300 chunks (~0.9% of the file).
+
+The main figure uses estimated input cost (not output-inclusive provider-reported cost)
+because input cost is the quantity that scales with context. Streaming the
+rows does not eliminate this charge when each request still contains the
+corresponding input tokens.
+
+## Real estimate near a large context limit
+
+For a provider-measured curve, use the separate `estimate_ecg_cost` script.
+It sends progressively larger streaming requests to OpenRouter:
+
+```bash
+export OPENROUTER_API_KEY="your-key-here"
+
+MPLBACKEND=Agg python -m flashfusion.viz.miniexp.estimate_ecg_cost \
+  --data-path data/AutoIOT_dataset/ECG.0/tmp_csv/100.csv \
+  --model openai/gpt-5.4 \
+  --context-window-tokens 1100000 \
+  --output-dir flashfusion/viz/miniexp/results/gpt54_1p1m
+```
+
+The output records provider-reported input tokens and total request cost. A
+rate-based input-cost estimate is retained for comparison when cost metadata is
+absent. Failed boundary requests are recorded in the CSV and are not plotted
+as successful measurements.
+
+The first GPT-5.4 run measured approximately 2.08--2.14 actual input tokens per
+nominal 200-token chunk (fitted growth: ~414.65 input tokens/chunk), rather than
+the earlier 2.02 fallback. Reuse that run as a calibration source so subsequent
+requests stay within the empirically observed safe range:
+
+```bash
+MPLBACKEND=Agg python -m flashfusion.viz.miniexp.estimate_ecg_cost \
+  --data-path data/AutoIOT_dataset/ECG.0/tmp_csv/100.csv \
+  --model openai/gpt-5.4 \
+  --context-window-tokens 1100000 \
+  --calibration-csv flashfusion/viz/miniexp/results/gpt54_1p1m/ecg_cost.csv \
+  --output-dir flashfusion/viz/miniexp/results/gpt54_1p1m_recalibrated
+```
+
+The prior run was reliable through 849,693 reported input tokens at 2,041
+chunks; the next scheduled point exceeded the provider's effective limit.
 
 ## Three runs (run-to-run variation)
 
